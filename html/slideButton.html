@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh_CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide Button</title>
+</head>
+<style>
+  :root {
+    --btn-width: 330px;
+    --btn-height: 200px;
+    --btn-radius: calc(var(--btn-height) / 2);
+    --circle-size: calc(var(--btn-height) * 0.8);
+    --inner-margin: calc(calc(var(--btn-height) - var(--circle-size)) / 2);
+  }
+
+  body {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+  }
+
+  .slide .checkbox {
+    display: none;
+  }
+
+  .slide .my-button {
+    width: var(--btn-width);
+    height: var(--btn-height);
+    border-radius: var(--btn-radius);
+    background: #eee;
+    position: relative;
+    box-shadow: 0px 0px 30px rgba(0, 0, 0, .1) inset,
+      0px 0px 3px rgba(0, 0, 0, .2);
+    transition: background-color .3s ease;
+  }
+
+  .slide .my-button .circle {
+    content: '';
+    box-shadow: 0 0 30px rgba(0, 0, 0, .2);
+    position: absolute;
+    height: var(--circle-size);
+    width: var(--circle-size);
+    background: #fff;
+    border-radius: calc(var(--circle-size) / 2);
+    top: var(--inner-margin);
+    left: var(--inner-margin);
+    transition: all ease .3s;
+  }
+
+  .slide .checkbox:checked+.my-button {
+    background-color: #00e856;
+  }
+
+  .slide .checkbox:checked+.my-button .circle {
+    left: calc(var(--btn-width) - var(--circle-size) - var(--inner-margin));
+  }
+
+  .slide .my-button:active .circle {
+    width: calc(var(--circle-size) * 1.2);
+  }
+
+  .slide .checkbox:checked+.my-button:active .circle {
+    left: calc(var(--btn-width) - calc(var(--circle-size) * 1.2) - var(--inner-margin));
+  }
+</style>
+
+<body>
+  <label class="slide" for='check'>
+    <input type="checkbox" class="checkbox" id="check">
+    <div class="my-button">
+      <div class="circle"></div>
+    </div>
+  </label>
+</body>
+<script>
+  let checkbox = document.querySelector('.slide .checkbox');
+  let btn = document.querySelector('.slide .my-button');
+  let circle = document.querySelector('.slide .my-button .circle');
+  const btnOffset = btn.getBoundingClientRect(); // 获取元素相对于视窗位置集合
+  const btnLeft = btnOffset.left; //距离页面左侧位置
+  const btnStyle = getComputedStyle(btn); // 获取元素渲染后的样式
+  const btnWidth = parseFloat(btnStyle.width); // 按钮宽度
+
+  const circleStyle = getComputedStyle(circle);
+  const circleGap = parseFloat(circleStyle.left);
+  const circleSize = parseFloat(circleStyle.width);
+  const circleLeftRange = [circleGap, btnWidth - circleGap - circleSize * 1.2]; // 
+
+  let circleMouseOffset;
+  function mouseMove(e) {
+    let left = e.clientX - btnLeft - circleMouseOffset;
+    if (left > circleLeftRange[0] && left < circleLeftRange[1]) {
+      circle.style.left = left + "px";
+    }
+  }
+  // 按下鼠标
+  circle.addEventListener('mousedown', (e) => {
+    circleMouseOffset = e.offsetX; // 记录鼠标与圆形滑块左侧位置
+    circle.style.transitionDuration = '0s'; // 拖动时禁用动画
+    btn.addEventListener('mousemove', mouseMove); // 移动鼠标事件
+    btn.addEventListener('mouseup', clearListeners); // 抬起鼠标
+    btn.addEventListener('mouseleave', leave); // 鼠标移出按钮事件
+  })
+
+  function leave(e){
+    let left = parseInt(circleStyle.left);
+    if(left < (circleLeftRange[0] + circleLeftRange[1]) / 2 ){ // 移动小于一半
+      checkbox.checked = false;
+    }else{
+      checkbox.checked = true;
+    }
+    clearListeners();
+  }
+  
+  // 清除事件
+  function clearListeners(e) {
+    circle.style.left = '';
+    circle.style.transitionDuration = '';
+    btn.removeEventListener('mousemove', mouseMove);
+    btn.removeEventListener('mouseleave', leave);
+    btn.removeEventListener('mouseup', clearListeners);
+  }
+ 
+</script>
+
+</html>
