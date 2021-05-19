@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Inertia Scroll</title>
+</head>
+<style>
+	.outer{
+		height: 200px;
+		background: #eee;
+		overflow: hidden;
+	}
+	ul {
+		--y: 0px;
+		transform: translateY(var(--y));
+		transition-property: all;
+		transition-duration: 0ms;
+		transition-timing-function: cubic-bezier(.11,.19,.33,1);
+		user-select: none;
+	}
+	ul li {
+		list-style: none;
+		height: 30px;
+	}
+	ul li:nth-child(2n){
+		color: red;
+	}
+</style>
+<body>
+	 <div class="outer">
+		 <ul>
+			 <li>1</li>
+			 <li>2</li>
+			 <li>3</li>
+			 <li>4</li>
+			 <li>5</li>
+			 <li>6</li>
+			 <li>7</li>
+			 <li>8</li>
+			 <li>9</li>
+			 <li>10</li>
+			 <li>11</li>
+			 <li>12</li>
+			 <li>13</li>
+			 <li>14</li>
+			 <li>15</li>
+			 <li>16</li>
+			 <li>17</li>
+			 <li>18</li>
+			 <li>19</li>
+			 <li>20</li>
+			 <li>21</li>
+		 </ul>
+	 </div>
+</body>
+<script>
+	let outer = document.querySelector('.outer');
+	let ul = document.querySelector('ul');
+	const outerHeight = parseFloat(getComputedStyle(outer).height);
+	const ulHeight = parseFloat(getComputedStyle(ul).height);
+	const ulMargin = parseFloat(getComputedStyle(ul).margin);
+	const MIN_STORE = outerHeight - ulHeight - ulMargin; 
+	const animationTime = 500; //惯性持续时间
+	console.log(MIN_STORE);
+	let store = 0; // 保存y偏移量
+	let startY = 0; // 保存拖动开始时的位置
+	let moveTimeout = null;
+	outer.addEventListener('mousedown',(e) => {
+		startY = e.clientY;
+		outer.addEventListener('mousemove', move);
+		outer.addEventListener('mouseleave', leave)
+		outer.addEventListener('mouseup', leave)
+		if(moveTimeout){
+			let stroe = e.target.offsetTop - e.clientY;
+			ul.style.setProperty('--y', store + 'px');
+			ul.style.transitionDuration = '0s';
+			ul.style.transitionProperty = 'none';
+			clearTimeout(moveTimeout);
+		}
+	})
+
+	function move(e){
+		if(!startY) startY = e.clientY;
+		ul.style.setProperty('--y', store + e.clientY - startY  + 'px')
+	}
+	function leave(e){
+		let y = e.clientY - startY;
+		store += y + y;//匀减速运动y
+		if(store > 0) store = 0;
+		if(store < MIN_STORE) store = MIN_STORE;
+		ul.style.setProperty('--y', store  + 'px');
+		ul.style.transitionDuration = animationTime + 'ms';
+		ul.style.transitionProperty = 'all';
+		moveTimeout = setTimeout(() => {
+			moveTimeout = null;
+			ul.style.transitionProperty = 'none';
+			ul.style.transitionDuration = '0s';
+		}, animationTime);
+
+		startY = 0;
+		outer.removeEventListener('mousemove', move);
+		outer.removeEventListener('mouseleave', leave);
+	}
+	
+</script>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh_CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<style>
+  .content{
+    height: 100px;width: 200px;
+    display:inline-block;
+    vertical-align: text-top;
+    margin: 5px;
+  }
+  .content:nth-child(1){
+    background:linear-gradient(#243949,#517fa4);
+  }
+  .content:nth-child(2){
+    background:linear-gradient(#fff1eb,#ace0f9);
+  }
+  .content:nth-child(3){
+    background:linear-gradient(0deg, red 20px, black 20px, black 40px, yellow 40px, yellow 60px, blue 60px, blue 80px, green 80px);
+  }
+  .content:nth-child(4){
+    background: radial-gradient(circle,teal 50%, transparent 50%);
+    background-size: 10px 10px;
+    background-position: -5px -5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .inner {
+    width: 190px;
+    height: 90px;
+    background: #fff;
+  }
+  .content:nth-child(5){
+    background: repeating-radial-gradient(circle,#ace, #ace 5px, #f96 5px, #f96 10px);
+  }
+  .content:nth-child(6){
+    background: repeating-linear-gradient(0deg, black, black 10px, red 10px, red 20px);
+  }
+  .content:nth-child(7){
+    border: 5px solid transparent;
+    padding: 5px;
+    background: linear-gradient(#aaa,#aaa) padding-box, radial-gradient(circle, #fff 50%, #aaa 50%) 10px 10px/10px 10px;
+  }
+  .stamp {
+    box-sizing: border-box;
+    height: 100%;
+    border: 1px solid #fff;
+  }
+  .content:nth-child(8){
+    border: 1px solid transparent;
+    background: linear-gradient(white, white) padding-box,
+                repeating-linear-gradient(-45deg, black 0, black 25%, transparent 0, transparent 50%) 0 / .6em .6em;
+    animation: ants 12s linear infinite;
+    
+  }
+  @keyframes ants { to { background-position: 100% 100% } }
+</style>
+<body>
+  <div class="content">1</div>  
+  <div class="content">2</div>  
+  <div class="content">3</div>  
+  <div class="content">
+    <div class="inner">4</div>
+  </div>
+  <div class="content">5</div> 
+  <div class="content">6</div>
+  <div class="content">
+    <div class="stamp">7</div>
+  </div>
+  <div class="content">8</div>
+</body>
+</html>

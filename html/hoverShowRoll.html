@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<style>
+  .content{
+    height: 400px;
+    width: 200px;
+    background: #eee;
+    overflow: auto;
+    overflow: overlay;
+    color: rgba(200,200,200, 0);
+    transition: all .2s ease;
+  }
+  .content:hover{
+    color: rgba(240,240,240,.8);
+  }
+  .content::-webkit-scrollbar{
+    width: 5px;
+    background: rgba(0,0,0,0);
+  }
+  .content::-webkit-scrollbar-thumb{
+    box-shadow: inset 0 0 0 5px;
+  }
+
+  .inner{
+    height: 800px;
+    width: 100%;
+    color: black;
+    word-break: break-all;
+    background: #f90;
+    background-image: linear-gradient(45deg,
+       rgba(255, 255, 255, .2) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, .2) 50%,
+        rgba(255, 255, 255, .2) 75%,
+        transparent 75%,
+        transparent);
+  }
+</style>
+<body>
+  <div class="content">
+    <div class="inner">1111111111111111111111111111111111</div>
+  </div>
+</body>
+</html>

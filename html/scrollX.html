@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>scrollx</title>
+</head>
+<style>
+    .rot{
+        position: absolute; /*脱离文档流，不占用transform之前的空间*/
+        background-color: #777;
+        height: 400px; /*宽度*/
+        transform: rotateZ(-90deg) rotateY(180deg);
+        transform-origin: left top;
+        overflow-x: hidden;
+    }
+    .innerot{
+        display: flex;
+        /* width: 300px; *//*自动撑开*/
+        /* height: 30px; *//*自动撑开*/
+        background-color: 777;
+        transform-origin: left bottom;
+        flex-wrap: nowrap; /*禁止换行*/
+    }
+    .pan{
+        width: 100px;
+        height: 30px;
+        line-height: 30px;
+        flex-shrink: 0;/*禁止压缩*/
+        background-color: #777;
+        color: #ddd;
+        border-right: 1px solid #555;
+        padding: 0 6px;
+    }
+    .rot::-webkit-scrollbar{
+        width: 3px;
+        background-color: #777;
+    }
+    .rot::-webkit-scrollbar-thumb{
+        background-color: #ccc;
+        opacity: 0.5;
+        transition: all ease 1s;
+    }
+    .rot::-webkit-scrollbar-thumb:active{
+        background-color: #ddd;
+    }
+</style>
+<body>
+    <div class="rot">
+        <div class="innerot">
+            <div class="pan" >1</div>
+            <div class="pan" >2</div>
+            <div class="pan" >3</div>
+            <div class="pan" >4</div>
+            <div class="pan" >5</div>
+        </div>
+    </div>
+</body>
+<script>
+    let innerot = document.getElementsByClassName('innerot')[0];
+    let rot = document.getElementsByClassName('rot')[0];
+    rot.style.width = innerot.clientHeight + 3 + 'px'; // 3px 预留滚动条
+    innerot.style.transform = `translateY(-${innerot.clientHeight}px) rotateZ(90deg) rotateX(180deg) translateY(${innerot.clientHeight}px)`;
+</script>
+</html>
