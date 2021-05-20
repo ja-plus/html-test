@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh_CN">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,75 +8,113 @@
   <title>Document</title>
 </head>
 <style>
-  :root{
+  :root {
     --height: 100px;
     --width: 200px;
   }
-  .content{
+
+  .content {
     height: var(--height);
     width: var(--width);
-    display:inline-block;
+    display: inline-block;
     vertical-align: text-top;
     margin: 5px;
+    text-shadow: 1px 1px 1px #fff;
   }
-  .content:nth-child(1){
-    background:linear-gradient(#243949,#517fa4);
+
+  .content:nth-child(1) {
+    background: linear-gradient(#243949, #517fa4);
   }
-  .content:nth-child(2){
-    background:linear-gradient(#fff1eb,#ace0f9);
+
+  .content:nth-child(2) {
+    background: linear-gradient(#fff1eb, #ace0f9);
   }
-  .content:nth-child(3){
-    background:linear-gradient(0deg, red 20px, black 20px, black 40px, yellow 40px, yellow 60px, blue 60px, blue 80px, green 80px);
+
+  .content:nth-child(3) {
+    background: linear-gradient(0deg, red 20px, black 0 40px, yellow 0 60px, blue 60px, blue 80px, green 80px);
   }
-  .content:nth-child(4){
+
+  .content:nth-child(4) {
     position: relative;
-    background: radial-gradient(circle,teal 50%, transparent 50%);
+    background: radial-gradient(circle, teal 50%, transparent 50%);
     background-size: 10px 10px;
     background-position: -5px -5px;
   }
-  .content:nth-child(5){
-    background: repeating-radial-gradient(circle,#ace, #ace 5px, #f96 5px, #f96 10px);
+
+  .content:nth-child(5) {
+    background: repeating-radial-gradient(circle, #ace, #ace 5px, #f96 5px, #f96 10px);
   }
-  .content:nth-child(6){
+
+  .content:nth-child(6) {
     background: repeating-linear-gradient(0deg, black, black 10px, red 10px, red 20px);
   }
-  .content:nth-child(7){
+
+  .content:nth-child(7) {
     box-sizing: border-box;
     border: 5px solid transparent;
     padding: 5px;
-    background: linear-gradient(#aaa,#aaa) padding-box, radial-gradient(circle, #fff 50%, #aaa 50%) 10px 10px/10px 10px;
+    background: linear-gradient(#aaa, #aaa) padding-box, radial-gradient(circle, #fff 50%, #aaa 50%) 10px 10px/10px 10px;
   }
+
   .stamp {
     box-sizing: border-box;
     height: 100%;
     border: 1px solid #fff;
   }
-  .content:nth-child(8){
-    border: 1px solid transparent;
-    background: linear-gradient(white, white) padding-box,
-                repeating-linear-gradient(-45deg, black 0, black 25%, transparent 0, transparent 50%) 0 / .6em .6em;
-    animation: ants 12s linear infinite;
-    
-  }
-  @keyframes ants { to { background-position: 100% 100% } }
 
-  .content:nth-child(9){
+  .content:nth-child(8) {
+    border: 1px solid transparent;
+    background: linear-gradient(#fff, #fff) padding-box,
+      repeating-linear-gradient(-45deg, black 0, black 25%, transparent 0, transparent 50%) 0 / .6em .6em;
+    animation: ants 12s linear infinite;
+  }
+
+  @keyframes ants {
+    to {
+      background-position: 100% 100%
+    }
+  }
+
+  .content:nth-child(9) {
     width: var(--height);
     border-radius: 50%;
-    background: conic-gradient(red 30%,transparent 30%);
+    background: conic-gradient(red 30%, transparent 30%);
+  }
+
+  .content:nth-child(10) {
+    background: conic-gradient(#000 12.5%, #fff 0 37.5%, #000 0 62.5%, #fff 0 87.5%, #000 0);
+    background-size: 50px 50px;
+  }
+
+  .content:nth-child(11) {
+    background: conic-gradient(from 60deg at 20% 20%, green 40%, orange 40%);
+  }
+
+  .content:nth-child(12) {
+    background: repeating-conic-gradient(#517fa4 0 10%, #243949 0 20%);
+  }
+
+  .content:nth-child(13) {
+    background: conic-gradient(from 45deg, white, black, white);
   }
 </style>
+
 <body>
-  <div class="content">1</div>  
-  <div class="content">2</div>  
-  <div class="content">3</div>  
+  <div class="content">1</div>
+  <div class="content">2</div>
+  <div class="content">3</div>
   <div class="content">4</div>
-  <div class="content">5</div> 
+  <div class="content">5</div>
   <div class="content">6</div>
   <div class="content">
     <div class="stamp">7</div>
   </div>
   <div class="content">8</div>
   <div class="content">9</div>
+  <div class="content">10</div>
+  <div class="content">11</div>
+  <div class="content">12</div>
+  <div class="content">13</div>
 </body>
+
 </html>
