@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>@property</title>
+</head>
+<style>
+  @property --color{
+    syntax: '<color>';
+    inherits: false;
+    initial-value: #ee6666;
+  }
+  @property --percentage{
+    syntax: '<percentage>';
+    inherits: false;
+    initial-value: 10%
+  }
+  .conic {
+    width: 100px;height: 100px;
+    background-image: conic-gradient(var(--color) var(--percentage), transparent var(--percentage));
+    transition: --color ease .5s,
+                --percentage ease 1s;
+  }
+  .conic:hover{
+    --color:orange;
+    --percentage: 100%
+  }
+</style>
+<body>
+  <div class="conic"></div>
+</body>
+</html>
