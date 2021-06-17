@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh_CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>fake password input</title>
+</head>
+<style>
+  /* .pwd{
+    color: transparent;
+    text-shadow: 0 0 0 #000;
+  } */
+</style>
+<body>
+  <form action="overflowTest.html">
+    <input class="pwd" type="text" name="" id="pwd" oninput="handleInput(event)" autocomplete="off">
+  </form>
+
+</body>
+<script>
+  const pwd=  document.querySelector('#pwd');
+  const pwdChar = '●';
+  let tout = null;
+  let p = []; // password
+  function handleInput(e){
+    let inputChar = e.data;
+    if(inputChar) p.push(inputChar)
+    else p.pop();
+
+    if(tout) {
+      pwd.value = pwd.value.split('').map((char,index) => {
+          // return index !== pwd.value.length - 1  ? pwdChar : char
+          if(char === inputChar){
+            return index !== pwd.value.length - 1  ? pwdChar : char;
+          }else {
+            return pwdChar;
+          }
+      }).join('');
+      clearTimeout(tout);
+    }
+
+    let tmp = pwd.value;
+    // console.log(tmp);
+
+    // for (let i = 0; i < tmp.length; i++) {
+    //   const char = tmp.charAt(i);
+    //   if(char !== pwdChar){
+    //     p.push(char);
+    //     // 输入的字符一定是最后一位，不能从中间插入
+    //     tmp = tmp.replace(char,'');
+    //     tmp += char;
+    //     break;
+    //   }
+    // }
+
+    // pwd.value = tmp;
+
+    tout = setTimeout(() => {
+      pwd.value = pwd.value.replace(/./g, pwdChar);
+      tout = null;
+    }, 1000);
+
+    // console.log(p);
+  }
+</script>
+</html>
