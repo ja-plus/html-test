@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    *{
+        box-sizing: border-box;
+    }
+    .calendar{
+        display:inline-block;
+    }
+    .calendar .header {
+        display: grid;
+        padding: 10px;
+        grid-template-columns: repeat(7, 40px);
+        gap: 5px;
+        border: 1px solid #aaa;
+    }
+    .calendar .body{
+        padding: 10px;
+        display:grid;
+        grid-template-rows: repeat(6, 40px);
+        grid-template-columns: repeat(7, 40px);
+        gap: 5px;
+        border: 1px solid #aaa;
+    }
+    .calendar .cube {
+        border: 1px solid #aaa;
+        border-radius: 3px;
+    }
+    .calendar .body .cube:hover{
+        background-color: #ddd;
+        cursor:pointer
+    }
+    .cube.gray {
+        color: #aaa;
+    }
+</style>
+<body>
+    <div id="calendar" class="calendar">
+    </div>
+    
+</body>
+<script>
+    const weekI18n = {
+        en: ['Sun', 'Mon', 'Tue', 'Wen', 'Thu', 'Fir', 'Sat']
+    }
+    function showMonthDays(year, month){
+        let daysArr = [];
+        let date = new Date();
+        if(year) date.setFullYear(year);
+        if(month){
+            date.setMonth(month);
+        }else{
+            month = date.getMonth();
+        }
+        // lastMonth
+        date.setDate(1);
+        let week = date.getDay(); // 获取当月第一天的星期
+        let lastMonthDate = week;
+        if(lastMonthDate == 0){
+            lastMonthDate = 7;
+        }
+        date.setDate(0);
+        let lastMonthLastDate = date.getDate();
+        daysArr.unshift({day:lastMonthLastDate,class:'gray'});
+        lastMonthDate--;
+        for (let i = 1; i <= lastMonthDate; i++) {
+            daysArr.unshift({day:lastMonthLastDate - i,class:'gray'});
+        }
+        
+        // thisMonth
+        let day = 1;
+        date.setMonth(month);
+        date.setDate(1);
+        while(date.getMonth() == month){
+            daysArr.push({day:date.getDate()});
+            date.setDate(++day);
+        }
+        
+        // nextMonth
+        let resetDay = 7 * 6 - daysArr.length;
+        for (let i = 1; i <= resetDay; i++) {
+            daysArr.push({day:i,class:'gray'});
+        }
+        // console.log(daysArr);
+        return daysArr;
+    }
+
+    function init(id = 'calendar'){
+        let calendar = document.querySelector('#' + id);
+        // header
+        let calendarHeader = myh('div', {class:'header'});
+        let headerWeekNames = weekI18n.en;
+        headerWeekNames.forEach(name => {
+            let item = myh('div', {class:'week'},name);
+            calendarHeader.append(item);
+        });
+
+        // body
+        let calendarBody = myh('div', {class:'body'});
+        let daysArr = showMonthDays();
+        let fgmt = document.createDocumentFragment();
+        daysArr.forEach(item => {
+            let div = myh('div',{class:'cube'});
+            if(item.class) div.classList.add(item.class);
+            div.textContent = item.day;
+            fgmt.append(div);
+        });
+        calendarBody.append(fgmt);
+        calendar.append(calendarHeader, calendarBody);
+    }
+    init();
+
+    function updateCalendar(year, month){
+        // TODO: remove calendar body
+        // TODO: update calendar body
+    }
+
+
+
+    function myh(tag,attrs,text){
+        /**@type{HTMLElement}*/
+        let ele = document.createElement(tag);
+        for (const key in attrs) {
+            if(key === 'class'){
+                ele.classList.add(attrs[key]);
+            }else{
+                ele[key] = attrs[key];
+            }
+        }
+        ele.textContent = text;
+        return ele;
+    }
+</script>
+</html>
