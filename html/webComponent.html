@@ -1,67 +1,126 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh_CN">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
+<style>
+    /* body:defined{
+        background-color:burlywood;
+    } */
+</style>
 <body>
+    <!-- HTML Template -->
     <template id="aTemplate">
         <style>
-            h1{
+            legend{
                 color: chocolate;
+                font-size: 20px;
             }
         </style>
-        <h1>hello world</h1>
+        <fieldset>
+            <legend>title</legend>
+            <!-- 具名插槽 -->
+            <slot name="myslot">my slot default</slot>
+        </fieldset>
     </template>
-    <h1>template 中的style会影响外部样式</h1>
+    <!-- use Template slot -->
+    <my-template class="myTemplate" data-title="头部">
+        <h1 slot="myslot">插槽内容</h1>
+    </my-template>
+    <hr id="hr">
+    <button onclick="removeMyTemplate()">remove my template</button>
+    <button onclick="addMyTemplate()">add my template</button>
+    <button onclick="alterMyTemplateAttr()">alter attr</button>
 
-    <my-panel data-title="hello world" data-body="this is shadow dom"></my-panel>
+    <!-- <h1>template 中的style会影响外部样式</h1> -->
+    <h1>shadow dom 中的样式不会影响外部</h1>
+
+    <my-panel data-title="attribut text" data-body="this is shadow dom"></my-panel>
+    <my-panel data-title="default slot">
+        <!-- 默认插槽 -->
+        <h2>slot link</h2>
+    </my-panel>
 
     <ul is="my-ul" data-items='["aa","bb"]'></ul>
 </body>
 <script>
-    //---------- html templates
-    /**@type{HTMLTemplateElement}*/
-    let ele = document.querySelector('#aTemplate');
-    let templateContent = ele.content;
-    // let fgmt = templateContent.cloneNode(true);
-    let fgmt = document.importNode(templateContent, true);
-    document.body.append(fgmt);
-
-    //------shadow root
+    function removeMyTemplate(){
+        let myTemp = document.querySelector('.myTemplate');
+        myTemp.remove();
+    }
+    function addMyTemplate(){
+        let myTemp = document.createElement('my-template');
+        myTemp.setAttribute('class','myTemplate');
+        myTemp.innerHTML = ` <h1 slot="myslot">插槽内容</h1>`;
+        let hr = document.querySelector('hr');
+        document.body.insertBefore(myTemp,hr);
+    }
+    function alterMyTemplateAttr(){
+        let myTemp = document.querySelector('.myTemplate');
+        myTemp.setAttribute('data-title','修改的头部');
+    }
+    
+    //------custom element
     class MyPanel extends HTMLElement{
         constructor() {
             super();
             const shadow = this.attachShadow({mode:'open'});
-            let header = document.createElement('header');
-            let title = document.createElement('div');
-            title.classList.add('title');
-            title.textContent = this.dataset.title || 'no header';
-            header.append(title);
-            let body = document.createElement('div');
-            body.classList.add('body');
-            body.textContent = this.dataset.body || 'no data';
+            // let header = document.createElement('header');
+            // let title = document.createElement('div');
+            // title.classList.add('title');
+            // title.textContent = this.dataset.title || 'no header';
+            // header.append(title);
+            // let body = document.createElement('div');
+            // body.classList.add('body');
+            // body.textContent = this.dataset.body || 'no data';
+            // let slot = document.createElement('slot');
+            // body.appendChild(slot);
             
-            let style = document.createElement('style');
-            style.textContent = `
-                header{
-                    background-color: #ddd;
-                    padding: 10px;
-                }
-                header .title {
-                    font-size: 20px;
-                    font-weight: bolder;
-                }
-                .body{
-                    border: 1px solid #ddd;
-                    padding: 10px;
-                }
+            // let style = document.createElement('style');
+            // style.textContent = `
+            //     header{
+            //         background-color: #ddd;
+            //         padding: 10px;
+            //     }
+            //     header .title {
+            //         font-size: 20px;
+            //         font-weight: bolder;
+            //     }
+            //     .body{
+            //         border: 1px solid #ddd;
+            //         padding: 10px;
+            //     }
+            // `;
+            // shadow.appendChild(style);
+            // shadow.appendChild(header);
+            // shadow.appendChild(body);
+            
+            shadow.innerHTML += `
+                <style>
+                    header{
+                        background-color: #ddd;
+                        padding: 10px;
+                    }
+                    header .title {
+                        font-size: 20px;
+                        font-weight: bolder;
+                    }
+                    .body{
+                        border: 1px solid #ddd;
+                        padding: 10px;
+                    }    
+                </style>
+                <header>
+                    <div class="title">${this.dataset.title || 'no header'}</div>
+                </header>
+                <div class="body">
+                    ${this.dataset.body || 'no data'}
+                    <slot></slot>
+                </div>
             `;
-            shadow.appendChild(style);
-            shadow.appendChild(header);
-            shadow.appendChild(body);
         }
     }
     customElements.define('my-panel', MyPanel);
@@ -73,7 +132,7 @@
             this.style.width = '100px';
             this.style.height = '100px';
             this.style.backgroundColor = '#aaa';
-            let items = JSON.parse(this.dataset.items);
+            let items = eval(this.dataset.items);
             items.forEach(item => {
                 let li = document.createElement('li');
                 li.textContent = item
@@ -82,5 +141,36 @@
         }
     }
     customElements.define('my-ul', MyUl, {extends: 'ul'});
+
+    customElements.define("my-template",
+        class extends HTMLElement{
+            constructor() {
+                super();
+                /**@type{HTMLTemplateElement}*/
+                let template = document.querySelector('#aTemplate');
+                let shadowRoot = this.attachShadow({mode:'open'});
+                let templateContent = template.content;
+                let fgmt = templateContent.cloneNode(true);
+                shadowRoot.appendChild(fgmt);
+            }
+            connectedCallback(){
+                console.log('当自定义元素第一次被连接到文档DOM时被调用');
+                // alert('当自定义元素第一次被连接到文档DOM时被调用');
+            }
+            disconnectedCallback(){
+                console.log('自定义元素与文档dom断开连接时被调用');
+                alert('自定义元素与文档dom断开连接时被调用');
+            }
+            adoptedCallback(){
+                console.log('自定义元素被移动到新文档时被调用');
+                alert('自定义元素被移动到新文档时被调用')
+            }
+            attributeChangedCallback(){
+                // 浏览器未实现？不支持?
+                console.log('自定义元素的一个属性被增加、移除或更改时被调用');
+                alert('自定义元素的一个属性被增加、移除或更改时被调用');
+            }
+        }
+    )
 </script>
 </html>
