@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    * {
+        box-sizing: border-box;
+    }
+</style>
+
+<body>
+    <template class="table-wrapper">
+        <style>
+            
+            .mytable {
+                --headerHeight: 25px;
+                position: relative;
+                overflow: auto;
+                height: 300px;
+                display: flex;
+                flex-direction: column;
+            }
+            .mytable td, .mytable th {
+                border: 1px solid #ccc;
+            }
+            .mytable_header__wrapper {
+                overflow: hidden;
+                flex-shrink:0;
+            }
+            .mytable_body__wrapper {
+                overflow-y: overlay;
+                overflow-x: auto;
+                flex:1;
+            }
+            .mytable_header, 
+            .mytable_body{
+                border-collapse: collapse;
+                table-layout: fixed;
+                width: max-content;
+                /* width: 1200px; */
+            }
+            .mytable_body tr:first-child td{ /*表体第一行没有上边框*/
+                border-top: none;
+            }
+
+            .mytable_fixed{
+                position:absolute;
+                top:0;left:0;
+                background-color: #eee;
+                height: 100%;
+                display:flex;
+                flex-direction: column;
+                width:100px;
+            }
+            .mytable_fixed .mytable_fixed_header,
+            .mytable_fixed .mytable_fixed_body{
+                border-collapse: collapse;
+                table-layout: fixed;
+                width: 100%;
+            }
+            .mytable_fixed .mytable_fixed_body tr:first-child td {
+                border-top: none;
+            }
+            .mytable_fixed .mytable_fixed_header__wrapper{
+                flex-shrink: 0;
+            }
+            .mytable_fixed .mytable_fixed_body__wrapper{
+                flex:1;
+            }
+            .mytable_fixed .mytable_fixed_header__wrapper,
+            .mytable_fixed .mytable_fixed_body__wrapper {
+                overflow: hidden;
+            }
+        </style>
+        <div class="mytable">
+            <div class="mytable_header__wrapper">
+                <table class="mytable_header"></table>
+            </div>
+            <div class="mytable_body__wrapper">
+                <table class="mytable_body"></table>
+            </div>
+            <!-- left fixed table -->
+            <div class="mytable_fixed">
+                <div class="mytable_fixed_header__wrapper">
+                    <table class="mytable_fixed_header">
+                    </table>
+                </div>
+                <div class="mytable_fixed_body__wrapper">
+                    <table class="mytable_fixed_body">
+                    </table>
+                </div>
+            </div>
+        </div>
+    </template>
+</body>
+<script>
+
+    
+    customElements.define('my-table', class extends HTMLElement {
+        defaultColWidth = 200;
+        constructor(className, options) {
+            super();
+            this.tableOptions = options; // store config
+            const shadowRoot = this.attachShadow({ mode: 'open' });
+            /**@type{HTMLTemplateElement}*/
+            const template = document.querySelector('.table-wrapper');
+            const templateContent = template.content;
+            const fgmt = templateContent.cloneNode(true);
+
+            let tableHeader = fgmt.querySelector('.mytable_header');
+            let tableBody = fgmt.querySelector('.mytable_body');
+            let fixedTableHeader = fgmt.querySelector('.mytable_fixed_header');
+            let fixedTableBody = fgmt.querySelector('.mytable_fixed_body');
+
+            let columns = options.columns.sort((a,b) => a.fixed ? -1 : 1);// fixed默认左侧
+            
+            let data = options.list;
+            let thead = this.h(
+                'thead', 
+                [
+                    this.h(
+                        'tr',
+                        columns
+                        .sort((a,b) => a.fixed ? -1 : 1)
+                        .map(col => {
+                            return /* col.fixed ? this.h('th',{style: {width: this.defaultColWidth + 'px'},}) :  */this.h('th', {textContent: col.title, style: {width: this.defaultColWidth + 'px'}});
+                        })
+                    )
+                ]
+            );
+            let tbody = this.h(
+                'tbody',
+                data.map(item => {
+                    return this.h(
+                        'tr',
+                        columns
+                        .sort((a,b) => a.fixed ? -1 : 1) // TODO: right
+                        .map(col => {
+                            return /* col.fixed ? this.h('td') : */ this.h('td', {textContent: item[col.key], style: {width: this.defaultColWidth + 'px'}});
+                        })
+                    )
+                })
+            )
+            //fix left
+            let fixedThead = this.h(
+                'thead',
+                [
+                    this.h(
+                        'tr',
+                        columns.filter(item => item.fixed === true || item.fixed === 'left')
+                        .map(col => {
+                            return this.h('th', col.title);
+                        })
+                    )
+                ]
+            )
+            let fixedTbody = this.h(
+                'tbody',
+                data.map(item => {
+                    return this.h(
+                        'tr',
+                        columns.filter(item => item.fixed === true || item.fixed === 'left')
+                        .map(col => {
+                            return this.h('td', item[col.key]);
+                        })
+                    )
+                })
+            )
+            tableHeader.appendChild(thead);
+            tableBody.appendChild(tbody);
+            fixedTableHeader.appendChild(fixedThead);
+            fixedTableBody.appendChild(fixedTbody);
+            shadowRoot.appendChild(fgmt);
+            window.addEventListener('resize', () => this.initTable());
+        }
+        //当这个元素被插入DOM树的时候将会触发这个方法
+        connectedCallback(){
+            console.log('insert into dom');
+            this.initTable();
+        }
+        
+        initTable(){
+            const shadowRoot = this.shadowRoot;
+            // scroll 控制固定表格滚动
+            const bodyWrapper = shadowRoot.querySelector('.mytable_body__wrapper');
+            let fixedBodyWrapper = shadowRoot.querySelector('.mytable_fixed_body__wrapper');
+            const headerWrapper = shadowRoot.querySelector('.mytable .mytable_header__wrapper');
+            bodyWrapper.addEventListener('scroll', (e) => {
+                fixedBodyWrapper.scrollTop = e.target.scrollTop; // 控制固定表格滚动
+                headerWrapper.scrollLeft = e.target.scrollLeft; // 控制表头滚动
+            });
+           
+
+            // 计算左侧固定表格宽度
+            let fixedLeftCol = this.tableOptions.columns.filter(it => it.fixed === true || it.fixed === 'left');            
+            let fixedLeftCount = fixedLeftCol.length; // 左侧几个表格宽度
+            let fixedColEle = shadowRoot.querySelectorAll('.mytable .mytable_header__wrapper .mytable_header thead th');
+            let fixedLeftWidth = 0;
+            for (let i = 0; i < fixedLeftCount; i++) {
+                let style = getComputedStyle(fixedColEle[i]);
+                // let width = fixedColEle[i].offsetWidth; // offset 取不到小数点
+                let width = parseFloat(style.width)
+                            + parseFloat(style.borderLeftWidth) 
+                            + parseFloat(style.borderRightWidth) 
+                            + parseFloat(style.paddingLeft)
+                            + parseFloat(style.paddingRight);
+                fixedLeftWidth += parseFloat(width);
+            }
+            let fixedLeftTableEle = shadowRoot.querySelector('.mytable_fixed');
+            fixedLeftTableEle.style.width = fixedLeftWidth + 'px';
+
+            // 计算左侧固定表格高度，防止把横向滚动条盖住
+            let scrollBarWidth = bodyWrapper.offsetHeight - bodyWrapper.clientHeight;
+            if(scrollBarWidth){ // 判断是否有横向滚动条
+                let fixedLeftTableEle = shadowRoot.querySelector('.mytable_fixed');
+                fixedLeftTableEle.style.height = headerWrapper.offsetHeight + bodyWrapper.clientHeight + 'px'; // 表格高度 - 滚动条高度
+            }else {
+                const myTableEle = shadowRoot.querySelector('.mytable');
+                fixedLeftTableEle.style.height = getComputedStyle(myTableEle).height;
+            }
+        }
+        /**
+         * createElement function
+         * h(tag, text[,children])
+         * h(tag, attrs[,children])
+         * h(tag, children)
+         * @param {String} tag 
+         * @param {Object | String | Array<HTMLElement>} attrs
+         * @param {Array<HTMLElement>} children 
+         */
+        h(tag, attrs, children){
+            let elem = document.createElement(tag);
+            if(Array.isArray(attrs)){
+                children = attrs;
+            }else if(typeof attrs === 'object' && attrs !== null){
+                for (const attr in attrs) {
+                    if(attr === 'style'){
+                        elem.style = Object.assign(elem.style, attrs.style);
+                        for (const key in attrs.style) {
+                            elem.style[key] = attrs.style[key];
+                        }
+                    }else {
+                        elem[attr] = attrs[attr];
+                    }
+                }
+            }else if(typeof attrs === 'string' || typeof attrs === 'number'){
+                elem.textContent = String(attrs);
+            }
+            if(children){
+                children.forEach(child => elem.appendChild(child));
+            }
+            return elem;
+        }
+    });
+
+    
+    let options = {
+        columns: [
+            { title: 'fixedCol', key: 'k1', fixed: true },
+            { title: 'fixedCol2', key: 'k2', fixed: true },
+            { title: 'a1', key: 'k2' },
+            { title: 'a2', key: 'k3' },
+            { title: 'a2', key: 'k3' },
+        ],
+        list: new Array(100).fill(0).map((item, i) => {
+            return {k1: i, k2: i, k3: i}
+        })
+    }
+    /**@type{HTMLElement}*/
+    let myTable = customElements.get('my-table');
+    let table = new myTable('.table-wrapper', options);
+    document.body.appendChild(table);
+</script>
+
+</html>
