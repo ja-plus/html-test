@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh_CN">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Context Menu</title>
+</head>
+<style>
+    .content {
+        width: 100px;
+        height: 100px;
+        background-color: yellow;
+    }
+    .content2{
+        width: 200px;
+        height: 100px;
+        background-color: blanchedalmond;
+    }
+</style>
+<body>
+    <div class="content" >right click here</div>
+    <div class="content2"> another element</div>
+</body>
+<script type="module">
+    import MyContextMenu from '../js/MyContextMenu.js';
+    const content = document.querySelector('.content');
+    const content2 = document.querySelector('.content2');
+
+    const myContextMenu = new MyContextMenu();
+    let menu1 = myContextMenu.create({
+        items:[
+            {
+                label: '返回',
+                tip: '返回上一页',
+                onclick(e){
+                    console.log('item1 click');
+                }
+            },
+            {
+                label: '前进',
+                tip: '提示文字',
+                onclick(e){
+                    console.log('item2 click');
+                }
+            },
+        ]
+    })
+    let menu2 = myContextMenu.create({
+        items:[
+            {
+                label: '第一',
+                onclick(e){
+                    console.log('ggggg');
+                }
+            },
+            {
+                label: '第二',
+                onclick(e){
+                    console.log('aaaaa');
+                }
+            },
+        ]
+    })
+    content.oncontextmenu = myContextMenu.showContextMenu(menu1);
+    content2.oncontextmenu = myContextMenu.showContextMenu(menu2);
+</script>
+</html>

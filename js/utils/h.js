@@ -1,0 +1,40 @@
+/**
+* createElement function
+* h(tag[, text[,children]])
+* h(tag[, attrs[,children]])
+* h(tag[, children])
+* @param {String} tag 标签名称，支持tag#id.class emmet写法，暂支持id ,class
+* @param {Object | String | Array<HTMLElement>} attrs 传Object为属性，传String为textContent，传数组为children
+* @param {Array<HTMLElement>} children 
+*/
+export default function h(tag, attrs, children){
+    // TODO: validate param type
+    // 解析emmet 语法 (暂支持id class, 防止解析字符串影响更多性能)
+    let id = tag.match(/#[\w\d_-]+/);
+    let classArr = tag.match(/(?<=\.)[\w\d_\-]+/g); // className
+    tag = tag.match(/^[\w\d]+/)[0];
+
+   let elem = document.createElement(tag);
+   if(Array.isArray(attrs)){
+       children = attrs;
+   }else if(typeof attrs === 'object' && attrs !== null){
+       for (const attr in attrs) {
+           if(attr === 'style'){
+               for (const key in attrs.style) {
+                   elem.style[key] = attrs.style[key];
+               }
+           }else {
+               elem[attr] = attrs[attr];
+           }
+       }
+   }else if(typeof attrs === 'string' || typeof attrs === 'number'){
+       elem.textContent = String(attrs);
+   }
+
+   if(children){
+       children.forEach(child => elem.appendChild(child));
+   }
+   if(id) elem.id = id;
+   if(classArr) elem.classList.add(...classArr);
+   return elem;
+}
