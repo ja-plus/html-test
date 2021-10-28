@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh_CN">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -44,6 +44,24 @@
                     console.log('item2 click');
                 }
             },
+            {
+                label: '更多',
+                tip:'more',
+                children:[
+                    {
+                        label: '二级菜单1', 
+                        onclick(){
+                            console.log('二级菜单被点击');
+                        } 
+                    },
+                    {
+                        label: '二级菜单2',
+                        onclick(){
+                            console.log('二级菜单2被点击');
+                        }
+                    },
+                ]
+            }
         ]
     })
     let menu2 = myContextMenu.create({

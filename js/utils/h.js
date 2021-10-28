@@ -32,7 +32,10 @@ export default function h(tag, attrs, children){
    }
 
    if(children){
-       children.forEach(child => elem.appendChild(child));
+       children.forEach(child =>{
+           if(child instanceof HTMLElement) elem.appendChild(child)
+           else if(child !== null && child !== undefined) console.error(child , 'not instance of HTMLElement');
+       });
    }
    if(id) elem.id = id;
    if(classArr) elem.classList.add(...classArr);
