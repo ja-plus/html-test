@@ -1,12 +1,12 @@
 /**
  * 右键菜单功能
  * 问题，多次new 会一直向dom中添加元素
- * TODO: 二级菜单，禁用，图标
+ * TODO: 禁用，图标
  */
 import h from './utils/h.js'
 const _wrapperClassName = 'mycontextmenu';
-const _childWrapperClassName = 'mycontextmenu_child';
 const _mainMenuWidth = 200;
+const _childMenuWidth = 150;
 const _cssStr = `
     .${_wrapperClassName}{
         border: 1px solid #ddd;
@@ -29,16 +29,16 @@ const _cssStr = `
         justify-content: space-between;
         flex-wrap: nowrap;
     }
-    .${_wrapperClassName} li span {
+    .${_wrapperClassName} li span.label {
         overflow: hidden;
         text-overflow: ellipsis;
     }
-    .${_wrapperClassName} li span:nth-child(2){
+    .${_wrapperClassName} li span.tip{
         color:#aaa;
         font-size: 12px;
     }
     .${_wrapperClassName} li:hover,
-    .${_wrapperClassName} li.hover{
+    .${_wrapperClassName} li.${_wrapperClassName}_hover{
         background-color: #eee;
     }
     .${_wrapperClassName} li .right-arrow {
@@ -53,6 +53,9 @@ const _cssStr = `
         border-right: 4px solid rgba(0,0,0,0);
         border-bottom: 4px solid rgba(0,0,0,0);
     }
+    .${_wrapperClassName}_child{
+        width: ${_childMenuWidth}px;
+    }
     `;
 
 class MyContextMenu {
@@ -61,8 +64,8 @@ class MyContextMenu {
      * 因此需要统一管理创建的所有菜单元素, 
      * (也可以统一管理传入的配置，右键时渲染，点击其他地方删除元素)
      */
+    /**@type{Array<HTMLElement>} */
     #storeEle = [];
-    #childMenuElements = new Map();
     constructor() {
         this.#injectCss();
         this.#onPageResize();
@@ -78,11 +81,11 @@ class MyContextMenu {
                 return h('li',{
                     onclick: it.onclick,
                     onmouseenter: it.children?.length 
-                        ? (e => this.#showChildMenu(e, it.children))
-                        : () => this.#hideChildMenu(),
+                        ? (e => this.#showChildMenu(e, it.children, contextMenuEle))
+                        : () => this.#hideChildMenu(contextMenuEle),
                 }, [
-                    h('span', it.label),
-                    it.tip && h('span', it.tip),
+                    h('span.label', it.label),
+                    it.tip && h('span.tip', it.tip),
                     it.children && h('span.right-arrow')
                 ])
             })
@@ -91,7 +94,7 @@ class MyContextMenu {
         // close contextmenu
         window.addEventListener('click', () => {
             contextMenuEle.style.display = 'none';
-            this.#hideChildMenu();
+            this.#hideChildMenu(contextMenuEle);
         });
         document.body.append(contextMenuEle);
         this.#storeEle.push(contextMenuEle);
@@ -107,43 +110,51 @@ class MyContextMenu {
             document.head.appendChild(style);
         }
     }
-    #showChildMenu(e, children){
-        let childMenuEle = this.#childMenuElements.get(children);
+    /**
+     * 
+     * @param {MouseEvent} e 
+     * @param {Array} children 
+     * @param {HTMLElement} contextMenuEle 
+     */
+    #showChildMenu(e, children, contextMenuEle){
+        this.#hideChildMenu(contextMenuEle); // close other child menu
+        /**@type{HTMLElement} */
+        let childMenuEle = e.target.querySelector(`ul.${_wrapperClassName}_child`);
         if(!childMenuEle){
-            childMenuEle = h(`ul.${_wrapperClassName}`, [
+            childMenuEle = h(`ul.${_wrapperClassName}.${_wrapperClassName}_child`, [
                 ...children.map(child => {
                     return h('li', {
                         onclick: child.onclick
                     },[
-                        h('span',child.label),
-                        h('span',child.tip),
+                        h('span.label',child.label),
+                        h('span.tip',child.tip),
                     ])
                 })
             ]);
             childMenuEle.oncontextmenu = e => e.preventDefault();
-            this.#childMenuElements.set(children, childMenuEle);
-            document.body.appendChild(childMenuEle);
+            e.target.appendChild(childMenuEle);
         }
         // if childMenuEle is hidden
         if(!childMenuEle.style.display || childMenuEle.style.display === 'none'){
-            const liPosition = e.target.getBoundingClientRect();
-            e.target.classList.add('hover');
+            e.target.classList.add(_wrapperClassName +'_hover');
             childMenuEle.style.display = 'block';
-            childMenuEle.style.transform = `translate(${liPosition.left + _mainMenuWidth - 10}px,${liPosition.top}px)`;
-
+            childMenuEle.style.transform = `translateX(${_mainMenuWidth - 5}px)`;
         }
 
         // TODO: 右侧边界判断
         // TODO: 下方边界判断
     }
-    #hideChildMenu(){
-        this.#childMenuElements.forEach((ul) => {
-            ul.style.display = 'none';
-            // TODO: 优化
-            let hovers = document.querySelectorAll('li.hover');
-            hovers.forEach(li => {
-                li.classList.remove('hover');
-            });
+    /**
+     * @param {HTMLElement} contextMenuEle 
+     */
+    #hideChildMenu(contextMenuEle){
+        // 取消主菜单选中状态
+        let hovers = contextMenuEle.querySelectorAll(`.${_wrapperClassName}_hover`);
+        hovers.forEach(li => {
+            li.classList.remove(_wrapperClassName +'_hover');
+            // 关闭子菜单
+            let childMenu = li.querySelector(`ul.${_wrapperClassName}`);
+            childMenu.style.display = 'none';
         });
     }
     /**页面大小变化时 */
