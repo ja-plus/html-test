@@ -264,8 +264,10 @@ class MyContextMenu {
         });
     }
     /** remove menu */
-    deleteMenu() {
-
+    deleteMenu(contextMenuEle) {
+        let i = this.#storeEle.findIndex(it => it === contextMenuEle);
+        this.#storeEle.splice(i, 1);
+        contextMenuEle = null;
     }
 }
 export default MyContextMenu;
