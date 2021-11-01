@@ -24,6 +24,11 @@ const _cssStr = `
         width: ${_mainMenuWidth}px;
         display: none;
     }
+    .${_wrapperClassName} .divide{
+        margin: 5px 0;
+        height: 1px;
+        background-color: #ddd;
+    }
     .${_wrapperClassName} li {
         position: relative;
         padding: 0 30px 0 30px;
@@ -42,7 +47,7 @@ const _cssStr = `
         color:#aaa;
         font-size: 12px;
     }
-    .${_wrapperClassName} li:hover,
+    .${_wrapperClassName} li:hover:not(.divide),
     .${_wrapperClassName} li.${_wrapperClassName}_hover{
         background-color: #eee;
     }
@@ -84,30 +89,72 @@ class MyContextMenu {
      * @returns {HTMLElement} context menu element
      */
     create(config) {
-        const contextMenuEle = h(`ul.${_wrapperClassName}`, {
-            onclick: e => e.stopPropagation()
-        }, [
-            ...config.items.map(it => {
-                return h('li', {
-                    onclick: e => {
-                        it.onclick && it.onclick(e)
-                        if (!it.children) this.hideMenu();
-                    },
-                    onmouseenter: it.children?.length
-                        ? (e => this.#showChildMenu(e, it.children, contextMenuEle))
-                        : () => this.#hideChildMenu(contextMenuEle),
-                }, [
-                    h('span.label', it.label),
-                    it.tip && h('span.tip', it.tip),
-                    it.children && h('span.right-arrow')
-                ])
-            })
-        ]);
-        contextMenuEle.oncontextmenu = e => e.preventDefault();
-        // close contextmenu
+        const contextMenuEle = this.#createMenuEle(config.items);
         document.body.append(contextMenuEle);
         this.#storeEle.push(contextMenuEle);
-
+        return contextMenuEle;
+    }
+    /**
+     * create menu element
+     * @param {Array<Object>} items config.items | config.items.children
+     * @param {String} type ['main' | 'child']
+     * @returns {HTMLElement}
+     */
+    #createMenuEle(items, type = "main"){
+        let contextMenuEle;
+        if (type === 'main'){
+            contextMenuEle = h(`ul.${_wrapperClassName}`, {
+                onclick: e => e.stopPropagation(),
+                oncontextmenu: e => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                }
+            }, [
+                ...items.map(it => {
+                    if (it.type === 'divide' || it.type?.indexOf('--') === 0){
+                        return h('li.divide');
+                    }
+                    return h('li', {
+                        onclick: e => {
+                            it.onclick && it.onclick(e)
+                            if (!it.children) this.hideMenu();
+                        },
+                        onmouseenter:
+                            it.children?.length
+                            ? (e => this.#showChildMenu(e, it.children, contextMenuEle))
+                            : () => this.#hideChildMenu(contextMenuEle),
+                    }, [
+                        h('span.label', it.label),
+                        it.tip && h('span.tip', it.tip),
+                        type === 'main' && it.children && h('span.right-arrow')
+                    ])
+                })
+            ]);
+        }
+        if (type === 'child'){
+            contextMenuEle = h(`ul.${_wrapperClassName}.${_wrapperClassName}_child`, {
+                onclick: e => e.stopPropagation(),
+                oncontextmenu: e => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                }
+            }, [
+                ...items.map(child => {
+                    if (child.type === 'divide' || child.type?.indexOf('--') === 0){
+                        return h('li.divide');
+                    }
+                    return h('li', {
+                        onclick: e => {
+                            child.onclick && child.onclick(e);
+                            this.hideMenu();
+                        }
+                    }, [
+                        h('span.label', child.label),
+                        child.tip && h('span.tip', child.tip),
+                    ])
+                })
+            ]);
+        }
         return contextMenuEle;
     }
     #injectCss() {
@@ -140,20 +187,7 @@ class MyContextMenu {
         /** @type {HTMLElement} */
         let childMenuEle = e.target.querySelector(`ul.${_wrapperClassName}_child`);
         if (!childMenuEle) {
-            childMenuEle = h(`ul.${_wrapperClassName}.${_wrapperClassName}_child`, [
-                ...children.map(child => {
-                    return h('li', {
-                        onclick: e => {
-                            child.onclick && child.onclick(e);
-                            this.hideMenu();
-                        }
-                    }, [
-                        h('span.label', child.label),
-                        h('span.tip', child.tip),
-                    ])
-                })
-            ]);
-            childMenuEle.oncontextmenu = e => e.preventDefault();
+            childMenuEle = this.#createMenuEle(children, 'child')
             e.target.appendChild(childMenuEle);
         }
         // if childMenuEle is hidden
@@ -173,7 +207,6 @@ class MyContextMenu {
                 // bottom avaliable space
                 translateY = -childMenuHeight + _menuItemHeight + 2 + 1; // 1px border
             }
-            console.log(liPosition, childMenuHeight, _menuItemHeight);
             childMenuEle.style.transform = `translate(${translateX}px, ${translateY}px)`;
         }
     }
