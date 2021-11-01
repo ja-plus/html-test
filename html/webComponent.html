@@ -53,21 +53,21 @@
     }
     function addMyTemplate(){
         let myTemp = document.createElement('my-template');
-        myTemp.setAttribute('class','myTemplate');
+        myTemp.setAttribute('class', 'myTemplate');
         myTemp.innerHTML = ` <h1 slot="myslot">插槽内容</h1>`;
         let hr = document.querySelector('hr');
-        document.body.insertBefore(myTemp,hr);
+        document.body.insertBefore(myTemp, hr);
     }
     function alterMyTemplateAttr(){
         let myTemp = document.querySelector('.myTemplate');
-        myTemp.setAttribute('data-title','修改的头部');
+        myTemp.setAttribute('data-title', '修改的头部');
     }
     
-    //------custom element
+    // ------custom element
     class MyPanel extends HTMLElement{
         constructor() {
             super();
-            const shadow = this.attachShadow({mode:'open'});
+            const shadow = this.attachShadow({ mode: 'open' });
             // let header = document.createElement('header');
             // let title = document.createElement('div');
             // title.classList.add('title');
@@ -78,7 +78,7 @@
             // body.textContent = this.dataset.body || 'no data';
             // let slot = document.createElement('slot');
             // body.appendChild(slot);
-            
+    
             // let style = document.createElement('style');
             // style.textContent = `
             //     header{
@@ -97,7 +97,7 @@
             // shadow.appendChild(style);
             // shadow.appendChild(header);
             // shadow.appendChild(body);
-            
+    
             shadow.innerHTML += `
                 <style>
                     header{
@@ -140,15 +140,15 @@
             })
         }
     }
-    customElements.define('my-ul', MyUl, {extends: 'ul'});
+    customElements.define('my-ul', MyUl, { extends: 'ul' });
 
     customElements.define("my-template",
         class extends HTMLElement{
             constructor() {
                 super();
-                /**@type{HTMLTemplateElement}*/
+                /** @type{HTMLTemplateElement}*/
                 let template = document.querySelector('#aTemplate');
-                let shadowRoot = this.attachShadow({mode:'open'});
+                let shadowRoot = this.attachShadow({ mode: 'open' });
                 let templateContent = template.content;
                 let fgmt = templateContent.cloneNode(true);
                 shadowRoot.appendChild(fgmt);

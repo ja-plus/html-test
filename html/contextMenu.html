@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -12,14 +13,16 @@
         height: 100px;
         background-color: yellow;
     }
-    .content2{
+
+    .content2 {
         width: 200px;
         height: 100px;
         background-color: blanchedalmond;
     }
 </style>
+
 <body>
-    <div class="content" >right click here</div>
+    <div class="content">right click here</div>
     <div class="content2"> another element</div>
 </body>
 <script type="module">
@@ -29,34 +32,37 @@
 
     const myContextMenu = new MyContextMenu();
     let menu1 = myContextMenu.create({
-        items:[
+        items: [
             {
                 label: '返回',
                 tip: '返回上一页',
-                onclick(e){
+                onclick() {
                     console.log('item1 click');
                 }
             },
             {
                 label: '前进',
                 tip: '提示文字',
-                onclick(e){
+                onclick() {
                     console.log('item2 click');
                 }
             },
             {
+                type: 'divide',
+            },
+            {
                 label: '更多',
-                tip:'more',
-                children:[
+                tip: 'more',
+                children: [
                     {
-                        label: '二级菜单1', 
-                        onclick(){
+                        label: '二级菜单1',
+                        onclick() {
                             console.log('二级菜单被点击');
-                        } 
+                        }
                     },
                     {
                         label: '二级菜单2',
-                        onclick(){
+                        onclick() {
                             console.log('二级菜单2被点击');
                         }
                     },
@@ -64,16 +70,16 @@
             },
             {
                 label: '更多2',
-                children:[
+                children: [
                     {
-                        label: '二级菜单2-1', 
-                        onclick(){
+                        label: '二级菜单2-1',
+                        onclick() {
                             console.log('二级菜单2-1被点击');
-                        } 
+                        }
                     },
                     {
                         label: '二级菜单2-2',
-                        onclick(){
+                        onclick() {
                             console.log('二级菜单2-2被点击');
                         }
                     },
@@ -82,44 +88,44 @@
         ]
     })
     let menu2 = myContextMenu.create({
-        items:[
+        items: [
             {
                 label: '第一',
-                onclick(e){
+                onclick() {
                     console.log('ggggg');
                 }
             },
             {
                 label: '第二',
-                onclick(e){
+                onclick() {
                     console.log('aaaaa');
                 }
             },
         ]
     })
     let menu3 = myContextMenu.create({
-        items:[
+        items: [
             {
                 label: 'body1',
-                onclick(e){
+                onclick() {
                     console.log('body1');
                 }
             },
             {
                 label: 'body2',
-                onclick(e){
+                onclick() {
                     console.log('body2');
                 },
-                children:[
+                children: [
                     {
-                        label: '二级菜单1', 
-                        onclick(){
+                        label: '二级菜单1',
+                        onclick() {
                             console.log('二级菜单被点击');
-                        } 
+                        }
                     },
                     {
                         label: '二级菜单2',
-                        onclick(){
+                        onclick() {
                             console.log('二级菜单2被点击');
                         }
                     },
@@ -131,4 +137,5 @@
     content2.oncontextmenu = myContextMenu.showContextMenu(menu2);
     window.oncontextmenu = myContextMenu.showContextMenu(menu3);
 </script>
+
 </html>

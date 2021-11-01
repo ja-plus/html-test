@@ -107,7 +107,7 @@
             super();
             this.tableOptions = options; // store config
             const shadowRoot = this.attachShadow({ mode: 'open' });
-            /**@type{HTMLTemplateElement}*/
+            /** @type {HTMLTemplateElement}*/
             const template = document.querySelector('.table-wrapper');
             const templateContent = template.content;
             const fgmt = templateContent.cloneNode(true);
@@ -117,18 +117,18 @@
             let fixedTableHeader = fgmt.querySelector('.mytable_fixed_header');
             let fixedTableBody = fgmt.querySelector('.mytable_fixed_body');
 
-            let columns = options.columns.sort((a,b) => a.fixed ? -1 : 1);// fixed默认左侧
-            
+            let columns = options.columns.sort((a) => a.fixed ? -1 : 1);// fixed默认左侧
+    
             let data = options.list;
             let thead = this.h(
-                'thead', 
+                'thead',
                 [
                     this.h(
                         'tr',
                         columns
-                        .sort((a,b) => a.fixed ? -1 : 1)
+                        .sort((a) => a.fixed ? -1 : 1)
                         .map(col => {
-                            return /* col.fixed ? this.h('th',{style: {width: this.defaultColWidth + 'px'},}) :  */this.h('th', {textContent: col.title, style: {width: this.defaultColWidth + 'px'}});
+                            return /* col.fixed ? this.h('th',{style: {width: this.defaultColWidth + 'px'},}) :  */this.h('th', { textContent: col.title, style: { width: this.defaultColWidth + 'px' } });
                         })
                     )
                 ]
@@ -139,14 +139,14 @@
                     return this.h(
                         'tr',
                         columns
-                        .sort((a,b) => a.fixed ? -1 : 1) // TODO: right
+                        .sort((a) => a.fixed ? -1 : 1) // TODO: right
                         .map(col => {
-                            return /* col.fixed ? this.h('td') : */ this.h('td', {textContent: item[col.key], style: {width: this.defaultColWidth + 'px'}});
+                            return /* col.fixed ? this.h('td') : */ this.h('td', { textContent: item[col.key], style: { width: this.defaultColWidth + 'px' } });
                         })
                     )
                 })
             )
-            //fix left
+            // fix left
             let fixedThead = this.h(
                 'thead',
                 [
@@ -178,12 +178,12 @@
             shadowRoot.appendChild(fgmt);
             window.addEventListener('resize', () => this.initTable());
         }
-        //当这个元素被插入DOM树的时候将会触发这个方法
+        // 当这个元素被插入DOM树的时候将会触发这个方法
         connectedCallback(){
             console.log('insert into dom');
             this.initTable();
         }
-        
+    
         initTable(){
             const shadowRoot = this.shadowRoot;
             // scroll 控制固定表格滚动
@@ -194,10 +194,10 @@
                 fixedBodyWrapper.scrollTop = e.target.scrollTop; // 控制固定表格滚动
                 headerWrapper.scrollLeft = e.target.scrollLeft; // 控制表头滚动
             });
-           
+    
 
             // 计算左侧固定表格宽度
-            let fixedLeftCol = this.tableOptions.columns.filter(it => it.fixed === true || it.fixed === 'left');            
+            let fixedLeftCol = this.tableOptions.columns.filter(it => it.fixed === true || it.fixed === 'left');
             let fixedLeftCount = fixedLeftCol.length; // 左侧几个表格宽度
             let fixedColEle = shadowRoot.querySelectorAll('.mytable .mytable_header__wrapper .mytable_header thead th');
             let fixedLeftWidth = 0;
@@ -205,8 +205,8 @@
                 let style = getComputedStyle(fixedColEle[i]);
                 // let width = fixedColEle[i].offsetWidth; // offset 取不到小数点
                 let width = parseFloat(style.width)
-                            + parseFloat(style.borderLeftWidth) 
-                            + parseFloat(style.borderRightWidth) 
+                            + parseFloat(style.borderLeftWidth)
+                            + parseFloat(style.borderRightWidth)
                             + parseFloat(style.paddingLeft)
                             + parseFloat(style.paddingRight);
                 fixedLeftWidth += parseFloat(width);
@@ -216,10 +216,10 @@
 
             // 计算左侧固定表格高度，防止把横向滚动条盖住
             let scrollBarWidth = bodyWrapper.offsetHeight - bodyWrapper.clientHeight;
-            if(scrollBarWidth){ // 判断是否有横向滚动条
+            if (scrollBarWidth){ // 判断是否有横向滚动条
                 let fixedLeftTableEle = shadowRoot.querySelector('.mytable_fixed');
                 fixedLeftTableEle.style.height = headerWrapper.offsetHeight + bodyWrapper.clientHeight + 'px'; // 表格高度 - 滚动条高度
-            }else {
+            } else {
                 const myTableEle = shadowRoot.querySelector('.mytable');
                 fixedLeftTableEle.style.height = getComputedStyle(myTableEle).height;
             }
@@ -229,29 +229,29 @@
          * h(tag, text[,children])
          * h(tag, attrs[,children])
          * h(tag, children)
-         * @param {String} tag 
+         * @param {String} tag
          * @param {Object | String | Array<HTMLElement>} attrs
-         * @param {Array<HTMLElement>} children 
+         * @param {Array<HTMLElement>} children
          */
         h(tag, attrs, children){
             let elem = document.createElement(tag);
-            if(Array.isArray(attrs)){
+            if (Array.isArray(attrs)){
                 children = attrs;
-            }else if(typeof attrs === 'object' && attrs !== null){
+            } else if (typeof attrs === 'object' && attrs !== null){
                 for (const attr in attrs) {
-                    if(attr === 'style'){
+                    if (attr === 'style'){
                         elem.style = Object.assign(elem.style, attrs.style);
                         for (const key in attrs.style) {
                             elem.style[key] = attrs.style[key];
                         }
-                    }else {
+                    } else {
                         elem[attr] = attrs[attr];
                     }
                 }
-            }else if(typeof attrs === 'string' || typeof attrs === 'number'){
+            } else if (typeof attrs === 'string' || typeof attrs === 'number'){
                 elem.textContent = String(attrs);
             }
-            if(children){
+            if (children){
                 children.forEach(child => elem.appendChild(child));
             }
             return elem;
@@ -268,12 +268,12 @@
             { title: 'a2', key: 'k3' },
         ],
         list: new Array(100).fill(0).map((item, i) => {
-            return {k1: i, k2: i, k3: i}
+            return { k1: i, k2: i, k3: i }
         })
     }
-    /**@type{HTMLElement}*/
-    let myTable = customElements.get('my-table');
-    let table = new myTable('.table-wrapper', options);
+    /** @type {HTMLElement} */
+    let MyTable = customElements.get('my-table');
+    let table = new MyTable('.table-wrapper', options);
     document.body.appendChild(table);
 </script>
 

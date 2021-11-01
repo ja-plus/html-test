@@ -60,8 +60,8 @@
   inputInner.addEventListener('focus', (e) => {
     outInput.classList.add('active');
   })
-  inputInner.addEventListener('blur',(e) => {
-    if(!inputInner.value) // input失焦时如果无内容则移除active class
+  inputInner.addEventListener('blur', (e) => {
+    if (!inputInner.value) // input失焦时如果无内容则移除active class
       outInput.classList.remove('active');
   })
 </script>

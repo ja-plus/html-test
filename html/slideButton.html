@@ -82,14 +82,14 @@
   let btn = document.querySelector('.slide .my-button');
   let circle = document.querySelector('.slide .my-button .circle');
   const btnOffset = btn.getBoundingClientRect(); // 获取元素相对于视窗位置集合
-  const btnLeft = btnOffset.left; //距离页面左侧位置
+  const btnLeft = btnOffset.left; // 距离页面左侧位置
   const btnStyle = getComputedStyle(btn); // 获取元素渲染后的样式
   const btnWidth = parseFloat(btnStyle.width); // 按钮宽度
 
   const circleStyle = getComputedStyle(circle);
   const circleGap = parseFloat(circleStyle.left);
   const circleSize = parseFloat(circleStyle.width);
-  const circleLeftRange = [circleGap, btnWidth - circleGap - circleSize * 1.2]; // 
+  const circleLeftRange = [circleGap, btnWidth - circleGap - circleSize * 1.2]; //
 
   let circleMouseOffset;
   function mouseMove(e) {
@@ -109,9 +109,9 @@
 
   function leave(e){
     let left = parseInt(circleStyle.left);
-    if(left < (circleLeftRange[0] + circleLeftRange[1]) / 2 ){ // 移动小于一半
+    if (left < (circleLeftRange[0] + circleLeftRange[1]) / 2 ){ // 移动小于一半
       checkbox.checked = false;
-    }else{
+    } else {
       checkbox.checked = true;
     }
     clearListeners();
@@ -125,7 +125,7 @@
     btn.removeEventListener('mouseleave', leave);
     btn.removeEventListener('mouseup', clearListeners);
   }
- 
+
 </script>
 
 </html>
