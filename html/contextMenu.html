@@ -97,7 +97,38 @@
             },
         ]
     })
+    let menu3 = myContextMenu.create({
+        items:[
+            {
+                label: 'body1',
+                onclick(e){
+                    console.log('body1');
+                }
+            },
+            {
+                label: 'body2',
+                onclick(e){
+                    console.log('body2');
+                },
+                children:[
+                    {
+                        label: '二级菜单1', 
+                        onclick(){
+                            console.log('二级菜单被点击');
+                        } 
+                    },
+                    {
+                        label: '二级菜单2',
+                        onclick(){
+                            console.log('二级菜单2被点击');
+                        }
+                    },
+                ]
+            },
+        ]
+    })
     content.oncontextmenu = myContextMenu.showContextMenu(menu1);
     content2.oncontextmenu = myContextMenu.showContextMenu(menu2);
+    window.oncontextmenu = myContextMenu.showContextMenu(menu3);
 </script>
 </html>

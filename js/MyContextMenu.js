@@ -4,10 +4,15 @@
  * TODO: 禁用，图标
  */
 import h from './utils/h.js'
+import debounce from './utils/debounce.js';
 const _wrapperClassName = 'mycontextmenu';
 const _mainMenuWidth = 200;
 const _childMenuWidth = 150;
+const _menuItemHeight = 24;
 const _cssStr = `
+    .${_wrapperClassName}, .${_wrapperClassName} *{
+        box-sizing: border-box;
+    }
     .${_wrapperClassName}{
         border: 1px solid #ddd;
         position: absolute;
@@ -23,7 +28,7 @@ const _cssStr = `
         position: relative;
         padding: 0 30px 0 30px;
         list-style: none;
-        line-height: 24px;
+        line-height: ${_menuItemHeight}px;
         font-size: 13px;
         display: flex;
         justify-content: space-between;
@@ -44,9 +49,6 @@ const _cssStr = `
     .${_wrapperClassName} li .right-arrow {
         position: absolute;
         right: 8px;
-        /* width: 24px;
-        height: 24px;
-        background-color: red; */
         top: 9px;
         border-top: 4px solid rgba(0,0,0,0);
         border-left: 4px solid #000;
@@ -68,7 +70,10 @@ class MyContextMenu {
     #storeEle = [];
     /**@type {Function} */
     #clickEventFunc;
+    /**@type {Array<Number>} */
+    #windowSize = {width: null, height: null};
     constructor() {
+        this.#windowSize = {width: window.innerWidth, height: window.innerHeight};
         this.#injectCss();
         this.#onPageResize();
         this.#hideMenuEventListener();
@@ -106,9 +111,8 @@ class MyContextMenu {
         return contextMenuEle;
     }
     #injectCss(){
-        // 已经有css就不重复加css
         let style = document.querySelector('#myContextMenu');
-        if(!style){
+        if(!style){ // if not be injected
             style = h('style#myContextMenu',{
                 innerHTML: _cssStr
             });
@@ -156,46 +160,75 @@ class MyContextMenu {
         if(!childMenuEle.style.display || childMenuEle.style.display === 'none'){
             e.target.classList.add(_wrapperClassName +'_hover');
             childMenuEle.style.display = 'block';
-            childMenuEle.style.transform = `translateX(${_mainMenuWidth - 5}px)`;
-        }
 
-        // TODO: 右侧边界判断
-        // TODO: 下方边界判断
+            const childMenuHeight = parseFloat(getComputedStyle(childMenuEle).height);
+            const liPosition = e.target.getBoundingClientRect();
+            let translateX = _mainMenuWidth - 5;
+            let translateY =  -2;
+            if(this.#windowSize.width - liPosition.x - _mainMenuWidth < _childMenuWidth){
+                // right avaliable space
+                translateX = -_childMenuWidth + 5;
+            }
+            if(this.#windowSize.height - liPosition.y + 2 < childMenuHeight){
+                // bottom avaliable space
+                translateY = -childMenuHeight + _menuItemHeight + 2 + 1; // 1px border
+            }
+            console.log(liPosition,childMenuHeight, _menuItemHeight);
+            childMenuEle.style.transform = `translate(${translateX}px, ${translateY}px)`;
+        }
     }
     /**
      * @param {HTMLElement} contextMenuEle 
      */
     #hideChildMenu(contextMenuEle){
-        // 取消主菜单选中状态
+        // remove main menu selected
         let hovers = contextMenuEle.querySelectorAll(`.${_wrapperClassName}_hover`);
         hovers.forEach(li => {
             li.classList.remove(_wrapperClassName +'_hover');
-            // 关闭子菜单
+            // close child menu
             let childMenu = li.querySelector(`ul.${_wrapperClassName}`);
             childMenu.style.display = 'none';
         });
     }
-    /**页面大小变化时 */
+    /**when adjust window size */
     #onPageResize(){
-
+        let resizeFunc = debounce(() =>{ 
+            // save window inner size
+            this.#windowSize = {width: window.innerWidth, height: window.innerHeight};
+        });
+        window.addEventListener('resize', resizeFunc);
     }
     /** open menu */
     showContextMenu(contextMenuEle){
         // return this.#onContextMenu.bind(this);
         return (e) => {
             this.#storeEle.forEach(ele => {
-                if(ele!== contextMenuEle) ele.style.display = 'none'; // 关闭其他菜单
+                if(ele!== contextMenuEle) ele.style.display = 'none'; // close other menus
             });
             e.preventDefault();
+            e.stopPropagation(); // 防止触发祖先元素定义的contextmenu事件
+            this.#hideChildMenu(contextMenuEle);
             contextMenuEle.style.display = 'block';
-            contextMenuEle.style.transform = `translate(${e.pageX}px,${e.pageY}px)`;
+
+            const mainMenuHeight = parseFloat(getComputedStyle(contextMenuEle).height);
+            let translateX = e.pageX;
+            let translateY = e.pageY;
+            if(this.#windowSize.width - e.pageX < _mainMenuWidth){
+                // right not have enough space
+                translateX = e.pageX - _mainMenuWidth;
+            }
+            if(this.#windowSize.height - e.pageY < mainMenuHeight){
+                // bottom not have enough space
+                translateY = e.pageY - mainMenuHeight
+            }
+            contextMenuEle.style.transform = `translate(${translateX}px,${translateY}px)`;
         }
     }
     hideMenu(){
         this.#storeEle.forEach(contextMenuEle => {
             contextMenuEle.style.display = 'none';
             this.#hideChildMenu(contextMenuEle);
-        })
+        });
     }
     /**remove menu */
     deleteMenu(){
