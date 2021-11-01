@@ -64,11 +64,14 @@ class MyContextMenu {
      * 因此需要统一管理创建的所有菜单元素, 
      * (也可以统一管理传入的配置，右键时渲染，点击其他地方删除元素)
      */
-    /**@type{Array<HTMLElement>} */
+    /**@type {Array<HTMLElement>} */
     #storeEle = [];
+    /**@type {Function} */
+    #clickEventFunc;
     constructor() {
         this.#injectCss();
         this.#onPageResize();
+        this.#hideMenuEventListener();
     }
     /**
      * create menu element
@@ -76,10 +79,15 @@ class MyContextMenu {
      * @returns {HTMLElement} context menu element
      */
     create(config){
-        const contextMenuEle = h(`ul.${_wrapperClassName}`, [
+        const contextMenuEle = h(`ul.${_wrapperClassName}`,{
+            onclick: e => e.stopPropagation()
+        }, [
             ...config.items.map(it => {
                 return h('li',{
-                    onclick: it.onclick,
+                    onclick: e => {
+                        it.onclick && it.onclick(e)
+                        if(!it.children) this.hideMenu();
+                    },
                     onmouseenter: it.children?.length 
                         ? (e => this.#showChildMenu(e, it.children, contextMenuEle))
                         : () => this.#hideChildMenu(contextMenuEle),
@@ -92,12 +100,9 @@ class MyContextMenu {
         ]);
         contextMenuEle.oncontextmenu = e => e.preventDefault(); 
         // close contextmenu
-        window.addEventListener('click', () => {
-            contextMenuEle.style.display = 'none';
-            this.#hideChildMenu(contextMenuEle);
-        });
         document.body.append(contextMenuEle);
         this.#storeEle.push(contextMenuEle);
+        
         return contextMenuEle;
     }
     #injectCss(){
@@ -110,6 +115,16 @@ class MyContextMenu {
             document.head.appendChild(style);
         }
     }
+    /**click and close menu listener */
+    #hideMenuEventListener(){
+        // add once event
+        if(!this.#clickEventFunc){
+            this.#clickEventFunc = (e) => {
+                this.hideMenu();
+            }
+            window.addEventListener('click', this.#clickEventFunc);
+        }
+    }
     /**
      * 
      * @param {MouseEvent} e 
@@ -118,13 +133,16 @@ class MyContextMenu {
      */
     #showChildMenu(e, children, contextMenuEle){
         this.#hideChildMenu(contextMenuEle); // close other child menu
-        /**@type{HTMLElement} */
+        /**@type {HTMLElement} */
         let childMenuEle = e.target.querySelector(`ul.${_wrapperClassName}_child`);
         if(!childMenuEle){
             childMenuEle = h(`ul.${_wrapperClassName}.${_wrapperClassName}_child`, [
                 ...children.map(child => {
                     return h('li', {
-                        onclick: child.onclick
+                        onclick: e => {
+                            child.onclick && child.onclick(e);
+                            this.hideMenu();
+                        }
                     },[
                         h('span.label',child.label),
                         h('span.tip',child.tip),
@@ -172,6 +190,16 @@ class MyContextMenu {
             contextMenuEle.style.display = 'block';
             contextMenuEle.style.transform = `translate(${e.pageX}px,${e.pageY}px)`;
         }
+    }
+    hideMenu(){
+        this.#storeEle.forEach(contextMenuEle => {
+            contextMenuEle.style.display = 'none';
+            this.#hideChildMenu(contextMenuEle);
+        })
+    }
+    /**remove menu */
+    deleteMenu(){
+
     }
 }
 export default MyContextMenu;
