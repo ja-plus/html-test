@@ -1,7 +1,7 @@
 /**
  * 右键菜单功能
  * 问题，多次new 会一直向dom中添加元素
- * TODO: 禁用，图标
+ * TODO: 图标
  */
 import h from './utils/h.js'
 import debounce from './utils/debounce.js';
@@ -39,6 +39,9 @@ const _cssStr = `
         justify-content: space-between;
         flex-wrap: nowrap;
     }
+    .${_wrapperClassName} li.disabled{
+        color: #aaa;
+    }
     .${_wrapperClassName} li span.label {
         overflow: hidden;
         text-overflow: ellipsis;
@@ -47,9 +50,13 @@ const _cssStr = `
         color:#aaa;
         font-size: 12px;
     }
-    .${_wrapperClassName} li:hover:not(.divide),
+    .${_wrapperClassName} li:hover:not(.divide):not(.disabled),
     .${_wrapperClassName} li.${_wrapperClassName}_hover{
         background-color: #eee;
+    }
+    .${_wrapperClassName} li:hover:not(.divide):not(.disabled) .tip,
+    .${_wrapperClassName} li.${_wrapperClassName}_hover .tip{
+        color: #000;
     }
     .${_wrapperClassName} li .right-arrow {
         position: absolute;
@@ -115,6 +122,7 @@ class MyContextMenu {
                         return h('li.divide');
                     }
                     return h('li', {
+                        classList: it.disabled ? ['disabled'] : [],
                         onclick: e => {
                             it.onclick && it.onclick(e)
                             if (!it.children) this.hideMenu();
