@@ -41,6 +41,7 @@ const _cssStr = `
     }
     .${_wrapperClassName} li.disabled{
         color: #aaa;
+        pointer-events: none;
     }
     .${_wrapperClassName} li span.label {
         overflow: hidden;
@@ -152,6 +153,7 @@ class MyContextMenu {
                         return h('li.divide');
                     }
                     return h('li', {
+                        classList: child.disabled ? ['disabled'] : [],
                         onclick: e => {
                             child.onclick && child.onclick(e);
                             this.hideMenu();
