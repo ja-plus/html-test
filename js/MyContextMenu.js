@@ -125,8 +125,10 @@ class MyContextMenu {
                     return h('li', {
                         classList: it.disabled ? ['disabled'] : [],
                         onclick: e => {
-                            it.onclick && it.onclick(e)
-                            if (!it.children) this.hideMenu();
+                            if (!it.disabled){
+                                it.onclick && it.onclick(e)
+                                if (!it.children) this.hideMenu();
+                            }
                         },
                         onmouseenter:
                             it.children?.length
@@ -155,8 +157,10 @@ class MyContextMenu {
                     return h('li', {
                         classList: child.disabled ? ['disabled'] : [],
                         onclick: e => {
-                            child.onclick && child.onclick(e);
-                            this.hideMenu();
+                            if (!child.disabled){
+                                child.onclick && child.onclick(e);
+                                this.hideMenu();
+                            }
                         }
                     }, [
                         h('span.label', child.label),

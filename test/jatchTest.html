@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+</body>
+<script type="module">
+    import jatch from '../js/utils/jatch.js';
+    jatch.get('http://localhost:8080/getTestData', {
+        params: { type: 'aa' },
+        mode: 'cors',
+        // credentials: 'include',
+        // responseType: 'text'
+    }).then(res => {
+        console.log(res, 'get: ok');
+    });
+
+    jatch.post('http://localhost:8080/postTestData', {
+        params: { id: '11' },
+        body: { type: 'json' },
+        mode: 'cors',
+    }).then(res => {
+        console.log(res, 'post jons: ok');
+    });
+
+    let formData = new FormData();
+    formData.append('type', 'formData');
+
+    jatch.post('http://localhost:8080/postTestData', {
+        params: { id: '11' },
+        body: formData,
+        mode: 'cors',
+    }).then(res => {
+        console.log(res, 'post form data: ok');
+    });
+
+    jatch.put('http://localhost:8080/putTestData', {
+        params: { id: 'pp' },
+        body: { type: 'put' },
+        mode: 'cors',
+    }).then(res => {
+        console.log(res, 'put jons: ok');
+    });
+
+    jatch.del('http://localhost:8080/delTestData', {
+        params: { id: 'del' },
+        body: { type: 'delete' },
+        mode: 'cors',
+    }).then(res => {
+        console.log(res, 'delete jons: ok');
+    });
+</script>
+
+</html>
