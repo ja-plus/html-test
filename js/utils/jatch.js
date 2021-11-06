@@ -1,5 +1,6 @@
 /** ************
  * fetch 包装
+ * TODO: timeout， request interceptor，  cancel request
  ***********/
 /**
  * 拼接url参数
@@ -140,9 +141,13 @@ class Interceptor {
 class Response {
     interceptor = new Interceptor;
 }
+class Request {
+    interceptor = new Interceptor;
+}
 class Service{
     defaultConf = {};
     response = new Response;
+    request = new Request;
     /**
      * @param {Object} defaultConf
      */
@@ -157,8 +162,14 @@ class Service{
      */
     #requestAdapter(url, conf){
         const assignedConf = Object.assign({}, conf, this.defaultConf);
-        let resInterceptor = this.response.interceptor;
         const responseType = assignedConf.responseType;
+
+        const reqInterceptor = this.request.interceptor;
+        const resInterceptor = this.response.interceptor;
+        if (reqInterceptor.onFulfilled){
+            conf = reqInterceptor.onFulfilled(url, conf);
+        }
+
         let fetchPromise = _originRequest(url, assignedConf)
             .then(res => {
                 if (res.ok){
