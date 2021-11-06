@@ -23,12 +23,11 @@ function _createUrlParamStr(params){
  */
 function _originRequest(url, conf){
     const params = conf.params;
-    const responseType = conf.responseType;
     // 拼url参数
     if (params) url += _createUrlParamStr(params);
 
-    delete conf.params;
-    delete conf.responseType;
+    // delete conf.params;
+    // delete conf.responseType;
     if (conf.body){
         try {
             conf.body = conf.body instanceof FormData
@@ -44,12 +43,16 @@ function _originRequest(url, conf){
             'Content-Type': 'application/json'
         });
     }
-    const fetchPromise = fetch(url, conf).then(res => {
-        if (responseType === 'blob') return res.blob();
-        if (responseType === 'text') return res.text();
-        if (responseType === 'arraybuffer') return res.arrayBuffer();
-        return res.json();
-    });
+    const fetchPromise = fetch(url, conf);/* .then(res => {
+        if (res.ok){
+            if (responseType === 'blob') return res.blob();
+            if (responseType === 'text') return res.text();
+            if (responseType === 'arraybuffer') return res.arrayBuffer();
+            return res.json();
+        } else {
+            return Promise.reject({ msg: `res status:${res.status}`, res });
+        }
+    }); */
 
     return fetchPromise;
 }
@@ -62,7 +65,17 @@ function _originRequest(url, conf){
  */
 function _requestAdapter(type, url, conf = {}){
     conf.method = type;
-    return _originRequest(url, conf);
+    const responseType = conf.responseType;
+    return _originRequest(url, conf).then(res => {
+        if (res.ok){
+            if (responseType === 'blob') return res.blob();
+            if (responseType === 'text') return res.text();
+            if (responseType === 'arraybuffer') return res.arrayBuffer();
+            return res.json();
+        } else {
+            return Promise.reject({ msg: `res status:${res.status}`, res });
+        }
+    });
 }
 
 function _get(url, conf){
@@ -80,67 +93,126 @@ function _del(url, conf){
     return _requestAdapter('DELETE', url, conf);
 }
 
-class Interceptors {
-    response = {
-
-    };
-    add(filledFunc, rejectFunc){
-
+class Interceptor {
+    /** @type {Array<{id:string,onFulfilled:function,onRejected:function}>} */
+    // store = [];
+    /** @type {Function} */
+    onFulfilled = null;
+    /** @type {Function} */
+    onRejected = null;
+    // add(onFulfilled, onRejected){
+    //     if (onFulfilled && typeof onFulfilled !== 'function'){
+    //         throw new TypeError('interceptor.add(onFulfilled, onRejected), parameter onFulfilled is not a function');
+    //     }
+    //     if (onRejected && typeof onRejected !== 'function'){
+    //         throw new TypeError('interceptor.add(onFulfilled, onRejected), parameter onRejected is not a function');
+    //     }
+    //     let uuid = Date.now();
+    //     this.store.push({
+    //         id: uuid,
+    //         onFulfilled,
+    //         onRejected
+    //     });
+    //     return uuid;
+    // }
+    use(onFulfilled, onRejected){
+        if (onFulfilled && typeof onFulfilled !== 'function'){
+            throw new TypeError('interceptor.add(onFulfilled, onRejected), parameter onFulfilled is not a function');
+        }
+        if (onRejected && typeof onRejected !== 'function'){
+            throw new TypeError('interceptor.add(onFulfilled, onRejected), parameter onRejected is not a function');
+        }
+        this.onFulfilled = onFulfilled;
+        this.onRejected = onRejected;
     }
+    remove(){
+        // if (id){
+        //     let index = this.store.findIndex(it => it.id === Number(id));
+        //     this.store.splice(index, 1);
+        // } else {
+            // remove all interceptors
+            // this.store = [];
+            this.onFulfilled = null;
+            this.onRejected = null;
+        // }
+    }
+}
+class Response {
+    interceptor = new Interceptor;
 }
 class Service{
     defaultConf = {};
-    respInterceptors = [];
+    response = new Response;
+    /**
+     * @param {Object} defaultConf
+     */
     constructor(defaultConf) {
         this.defaultConf = defaultConf;
     }
     /**
-     * 设置请求拦截器
-     * @param {Function} func
+     *
+     * @param {String} type
+     * @param {String} url
+     * @param {Object} conf
      */
-    addRespInterceptor(func){
-        if (typeof func !== 'function'){
-            throw new Error('setRespIntercpet: param is not a function');
-        }
-        this.respInterceptor.push(func);
-        return func;
-    }
-    /**
-     * 删除请求拦截器
-     * @param {Function} func
-     */
-    removeRespInterceptor(func){
-        let i = this.respInterceptors.findIndex(f => f === func);
-        this.respInterceptors.splice(i, 1);
-    }
-    #requestAdapter(type, url, conf){
+    #requestAdapter(url, conf){
         const assignedConf = Object.assign({}, conf, this.defaultConf);
-        let fetchPromise = null;
-        if (type === 'get'){
-            fetchPromise = _get(url, assignedConf);
-        }
-        if ( type === 'post'){
-            fetchPromise = _post(url, assignedConf);
-        }
-        // 添加响应拦截器
-        if (this.respInterceptors.length){
-            this.respInterceptors.forEach(func => {
-                fetchPromise.then(data => {
-                    return func(data, { type, ...conf });
-                });
+        let resInterceptor = this.response.interceptor;
+        const responseType = assignedConf.responseType;
+        let fetchPromise = _originRequest(url, assignedConf)
+            .then(res => {
+                if (res.ok){
+                    let prom = res.json();
+                    if (responseType === 'blob') prom = res.blob();
+                    if (responseType === 'text') prom = res.text();
+                    if (responseType === 'arraybuffer') prom = res.arrayBuffer();
+                    return prom.then(data => {
+                        return resInterceptor.onFulfilled
+                            ? resInterceptor.onFulfilled(data, assignedConf, res) // 可能要把response对象传给拦截器使用
+                            : data;
+                    });
+                } else {
+                    return Promise.reject({ msg: `res status:${res.status}`, res });
+                }
+            }).catch(err => {
+                return resInterceptor.onRejected
+                    ? resInterceptor.onRejected(err, assignedConf)
+                    : Promise.reject(err, assignedConf);
             });
-        }
+        // 添加响应拦截器, 给每个响应promise上加上then
+        // if (resInterceptor.length){
+        //     resInterceptor.forEach(item => {
+        //         fetchPromise.then(data => {
+        //             return item.onFulfilled(data, { type, ...conf });
+        //         }).catch(err => {
+        //             console.log(err);
+        //             return item.onRejected(err, { type, ...conf });
+        //         });
+        //     });
+        // }
+        return fetchPromise;
     }
-    get(url, conf){
-        this.#requestAdapter('get', url, conf);
+    get(url, conf = {}){
+        conf.method = 'GET';
+        return this.#requestAdapter(url, conf);
     }
-    post(url, conf){
-        this.#requestAdapter('post', url, conf);
+    post(url, conf = {}){
+        conf.method = 'POST';
+        return this.#requestAdapter(url, conf);
     }
+    put(url, conf = {}){
+        conf.method = 'PUT';
+        return this.#requestAdapter(url, conf);
+    }
+    del(url, conf = {}){
+        conf.method = 'DELETE';
+        return this.#requestAdapter(url, conf);
+    }
+
 }
 
-function _create(){
-
+function _create(defaultConf){
+    return new Service(defaultConf);
 }
 export { _get as get };
 export { _post as post };

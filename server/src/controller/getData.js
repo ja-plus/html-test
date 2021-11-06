@@ -19,6 +19,7 @@ exports.getTestData = async function(ctx){
     console.log('get query:', data);
     console.log('get body:', data);
     ctx.body = {
+        code: 1,
         type: 'get',
         query: ctx.request.query,
         body: data
@@ -29,6 +30,7 @@ exports.postTestData = async function(ctx){
     console.log('post query:', ctx.request.query);
     console.log('post body:', data);
     ctx.body = {
+        code: 0,
         type: 'post',
         query: ctx.request.query,
         body: data
@@ -53,4 +55,10 @@ exports.delTestData = async function(ctx){
         query: ctx.request.query,
         body: data
     };
+};
+
+exports.timeoutTestData = async function(ctx){
+    let data = ctx.request.body;
+    console.log('delete query:', ctx.request.query);
+    console.log('delete body:', data);
 };
