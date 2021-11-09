@@ -20,7 +20,7 @@ function _createUrlParamStr(params){
 /**
  * @param {String} url url
  * @param {Object} conf fetch init obj
- * @returns
+ * @returns {Promise}
  */
 function _originRequest(url, conf){
     const params = conf.params;
@@ -78,18 +78,35 @@ function _requestAdapter(type, url, conf = {}){
         }
     });
 }
-
+/**
+ * @param {String} url
+ * @param {Object} conf
+ * @returns
+ */
 function _get(url, conf){
     return _requestAdapter('GET', url, conf);
 }
-
+/**
+ * @param {String} url
+ * @param {Object} conf
+ * @returns
+ */
 function _post(url, conf){
     return _requestAdapter('POST', url, conf);
 }
-
+/**
+ * @param {String} url
+ * @param {Object} conf
+ * @returns
+ */
 function _put(url, conf){
     return _requestAdapter('PUT', url, conf);
 }
+/**
+ * @param {String} url
+ * @param {Object} conf
+ * @returns
+ */
 function _del(url, conf){
     return _requestAdapter('DELETE', url, conf);
 }
