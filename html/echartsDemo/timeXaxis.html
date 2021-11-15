@@ -55,22 +55,38 @@
                     console.log(date, index);
                     if (!tmpArr.includes(year)){
                         tmpArr.push(year);
-                        // return `{y|${year}}-${date.substring(5)}`;
-                        return `${date.substring(5)}\n{verticalLine||}\n${year}`;
+                        // return `{y|${year}}-${date.substring(5)}`; // 年份不换行方案
+                        // return `${date.substring(5)}\n{verticalLine||}\n${year}`; // 方案1画竖线
+                        return `${date.substring(5)}\n{paddingLeft|}{verticalLine|}\n${year}`; // 方案2画竖线
                     }
                     return `${date.substring(5)}`;
                 },
                 rich: {
+                    // 年份不换行方案
                     // y: {
                     //     fontWeight: 'bolder'
                     // }
+                    // -----方案1画竖线
+                    // verticalLine: {
+                    //     align: 'left',
+                    //     padding: 8,
+                    //     fontSize: 6,
+                    //     fontWeight: 'bolder',
+                    //     lineHeight: 12
+                    // }
+                    // -----end 方案1
+                    // -----方案2画竖线
+                    paddingLeft: {
+                        align: 'left',
+                        width: 8
+                    },
                     verticalLine: {
                         align: 'left',
-                        padding: 8,
-                        fontSize: 6,
-                        fontWeight: 'bolder',
-                        lineHeight: 12
+                        borderColor: '#000',
+                        borderWidth: 0.5, // 由于是左右border，所以画0.5 + 0.5 = 1
+                        height: 6,
                     }
+                    // ----- end 方案2
                 }
             },
         },
