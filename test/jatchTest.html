@@ -10,6 +10,7 @@
     
 </body>
 <!-- <script type="module">
+    /* -------basic request---------------*/
     import jatch from '../js/utils/jatch.js';
     const body = document.body;
     jatch.get('http://localhost:8080/getTestData', {
@@ -62,6 +63,7 @@
     });
 </script> -->
 <script type="module">
+    /* ------------response interceptor-----------------*/
     import jatch from '../js/utils/jatch.js';
     const Service = jatch.create();
     Service.response.interceptor.use((data, conf) => {
@@ -117,7 +119,5 @@
         console.error('interceptor post: fail', err);
         document.body.innerText += 'interceptor POST: fail,' + JSON.stringify(err) + '\n';
     });
-
-
 </script>
 </html>

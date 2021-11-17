@@ -1,6 +1,6 @@
 /** ************
  * fetch 包装
- * TODO: timeout， request interceptor，  cancel request
+ * TODO: timeout，cancel request
  ***********/
 /**
  * 拼接url参数
@@ -27,35 +27,23 @@ function _originRequest(url, conf){
     // 拼url参数
     if (params) url += _createUrlParamStr(params);
 
-    // delete conf.params;
-    // delete conf.responseType;
     if (conf.body){
-        try {
-            conf.body = conf.body instanceof FormData
-                        ? conf.body
-                        : JSON.stringify(conf.body);
-        } catch (e){
-            throw new Error('cannot stringify body json');
+        // conf.body is object
+        if (!(conf.body instanceof FormData)
+            && typeof conf.body === 'object'){
+            conf.headers = Object.assign(conf.headers || {}, {
+                'Content-Type': 'application/json'
+            });
+            try {
+                conf.body = JSON.stringify(conf.body);
+            } catch (e){
+                throw new Error('cannot stringify body json');
+            }
         }
     }
     if (!conf.credentials) conf.credentials = 'same-origin'; // 自 2017 年 8 月 25 日以后，默认的 credentials 政策变更为 same-origin
-    if (!(conf.body instanceof FormData)){
-        conf.headers = Object.assign(conf.headers || {}, {
-            'Content-Type': 'application/json'
-        });
-    }
-    const fetchPromise = fetch(url, conf);/* .then(res => {
-        if (res.ok){
-            if (responseType === 'blob') return res.blob();
-            if (responseType === 'text') return res.text();
-            if (responseType === 'arraybuffer') return res.arrayBuffer();
-            return res.json();
-        } else {
-            return Promise.reject({ msg: `res status:${res.status}`, res });
-        }
-    }); */
 
-    return fetchPromise;
+    return fetch(url, conf);
 }
 /**
  *
@@ -118,21 +106,6 @@ class Interceptor {
     onFulfilled = null;
     /** @type {Function} */
     onRejected = null;
-    // add(onFulfilled, onRejected){
-    //     if (onFulfilled && typeof onFulfilled !== 'function'){
-    //         throw new TypeError('interceptor.add(onFulfilled, onRejected), parameter onFulfilled is not a function');
-    //     }
-    //     if (onRejected && typeof onRejected !== 'function'){
-    //         throw new TypeError('interceptor.add(onFulfilled, onRejected), parameter onRejected is not a function');
-    //     }
-    //     let uuid = Date.now();
-    //     this.store.push({
-    //         id: uuid,
-    //         onFulfilled,
-    //         onRejected
-    //     });
-    //     return uuid;
-    // }
     use(onFulfilled, onRejected){
         if (onFulfilled && typeof onFulfilled !== 'function'){
             throw new TypeError('interceptor.add(onFulfilled, onRejected), parameter onFulfilled is not a function');
@@ -144,15 +117,8 @@ class Interceptor {
         this.onRejected = onRejected;
     }
     remove(){
-        // if (id){
-        //     let index = this.store.findIndex(it => it.id === Number(id));
-        //     this.store.splice(index, 1);
-        // } else {
-            // remove all interceptors
-            // this.store = [];
-            this.onFulfilled = null;
-            this.onRejected = null;
-        // }
+        this.onFulfilled = null;
+        this.onRejected = null;
     }
 }
 class Response {
@@ -178,46 +144,38 @@ class Service{
      * @param {Object} conf
      */
     #requestAdapter(url, conf){
-        const assignedConf = Object.assign({}, conf, this.defaultConf);
-        const responseType = assignedConf.responseType;
+        const reqInterceptor = this.request.interceptor; // 请求拦截器
+        const resInterceptor = this.response.interceptor; // 响应拦截器
 
-        const reqInterceptor = this.request.interceptor;
-        const resInterceptor = this.response.interceptor;
+        // 请求拦截器
         if (reqInterceptor.onFulfilled){
-            conf = reqInterceptor.onFulfilled(url, conf);
+            conf = reqInterceptor.onFulfilled(url, assignedConf);
         }
+        const assignedConf = Object.assign({}, conf, this.defaultConf);
 
-        let fetchPromise = _originRequest(url, assignedConf)
-            .then(res => {
-                if (res.ok){
-                    let prom = res.json();
-                    if (responseType === 'blob') prom = res.blob();
-                    if (responseType === 'text') prom = res.text();
-                    if (responseType === 'arraybuffer') prom = res.arrayBuffer();
+        const fetchPromise = _originRequest(url, assignedConf)
+            .then(response => {
+                if (response.ok){
+                    const responseType = assignedConf.responseType;
+                    let prom;
+                    if (responseType === 'blob') prom = response.blob();
+                    else if (responseType === 'text') prom = response.text();
+                    else if (responseType === 'arraybuffer') prom = response.arrayBuffer();
+                    else prom = response.json();
                     return prom.then(data => {
+                        // 添加响应拦截器
                         return resInterceptor.onFulfilled
-                            ? resInterceptor.onFulfilled(data, assignedConf, res) // 可能要把response对象传给拦截器使用
+                            ? resInterceptor.onFulfilled(data, assignedConf, response) // 可能要把response对象传给拦截器使用
                             : data;
                     });
                 } else {
-                    return Promise.reject({ msg: `res status:${res.status}`, res });
+                    return Promise.reject({ msg: `res status:${response.status}`, response });
                 }
             }).catch(err => {
                 return resInterceptor.onRejected
-                    ? resInterceptor.onRejected(err, assignedConf)
-                    : Promise.reject(err, assignedConf);
+                    ? resInterceptor.onRejected({ ...err, config: assignedConf })
+                    : Promise.reject({ ...err, config: assignedConf });
             });
-        // 添加响应拦截器, 给每个响应promise上加上then
-        // if (resInterceptor.length){
-        //     resInterceptor.forEach(item => {
-        //         fetchPromise.then(data => {
-        //             return item.onFulfilled(data, { type, ...conf });
-        //         }).catch(err => {
-        //             console.log(err);
-        //             return item.onRejected(err, { type, ...conf });
-        //         });
-        //     });
-        // }
         return fetchPromise;
     }
     get(url, conf = {}){
