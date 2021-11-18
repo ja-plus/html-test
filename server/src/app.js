@@ -12,7 +12,10 @@ const app = new Koa();
 const render = views(__dirname + '/views', {
     extension: 'html'
 });
-app.use(cors());
+app.use(cors({
+    // origin: '127.0.0.1',
+    // credentials: true // 支持跨域cookie
+}));
 app.use(render);
 // app.use(bodyParser());
 app.use(koaBody({

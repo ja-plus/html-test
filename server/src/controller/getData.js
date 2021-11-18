@@ -16,8 +16,14 @@ exports.saveData = async function(ctx){
 
 exports.getTestData = async function(ctx){
     let data = ctx.request.query;
+    console.log('get headers:', ctx.request.headers);
+    console.log('get cookies:', ctx.cookies.get('name'));
     console.log('get query:', data);
     console.log('get body:', data);
+    ctx.cookies.set('name', 'serverSetCookie', {
+        // secure: true,
+        // sameSite: 'none'
+    });
     ctx.body = {
         code: 1,
         type: 'get',
@@ -27,10 +33,11 @@ exports.getTestData = async function(ctx){
 };
 exports.postTestData = async function(ctx){
     let data = ctx.request.body; // 请求头必须要 Content-Type: application/json
+    console.log('get headers:', ctx.request.headers);
     console.log('post query:', ctx.request.query);
     console.log('post body:', data);
     ctx.body = {
-        code: 0,
+        code: 1,
         type: 'post',
         query: ctx.request.query,
         body: data

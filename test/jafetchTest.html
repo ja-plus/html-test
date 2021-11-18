@@ -11,7 +11,7 @@
 </body>
 <!-- <script type="module">
     /* -------basic request---------------*/
-    import jatch from '../js/utils/jatch.js';
+    import jatch from '../js/utils/jafetch.js';
     const body = document.body;
     jatch.get('http://localhost:8080/getTestData', {
         params: { type: 'aa' },
@@ -64,9 +64,19 @@
 </script> -->
 <script type="module">
     /* ------------response interceptor-----------------*/
-    import jatch from '../js/utils/jatch.js';
-    const Service = jatch.create();
-    Service.response.interceptor.use((data, conf) => {
+    import jafetch from '../js/utils/jafetch.js';
+    const Service = jafetch.create({
+        mode: 'cors',
+        // credentials: 'include' // cookie
+    });
+    Service.interceptors.request.use((url, config) => {
+        // config.headers = {
+        //     // userToken: '11111',
+        //     Cookie: '1111'
+        // };
+        return config;
+    });
+    Service.interceptors.response.use((data, conf) => {
         if (data.code === 1){
             console.log(data, 'response interceptor: ok');
             document.body.innerText += 'response interceptor: ok,' + JSON.stringify(data) + '\n';
@@ -75,9 +85,10 @@
             return Promise.reject('response.data.code is ' + data.code);
         }
     }, (err, conf) => {
-        console.log(err, conf);
+        console.log('response interceptor err:', err, conf);
         return Promise.reject(err);
     });
+
     Service.get('http://localhost:8080/getTestData', {
         params: { type: 'aa' },
         mode: 'cors',
@@ -91,9 +102,9 @@
         document.body.innerText += 'interceptor GET: fail,' + JSON.stringify(err) + '\n';
     });
     // remove interceptor
-    // Service.response.interceptor.remove();
+    // Service.interceptor.response.remove();
     
-    // Service.response.interceptor.use((data, conf, response) => {
+    // Service.interceptor.response.use((data, conf, response) => {
     //     console.log('interceptor:', conf, response);
     //     if (data.code === 0){
     //         console.log(data, 'interceptor: ok');

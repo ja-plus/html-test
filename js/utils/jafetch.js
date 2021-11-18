@@ -121,16 +121,13 @@ class Interceptor {
         this.onRejected = null;
     }
 }
-class Response {
-    interceptor = new Interceptor;
-}
-class Request {
-    interceptor = new Interceptor;
+class Interceptors {
+    request = new Interceptor;
+    response = new Interceptor;
 }
 class Service{
     defaultConf = {};
-    response = new Response;
-    request = new Request;
+    interceptors = new Interceptors;
     /**
      * @param {Object} defaultConf
      */
@@ -144,14 +141,14 @@ class Service{
      * @param {Object} conf
      */
     #requestAdapter(url, conf){
-        const reqInterceptor = this.request.interceptor; // 请求拦截器
-        const resInterceptor = this.response.interceptor; // 响应拦截器
+        const reqInterceptor = this.interceptors.request; // 请求拦截器
+        const resInterceptor = this.interceptors.response; // 响应拦截器
+        let assignedConf = Object.assign({}, conf, this.defaultConf);
 
         // 请求拦截器
         if (reqInterceptor.onFulfilled){
-            conf = reqInterceptor.onFulfilled(url, assignedConf);
+            assignedConf = reqInterceptor.onFulfilled(url, assignedConf); // 请求拦截器中修改请求配置 TODO: deep clone
         }
-        const assignedConf = Object.assign({}, conf, this.defaultConf);
 
         const fetchPromise = _originRequest(url, assignedConf)
             .then(response => {
@@ -173,7 +170,7 @@ class Service{
                 }
             }).catch(err => {
                 return resInterceptor.onRejected
-                    ? resInterceptor.onRejected({ ...err, config: assignedConf })
+                    ? resInterceptor.onRejected({ err, config: assignedConf })
                     : Promise.reject({ ...err, config: assignedConf });
             });
         return fetchPromise;
@@ -196,7 +193,11 @@ class Service{
     }
 
 }
-
+/**
+ *
+ * @param {Object} defaultConf
+ * @returns {Service}
+ */
 function _create(defaultConf){
     return new Service(defaultConf);
 }
