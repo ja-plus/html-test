@@ -166,12 +166,22 @@ class Service{
                             : data;
                     });
                 } else {
+                    // 响应错误
                     return Promise.reject({ msg: `res status:${response.status}`, response });
                 }
             }).catch(err => {
-                return resInterceptor.onRejected
-                    ? resInterceptor.onRejected({ err, config: assignedConf })
-                    : Promise.reject({ ...err, config: assignedConf });
+                // 错误交给拦截器处理
+                if (err.response?.ok){
+                    // 响应错误
+                    return resInterceptor.onRejected
+                        ? resInterceptor.onRejected({ err, config: assignedConf })
+                        : Promise.reject({ err, config: assignedConf });
+                } else {
+                    // 请求错误,(浏览器阻止请求)
+                    return reqInterceptor.onRejected
+                        ? reqInterceptor.onRejected({ err, config: assignedConf })
+                        : Promise.reject({ err, config: assignedConf });
+                }
             });
         return fetchPromise;
     }

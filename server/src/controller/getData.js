@@ -30,6 +30,7 @@ exports.getTestData = async function(ctx){
         query: ctx.request.query,
         body: data
     };
+    // ctx.response.redirect('https://www.baidu.com');
 };
 exports.postTestData = async function(ctx){
     let data = ctx.request.body; // 请求头必须要 Content-Type: application/json
@@ -42,6 +43,7 @@ exports.postTestData = async function(ctx){
         query: ctx.request.query,
         body: data
     };
+    // ctx.status = 500;
 };
 exports.putTestData = async function(ctx){
     let data = ctx.request.body;

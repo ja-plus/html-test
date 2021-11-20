@@ -9,7 +9,7 @@
 <body>
     
 </body>
-<!-- <script type="module">
+<script type="module">
     /* -------basic request---------------*/
     import jatch from '../js/utils/jafetch.js';
     const body = document.body;
@@ -61,46 +61,48 @@
         console.log(res, 'delete : ok');
         body.innerText += 'DELETE : ok,' + JSON.stringify(res) + '\n';
     });
-</script> -->
+</script>
 <script type="module">
-    /* ------------response interceptor-----------------*/
+    /* ------------interceptors-----------------*/
     import jafetch from '../js/utils/jafetch.js';
     const Service = jafetch.create({
         mode: 'cors',
         // credentials: 'include' // cookie
     });
     Service.interceptors.request.use((url, config) => {
-        // config.headers = {
-        //     // userToken: '11111',
-        //     Cookie: '1111'
-        // };
+        config.headers = {
+            userToken: '11111',
+        };
         return config;
+    }, (err) => {
+        console.log('request interceptor err:', err);
+        return Promise.reject(err);
     });
     Service.interceptors.response.use((data, conf) => {
         if (data.code === 1){
-            console.log(data, 'response interceptor: ok');
+            console.log(data, conf, 'response interceptor: ok');
             document.body.innerText += 'response interceptor: ok,' + JSON.stringify(data) + '\n';
             return data;
         } else {
             return Promise.reject('response.data.code is ' + data.code);
         }
-    }, (err, conf) => {
-        console.log('response interceptor err:', err, conf);
+    }, (err) => {
+        console.log('response interceptor err:', err);
         return Promise.reject(err);
     });
 
-    Service.get('http://localhost:8080/getTestData', {
-        params: { type: 'aa' },
-        mode: 'cors',
-        // credentials: 'include',
-        // responseType: 'text'
-    }).then(res => {
-        console.log(res, 'interceptor get: ok');
-        document.body.innerText += 'interceptor GET: ok,' + JSON.stringify(res) + '\n';
-    }).catch(err => {
-        console.error('interceptor get: fail', err);
-        document.body.innerText += 'interceptor GET: fail,' + JSON.stringify(err) + '\n';
-    });
+    // Service.get('http://localhost:8080/getTestData', {
+    //     params: { type: 'aa' },
+    //     mode: 'cors',
+    //     // credentials: 'include',
+    //     // responseType: 'text'
+    // }).then(res => {
+    //     console.log(res, 'interceptor get: ok');
+    //     document.body.innerText += 'interceptor GET: ok,' + JSON.stringify(res) + '\n';
+    // }).catch(err => {
+    //     console.error('interceptor get: fail', err);
+    //     document.body.innerText += 'interceptor GET: fail,' + JSON.stringify(err) + '\n';
+    // });
     // remove interceptor
     // Service.interceptor.response.remove();
     
