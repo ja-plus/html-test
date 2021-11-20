@@ -19,84 +19,85 @@ function _createUrlParamStr(params){
 
 /**
  * @param {String} url url
- * @param {Object} conf fetch init obj
+ * @param {Object} config fetch init obj
  * @returns {Promise}
  */
-function _originRequest(url, conf){
-    const params = conf.params;
+function _originRequest(url, config){
+    const params = config.params;
     // 拼url参数
     if (params) url += _createUrlParamStr(params);
 
-    if (conf.body){
+    if (config.body){
         // conf.body is object
-        if (!(conf.body instanceof FormData)
-            && typeof conf.body === 'object'){
-            conf.headers = Object.assign(conf.headers || {}, {
+        if (!(config.body instanceof FormData)
+            && typeof config.body === 'object'){
+            config.headers = Object.assign(config.headers || {}, {
                 'Content-Type': 'application/json'
             });
             try {
-                conf.body = JSON.stringify(conf.body);
+                config.body = JSON.stringify(config.body);
             } catch (e){
                 throw new Error('cannot stringify body json');
             }
         }
     }
-    if (!conf.credentials) conf.credentials = 'same-origin'; // 自 2017 年 8 月 25 日以后，默认的 credentials 政策变更为 same-origin
+    if (!config.credentials) config.credentials = 'same-origin'; // 自 2017 年 8 月 25 日以后，默认的 credentials 政策变更为 same-origin
 
-    return fetch(url, conf);
+    return fetch(url, config);
 }
 /**
  *
  * @param {String} type get post put delete
  * @param {String} url
- * @param {Object} conf
+ * @param {Object} config
  * @returns
  */
-function _requestAdapter(type, url, conf = {}){
-    conf.method = type;
-    const responseType = conf.responseType;
-    return _originRequest(url, conf).then(res => {
-        if (res.ok){
-            if (responseType === 'blob') return res.blob();
-            if (responseType === 'text') return res.text();
-            if (responseType === 'arraybuffer') return res.arrayBuffer();
-            return res.json();
+function _requestAdapter(type, url, config = {}){
+    config.method = type;
+    const responseType = config.responseType;
+    return _originRequest(url, config).then(response => {
+        if (response.ok){
+            if (responseType === 'blob') return response.blob();
+            if (responseType === 'text') return response.text();
+            if (responseType === 'arraybuffer') return response.arrayBuffer();
+            if (responseType === 'response') return response; // response.body
+            return response.json();
         } else {
-            return Promise.reject({ msg: `res status:${res.status}`, res });
+            return Promise.reject({ msg: `res status:${response.status}`, res: response });
         }
     });
 }
 /**
  * @param {String} url
- * @param {Object} conf
+ * @param {Object} config
  * @returns
  */
-function _get(url, conf){
-    return _requestAdapter('GET', url, conf);
+function _get(url, config){
+    return _requestAdapter('GET', url, config);
 }
 /**
  * @param {String} url
- * @param {Object} conf
+ * @param {Object} config
  * @returns
  */
-function _post(url, conf){
-    return _requestAdapter('POST', url, conf);
+function _post(url, config){
+    return _requestAdapter('POST', url, config);
 }
 /**
  * @param {String} url
- * @param {Object} conf
+ * @param {Object} config
  * @returns
  */
-function _put(url, conf){
-    return _requestAdapter('PUT', url, conf);
+function _put(url, config){
+    return _requestAdapter('PUT', url, config);
 }
 /**
  * @param {String} url
- * @param {Object} conf
+ * @param {Object} config
  * @returns
  */
-function _del(url, conf){
-    return _requestAdapter('DELETE', url, conf);
+function _del(url, config){
+    return _requestAdapter('DELETE', url, config);
 }
 
 class Interceptor {
@@ -138,12 +139,12 @@ class Service{
      *
      * @param {String} type
      * @param {String} url
-     * @param {Object} conf
+     * @param {Object} config
      */
-    #requestAdapter(url, conf){
+    #requestAdapter(url, config){
         const reqInterceptor = this.interceptors.request; // 请求拦截器
         const resInterceptor = this.interceptors.response; // 响应拦截器
-        let assignedConf = Object.assign({}, conf, this.defaultConf);
+        let assignedConf = Object.assign({}, config, this.defaultConf);
 
         // 请求拦截器
         if (reqInterceptor.onFulfilled){
@@ -158,6 +159,7 @@ class Service{
                     if (responseType === 'blob') prom = response.blob();
                     else if (responseType === 'text') prom = response.text();
                     else if (responseType === 'arraybuffer') prom = response.arrayBuffer();
+                    else if (responseType === 'response') prom = response; // response.body
                     else prom = response.json();
                     return prom.then(data => {
                         // 添加响应拦截器
@@ -185,31 +187,31 @@ class Service{
             });
         return fetchPromise;
     }
-    get(url, conf = {}){
-        conf.method = 'GET';
-        return this.#requestAdapter(url, conf);
+    get(url, config = {}){
+        config.method = 'GET';
+        return this.#requestAdapter(url, config);
     }
-    post(url, conf = {}){
-        conf.method = 'POST';
-        return this.#requestAdapter(url, conf);
+    post(url, config = {}){
+        config.method = 'POST';
+        return this.#requestAdapter(url, config);
     }
-    put(url, conf = {}){
-        conf.method = 'PUT';
-        return this.#requestAdapter(url, conf);
+    put(url, config = {}){
+        config.method = 'PUT';
+        return this.#requestAdapter(url, config);
     }
-    del(url, conf = {}){
-        conf.method = 'DELETE';
-        return this.#requestAdapter(url, conf);
+    del(url, config = {}){
+        config.method = 'DELETE';
+        return this.#requestAdapter(url, config);
     }
 
 }
 /**
  *
- * @param {Object} defaultConf
+ * @param {Object} defaultConfig
  * @returns {Service}
  */
-function _create(defaultConf){
-    return new Service(defaultConf);
+function _create(defaultConfig){
+    return new Service(defaultConfig);
 }
 export { _get as get };
 export { _post as post };
