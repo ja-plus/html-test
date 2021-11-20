@@ -31,9 +31,9 @@ function _originRequest(url, config){
         // conf.body is object
         if (!(config.body instanceof FormData)
             && typeof config.body === 'object'){
-            config.headers = Object.assign(config.headers || {}, {
+            config.headers = Object.assign({
                 'Content-Type': 'application/json'
-            });
+            }, config.headers || {}, );
             try {
                 config.body = JSON.stringify(config.body);
             } catch (e){
