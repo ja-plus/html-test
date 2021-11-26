@@ -39,7 +39,6 @@
     width = 100;
     align = 'center';
     overflow = 'breakAll';
-    offset = [-10, 0];
     constructor(type) {
       if (type === 1){
         this.backgroundColor = '#eee';
@@ -107,17 +106,43 @@
               ]
             },
             {
-              name: '30%',
-              label: lineLabel,
-              ...lineConfig,
-              children: [
-                {
-                  name: '人物',
-                  label: personLeavesLabel,
-                  symbolSize: 0.1,
+              name: '人物',
+              symbol: 'triangle',
+              symbolSize: 10,
+              label: {
+                position: 'left',
+                distance: -50,
+                formatter: (val) => `{label|${val.name}}{line|}{percent| 10%}`,
+                rich: {
+                  label: {
+                    ...personLeavesLabel,
+                  },
+                  line: { // 画横线
+                    borderWidth: 0.5,
+                    borderColor: '#000',
+                    width: 50,
+                    height: 0,
+                  },
+                  percent: {
+                    align: 'left',
+                    width: 50,
+                    padding: [20, 0, 0, 0],
+                  }
                 }
-              ]
+              },
             },
+            // {
+            //   name: '30%',
+            //   label: lineLabel,
+            //   ...lineConfig,
+            //   children: [
+            //     {
+            //       name: '人物',
+            //       label: personLeavesLabel,
+            //       symbolSize: 0.1,
+            //     }
+            //   ]
+            // },
           ]
         }],
       }
