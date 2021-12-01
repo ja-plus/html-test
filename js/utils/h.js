@@ -11,7 +11,9 @@ export default function h(tag, attrs, children){
     // TODO: validate param type
     // 解析emmet 语法 (暂支持id class, 防止解析字符串影响更多性能)
     let id = tag.match(/#[\w\d_-]+/);
-    let classArr = tag.match(/(?<=\.)[\w\d_-]+/g) || []; // className
+    // let classArr = tag.match(/(?<=\.)[\w\d_-]+/g) || []; // className // 低版本浏览器不支持零宽断言
+    let classArr = tag.match(/\.[\w\d_-]+/g) || []; // className
+    classArr = classArr.map(it => it.substring(1));
     tag = tag.match(/^[\w\d]+/)[0];
 
    let elem = document.createElement(tag);
@@ -35,7 +37,7 @@ export default function h(tag, attrs, children){
 
    if (children){
        children.forEach(child => {
-           if (child instanceof HTMLElement) elem.appendChild(child)
+           if (child instanceof HTMLElement) elem.appendChild(child);
            else if (child !== null && child !== undefined) console.error(child, 'not instance of HTMLElement');
        });
    }
