@@ -3,7 +3,7 @@
  * 问题，多次new 会一直向dom中添加元素
  * TODO: 图标
  */
-import h from './utils/h.js'
+import h from './utils/h.js';
 import debounce from './utils/debounce.js';
 const _wrapperClassName = 'mycontextmenu';
 const _mainMenuWidth = 200;
@@ -108,7 +108,7 @@ class MyContextMenu {
      * @param {String} type ['main' | 'child']
      * @returns {HTMLElement}
      */
-    #createMenuEle(items, type = "main"){
+    #createMenuEle(items, type = 'main'){
         let contextMenuEle;
         if (type === 'main'){
             contextMenuEle = h(`ul.${_wrapperClassName}`, {
@@ -126,7 +126,7 @@ class MyContextMenu {
                         classList: it.disabled ? ['disabled'] : [],
                         onclick: e => {
                             if (!it.disabled){
-                                it.onclick && it.onclick(e)
+                                it.onclick && it.onclick(e);
                                 if (!it.children) this.hideMenu();
                             }
                         },
@@ -138,7 +138,7 @@ class MyContextMenu {
                         h('span.label', it.label),
                         it.tip && h('span.tip', it.tip),
                         type === 'main' && it.children && h('span.right-arrow')
-                    ])
+                    ]);
                 })
             ]);
         }
@@ -165,7 +165,7 @@ class MyContextMenu {
                     }, [
                         h('span.label', child.label),
                         child.tip && h('span.tip', child.tip),
-                    ])
+                    ]);
                 })
             ]);
         }
@@ -186,7 +186,7 @@ class MyContextMenu {
         if (!this.#clickEventFunc) {
             this.#clickEventFunc = () => {
                 this.hideMenu();
-            }
+            };
             window.addEventListener('click', this.#clickEventFunc);
         }
     }
@@ -201,7 +201,7 @@ class MyContextMenu {
         /** @type {HTMLElement} */
         let childMenuEle = e.target.querySelector(`ul.${_wrapperClassName}_child`);
         if (!childMenuEle) {
-            childMenuEle = this.#createMenuEle(children, 'child')
+            childMenuEle = this.#createMenuEle(children, 'child');
             e.target.appendChild(childMenuEle);
         }
         // if childMenuEle is hidden
@@ -246,7 +246,7 @@ class MyContextMenu {
         window.addEventListener('resize', resizeFunc);
     }
     /** open menu */
-    showContextMenu(contextMenuEle) {
+    showContextMenuFunc(contextMenuEle) {
         // return this.#onContextMenu.bind(this);
         return (e) => {
             this.#storeEle.forEach(ele => {
@@ -266,10 +266,10 @@ class MyContextMenu {
             }
             if (this.#windowSize.height - e.pageY < mainMenuHeight) {
                 // bottom not have enough space
-                translateY = e.pageY - mainMenuHeight
+                translateY = e.pageY - mainMenuHeight;
             }
             contextMenuEle.style.transform = `translate(${translateX}px,${translateY}px)`;
-        }
+        };
     }
     hideMenu() {
         this.#storeEle.forEach(contextMenuEle => {
@@ -277,11 +277,28 @@ class MyContextMenu {
             this.#hideChildMenu(contextMenuEle);
         });
     }
-    /** remove menu */
+    /**
+     *  remove menu
+    */
     deleteMenu(contextMenuEle) {
-        let i = this.#storeEle.findIndex(it => it === contextMenuEle);
-        this.#storeEle.splice(i, 1);
-        contextMenuEle = null;
+        if (Array.isArray(contextMenuEle)){
+            contextMenuEle.forEach(ele => {
+                let item = this.#storeEle.find(it => it === ele);
+                item.remove();
+                item = null;
+            });
+
+        } else if (contextMenuEle instanceof HTMLElement){
+            let item = this.#storeEle.find(it => it === contextMenuEle);
+            item.remove();
+            item = null;
+        } else {
+            this.#storeEle.forEach(ele => {
+                ele.remove();
+                ele = null;
+            });
+        }
+        this.#storeEle = this.#storeEle.filter(Boolean);
     }
 }
 export default MyContextMenu;
