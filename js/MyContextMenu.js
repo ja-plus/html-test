@@ -98,7 +98,8 @@ class MyContextMenu {
      */
     create(config) {
         const contextMenuEle = this.#createMenuEle(config.items);
-        document.body.append(contextMenuEle);
+        document.body.appendChild(contextMenuEle);
+        // document.body.append(contextMenuEle); // dom.append chrome>54
         this.#storeEle.push(contextMenuEle);
         return contextMenuEle;
     }
@@ -108,7 +109,7 @@ class MyContextMenu {
      * @param {String} type ['main' | 'child']
      * @returns {HTMLElement}
      */
-    #createMenuEle(items, type = 'main'){
+    #createMenuEle(items, type = 'main', mainContextMenuEle){
         let contextMenuEle;
         if (type === 'main'){
             contextMenuEle = h(`ul.${_wrapperClassName}`, {
@@ -126,7 +127,7 @@ class MyContextMenu {
                         classList: it.disabled ? ['disabled'] : [],
                         onclick: e => {
                             if (!it.disabled){
-                                it.onclick && it.onclick(e);
+                                it.onclick && it.onclick(e, contextMenuEle.payload);
                                 if (!it.children) this.hideMenu();
                             }
                         },
@@ -158,7 +159,7 @@ class MyContextMenu {
                         classList: child.disabled ? ['disabled'] : [],
                         onclick: e => {
                             if (!child.disabled){
-                                child.onclick && child.onclick(e);
+                                child.onclick && child.onclick(e, mainContextMenuEle.payload);
                                 this.hideMenu();
                             }
                         }
@@ -201,7 +202,7 @@ class MyContextMenu {
         /** @type {HTMLElement} */
         let childMenuEle = e.target.querySelector(`ul.${_wrapperClassName}_child`);
         if (!childMenuEle) {
-            childMenuEle = this.#createMenuEle(children, 'child');
+            childMenuEle = this.#createMenuEle(children, 'child', contextMenuEle);
             e.target.appendChild(childMenuEle);
         }
         // if childMenuEle is hidden
@@ -246,8 +247,10 @@ class MyContextMenu {
         window.addEventListener('resize', resizeFunc);
     }
     /** open menu */
-    showContextMenuFunc(contextMenuEle) {
+    showContextMenuFunc(contextMenuEle, payload) {
         // return this.#onContextMenu.bind(this);
+        // save data to contextMenuEle
+        contextMenuEle.payload = payload;
         return (e) => {
             this.#storeEle.forEach(ele => {
                 if (ele !== contextMenuEle) ele.style.display = 'none'; // close other menus

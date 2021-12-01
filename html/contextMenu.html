@@ -44,8 +44,8 @@
             {
                 label: '前进',
                 tip: '提示文字',
-                onclick() {
-                    console.log('item2 click');
+                onclick(e, payload) {
+                    console.log('item2 click', payload);
                 }
             },
             {
@@ -65,8 +65,8 @@
                     { type: 'divide' },
                     {
                         label: '二级菜单2',
-                        onclick() {
-                            console.log('二级菜单2被点击');
+                        onclick(e, payload) {
+                            console.log('二级菜单2被点击', payload);
                         }
                     },
                 ]
@@ -137,7 +137,7 @@
             },
         ]
     });
-    content.oncontextmenu = myContextMenu.showContextMenuFunc(menu1);
+    content.oncontextmenu = myContextMenu.showContextMenuFunc(menu1, 'datadata');
     content2.oncontextmenu = myContextMenu.showContextMenuFunc(menu2);
     window.oncontextmenu = myContextMenu.showContextMenuFunc(menu3);
     // remove contextmenu
