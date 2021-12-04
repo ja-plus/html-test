@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>webPPT</title>
+</head>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    background-color: #000;
+  }
+
+  .web-ppt {
+    position: relative;
+    height: 100vh;
+    width: 100%;
+    /* overflow: auto; */
+    overflow:hidden;
+    /* scroll-snap-type: y mandatory; */
+  }
+
+  .page {
+    width: 100%;
+    height: inherit;
+    /* scroll-snap-align: start; */
+    overflow: hidden;
+    position: absolute;
+    transform: translateY(100vh);
+    transition: transform 1s ease;
+  }
+
+  .page.active {
+    transform: translateY(0);
+  }
+
+  .page:nth-child(1) {
+    background-attachment: fixed;
+    background-image: repeating-linear-gradient(45deg, #aaa 0 10%, #fff 10% 20%);
+  }
+
+  .page:nth-child(2) {
+    background-color: #ccc;
+  }
+</style>
+
+<body>
+  <div class="web-ppt">
+    <div class="page">
+      <h1>你好</h1>
+    </div>
+    <div class="page">
+      <h1>你好2</h1>
+    </div>
+  </div>
+</body>
+<script>
+  let wp = document.querySelector('.web-ppt');
+  let pages = document.querySelectorAll('.web-ppt>.page');
+  let i = 0;
+  wp.addEventListener('wheel', () => {
+    if (i < pages.length){
+      pages[i++].classList.add('active');
+    }
+  });
+
+</script>
+
+</html>
