@@ -22,7 +22,7 @@
     height: 100vh;
     width: 100%;
     /* overflow: auto; */
-    overflow:hidden;
+    overflow: hidden;
     /* scroll-snap-type: y mandatory; */
   }
 
@@ -32,12 +32,18 @@
     /* scroll-snap-align: start; */
     overflow: hidden;
     position: absolute;
+    left: 0;
+    top: 0;
     transform: translateY(100vh);
-    transition: transform 1s ease;
+    transition: transform 0.5s ease, width 0.2s ease, height 0.2s ease, left 0.2s ease, top 0.2s ease;
   }
 
   .page.active {
     transform: translateY(0);
+  }
+
+  .page.leave {
+    transform: translateY(-100vh);
   }
 
   .page:nth-child(1) {
@@ -48,27 +54,110 @@
   .page:nth-child(2) {
     background-color: #ccc;
   }
+
+  .efc {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .title-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
 </style>
 
 <body>
   <div class="web-ppt">
-    <div class="page">
+    <div class="page title-page">
       <h1>你好</h1>
+      <h2>副标题</h2>
     </div>
     <div class="page">
       <h1>你好2</h1>
+    </div>
+    <div class="page">
+      <h1 style="color:#fff">你好3</h1>
     </div>
   </div>
 </body>
 <script>
   let wp = document.querySelector('.web-ppt');
   let pages = document.querySelectorAll('.web-ppt>.page');
+  let _isMini = false;
   let i = 0;
-  wp.addEventListener('wheel', () => {
-    if (i < pages.length){
-      pages[i++].classList.add('active');
+  pages.forEach((page, i) => {
+    page.id = 'page' + i;
+    page.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (_isMini) {
+        i = Number(e.target.id.match(/\d+/)[0]);
+        for (let j = 0; j < i; j++) {
+          pages[j].className = 'page leave';
+        }
+        pages[i].className = 'page active';
+        for (let j = i + 1; j < pages.length; j++) {
+          pages[j].className = 'page';
+        }
+        toggleMiniPage();
+      }
+    });
+  });
+  wp.addEventListener('wheel', (e) => {
+    if (e.wheelDeltaY < 0) {
+      nextPage();
+    } else {
+      lastPage();
     }
   });
+  wp.addEventListener('click', (e) => {
+    nextPage();
+  });
+
+  function nextPage() {
+    if (!_isMini && i < pages.length) {
+      for (let j = 0; j < i; j++) {
+        const page = pages[j];
+        page.classList.remove('active');
+        page.classList.add('leave');
+      }
+      pages[i].classList.add('active');
+      i++;
+    }
+  }
+  function lastPage() {
+    if (!_isMini && i > 0) {
+      i--;
+      pages[i].classList.remove('active');
+      pages[i - 1]?.classList.remove('leave');
+      pages[i - 1]?.classList.add('active');
+    }
+  }
+
+  window.addEventListener('keydown', e => {
+    e.preventDefault();
+    if (e.shiftKey && e.code === 'Tab') {
+      console.log('tab');
+      toggleMiniPage();
+    }
+  });
+  window.addEventListener('keyup', e => {
+    e.preventDefault();
+  });
+  window.addEventListener('blur', (e) => {
+  });
+
+  function toggleMiniPage() {
+    _isMini = !_isMini;
+    pages.forEach((page, i) => {
+      if (_isMini) {
+        page.style.cssText = `width:300px;height:200px;left: ${i * 300 + 20 * (i + 1)}px;top: ${Math.floor(i / 4) * 200 + 10}px;transform:none;border:1px solid #aaa`;
+      } else {
+        page.style.cssText = '';
+      }
+    });
+  }
 
 </script>
 
