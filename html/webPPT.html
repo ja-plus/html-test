@@ -29,6 +29,8 @@
   .page {
     width: 100%;
     height: inherit;
+    background-color: #fff;
+    padding: 10px 20px;
     /* scroll-snap-align: start; */
     overflow: hidden;
     position: absolute;
@@ -44,6 +46,9 @@
 
   .page.leave {
     transform: translateY(-100vh);
+  }
+  .page.mini-hover:hover{
+    box-shadow: 0 0 50px rgba(255,255,255,0.7)
   }
 
   .page:nth-child(1) {
@@ -71,14 +76,22 @@
 <body>
   <div class="web-ppt">
     <div class="page title-page">
-      <h1>你好</h1>
-      <h2>副标题</h2>
+      <h1 style="font-size: 80px">主标题</h1>
+      <h2 style="color: #555">副标题</h2>
     </div>
     <div class="page">
-      <h1>你好2</h1>
+      <h1>标题</h1>
+      <div style="display:flex;justify-content:center;align-items: center;">
+        <p style="width: 50%">
+          正文 正文 正文 正文 正文 正文 正文
+        </p>
+      </div>
     </div>
     <div class="page">
-      <h1 style="color:#fff">你好3</h1>
+      <h1 style="">你好3</h1>
+    </div>
+    <div class="finish">
+      finish
     </div>
   </div>
 </body>
@@ -90,15 +103,18 @@
   pages.forEach((page, i) => {
     page.id = 'page' + i;
     page.addEventListener('click', (e) => {
-      e.stopPropagation();
       if (_isMini) {
+        e.stopPropagation(); // stop to wp.addEventListener('click'
         i = Number(e.target.id.match(/\d+/)[0]);
         for (let j = 0; j < i; j++) {
-          pages[j].className = 'page leave';
+          pages[j].classList.remove('active');
+          pages[j].classList.add('leave');
         }
-        pages[i].className = 'page active';
+        pages[i].classList.remove('leave');
+        pages[i].classList.add('active');
         for (let j = i + 1; j < pages.length; j++) {
-          pages[j].className = 'page';
+          pages[j].classList.remove('leave');
+          pages[j].classList.remove('active');
         }
         toggleMiniPage();
       }
@@ -116,12 +132,9 @@
   });
 
   function nextPage() {
-    if (!_isMini && i < pages.length) {
-      for (let j = 0; j < i; j++) {
-        const page = pages[j];
-        page.classList.remove('active');
-        page.classList.add('leave');
-      }
+    if (!_isMini && i <= pages.length) {
+      pages[i - 1]?.classList.remove('active');
+      pages[i - 1]?.classList.add('leave');
       pages[i].classList.add('active');
       i++;
     }
@@ -149,12 +162,19 @@
   });
 
   function toggleMiniPage() {
+    const scale = 0.2;
+    const gap = 20;
+    const miniWidth = window.innerWidth * scale;
+    const minHeight = window.innerHeight * scale;
     _isMini = !_isMini;
     pages.forEach((page, i) => {
       if (_isMini) {
-        page.style.cssText = `width:300px;height:200px;left: ${i * 300 + 20 * (i + 1)}px;top: ${Math.floor(i / 4) * 200 + 10}px;transform:none;border:1px solid #aaa`;
+        page.style.cssText = `left: ${i * miniWidth + gap * (i + 1)}px; top:${Math.floor(i / 4) * minHeight + 10}px; transform-origin: left top;transform:scale(${scale});border:1px solid #aaa`;
+        // page.style.cssText = `width:300px;height:200px;left: ${i * 300 + 20 * (i + 1)}px;top: ${Math.floor(i / 4) * 200 + 10}px;transform:none;border:1px solid #aaa`;
+        page.classList.add('mini-hover');
       } else {
-        page.style.cssText = '';
+        page.style.cssText = 'transform-origin: left top;';
+        page.classList.remove('mini-hover');
       }
     });
   }
