@@ -27,5 +27,5 @@ app.use(serverRouter.routes());
 
 
 app.listen(8080, () => {
-    console.log('服务已启动，访问地址：localhost:8080');
+    console.log('服务已启动，访问地址：http://localhost:8080');
 });
