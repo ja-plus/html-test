@@ -1,7 +1,8 @@
 import aa from './a.js';
 import './style.css';
-// import './style.less';
-// import './style.scss';// 同名情况
+import './style1.less';
+// import './style.less';// 同名情况
+import './style2.scss';
 let a = document.createElement('a');
 a.textContent = 'hahahaha';
 a.href = 'http://www.baidu.com';

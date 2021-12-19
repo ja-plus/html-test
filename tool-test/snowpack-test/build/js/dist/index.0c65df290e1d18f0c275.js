@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunk=self.webpackChunk||[]).push([[639],{959:()=>{console.log("a.js code");let e=document.createElement("a");e.textContent="hahahaha",e.href="http://www.baidu.com",document.body.appendChild(e),console.log({a:"111"})}},e=>{e.O(0,[532],(()=>(959,e(e.s=959)))),e.O()}]);
-//# sourceMappingURL=index.0c65df290e1d18f0c275.js.map
