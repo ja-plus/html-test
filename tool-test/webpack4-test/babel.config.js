@@ -3,12 +3,11 @@ module.exports = {
     [
       '@babel/preset-env',
       {
-        // modules: 'auto',
-        useBuiltIns: 'usage', // 使用的引入，'entry','usage'
-        corejs: 3, // 使用useBuiltIns 需要定义corejs版本，不定义默认为2
+        modules: false,
+        useBuiltIns: 'entry', // webpack在使用usage配置时会出问题
+        corejs: 3,
         targets: {
           chrome: 49
-          // browsers: ['chrome > 49']
         }
       }
     ]
@@ -17,7 +16,7 @@ module.exports = {
     // [
     //   '@babel/plugin-transform-runtime',
     //   {
-    //     corejs: 3, // 配置这个polyfill方法才不污染全局
+    //     corejs: 3,
     //   }
     // ]
     // "@babel/plugin-transform-arrow-functions",

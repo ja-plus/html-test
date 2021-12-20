@@ -1,24 +1,35 @@
-import _createClass from "@babel/runtime-corejs3/helpers/createClass";
-import _classCallCheck from "@babel/runtime-corejs3/helpers/classCallCheck";
+"use strict";
 
-var _context;
+require("core-js/modules/es.array.iterator.js");
 
-import _concatInstanceProperty from "@babel/runtime-corejs3/core-js-stable/instance/concat";
-import _Promise from "@babel/runtime-corejs3/core-js-stable/promise";
-import _Map from "@babel/runtime-corejs3/core-js-stable/map";
+require("core-js/modules/web.dom-collections.iterator.js");
 
-var study = function study() {};
+require("core-js/modules/es.object.entries.js");
 
-var a = Math.pow(1, 2);
-var arr1 = [1, 2, 3];
+require("core-js/modules/es.promise.js");
 
-var arr2 = _concatInstanceProperty(_context = [11]).call(_context, arr1);
+require("core-js/modules/es.map.js");
 
-var b = [1, 2, 3].at(-1); // 新增API
+var _vue = _interopRequireDefault(require("vue/dist/vue.esm"));
 
-new _Promise(function () {});
-new _Map();
+var _comm = _interopRequireDefault(require("./comm.js"));
 
-var Parent = /*#__PURE__*/_createClass(function Parent() {
-  _classCallCheck(this, Parent);
-});
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// import 'core-js/stable';
+console.log(_comm.default.a);
+
+const study = () => {};
+
+const a = Math.pow(1, 2);
+const arr1 = [1, 2, 3];
+const arr2 = [11, ...arr1];
+const b = [1, 2, 3].at(-1);
+Object.entries({}); // 新增API
+
+new Promise(() => {});
+new Map();
+
+class Parent {}
+
+new _vue.default({});

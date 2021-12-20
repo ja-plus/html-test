@@ -1,0 +1,27 @@
+{
+  "name": "webpack4-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "webpack-dev-server --mode=development",
+    "bd:dev": "webpack --mode=development",
+    "bd": "webpack --mode=production"
+  },
+  "author": "JA+",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.16.5",
+    "@babel/preset-env": "^7.16.5",
+    "babel-loader": "^8.2.3",
+    "core-js": "^3.20.0",
+    "css-loader": "^5.2.7",
+    "html-webpack-plugin": "^4.5.2",
+    "regenerator-runtime": "^0.13.9",
+    "vue": "^2.6.14",
+    "webpack": "^4.46.0",
+    "webpack-bundle-analyzer": "^4.5.0",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.3"
+  }
+}
