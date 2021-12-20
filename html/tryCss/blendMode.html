@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blend mode 混入</title>
+</head>
+<style>
+  .outer {
+    display: inline-block;
+  }
+
+  .mask-image {
+    width: 300px;
+  }
+
+  .background {
+    vertical-align: top;
+    display: inline-block;
+    width: 300px;
+    height: 120px;
+    background-size: 300px;
+    background-image: url(../img/searah.jpg);
+    /* background-blend-mode: lighten; */
+  }
+
+  .text {
+    mix-blend-mode: lighten;
+    background-color: #fff;
+  }
+
+  .background-clip {
+    -webkit-background-clip: text;
+    background-blend-mode: darken;
+    color: transparent;
+  }
+</style>
+
+<body>
+  <div class="outer" style="background-color: #aaa;">
+    <img src="../img/searah.jpg" alt="" class="mask-image" style="mix-blend-mode: darken;">
+  </div>
+  <div class="outer" style="background-color: #999;">
+    <img src="../img/searah.jpg" alt="" class="mask-image" style="mix-blend-mode: lighten;">
+  </div>
+  <div class="background">
+    <h1 class="text">Hello world</h1>
+  </div>
+  <div class="background background-clip">
+    <h1>Hello world</h1>
+  </div>
+</body>
+
+</html>
