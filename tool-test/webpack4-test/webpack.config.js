@@ -1,6 +1,8 @@
+const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 module.exports = {
+  devtool: 'eval',
   entry: {
     app: './src/app.js'
   },
@@ -32,6 +34,9 @@ module.exports = {
       template: './index.html',
       filename: 'index.html'
     }),
-    new BundleAnalyzerPlugin()
+    new BundleAnalyzerPlugin({ openAnalyzer: false }),
+    new webpack.DefinePlugin({
+      version: '"hahahaha"' // 替换代码中的这个字符
+    })
   ]
 };
