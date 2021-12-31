@@ -4,6 +4,7 @@ import 'core-js/stable';
 // import './style/style.css';
 Object.entries({});
 window.version = version;
-version = 'a';
-console.log(app_version);
 // new Vue();
+
+import { f } from './ts/test.ts';
+f();

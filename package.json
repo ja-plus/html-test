@@ -16,6 +16,7 @@
   "author": "JA+",
   "license": "ISC",
   "devDependencies": {
+    "@vue/cli": "^4.5.15",
     "eslint": "^8.1.0",
     "eslint-plugin-html": "^6.2.0"
   }
