@@ -1,10 +1,12 @@
 const webpack = require('webpack');
+const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 module.exports = {
   devtool: 'eval',
   entry: {
-    app: './src/app.js'
+    app: './src/app.js',
+    svelteApp: './src/svelteApp.js'
   },
   devServer: {
     open: true,
@@ -15,11 +17,20 @@ module.exports = {
   //     vue: 'vue/dist/vue.esm'
   //   }
   // },
+  resolve: {
+    alias: {
+      svelte: path.resolve('node_modules', 'svelte')
+    }
+  },
   module: {
     rules: [
       {
         test: /\.js$/,
         loader: 'babel-loader?cacheDirectory'
+      },
+      {
+        test: /.svelte$/,
+        loader: 'svelte-loader'
       },
       {
         test: /\.css$/,
