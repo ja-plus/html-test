@@ -1,18 +1,22 @@
-<h1>Hello Svelte {name}</h1>
-name: <input type="text" bind:value={name}>
-<button on:click={count}>num: {num},doubleNum: {doubleNum}</button>
-arr:{arr}
+<ChildComponent>
+  <header slot="header">{name}</header>
+  <span>
+    header: <input type="text" bind:value={name}>
+  <button on:click={count}>num: {num},doubleNum: {doubleNum}</button>
+  arr:{arr}
+  </span>
+</ChildComponent>
 <ChildComponent color="orange">
   <header slot="header">slot header</header>
   <span>slot</span>
 </ChildComponent>
 <script>
   import ChildComponent from './childComponent.svelte'
-  let name = 'svelte'
+  export let name = 'svelte';
   let num = 0;
   $: doubleNum = num * 2;
   $: {
-    console.log('doubleNum', doubleNum)
+    console.log('svelte:doubleNum', doubleNum)
   }
   let arr = []
   function count(){

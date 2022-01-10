@@ -20,5 +20,5 @@
   }
 </style>
 <script>
-  export let color;
+  export let color = "azure";
 </script>
