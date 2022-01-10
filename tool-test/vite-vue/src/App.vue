@@ -4,6 +4,7 @@
 import HelloWorld from './components/HelloWorld.vue'
 import CompositionAPI from './components/CompositionAPI.vue'
 import Element from './components/ElementUI/index.vue'
+import Antdv from './components/Antdv/index.vue'
 import { ref } from 'vue'
 let user = ref('user1')
 // let user = 'user1'
@@ -15,6 +16,7 @@ let user = ref('user1')
   user:<input type="text" v-model="user">
   <CompositionAPI :user="user"/>
   <Element />
+  <Antdv />
 </template>
 
 <style>
