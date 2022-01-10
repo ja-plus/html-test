@@ -1,10 +1,12 @@
 <template>
-  <h1>CompositionAPI {{user}}</h1>
-  <button @click="addCount">counter:{{counter}}</button>
-  <div>
-    {{userComputed}}
-    </div>
-    <div>counter2:{{counter2}}</div>
+  <details>
+    <summary><b>CompositionAPI {{user}}</b></summary>
+    <button @click="addCount">counter:{{counter}}</button>
+    <div>
+      {{userComputed}}
+      </div>
+      <div>counter2:{{counter2}}</div>
+  </details>
 </template>
 
 <script>

@@ -3,6 +3,7 @@
 // Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
 import HelloWorld from './components/HelloWorld.vue'
 import CompositionAPI from './components/CompositionAPI.vue'
+import Element from './components/ElementUI/index.vue'
 import { ref } from 'vue'
 let user = ref('user1')
 // let user = 'user1'
@@ -13,6 +14,7 @@ let user = ref('user1')
   <!-- <HelloWorld msg="Hello Vue 3 + Vite" /> -->
   user:<input type="text" v-model="user">
   <CompositionAPI :user="user"/>
+  <Element />
 </template>
 
 <style>
@@ -20,7 +22,7 @@ let user = ref('user1')
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
+  /* text-align: center; */
   color: #2c3e50;
   margin-top: 60px;
 }
