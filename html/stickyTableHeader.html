@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<style>
+  :root {
+    --cell-height: 50px;
+  }
+  table td,table th {
+    box-sizing: border-box;
+    height: var(--cell-height);
+    padding: 5px;
+    /* border: 1px solid #aaa; */
+  }
+  table thead {
+    z-index:2;
+    position:sticky;
+    top:0px;/*必须*/
+  }
+  .table-wrapper {
+    height: 400px;
+    overflow: auto;
+    display: inline-block;
+  }
+</style>
+<style>
+  table.linear-gradient {
+    /* collapse  会使表头border 隐藏*/
+    border-collapse: collapse;
+  }
+  table.linear-gradient tr{
+    border-left: 1px solid tomato;
+  }
+  table.linear-gradient td {
+    border-right: 1px solid tomato;
+    border-bottom: 1px solid tomato;
+  }
+  
+  table.linear-gradient thead tr {
+    background-image: linear-gradient(180deg, #aaa 0 1px, #fff 1px)
+  }
+  table.linear-gradient thead th{
+    padding: 5px;
+    background-image: linear-gradient( #aaa 0 1px, #fff 1px calc(var(--cell-height) - 1px), #aaa calc(var(--cell-height) - 1px) var(--cell-height));
+    border-left: 1px solid #aaa;
+    border-right: 1px solid #aaa;
+  }
+</style>
+<style>
+  table.collapse-separate{
+    border-collapse: separate;
+    border-spacing: 0; 
+  }
+  table.collapse-separate td,
+  table.collapse-separate th {
+    background-color: #fff;
+    border: 1px solid #aaa;
+  }
+</style>
+<body>
+  <h1>Sticky Table Header</h1>
+  <div class="table-wrapper" >
+    <table class="linear-gradient">
+      <caption>用linear-gradient画边框</caption>
+      <thead>
+        <tr> <th>No.</th> <th>Name</th> </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
+  <div class="table-wrapper" >
+    <table class="collapse-separate">
+      <caption>border-collapse:separate</caption>
+      <thead>
+        <tr> <th>No.</th> <th>Name</th> </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
+</body>
+<script type="module">
+  import h from '../js/utils/h.js';
+  let tbody = document.querySelector('table.linear-gradient > tbody');
+  for (let i = 0;i < 100;i++){
+    tbody.append(h('tr', [
+      h('td', { textContent: i }),
+      h('td', { textContent: 'tom' + i })
+    ]));
+  }
+  tbody = document.querySelector('table.collapse-separate > tbody');
+  for (let i = 0;i < 100;i++){
+    tbody.append(h('tr', [
+      h('td', { textContent: i }),
+      h('td', { textContent: 'tom' + i })
+    ]));
+  }
+</script>
+</html>
