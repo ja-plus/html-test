@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="border:1px solid #ddd">
     <h1>CompositionAPI {{user}}</h1>
     <button @click="addCount">counter:{{counter}}</button>
     <div>
