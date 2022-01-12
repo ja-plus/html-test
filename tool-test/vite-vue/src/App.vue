@@ -5,6 +5,7 @@ import HelloWorld from './components/HelloWorld.vue'
 import CompositionAPI from './components/CompositionAPI.vue'
 import Element from './components/ElementUI/index.vue'
 import Antdv from './components/Antdv/index.vue'
+import VxeTable from './components/VxeTable.vue'
 import { ref } from 'vue'
 let user = ref('user1')
 // let user = 'user1'
@@ -17,6 +18,7 @@ let user = ref('user1')
   <CompositionAPI :user="user"/>
   <Element />
   <Antdv />
+  <VxeTable />
 </template>
 
 <style>

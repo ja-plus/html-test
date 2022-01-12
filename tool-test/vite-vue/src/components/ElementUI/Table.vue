@@ -1,18 +1,22 @@
 <template>
-  <details open>
+  <details>
     <summary><b>Table</b></summary>
-    <el-input v-model="search"></el-input>
+    <el-input v-model="search" placeholder="输入查询条件" style="margin-bottom:10px;"></el-input>
     <el-table
+      :max-height="300"
       :data="filteredTableData"
       style="width: 100%; margin-bottom: 20px"
       row-key="id"
       border
+      lazy
+      :load="load"
       default-expand-all
     >
       <el-table-column prop="date" label="date" sortable width="180" />
       <el-table-column prop="name" label="Name" sortable width="180" />
-      <el-table-column fixed="right" label="Operations" width="120">
+      <el-table-column fixed="right" label="Operations" width="200">
           <template #default>
+            <el-button type="text" size="small">新增子节点</el-button>
             <el-button type="text" size="small">修改</el-button>
             <el-button type="text" size="small">删除</el-button>
           </template>
@@ -51,12 +55,12 @@ const load = (
   setTimeout(() => {
     resolve([
       {
-        id: 31,
+        id: 11,
         date: '2016-05-01',
         name: 'wangxiaohu',
       },
       {
-        id: 32,
+        id: 12,
         date: '2016-05-01',
         name: 'wangxiaohu',
       },
@@ -69,6 +73,7 @@ const tableData: User[] = [
     id: 1,
     date: '2016-05-02',
     name: 'wangxiaohu',
+    hasChildren:true
   },
   {
     id: 2,
@@ -105,6 +110,13 @@ const tableData: User[] = [
     name: 'wangxiaohu',
   },
 ]
+for(let i=0;i<1000;i++){
+  tableData.push({
+    id: 5 + i,
+    date: '2016-05-03',
+    name: 'wangxiaohu',
+  })
+}
 const filteredTableData: User[] = computed(() => {
   let data = JSON.parse(JSON.stringify(tableData))
   return data.filter(function ft(user:User) {
