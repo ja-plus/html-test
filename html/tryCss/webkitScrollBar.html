@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<style>
+  .base-content{
+    height: 300px;
+    width: 200px;
+    background: #eee;
+    overflow: auto;
+    display:inline-block;
+    vertical-align: top;
+  }
+</style>
+<style>
+  .content{
+    overflow: overlay;
+    color: rgba(200,200,200, 0.2);
+    transition: all .2s ease;
+  }
+  .content:hover{
+    color: rgba(240,240,240,.8);
+  }
+  .content::-webkit-scrollbar{
+    width: 20px;
+    background: rgba(0,0,0,0);
+  }
+  .content::-webkit-scrollbar-thumb{
+    box-shadow: inset 0 0 0 10px;
+    border-radius: 10px;
+  }
+
+  .inner{
+    height: 800px;
+    width: 100%;
+    color: black;
+    word-break: break-all;
+    background: #f90;
+    background-image: linear-gradient(45deg,
+       rgba(255, 255, 255, .2) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, .2) 50%,
+        rgba(255, 255, 255, .2) 75%,
+        transparent 75%,
+        transparent);
+  }
+</style>
+<style>
+  .content2::-webkit-scrollbar{
+    width: 24px;
+    height: 24px;
+    background: rgba(0,0,0,0);
+    border: 4px solid red;
+  }
+  .content2::-webkit-scrollbar-thumb{
+    border: 8px solid rgba(0,0,0,0);
+    box-shadow: inset 0 0 0 5px rgba(0,0,0,1);
+    border-radius: 16px;;
+  }
+  .inner2{
+    background: #aaa;
+    height: 800px;
+    width: 50%;
+  }
+</style>
+<style>
+  .content3 {
+    border: 4px solid teal;
+  }
+  .content3::-webkit-scrollbar{
+    width:24px;
+    height: 24px;
+    background: rgba(0,0,0,0);
+    border-top: 4px solid red;
+    border-left: 4px solid red;
+  }
+  .content3::-webkit-scrollbar-thumb{
+    border-top: 8px solid rgba(0,0,0,0);
+    border-left: 8px solid rgba(0,0,0,0);
+    border-right: 4px solid rgba(0,0,0,0);
+    border-bottom: 4px solid rgba(0,0,0,0);
+    box-shadow: inset 0 0 0 10px rgba(0,0,0,1);
+  }
+  .inner3{
+    /* writing-mode: vertical-lr; */
+    background: #aaa;
+    height: 800px;
+    width: 50%;
+  }
+</style>
+<body>
+  <div class="base-content content">
+    <div class="inner">hover 展示滚动条</div>
+  </div>
+  <div class="base-content content2">
+    <div class="inner2">222222222222222222222222222222222</div>
+  </div>
+  <div class="base-content content3">
+    <div class="inner3">333333333333333333333333333333333</div>
+  </div>
+</body>
+</html>
