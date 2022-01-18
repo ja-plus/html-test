@@ -127,13 +127,15 @@ class Interceptors {
     response = new Interceptor;
 }
 class Service{
-    defaultConf = {};
+    defaultConf = {
+        headers: {}
+    };
     interceptors = new Interceptors;
     /**
      * @param {Object} defaultConf
      */
     constructor(defaultConf) {
-        this.defaultConf = defaultConf;
+        this.defaultConf = Object.assign({}, this.defaultConf, defaultConf);
     }
     /**
      *
@@ -144,7 +146,7 @@ class Service{
     #requestAdapter(url, config){
         const reqInterceptor = this.interceptors.request; // 请求拦截器
         const resInterceptor = this.interceptors.response; // 响应拦截器
-        let assignedConf = Object.assign({}, config, this.defaultConf);
+        let assignedConf = Object.assign({}, this.defaultConf, config);
 
         // 请求拦截器
         if (reqInterceptor.onFulfilled){

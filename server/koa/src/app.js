@@ -4,6 +4,11 @@ const views = require('koa-views');
 const koaBody = require('koa-body');
 const cors = require('koa-cors');
 const path = require('path');
+const chalk = require('chalk');
+const log4js = require('log4js');
+const logger = log4js.getLogger();
+logger.level = 'info';
+
 const webRouter = require('./router/webRouter.js');
 const serverRouter = require('./router/serverRouter.js');
 
@@ -21,6 +26,16 @@ app.use(render);
 app.use(koaBody({
     multipart: true // 支持formData
 }));
+app.use(async (ctx, next) => {
+    // 收到请求的时间
+    // console.log(
+    //     chalk.green(new Date().toLocaleString()),
+    //     ctx.header.referer,
+    //     chalk.yellow(ctx.url)
+    // );
+    logger.info( chalk.bgGreen(ctx.method), ctx.url, ctx.header.referer,);
+    next();
+});
 app.use(webRouter.routes());
 app.use(serverRouter.routes());
 

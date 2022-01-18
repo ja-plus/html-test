@@ -66,8 +66,15 @@ exports.delTestData = async function(ctx){
     };
 };
 
+/** 延时 */
 exports.timeoutTestData = async function(ctx){
-    let data = ctx.request.body;
-    console.log('delete query:', ctx.request.query);
-    console.log('delete body:', data);
+    console.log('get query:', ctx.request.query);
+    const query = ctx.request.query;
+    let timeout = +query.timeout || 2000;
+    await new Promise((resolve) => {
+        setTimeout(resolve, timeout);
+    });
+    ctx.body = {
+        timeout: 1000
+    };
 };

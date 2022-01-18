@@ -7,7 +7,8 @@
     <title>Document</title>
 </head>
 <body>
-    
+    <button id="fetch">fetch</button>
+    <button id="abort">AbortController</button>
 </body>
 <!-- <script type="module">
     /* -------basic request---------------*/
@@ -69,6 +70,7 @@
         mode: 'cors',
         // credentials: 'include' // cookie
     });
+
     Service.interceptors.request.use((url, config) => {
         config.headers.userToken = '11111';
         return config;
@@ -76,6 +78,8 @@
         console.log('request interceptor err:', err);
         return Promise.reject(err);
     });
+
+
     Service.interceptors.response.use((data, conf) => {
         if (data.code === 1){
             console.log(data, conf, 'response interceptor: ok');
@@ -117,21 +121,55 @@
     //     console.log('onRejectedInterceptor', err, conf);
     //     return Promise.reject(err);
     // });
-    Service.post('http://localhost:8080/postTestData', {
-        params: { type: 'post param' },
-        headers: {
-            // 'Content-Type': 'text/plain',
-        },
-        body: { type: 'post' },
-        mode: 'cors',
-        // credentials: 'include',
-        // responseType: 'text'
-    }).then(res => {
-        console.log(res, 'interceptor post: ok');
-        document.body.innerText += 'post interceptor: ok,' + JSON.stringify(res) + '\n';
-    }).catch(err => {
-        console.error('interceptor post: fail', err);
-        document.body.innerText += 'interceptor POST: fail,' + JSON.stringify(err) + '\n';
+    // Service.post('http://localhost:8080/postTestData', {
+    //     params: { type: 'post param' },
+    //     headers: {
+    //         // 'Content-Type': 'text/plain',
+    //     },
+    //     body: { type: 'post' },
+    //     mode: 'cors',
+    //     // credentials: 'include',
+    //     // responseType: 'text'
+    // }).then(res => {
+    //     console.log(res, 'interceptor post: ok');
+    //     document.body.innerText += 'post interceptor: ok,' + JSON.stringify(res) + '\n';
+    // }).catch(err => {
+    //     console.error('interceptor post: fail', err);
+    //     document.body.innerText += 'interceptor POST: fail,' + JSON.stringify(err) + '\n';
+    // });
+    
+    // Service.get('http://localhost:8080/timeoutTestData', {
+    //     params: {
+    //         timeout: 2000
+    //     }
+    // }).then(res => {
+    //     console.log('res', res);
+    // }).catch(err => {
+    //     console.log(err);
+    // });
+</script>
+
+<script type="module">
+    const fetchBtn = document.querySelector('#fetch');
+    const abortBtn = document.querySelector('#abort');
+    let controller;
+    let signal;
+    fetchBtn.addEventListener('click', () => {
+        console.log('发起fetch 请求... 4s后返回结果');
+        controller?.abort();
+        controller = new AbortController();
+        signal = controller.signal;
+        // console.log('AbortController.signal',  signal);
+        fetch('http://localhost:8080/timeoutTestData?timeout=4000', { signal }).then(response => {
+            console.log('fetch response :>> ', response);
+        }).catch(err => {
+            console.warn('fetch请求已被取消', err);
+        });
+    });
+    abortBtn.addEventListener('click', () => {
+        if (!controller) console.log('请先发起请求');
+        console.log('使用AbortController 取消请求');
+        controller.abort();
     });
 </script>
 </html>

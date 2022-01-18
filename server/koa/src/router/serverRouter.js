@@ -10,6 +10,6 @@ router.get('/getTestData', controller.getTestData);
 router.post('/postTestData', controller.postTestData);
 router.put('/putTestData', controller.putTestData);
 router.del('/delTestData', controller.delTestData);
-router.del('/timeoutTestData', controller.timeoutTestData);
+router.get('/timeoutTestData', controller.timeoutTestData);
 
 module.exports = router;
