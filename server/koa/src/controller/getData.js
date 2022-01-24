@@ -16,7 +16,7 @@ exports.saveData = async function(ctx){
 
 exports.getTestData = async function(ctx){
     let data = ctx.request.query;
-    console.log('get headers:', ctx.request.headers);
+    // console.log('get headers:', ctx.request.headers);
     console.log('get cookies:', ctx.cookies.get('name'));
     console.log('get query:', data);
     console.log('get body:', data);
