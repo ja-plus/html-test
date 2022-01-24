@@ -32,9 +32,14 @@
         // });
     });
 
-    fetch('/getTestData?test=1').then(res => res.json())
-    .then(res => {
-        console.log(res);
-    });
+    // fetch('/getTestData?test=1').then(res => res.json())
+    // .then(res => {
+    //     console.log(res);
+    // });
+</script>
+<script type="module">
+    import { io } from 'https://cdn.bootcdn.net/ajax/libs/socket.io/4.4.1/socket.io.esm.min.js';
+    /** socket.io*/
+    const socket = io('http://localhost:3000');
 </script>
 </html>

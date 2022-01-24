@@ -1,4 +1,5 @@
 const Koa = require('koa');
+const app = new Koa();
 const views = require('koa-views');
 // const bodyParser = require('koa-bodyparser');
 const koaBody = require('koa-body');
@@ -6,14 +7,15 @@ const cors = require('koa-cors');
 const staticMid = require('koa-static');
 const path = require('path');
 const chalk = require('chalk');
-const log4js = require('log4js');
-const logger = log4js.getLogger();
-logger.level = 'info';
+const logger = require('./logger.js');
 
 const webRouter = require('./router/webRouter.js');
 const serverRouter = require('./router/serverRouter.js');
 
-const app = new Koa();
+const socket = require('./socket.io.js');
+socket(app);
+
+
 
 app.use(views(__dirname + '/views', {
     extension: 'html'
@@ -42,7 +44,6 @@ app.use(webRouter.routes());
 app.use(serverRouter.routes());
 
 
-
 app.listen(8080, () => {
-    console.log('服务已启动，访问地址：http://localhost:8080');
+    logger.info('服务已启动，访问地址：http://localhost:8080');
 });
