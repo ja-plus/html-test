@@ -1,4 +1,4 @@
-html test
+# html test
 一些html灵感和技术测试  
 
 * /html目录下的html文件可以直接使用vscode 的插件live server打开  
@@ -10,3 +10,6 @@ html test
 启动命令 npm run start
 
 * /test 目录为测试html，引入了需要测试的js，使用live server 启动，请求上述node server 服务的接口
+
+# idea
+1. 鼠标放大镜效果
