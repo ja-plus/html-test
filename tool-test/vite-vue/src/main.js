@@ -11,11 +11,10 @@ import App from './App.vue';
 
 // pinia
 import { createPinia } from 'pinia';
-const pinia = createPinia();
 
 createApp(App)
 // .use(ElementPlus)
 // .use(Antdv)
 // .use(VXETable)
-.use(pinia)
+.use(createPinia())
 .mount('#app');
