@@ -2,7 +2,10 @@ const webpack = require('webpack');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-module.exports = {
+const { ESBuildPlugin } = require('esbuild-loader');
+const SpeedMeasurePlugin = require('speed-measure-webpack-plugin');
+const smp = new SpeedMeasurePlugin();
+module.exports = smp.wrap({
   devtool: 'eval',
   entry: {
     app: './src/app.js',
@@ -24,9 +27,16 @@ module.exports = {
   },
   module: {
     rules: [
+      // {
+      //   test: /\.js$/,
+      //   loader: 'babel-loader?cacheDirectory'
+      // },
       {
         test: /\.js$/,
-        loader: 'babel-loader?cacheDirectory'
+        loader: 'esbuild-loader',
+        options: {
+          target: 'es2015'
+        }
       },
       {
         test: /.svelte$/,
@@ -39,11 +49,17 @@ module.exports = {
         ]
       }, {
         test: /\.ts$/,
-        loader: 'ts-loader'
+        // loader: 'ts-loader'
+        loader: 'esbuild-loader',
+        options: {
+          loader: 'ts',
+          target: 'es2015'
+        }
       }
     ]
   },
   plugins: [
+    new ESBuildPlugin(),
     new HtmlWebpackPlugin({
       template: './index.html',
       filename: 'index.html'
@@ -53,4 +69,4 @@ module.exports = {
       version: '"hahahaha"' // 替换代码中的这个字符
     })
   ]
-};
+});

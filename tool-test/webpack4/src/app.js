@@ -7,4 +7,4 @@ window.version = version;
 // new Vue();
 
 import { f } from './ts/test.ts';
-f();
+f({ a: 1 });
