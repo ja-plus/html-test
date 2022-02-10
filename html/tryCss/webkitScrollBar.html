@@ -27,7 +27,7 @@
   }
   .content::-webkit-scrollbar{
     width: 20px;
-    background: rgba(0,0,0,0);
+    background: transparent;
   }
   .content::-webkit-scrollbar-thumb{
     box-shadow: inset 0 0 0 10px;
@@ -54,12 +54,12 @@
   .content2::-webkit-scrollbar{
     width: 24px;
     height: 24px;
-    background: rgba(0,0,0,0);
+    background: transparent;
     border: 4px solid red;
   }
   .content2::-webkit-scrollbar-thumb{
-    border: 8px solid rgba(0,0,0,0);
-    box-shadow: inset 0 0 0 5px rgba(0,0,0,1);
+    border: 8px solid transparent;
+    box-shadow: 0 0 0 5px rgba(0,0,0,1) inset;
     border-radius: 16px;;
   }
   .inner2{
@@ -75,16 +75,64 @@
   .content3::-webkit-scrollbar{
     width:24px;
     height: 24px;
-    background: rgba(0,0,0,0);
-    border-top: 4px solid red;
+    background: transparent;
+  }
+  .content3::-webkit-scrollbar:vertical{
     border-left: 4px solid red;
   }
+  .content3::-webkit-scrollbar:horizontal{
+    border-top: 4px solid red;
+  }
   .content3::-webkit-scrollbar-thumb{
-    border-top: 8px solid rgba(0,0,0,0);
-    border-left: 8px solid rgba(0,0,0,0);
-    border-right: 4px solid rgba(131, 90, 90, 0);
-    border-bottom: 4px solid rgba(0,0,0,0);
-    box-shadow: inset 0 0 0 10px rgba(0,0,0,1);
+    box-shadow: 0 0 0 10px rgba(0,0,0,0.5) inset;
+  }
+  .content3::-webkit-scrollbar-thumb:hover{
+    box-shadow: 0 0 0 10px rgba(0,0,0,1) inset;
+  }
+  .content3::-webkit-scrollbar-thumb:vertical{
+    border-top: 4px solid transparent;
+    border-left: 8px solid transparent;
+    border-right: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+  }
+  .content3::-webkit-scrollbar-thumb:horizontal{
+    border-top: 8px solid transparent;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+  }
+  .content3::-webkit-scrollbar-button{
+    width: 24px;
+    height: 24px;
+    background-color: #ccc;
+    border: 4px dotted #f90;
+    background-clip: content-box;
+    background-size: 10px 10px;
+    background-repeat: no-repeat;
+  }
+  .content3::-webkit-scrollbar-button:hover{
+    background-color: #ddd;
+  }
+  /* use conic-gradient to draw arrow */
+  .content3::-webkit-scrollbar-button:vertical:start{
+    background-image: conic-gradient(from 135deg,#000 90deg, transparent 90deg);
+    background-position: center 0px;
+  }
+  .content3::-webkit-scrollbar-button:vertical:end{
+    background-image: conic-gradient(from -45deg,#000 90deg, transparent 90deg);
+    background-position: center 5px;
+  }
+  .content3::-webkit-scrollbar-button:horizontal:start{
+    background-image: conic-gradient(from 45deg,#000 90deg, transparent 90deg);
+    background-position: 0 center;
+  }
+  .content3::-webkit-scrollbar-button:horizontal:end{
+    background-image: conic-gradient(from -135deg,#000 90deg, transparent 90deg);
+    background-position: 5px center;
+  }
+  .content3::-webkit-scrollbar-corner{
+    background-color: darkgray;
+    border: 4px dashed tomato;
   }
   .inner3{
     /* writing-mode: vertical-lr; */
