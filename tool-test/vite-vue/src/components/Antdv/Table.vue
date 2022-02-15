@@ -1,6 +1,11 @@
 <template>
   <a-table :columns="columns" :data-source="data" :scroll="{ x: 1300, }">
-    <a slot="action" slot-scope="text" href="javascript:;">action</a>
+    <template #action>
+    <a href="javascript:;">action</a>
+    </template>
+    <template #html="{text}">
+      <div v-html="text"></div>
+    </template>
   </a-table>
 </template>
 <script>
@@ -14,15 +19,14 @@ const columns = [
   { title: 'Column 5', dataIndex: 'address', key: '5' },
   { title: 'Column 6', dataIndex: 'address', key: '6' },
   { title: 'Column 7', dataIndex: 'address', key: '7' },
-  { title: 'Column 8', dataIndex: 'address', key: '8' },
+  { title: 'Column 8', dataIndex: 'address', key: '8', slots: {customRender: 'html'} },
   ] },
-  
   {
     title: 'Action',
     key: 'operation',
     fixed: 'right',
     width: 100,
-    scopedSlots: { customRender: 'action' },
+    slots: { customRender: 'action' },
   },
 ];
 
@@ -37,7 +41,7 @@ const data = [
     key: '2',
     name: 'Jim Green',
     age: 40,
-    address: 'London Park',
+    address: '<b>London Park</b>',
   },
 ];
 
