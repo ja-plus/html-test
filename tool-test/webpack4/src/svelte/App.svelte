@@ -6,12 +6,19 @@
   arr:{arr}
   </span>
 </ChildComponent>
-<ChildComponent color="orange">
-  <header slot="header">slot header</header>
-  <span>slot</span>
+<ChildComponent color="#fff">
+  <header slot="header">SMUI</header>
+  <div>
+    <Smui/>
+  </div>
 </ChildComponent>
+<!-- <Button>carbon-components-svelte Button</Button> -->
+
 <script>
   import ChildComponent from './childComponent.svelte'
+  import Smui from './smui.svelte';
+  // import 'carbon-components-svelte/css/white.css';
+  // import { Button } from "carbon-components-svelte"; // 啥也不是
   export let name = 'svelte';
   let num = 0;
   $: doubleNum = num * 2;

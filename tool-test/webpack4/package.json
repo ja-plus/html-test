@@ -14,14 +14,19 @@
     "@babel/core": "^7.16.5",
     "@babel/preset-env": "^7.16.5",
     "babel-loader": "^8.2.3",
+    "carbon-components-svelte": "^0.58.2",
     "core-js": "^3.20.0",
     "css-loader": "^5.2.7",
     "esbuild-loader": "^2.18.0",
     "html-webpack-plugin": "^4.5.2",
     "regenerator-runtime": "^0.13.9",
+    "sass": "^1.49.7",
+    "sass-loader": "^10.2.1",
     "speed-measure-webpack-plugin": "^1.5.0",
+    "style-loader": "^2.0.0",
     "svelte": "^3.45.0",
     "svelte-loader": "^3.1.2",
+    "svelte-material-ui": "^6.0.0-beta.14",
     "ts-loader": "^8.2.0",
     "typescript": "^4.5.4",
     "vue": "^2.6.14",
@@ -29,5 +34,8 @@
     "webpack-bundle-analyzer": "^4.5.0",
     "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^3.11.3"
+  },
+  "dependencies": {
+    "@smui/button": "^6.0.0-beta.14"
   }
 }

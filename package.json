@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "description": "try some idea",
   "main": "index.js",
-  "scripts": {
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "https://gitee.com/chenja123/html-test.git"
