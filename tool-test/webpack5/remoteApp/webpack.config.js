@@ -1,7 +1,7 @@
 const ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPlugin');
 module.exports = {
   entry: {
-    app2: './index.js'
+    app: './index.js'
   },
   devServer: {
     port: 3000

@@ -36,10 +36,6 @@ module.exports = smp.wrap({
       {
         test: /\.m?js$/,
         loader: 'esbuild-loader',
-        // include: [
-        //   path.resolve(__dirname, 'src'),
-        //   path.resolve(__dirname, 'node_modules'),
-        // ],
         options: {
           target: 'es2015'
         }
@@ -47,10 +43,6 @@ module.exports = smp.wrap({
       {
         test: /\.svelte$/,
         loader: 'svelte-loader',
-        // include: [
-        //   path.resolve(__dirname, 'src'),
-        //   path.resolve(__dirname, 'node_modules')
-        // ]
       },
       {
         test: /\.css$/,

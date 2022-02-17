@@ -1,6 +1,6 @@
 import('remoteApp/index').then(res => {
-  const app2 = res.default;
-  app2();
+  const remoteApp_index = res.default;
+  remoteApp_index();
 });
 
 import('remoteApp/console').then(res => {
