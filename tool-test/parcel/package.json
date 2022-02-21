@@ -1,0 +1,23 @@
+{
+  "name": "parcel-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "parcel index.html",
+    "build": "parcel build index.html"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@vue/component-compiler-utils": "^3.3.0",
+    "less": "^4.1.2",
+    "parcel-bundler": "^1.12.5",
+    "pug": "^3.0.2",
+    "vue-template-compiler": "^2.6.14"
+  },
+  "dependencies": {
+    "vue": "^2.6.14",
+    "vue-hot-reload-api": "^2.3.4"
+  }
+}
