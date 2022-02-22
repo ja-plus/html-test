@@ -3,13 +3,14 @@ module.exports = {
     [
       '@babel/preset-env',
       {
-        // modules: 'auto',
+        modules: false, // esm 为false
         useBuiltIns: 'usage', // 使用的引入，'entry','usage'
         corejs: 3, // 使用useBuiltIns 需要定义corejs版本，不定义默认为2
         targets: {
           chrome: 49
           // browsers: ['chrome > 49']
-        }
+        },
+        shippedProposals: true
       }
     ]
   ],
@@ -22,5 +23,6 @@ module.exports = {
     // ]
     // "@babel/plugin-transform-arrow-functions",
     // "@babel/plugin-transform-exponentiation-operator",
+    // '@babel/plugin-proposal-object-rest-spread'
   ]
 };

@@ -1,29 +1,24 @@
-"use strict";
-
-require("core-js/modules/es.array.iterator.js");
-
-require("core-js/modules/web.dom-collections.iterator.js");
-
-require("core-js/modules/es.object.entries.js");
-
-require("core-js/modules/es.promise.js");
-
-require("core-js/modules/es.map.js");
-
-var _vue = _interopRequireDefault(require("vue/dist/vue.esm"));
-
-var _comm = _interopRequireDefault(require("./comm.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// import 'core-js/stable';
-console.log(_comm.default.a);
+import "core-js/modules/es.array.iterator.js";
+import "core-js/modules/web.dom-collections.iterator.js";
+import "core-js/modules/es.object.entries.js";
+import "core-js/modules/es.promise.js";
+import "core-js/modules/es.map.js";
+import "core-js/modules/es.array.flat.js";
+import "core-js/modules/es.array.unscopables.flat.js";
+import "core-js/modules/es.regexp.exec.js";
+import "core-js/modules/esnext.string.match-all.js";
+import "core-js/modules/es.set.js";
+// 不会自动替换？
+import 'core-js/stable/structured-clone';
+import 'core-js/stable/array/at';
+import Vue from 'vue/dist/vue.esm';
+import comm from './comm.js';
+console.log(comm.a);
 
 const study = () => {};
 
 const a = Math.pow(1, 2);
-const arr1 = [1, 2, 3];
-const arr2 = [11, ...arr1];
+const arr = [11, ...[1, 2, 3]];
 const b = [1, 2, 3].at(-1);
 Object.entries({}); // 新增API
 
@@ -32,4 +27,9 @@ new Map();
 
 class Parent {}
 
-new _vue.default({});
+[].flat();
+new Vue({});
+String('a').matchAll('a', '1');
+structuredClone({
+  a: 1
+});
