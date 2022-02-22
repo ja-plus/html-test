@@ -8,5 +8,14 @@
 </head>
 <body>
   <h1>hello world</h1>
+  <main id="main">
+    <h2>Main</h2>
+    <button onclick="fullScreen()">fullScreen</button>
+  </main>
 </body>
+<script>
+  window.fullScreen = () => {
+    document.querySelector('#main').requestFullscreen();
+  };
+</script>
 </html>

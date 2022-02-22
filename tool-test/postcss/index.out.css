@@ -1,0 +1,11 @@
+* {
+  transition: all .1s;
+  -webkit-user-select: none;
+          user-select: none;
+}
+:-webkit-full-screen{
+  background-color: #ddd;
+}
+:fullscreen{
+  background-color: #ddd;
+}

@@ -1,0 +1,7 @@
+* {
+  transition: all .1s;
+  user-select: none;
+}
+:fullscreen{
+  background-color: #ddd;
+}
