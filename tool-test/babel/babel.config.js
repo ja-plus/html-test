@@ -4,13 +4,24 @@ module.exports = {
       '@babel/preset-env',
       {
         modules: false, // esm 为false
-        useBuiltIns: 'usage', // 使用的引入，'entry','usage'
-        corejs: 3, // 使用useBuiltIns 需要定义corejs版本，不定义默认为2
+        /**
+         * 使用的引入，
+         * false
+         * 'entry' 文件开头需要import 'core-js' ，才会导入全部polyfill
+         * 'usage' 转换使用过的特性
+         */
+        useBuiltIns: 'usage',
+        /**
+         * 使用useBuiltIns 需要定义corejs版本，不定义默认为2
+         * 注意：这里写corejs: 3的话为3.0，所以一定要带小版本号
+         */
+        corejs: '3.21',
         targets: {
+          // esmodules: true,
           chrome: 49
           // browsers: ['chrome > 49']
         },
-        shippedProposals: true
+        // shippedProposals: true
       }
     ]
   ],

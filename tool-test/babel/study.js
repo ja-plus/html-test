@@ -1,6 +1,7 @@
 // 不会自动替换？
-import 'core-js/stable/structured-clone';
-import 'core-js/stable/array/at';
+// import 'core-js/stable';
+// import 'core-js/stable/structured-clone';
+// import 'core-js/stable/array/at';
 
 import Vue from 'vue/dist/vue.esm';
 import comm from './comm.js';
