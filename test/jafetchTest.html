@@ -149,18 +149,23 @@
     // });
 </script>
 
-<script type="module">
+<!-- <script type="module">
+    /* test abortController*/
+    import jafetch from '../js/utils/jafetch.js';
     const fetchBtn = document.querySelector('#fetch');
     const abortBtn = document.querySelector('#abort');
     let controller;
     let signal;
     fetchBtn.addEventListener('click', () => {
+        if (controller){
+            controller.abort();
+            console.log('取消上次请求');
+        }
         console.log('发起fetch 请求... 4s后返回结果');
-        controller?.abort();
         controller = new AbortController();
         signal = controller.signal;
         // console.log('AbortController.signal',  signal);
-        fetch('http://localhost:8080/timeoutTestData?timeout=4000', { signal }).then(response => {
+        jafetch.get('http://localhost:8080/timeoutTestData', { params: { timeout: 4000 }, signal }).then(response => {
             console.log('fetch response :>> ', response);
         }).catch(err => {
             console.warn('fetch请求已被取消', err);
@@ -170,6 +175,47 @@
         if (!controller) console.log('请先发起请求');
         console.log('使用AbortController 取消请求');
         controller.abort();
+    });
+</script> -->
+<script type="module">
+    /* test interceptor abortController*/
+    import jafetch from '../js/utils/jafetch.js';
+    let Service = jafetch.create();
+    let cacheArr = [];
+    Service.interceptors.request.use((url, config) => {
+        cacheArr.forEach(item => {
+            if (item.url === url){
+                item.controller.abort();
+                item.canceled = true;
+            }
+        });
+        let abController = new AbortController();
+        config.signal = abController.signal;
+        cacheArr.push({
+            url,
+            controller: abController,
+            cancel: false
+        });
+    });
+    Service.interceptors.response.use((url, config) => {
+        cacheArr = cacheArr.filter(item => !item.canceled); // 仅保留未清除的,对象回收
+    });
+
+    const fetchBtn = document.querySelector('#fetch');
+    const abortBtn = document.querySelector('#abort');
+    fetchBtn.addEventListener('click', () => {
+        console.log('发起fetch 请求... 4s后返回结果');
+        Service.get('http://localhost:8080/timeoutTestData', { params: { timeout: 4000 } }).then(response => {
+            console.log('fetch response :>> ', response);
+        }).catch(err => {
+            console.warn('fetch请求已被取消', err);
+        });
+    });
+    abortBtn.addEventListener('click', () => {
+        console.log('使用AbortController 取消所有请求');
+        cacheArr.forEach(item => {
+            item.controller.abort();
+        });
     });
 </script>
 </html>

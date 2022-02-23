@@ -75,6 +75,6 @@ exports.timeoutTestData = async function(ctx){
         setTimeout(resolve, timeout);
     });
     ctx.body = {
-        timeout: 1000
+        timeout
     };
 };

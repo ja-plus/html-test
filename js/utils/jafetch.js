@@ -1,6 +1,7 @@
 /** ************
  * fetch 包装
- * TODO: timeout，cancel request
+ * TODO: timeout
+ * 取消请求可使用abortController()
  ***********/
 /**
  * 拼接url参数
