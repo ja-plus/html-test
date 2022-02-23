@@ -150,7 +150,8 @@ class Service{
 
         // 请求拦截器
         if (reqInterceptor.onFulfilled){
-            assignedConf = reqInterceptor.onFulfilled(url, assignedConf); // 请求拦截器中修改请求配置 TODO: deep clone
+            let returnConf = reqInterceptor.onFulfilled(url, assignedConf); // 请求拦截器中修改请求配置 TODO: deep clone
+            if (returnConf) assignedConf = returnConf; // 考虑使用的时候直接option.来修改配置对象不返回的情况
         }
 
         const fetchPromise = _originRequest(url, assignedConf)
