@@ -11,15 +11,26 @@ module.exports = function(app) {
 
   // webscoket
   io.on('connection', (socket) => {
-    logger.info('socket.io 已建立连接，socketId:', socket.id);
+    logger.info('socket.io connected, socketId:', socket.id);
+    socket.emit('open');// 主动推送消息,TODO: 给当前在线人数
+    socket.broadcast.emit('someoneJoin'); // 通知有新人加入
     socket.on('connect', () => {
-      logger.info('socket 已建立连接，socketId:', socket.id);
+      logger.info('socket connect, socketId:', socket.id);
     });
     socket.on('disconnect', () => {
-      logger.info('socket 已断开连接，scoketId:', socket.id);
+      logger.info('socket disconnect, socketId:', socket.id);
+      socket.broadcast.emit('someoneLeave');// 通知有人离开
+    });
+    socket.on('sendMsg', (msg, callback) => {
+      callback({ ok: true });
+      logger.info('socket on:sendMsg: ', msg, ' socketId', socket.id);
+      let boradCastMsgObj =  { msg, time: Date.now() };
+      // 信息通知到所有
+      socket.broadcast.emit('broadcastMsg', boradCastMsgObj);
+      // socket.emit('broadcastMsg', boradCastMsgObj); // 发出方知道自己发出的东西
     });
   });
   httpServer.listen(3000, () => {
-    logger.info('socket.io已启动 http://localhost:3000');
+    logger.info('socket.io server runing on http://localhost:3000');
   });
 };

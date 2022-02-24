@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    .msg-row .msg-title{
+        color:darkgreen;
+    }
+    .msg-row .msg-title.mine{
+        color: blue;
+    }
+    .msg-row .msg-title .msg-state{
+        margin-left: 10px;
+    }
+    .msg-row .msg-text{
+        margin-left: 10px;
+        word-break: break-all;
+    }
+    .msg-row .msg-tip {
+        font-size: 14px;
+        color: #bbb;
+        text-align: center;
+    }
+</style>
+<body>
+    <details open>
+        <summary style="font-size: 24px;font-weight:bolder;">Socket.io</summary>
+        <div id="msgBox" style="border:1px dashed #aaa;height: 300px;width: 400px;overflow:auto;"></div>
+        <div class="sendbar">
+            msg: <input type="text" id="inputMsg"/> <button id="sendSocketIOBtn">send</button>
+        </div>
+    </details>
+</body>
+<script type="module">
+    import { io } from 'https://cdn.bootcdn.net/ajax/libs/socket.io/4.4.1/socket.io.esm.min.js';
+    import h from '/js/h.js';
+    /** socket.io*/
+    const socket = io('http://localhost:3000');
+    socket.on('open', () => {
+        console.log('收到服务端连接确认');
+    });
+    const sendSocketIOBtn = document.querySelector('#sendSocketIOBtn');
+    const inputMsg = document.querySelector('#inputMsg');
+    const msgBox = document.querySelector('#msgBox');
+
+    sendSocketIOBtn.addEventListener('click', () => {
+        sendMsg();
+    });
+    inputMsg.addEventListener('keypress', (e) => {
+        if (e.keyCode === 13){
+            sendMsg();
+        }
+    });
+    socket.on('broadcastMsg', onBroadcastMsg);
+    socket.on('someoneJoin', () => onSomeoneJoinOrLeave('join'));
+    socket.on('someoneLeave', () => onSomeoneJoinOrLeave('leave'));
+    
+    function sendMsg(){
+        let msg = inputMsg.value;
+        if (!msg) return alert('请输入文字发送');
+        let time = Date.now(); // TODO: 时间更正
+        addMsg('mine', { msg, time });
+        socket.emit('sendMsg', msg, (data) => {
+            if (data.ok){
+                let state = document.querySelector('#t' + time);
+                state.textContent = '✔';
+            }
+        });
+        inputMsg.value = '';
+
+    }
+    function onBroadcastMsg(data){
+        console.log('收到广播信息', data);
+        addMsg('others', data);
+    }
+    /* 向对话框中添加信息*/
+    function addMsg(type, data){
+        let msgRow = h('div.msg-row', [
+            h(
+                'div.msg-title',
+                 {
+                classList: type === 'mine' && ['mine'],
+                textContent: (type === 'mine' ? '我发出的消息' : '接收到的消息') + ' ' + new Date(data.time).toLocaleTimeString()
+                },
+                type === 'mine' && [
+                    h(`span#t${data.time}.msg-state`, '•••')
+                ]
+            ),
+            h('div.msg-text', data.msg)
+        ]);
+        msgBox.appendChild(msgRow);
+    }
+    /* 有人加入*/
+    function onSomeoneJoinOrLeave(type){
+        let msgRow = h('div.msg-row', [
+            h('div.msg-tip', type === 'join' ? '有新人加入' : '有人断开连接')
+        ]);
+        msgBox.appendChild(msgRow);
+    }
+</script>
+</html>

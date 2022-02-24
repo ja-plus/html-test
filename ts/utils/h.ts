@@ -47,7 +47,7 @@ export default function h(tag:string, attrs:Attrs|string|HTMLElement[], children
       else if (child !== null && child !== undefined) console.error(child, 'not instance of HTMLElement');
     });
   }
-  if (id) elem.id = id[0];
+  if (id) elem.id = id[0].substring(1);
   if (classArr) elem.classList.add(...classArr);
   return elem;
 }

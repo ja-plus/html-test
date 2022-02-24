@@ -1,45 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Koa Main Page</title>
 </head>
 <body>
-    <h1>home</h1>
-    <input type="text" id="cookie">
-    <div class="data"></div>
-
+  <h1>Koa Main Page</h1>
+  <p>
+    <a href="/socketIOChat">Chat Room</a>
+  </p>
 </body>
-<script>
-    let input = document.querySelector('#cookie');
-    input.addEventListener('change', function getData() {
-        // fetch('/getData', {
-        //     method: 'POST',
-        //     body: JSON.stringify({
-        //         cookie: input.value
-        //     }),
-        //     headers: new Headers({
-        //         'Content-Type': 'application/json'
-        //     })
-        // }).then(res => res.text())
-        // .then(text => {
-        //     document.querySelector('.data').innerHTML =text;
-        //     setTimeout(() => {
-        //        getData();
-        //     }, 3000);
-        // });
-    });
-
-    // fetch('/getTestData?test=1').then(res => res.json())
-    // .then(res => {
-    //     console.log(res);
-    // });
-</script>
-<script type="module">
-    import { io } from 'https://cdn.bootcdn.net/ajax/libs/socket.io/4.4.1/socket.io.esm.min.js';
-    /** socket.io*/
-    const socket = io('http://localhost:3000');
-</script>
 </html>

@@ -44,6 +44,9 @@ app.use(webRouter.routes());
 app.use(serverRouter.routes());
 
 
+app.listen(8080, '10.10.17.92', () => {
+    logger.info('服务已启动，访问地址：http://10.10.17.92:8080');
+});
 app.listen(8080, () => {
     logger.info('服务已启动，访问地址：http://localhost:8080');
 });
