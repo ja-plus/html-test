@@ -20,3 +20,5 @@ class Parent{}
 new Vue({});
 String('a').matchAll('a', '1');
 structuredClone({ a: 1 });
+
+Promise.allSettled([Promise.resolve()]);

@@ -11,6 +11,7 @@ import "core-js/modules/es.string.match-all.js";
 import "core-js/modules/es.set.js";
 import "core-js/modules/web.dom-exception.stack.js";
 import "core-js/modules/web.structured-clone.js";
+import "core-js/modules/es.promise.all-settled.js";
 // 不会自动替换？
 // import 'core-js/stable';
 // import 'core-js/stable/structured-clone';
@@ -37,3 +38,4 @@ String('a').matchAll('a', '1');
 structuredClone({
   a: 1
 });
+Promise.allSettled([Promise.resolve()]);
