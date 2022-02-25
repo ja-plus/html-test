@@ -21,8 +21,11 @@ export default function h(tag:string, attrs:Attrs|string|HTMLElement[], children
   let classArr:string[] = tag.match(/\.[\w\d_-]+/g) || []; // className
   classArr = classArr.map((it) => it.substring(1));
   tag = tag.match(/^[\w\d]+/)[0];
-
+  
   let elem:any = document.createElement(tag);
+  if (id) elem.id = id[0].substring(1);
+  if (classArr) elem.classList.add(...classArr);
+  
   if (Array.isArray(attrs)) {
     children = attrs;
   } else if (typeof attrs === 'object' && attrs !== null) {
@@ -47,7 +50,6 @@ export default function h(tag:string, attrs:Attrs|string|HTMLElement[], children
       else if (child !== null && child !== undefined) console.error(child, 'not instance of HTMLElement');
     });
   }
-  if (id) elem.id = id[0].substring(1);
-  if (classArr) elem.classList.add(...classArr);
+ 
   return elem;
 }
