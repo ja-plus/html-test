@@ -36,6 +36,7 @@
   }
 </style>
 <body>
+    <h2>使所有数字为1</h2>
     <table>
       <tr>
         <td></td>
@@ -99,6 +100,7 @@ function btnClick(id) {
         break;
     }
     updateBtnNum();
+    checkFinish();
 }
 function updateNum(num) {
     if (num >= 4) {
@@ -107,6 +109,18 @@ function updateNum(num) {
       num++;
     }
     return num;
+}
+function checkFinish() {
+    if (
+      btn1.textContent == 1 &&
+      btn2.textContent == 1 &&
+      btn3.textContent == 1 &&
+      btn4.textContent == 1
+    ) {
+      setTimeout(() => {
+        alert("成功！");
+      }, 200);
+  }
 }
 </script>
 </html>
