@@ -23,34 +23,44 @@
   }
   .table-wrapper {
     height: 400px;
+    max-width: 300px;
     overflow: auto;
     display: inline-block;
   }
 </style>
 <style>
+  /*table 1*/
   table.linear-gradient {
     /* collapse  会使表头border 隐藏*/
     border-collapse: collapse;
   }
   table.linear-gradient tr{
-    border-left: 1px solid tomato;
+    /* border-left: 1px solid tomato; */
   }
-  table.linear-gradient td {
+  table.linear-gradient tr th:first-child{
+    border-left: 1px solid blue;
+  }
+  table.linear-gradient tr td:first-child{
+    border-left: 1px solid red;
+  }
+  /*用于观察边框颜色，在滚动是会被td边框顶替*/
+  table.linear-gradient tr th{
+    border-right: 1px solid  #aaa;
+    border-bottom: 1px solid  #aaa;
+  }
+  table.linear-gradient tr td {
     border-right: 1px solid tomato;
     border-bottom: 1px solid tomato;
   }
   
-  table.linear-gradient thead tr {
-    background-image: linear-gradient(180deg, #aaa 0 1px, #fff 1px)
-  }
-  table.linear-gradient thead th{
-    padding: 5px;
+  table.linear-gradient thead tr th{
+    background-color: #fff;
+    border-top: 1px solid #aaa;
     background-image: linear-gradient( #aaa 0 1px, #fff 1px calc(var(--cell-height) - 1px), #aaa calc(var(--cell-height) - 1px) var(--cell-height));
-    border-left: 1px solid #aaa;
-    border-right: 1px solid #aaa;
   }
 </style>
 <style>
+  /*table 2*/
   table.collapse-separate{
     border-collapse: separate;
     border-spacing: 0; 
@@ -61,11 +71,45 @@
     border: 1px solid #aaa;
   }
 </style>
+<style>
+  /*table 3*/
+  table.fix-col{
+    --cell-width: 50px;
+    width: max-content;
+    border-spacing: 0px;
+  }
+  table.fix-col caption {text-align: left;}
+  table.fix-col tr td {
+    width: var(--cell-width);
+  }
+  table.fix-col tr th,
+  table.fix-col tr td{
+    background: #fff;
+    border-right: 1px solid blue;
+    border-bottom: 1px solid violet;
+  }
+  table.fix-col tr th {
+    border-top: 1px solid orange;
+  }
+  table.fix-col tr td:first-child,
+  table.fix-col tr th:first-child{
+    background-color: #eee;
+    position: sticky;
+    left:0;
+    border-left: 1px solid red;
+  }
+  table.fix-col tr td:nth-child(2),
+  table.fix-col tr th:nth-child(2){
+    background-color: #eee;
+    position: sticky;
+    left: var(--cell-width);
+  }
+</style>
 <body>
-  <h1>Sticky Table Header</h1>
+  <h1>Sticky Table Header/Column</h1>
   <div class="table-wrapper" >
     <table class="linear-gradient">
-      <caption>用linear-gradient画边框</caption>
+      <caption>border-collapse:collapse</caption>
       <thead>
         <tr> <th>No.</th> <th>Name</th> </tr>
       </thead>
@@ -90,27 +134,42 @@
       <tbody> </tbody>
     </table>
   </div>
+  <h3>小结</h3>
+  <p>
+      不能使用border-collapse:collapse，因为在滚动时，表头边框会消失，而且最上方会有1px透明。表格固定头部的边框可以使用linear-gradient 来绘制。
+  </p>
 </body>
+<script></script>
 <script type="module">
   import h from "../js/utils/h.js";
+  /* table 1*/
   let tbody = document.querySelector("table.linear-gradient > tbody");
   for (let i = 0; i < 100; i++) {
     tbody.append(
       h("tr", [h("td", { textContent: i }), h("td", { textContent: "tom" + i })])
     );
   }
+  /* tbody 2*/
   tbody = document.querySelector("table.collapse-separate > tbody");
   for (let i = 0; i < 100; i++) {
     tbody.append(
       h("tr", [h("td", { textContent: i }), h("td", { textContent: "tom" + i })])
     );
   }
-
+  /* table 3*/
   let fixColThead = document.querySelector("table.fix-col > thead");
-  let fixColTbody = document.querySelector("table.fix-col > thead");
-  let tr = h("tr");
-  for (let i = 0; i < 100; i++) {
-    fixColThead.append(h("tr", [h("th", { textContent: i })]));
+  let fixColTbody = document.querySelector("table.fix-col > tbody");
+  let theadTr = h("tr");
+  for (let i = 0; i < 10; i++) {
+    theadTr.append(h("th", { textContent: i }));
   }
+  for (let j = 0; j < 100; j++) {
+    let tbodyTr = h("tr");
+    for (let k = 0; k < 10; k++) {
+      tbodyTr.appendChild(h("td", k));
+    }
+    fixColTbody.appendChild(tbodyTr);
+  }
+  fixColThead.appendChild(theadTr);
 </script>
 </html>
