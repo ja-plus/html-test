@@ -56,8 +56,8 @@
 	 </div>
 </body>
 <script>
-	let outer = document.querySelector('.outer');
-	let ul = document.querySelector('ul');
+	let outer = document.querySelector(".outer");
+	let ul = document.querySelector("ul");
 	const outerHeight = parseFloat(getComputedStyle(outer).height);
 	const ulHeight = parseFloat(getComputedStyle(ul).height);
 	const ulMargin = parseFloat(getComputedStyle(ul).margin);
@@ -67,42 +67,41 @@
 	let store = 0; // 保存y偏移量
 	let startY = 0; // 保存拖动开始时的位置
 	let moveTimeout = null;
-	outer.addEventListener('mousedown', (e) => {
-		startY = e.clientY;
-		outer.addEventListener('mousemove', move);
-		outer.addEventListener('mouseleave', leave)
-		outer.addEventListener('mouseup', leave)
-		if (moveTimeout){
-			let stroe = e.target.offsetTop - e.clientY;
-			ul.style.setProperty('--y', store + 'px');
-			ul.style.transitionDuration = '0s';
-			ul.style.transitionProperty = 'none';
-			clearTimeout(moveTimeout);
-		}
-	})
+	outer.addEventListener("mousedown", (e) => {
+	  startY = e.clientY;
+	  outer.addEventListener("mousemove", move);
+	  outer.addEventListener("mouseleave", leave);
+	  outer.addEventListener("mouseup", leave);
+	  if (moveTimeout) {
+	    let stroe = e.target.offsetTop - e.clientY;
+	    ul.style.setProperty("--y", store + "px");
+	    ul.style.transitionDuration = "0s";
+	    ul.style.transitionProperty = "none";
+	    clearTimeout(moveTimeout);
+	  }
+	});
 
-	function move(e){
-		if (!startY) startY = e.clientY;
-		ul.style.setProperty('--y', store + e.clientY - startY  + 'px')
+	function move(e) {
+	  if (!startY) startY = e.clientY;
+	  ul.style.setProperty("--y", store + e.clientY - startY + "px");
 	}
-	function leave(e){
-		let y = e.clientY - startY;
-		store += y + y;// 匀减速运动y
-		if (store > 0) store = 0;
-		if (store < MIN_STORE) store = MIN_STORE;
-		ul.style.setProperty('--y', store  + 'px');
-		ul.style.transitionDuration = animationTime + 'ms';
-		ul.style.transitionProperty = 'all';
-		moveTimeout = setTimeout(() => {
-			moveTimeout = null;
-			ul.style.transitionProperty = 'none';
-			ul.style.transitionDuration = '0s';
-		}, animationTime);
+	function leave(e) {
+	  let y = e.clientY - startY;
+	  store += y + y; // 匀减速运动y
+	  if (store > 0) store = 0;
+	  if (store < MIN_STORE) store = MIN_STORE;
+	  ul.style.setProperty("--y", store + "px");
+	  ul.style.transitionDuration = animationTime + "ms";
+	  ul.style.transitionProperty = "all";
+	  moveTimeout = setTimeout(() => {
+	    moveTimeout = null;
+	    ul.style.transitionProperty = "none";
+	    ul.style.transitionDuration = "0s";
+	  }, animationTime);
 
-		startY = 0;
-		outer.removeEventListener('mousemove', move);
-		outer.removeEventListener('mouseleave', leave);
+	  startY = 0;
+	  outer.removeEventListener("mousemove", move);
+	  outer.removeEventListener("mouseleave", leave);
 	}
-	
 </script>
 </html>

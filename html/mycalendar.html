@@ -48,127 +48,123 @@
 </body>
 <script>
     class Calendar {
-        weekI18n = {
-            en: ['Sun', 'Mon', 'Tue', 'Wen', 'Thu', 'Fir', 'Sat']
-        }
-        constructor() {
-            this.calendarHeader = this.myh('div', { class: 'header' });
-            this.calendarBody = this.myh('div', { class: 'body' });
-            this.month = 7;
-            this.year = 2021;
-        }
-        /* main*/
-        init(htmlElement){
-            this.calendar = htmlElement;
-            // header
-            let headerWeekNames = this.weekI18n.en; // TODO: i18n
-            headerWeekNames.forEach(name => {
-                let item = this.myh('div', { class: 'week' }, name);
-                this.calendarHeader.append(item);
-            });
-            this.calendar.append(this.calendarHeader, this.calendarBody);
+      weekI18n = {
+        en: ["Sun", "Mon", "Tue", "Wen", "Thu", "Fir", "Sat"],
+      };
+      constructor() {
+        this.calendarHeader = this.myh("div", { class: "header" });
+        this.calendarBody = this.myh("div", { class: "body" });
+        this.month = 7;
+        this.year = 2021;
+      }
+      /* main*/
+      init(htmlElement) {
+        this.calendar = htmlElement;
+        // header
+        let headerWeekNames = this.weekI18n.en; // TODO: i18n
+        headerWeekNames.forEach((name) => {
+          let item = this.myh("div", { class: "week" }, name);
+          this.calendarHeader.append(item);
+        });
+        this.calendar.append(this.calendarHeader, this.calendarBody);
     
-            // body
-            let daysArr = this.showMonthDays();
-            this.drawCalendarBody(daysArr);
-    
+        // body
+        let daysArr = this.showMonthDays();
+        this.drawCalendarBody(daysArr);
+      }
+      /* 获取日期数组*/
+      showMonthDays(year, month) {
+        let daysArr = [];
+        let date = new Date();
+        if (year) {
+          this.year = year;
+          date.setFullYear(this.year);
         }
-        /* 获取日期数组*/
-        showMonthDays(year, month){
-            let daysArr = [];
-            let date = new Date();
-            if (year) {
-                this.year = year;
-                date.setFullYear(this.year);
-            }
-            if (month){
-                this.month = month;
-                date.setMonth(this.month);
-            } else {
-                date.setMonth(this.month);
-            }
-            // lastMonth
-            date.setDate(1);
-            let week = date.getDay(); // 获取当月第一天的星期
-            let lastMonthDate = week;
-            if (lastMonthDate == 0){
-                lastMonthDate = 7;
-            }
-            date.setDate(0);
-            let lastMonthLastDate = date.getDate();
-            daysArr.unshift({ day: lastMonthLastDate, class: 'gray' });
-            lastMonthDate--;
-            for (let i = 1; i <= lastMonthDate; i++) {
-                daysArr.unshift({ day: lastMonthLastDate - i, class: 'gray' });
-            }
-            // thisMonth
-            let day = 1;
-            date.setMonth(this.month);
-            date.setDate(1);
-            console.log(date.getMonth(), this.month); // TODO: Why?
-            while (date.getMonth() == this.month){
-                daysArr.push({ day: date.getDate() });
-                date.setDate(++day);
-            }
-    
-            // nextMonth
-            let resetDay = 7 * 6 - daysArr.length;
-            for (let i = 1; i <= resetDay; i++) {
-                daysArr.push({ day: i, class: 'gray' });
-            }
-            // console.log(daysArr);
-            return daysArr;
+        if (month) {
+          this.month = month;
+          date.setMonth(this.month);
+        } else {
+          date.setMonth(this.month);
+        }
+        // lastMonth
+        date.setDate(1);
+        let week = date.getDay(); // 获取当月第一天的星期
+        let lastMonthDate = week;
+        if (lastMonthDate == 0) {
+          lastMonthDate = 7;
+        }
+        date.setDate(0);
+        let lastMonthLastDate = date.getDate();
+        daysArr.unshift({ day: lastMonthLastDate, class: "gray" });
+        lastMonthDate--;
+        for (let i = 1; i <= lastMonthDate; i++) {
+          daysArr.unshift({ day: lastMonthLastDate - i, class: "gray" });
+        }
+        // thisMonth
+        let day = 1;
+        date.setMonth(this.month);
+        date.setDate(1);
+        console.log(date.getMonth(), this.month); // TODO: Why?
+        while (date.getMonth() == this.month) {
+          daysArr.push({ day: date.getDate() });
+          date.setDate(++day);
         }
     
-        /* 绘制日历元素*/
-        drawCalendarBody(daysArr){
-            let fgmt = document.createDocumentFragment();
-            daysArr.forEach(item => {
-                let div = this.myh('div', { class: 'cube' });
-                if (item.class) div.classList.add(item.class);
-                div.textContent = item.day;
-                fgmt.append(div);
-            });
-            this.calendarBody.append(fgmt);
+        // nextMonth
+        let resetDay = 7 * 6 - daysArr.length;
+        for (let i = 1; i <= resetDay; i++) {
+          daysArr.push({ day: i, class: "gray" });
+        }
+        // console.log(daysArr);
+        return daysArr;
+      }
+    
+      /* 绘制日历元素*/
+      drawCalendarBody(daysArr) {
+        let fgmt = document.createDocumentFragment();
+        daysArr.forEach((item) => {
+          let div = this.myh("div", { class: "cube" });
+          if (item.class) div.classList.add(item.class);
+          div.textContent = item.day;
+          fgmt.append(div);
+        });
+        this.calendarBody.append(fgmt);
+      }
+    
+      updateCalendar(year, month) {
+        // remove body all child node
+        while (this.calendarBody.hasChildNodes()) {
+          this.calendarBody.removeChild(this.calendarBody.firstChild);
         }
     
-        updateCalendar(year, month){
-            // remove body all child node
-            while (this.calendarBody.hasChildNodes()){
-                this.calendarBody.removeChild(this.calendarBody.firstChild);
-            }
-    
-            let dayArr = this.showMonthDays(year, month);
-            this.drawCalendarBody(dayArr);
+        let dayArr = this.showMonthDays(year, month);
+        this.drawCalendarBody(dayArr);
+      }
+      /* 创建元素的一个封装*/
+      myh(tag, attrs, text) {
+        /** @type{HTMLElement}*/
+        let ele = document.createElement(tag);
+        for (const key in attrs) {
+          if (key === "class") {
+            ele.classList.add(attrs[key]);
+          } else {
+            ele[key] = attrs[key];
+          }
         }
-         /* 创建元素的一个封装*/
-        myh(tag, attrs, text){
-            /** @type{HTMLElement}*/
-            let ele = document.createElement(tag);
-            for (const key in attrs) {
-                if (key === 'class'){
-                    ele.classList.add(attrs[key]);
-                } else {
-                    ele[key] = attrs[key];
-                }
-            }
-            ele.textContent = text;
-            return ele;
-        }
+        ele.textContent = text;
+        return ele;
+      }
     }
 
     let calendar = new Calendar();
-    calendar.init(document.querySelector('#calendar'));
+    calendar.init(document.querySelector("#calendar"));
 
-    function yearChange(ele){
-        calendar.updateCalendar(ele.value);
+    function yearChange(ele) {
+      calendar.updateCalendar(ele.value);
     }
-    function monthChange(ele){
-        console.log(ele.value);
-        calendar.updateCalendar(2021, 1)
+    function monthChange(ele) {
+      console.log(ele.value);
+      calendar.updateCalendar(2021, 1);
     }
-
-
-
 </script>
 </html>

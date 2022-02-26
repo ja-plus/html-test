@@ -37,22 +37,22 @@
     padding = 10;
     borderRadius = 5;
     width = 100;
-    align = 'center';
-    overflow = 'breakAll';
+    align = "center";
+    overflow = "breakAll";
     constructor(type) {
-      if (type === 1){
-        this.backgroundColor = '#eee';
-        this.borderColor = '#ddd';
+      if (type === 1) {
+        this.backgroundColor = "#eee";
+        this.borderColor = "#ddd";
         this.width = 150;
       }
-      if (type === 2){
+      if (type === 2) {
         this.width = 80;
-        this.backgroundColor = '#eee';
-        this.borderColor = '#409EFF';
+        this.backgroundColor = "#eee";
+        this.borderColor = "#409EFF";
       }
-      if (type === 3){
-        this.color = '#fff';
-        this.backgroundColor = '#409EFF';
+      if (type === 3) {
+        this.color = "#fff";
+        this.backgroundColor = "#409EFF";
       }
     }
   }
@@ -63,159 +63,168 @@
 
   const lineLabel = {
     fontSize: 12,
-    color: '#000',
-    offset: [0, 20]
+    color: "#000",
+    offset: [0, 20],
   };
   const lineConfig = {
-    symbol: 'triangle',
+    symbol: "triangle",
     symbolSize: 10,
   };
-  let myChart = window.echarts.init(document.querySelector('.mychart'), {}, { renderer: 'svg' });
+  let myChart = window.echarts.init(
+    document.querySelector(".mychart"),
+    {},
+    { renderer: "svg" }
+);
   myChart.setOption({
     series: [
       {
-        type: 'tree',
-        orient: 'RL',
+        type: "tree",
+        orient: "RL",
         width: 400,
-        roam: 'move',
-        left: '100px',
+        roam: "move",
+        left: "100px",
         symbolRotate: -90,
         itemStyle: {
-          color: '#ddd',
-          borderWidth: 0
+          color: "#ddd",
+          borderWidth: 0,
         },
         lineStyle: {
-          color: '#ddd',
-          curveness: 0.5
+          color: "#ddd",
+          curveness: 0.5,
         },
         expandAndCollapse: false,
-        data: [{
-          name: '公司公司公司公司名称名称名称 \n A股 | 同花顺 300033',
-          label: mainLabel,
-          children: [
-            {
-              name: '50%',
-              label: lineLabel,
-              ...lineConfig,
-              children: [
-                {
-                  name: '1111',
-                  label: mainLabel,
-                  symbolSize: 0.1, // 兼容echarts4.9
-                }
-              ]
-            },
-            {
-              name: '人物',
-              symbol: 'triangle',
-              symbolSize: 10,
-              label: {
-                position: 'left',
-                distance: -50,
-                formatter: (val) => `{label|${val.name}}{line|}{percent| 10%}`,
-                rich: {
-                  label: {
-                    ...personLeavesLabel,
+        data: [
+          {
+            name: "公司公司公司公司名称名称名称 \n A股 | 同花顺 300033",
+            label: mainLabel,
+            children: [
+              {
+                name: "50%",
+                label: lineLabel,
+                ...lineConfig,
+                children: [
+                  {
+                    name: "1111",
+                    label: mainLabel,
+                    symbolSize: 0.1, // 兼容echarts4.9
                   },
-                  line: { // 画横线
-                    borderWidth: 0.5,
-                    borderColor: '#000',
-                    width: 50,
-                    height: 0,
-                  },
-                  percent: {
-                    align: 'left',
-                    width: 50,
-                    padding: [20, 0, 0, 0],
-                  }
-                }
+                ],
               },
-            },
-            // {
-            //   name: '30%',
-            //   label: lineLabel,
-            //   ...lineConfig,
-            //   children: [
-            //     {
-            //       name: '人物',
-            //       label: personLeavesLabel,
-            //       symbolSize: 0.1,
-            //     }
-            //   ]
-            // },
-          ]
-        }],
-      }
-    ]
+              {
+                name: "人物",
+                symbol: "triangle",
+                symbolSize: 10,
+                label: {
+                  position: "left",
+                  distance: -50,
+                  formatter: (val) => `{label|${val.name}}{line|}{percent| 10%}`,
+                  rich: {
+                    label: {
+                      ...personLeavesLabel,
+                    },
+                    line: {
+                      // 画横线
+                      borderWidth: 0.5,
+                      borderColor: "#000",
+                      width: 50,
+                      height: 0,
+                    },
+                    percent: {
+                      align: "left",
+                      width: 50,
+                      padding: [20, 0, 0, 0],
+                    },
+                  },
+                },
+              },
+              // {
+              //   name: '30%',
+              //   label: lineLabel,
+              //   ...lineConfig,
+              //   children: [
+              //     {
+              //       name: '人物',
+              //       label: personLeavesLabel,
+              //       symbolSize: 0.1,
+              //     }
+              //   ]
+              // },
+            ],
+          },
+        ],
+      },
+    ],
   });
-
 
   const lineLabel2 = {
     fontSize: 12,
-    color: '#000',
-    offset: [20, 0]
+    color: "#000",
+    offset: [20, 0],
   };
 
-  let myChart2 = window.echarts.init(document.querySelector('.mychart2'), {}, { renderer: 'svg' });
+  let myChart2 = window.echarts.init(
+    document.querySelector(".mychart2"),
+    {},
+    { renderer: "svg" }
+);
   myChart2.setOption({
     series: [
       {
-        type: 'tree',
-        orient: 'BT',
+        type: "tree",
+        orient: "BT",
         symbolRotate: 180,
-        itemStyle: { color: '#ddd' },
-        lineStyle: { color: '#ddd' },
+        itemStyle: { color: "#ddd" },
+        lineStyle: { color: "#ddd" },
         expandAndCollapse: false,
-        data: [{
-          name: '公司公司公司公司名称名称名称 \n A股 | 同花顺 300033',
-          label: mainLabel,
-          children: [
-            {
-              name: '50%',
-              label: lineLabel2,
-              ...lineConfig,
+        data: [
+          {
+            name: "公司公司公司公司名称名称名称 \n A股 | 同花顺 300033",
+            label: mainLabel,
+            children: [
+              {
+                name: "50%",
+                label: lineLabel2,
+                ...lineConfig,
 
-              children: [
-                {
-                  name: '控制人',
-                  label: actualControllerLeavesLabel
-                }
-              ]
-            },
-            {
-              name: '30%',
-              label: lineLabel2,
-              ...lineConfig,
-              children: [
-                {
-                  name: '公司名称公司名称公司名称公司名称公司名称',
-                  value: '111',
-                  label: mainLabel,
-                }
-              ]
-            },
-            {
-              name: '20%',
-              label: lineLabel2,
-              ...lineConfig,
-              children: [
-                {
-                  name: '人物',
-                  label: personLeavesLabel,
-                }
-              ]
-            },
-          ]
-        }],
-  
-      }
-    ]
+                children: [
+                  {
+                    name: "控制人",
+                    label: actualControllerLeavesLabel,
+                  },
+                ],
+              },
+              {
+                name: "30%",
+                label: lineLabel2,
+                ...lineConfig,
+                children: [
+                  {
+                    name: "公司名称公司名称公司名称公司名称公司名称",
+                    value: "111",
+                    label: mainLabel,
+                  },
+                ],
+              },
+              {
+                name: "20%",
+                label: lineLabel2,
+                ...lineConfig,
+                children: [
+                  {
+                    name: "人物",
+                    label: personLeavesLabel,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
   });
 
-
-
-  const myChart2Ele = document.querySelector('.mychart2>div>svg');
-  const myChart2Svg = document.querySelector('.mychart2>div>svg>g:nth-child(2)');
+  const myChart2Ele = document.querySelector(".mychart2>div>svg");
+  const myChart2Svg = document.querySelector(".mychart2>div>svg>g:nth-child(2)");
   let scale = 1;
 
   let sign = false;
@@ -224,8 +233,8 @@
   let translatey = 0;
   let offsetx = 0;
   let offsety = 0;
-  myChart2Ele.addEventListener('wheel', (e) => {
-    console.log('wheel', e);
+  myChart2Ele.addEventListener("wheel", (e) => {
+    console.log("wheel", e);
     e.stopPropagation();
     e.preventDefault();
     if (e.deltaY > 0) {
@@ -236,29 +245,28 @@
     if (scale < 0.5) scale = 0.5;
     if (scale > 3) scale = 3;
     myChart2Svg.style.transform = `translate(${translatex}px,${translatey}px) scale(${scale})`;
-    myChart2Svg.style.transformOrigin = 'center center';
+    myChart2Svg.style.transformOrigin = "center center";
   });
-  myChart2Ele.addEventListener('mousedown', (e) => {
+  myChart2Ele.addEventListener("mousedown", (e) => {
     sign = true;
     startXY.x = e.x;
     startXY.y = e.y;
     console.log(e.x, e.y);
-
   });
-  myChart2Ele.addEventListener('mousemove', (e) => {
+  myChart2Ele.addEventListener("mousemove", (e) => {
     if (sign) {
       offsetx = translatex + e.x - startXY.x;
       offsety = translatey + e.y - startXY.y;
       myChart2Svg.style.transform = `translate(${offsetx}px,${offsety}px) scale(${scale})`;
     }
   });
-  myChart2Ele.addEventListener('mouseup', (e) => {
+  myChart2Ele.addEventListener("mouseup", (e) => {
     sign = false;
     console.log(e);
     translatex = offsetx;
     translatey = offsety;
   });
-  myChart2Ele.addEventListener('mouseleave', (e) => {
+  myChart2Ele.addEventListener("mouseleave", (e) => {
     sign = false;
     console.log(e);
     translatex = offsetx;

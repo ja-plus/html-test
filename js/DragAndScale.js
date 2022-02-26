@@ -6,7 +6,7 @@
  *  let das = new DragAndScale('div','div>div')
  */
 
-export default class DragAndScale{
+export default class DragAndScale {
   scale = 1; // 缩放
   maxScale = 3;
   minScale = 0.5;
@@ -34,26 +34,44 @@ export default class DragAndScale{
    * @param {String} targetEle 响应变化的元素
    */
   constructor(linstenerEle, targetEle) {
-    this.listenerEle = linstenerEle instanceof HTMLElement ? linstenerEle : document.querySelector(linstenerEle);
-    this.listenerEle.style.cursor = 'move';
-    this.targetEle = targetEle instanceof HTMLElement ? targetEle : document.querySelector(targetEle);
-    this.targetEle.style.transformOrigin = 'center';
+    this.listenerEle =
+      linstenerEle instanceof HTMLElement
+        ? linstenerEle
+        : document.querySelector(linstenerEle);
+    this.listenerEle.style.cursor = "move";
+    this.targetEle =
+      targetEle instanceof HTMLElement
+        ? targetEle
+        : document.querySelector(targetEle);
+    this.targetEle.style.transformOrigin = "center";
     this.initEventListener();
   }
-  initEventListener(){
-    if (this.listenerEle){
-      this.listenerEle.addEventListener('wheel', (this.onWheelCb = this.onWheel.bind(this)));
-      this.listenerEle.addEventListener('mousedown', (this.onMouseDownCb = this.onMouseDown.bind(this)));
-      this.listenerEle.addEventListener('mousemove', (this.onMouseMoveCb = this.onMouseMove.bind(this)));
-      this.listenerEle.addEventListener('mouseup', (this.onMouseUpCb = this.onMouseUp.bind(this)));
-      this.listenerEle.addEventListener('mouseleave', this.onMouseUpCb);
+  initEventListener() {
+    if (this.listenerEle) {
+      this.listenerEle.addEventListener(
+        "wheel",
+        (this.onWheelCb = this.onWheel.bind(this))
+      );
+      this.listenerEle.addEventListener(
+        "mousedown",
+        (this.onMouseDownCb = this.onMouseDown.bind(this))
+      );
+      this.listenerEle.addEventListener(
+        "mousemove",
+        (this.onMouseMoveCb = this.onMouseMove.bind(this))
+      );
+      this.listenerEle.addEventListener(
+        "mouseup",
+        (this.onMouseUpCb = this.onMouseUp.bind(this))
+      );
+      this.listenerEle.addEventListener("mouseleave", this.onMouseUpCb);
     }
   }
   /**
    *
    * @param {Event} e
    */
-  onWheel(e){
+  onWheel(e) {
     e.stopPropagation();
     // e.preventDefault();
     e.deltaY < 0 ? this.zoom(1) : this.zoom(-1);
@@ -62,7 +80,7 @@ export default class DragAndScale{
    *
    * @param {Event} e
    */
-  onMouseDown(e){
+  onMouseDown(e) {
     e.preventDefault();
     this.sign = true;
     this.startx = e.x;
@@ -72,8 +90,8 @@ export default class DragAndScale{
    *
    * @param {Event} e
    */
-  onMouseMove(e){
-    if (this.sign){
+  onMouseMove(e) {
+    if (this.sign) {
       this.offsetx = this.translatex + e.x - this.startx;
       this.offsety = this.translatey + e.y - this.starty;
       // this.transform.offsetx = this.translatex + e.x - this.startx;
@@ -81,30 +99,31 @@ export default class DragAndScale{
       this.updateTransform();
     }
   }
-  onMouseUp(){
+  onMouseUp() {
     this.sign = false;
     this.translatex = this.offsetx;
     this.translatey = this.offsety;
   }
-  removeListeners(){
-    if (this.listenerEle){
-      this.listenerEle.removeEventListener('wheel', this.onWheelCb);
-      this.listenerEle.removeEventListener('mousedown', this.onMouseDownCb);
-      this.listenerEle.removeEventListener('mousemove', this.onMouseMoveCb);
-      this.listenerEle.removeEventListener('mouseup', this.onMouseUpCb);
-      this.listenerEle.removeEventListener('mouseleave', this.onMouseDownCb);
+  removeListeners() {
+    if (this.listenerEle) {
+      this.listenerEle.removeEventListener("wheel", this.onWheelCb);
+      this.listenerEle.removeEventListener("mousedown", this.onMouseDownCb);
+      this.listenerEle.removeEventListener("mousemove", this.onMouseMoveCb);
+      this.listenerEle.removeEventListener("mouseup", this.onMouseUpCb);
+      this.listenerEle.removeEventListener("mouseleave", this.onMouseDownCb);
     }
   }
   /**
    * 更新属性
    * TODO: 将this.offsetx this.offsety this.scale 通过Proxy代理，检测值变化时更新位置？
    */
-  updateTransform(){
+  updateTransform() {
     this.targetEle.style.transform = `translate(${this.offsetx}px, ${this.offsety}px) scale(${this.scale})`;
   }
-  zoom(sign){
-    if (this.targetEle){
-      this.scale = sign < 0 ? this.scale - this.scaleStep : this.scale + this.scaleStep;
+  zoom(sign) {
+    if (this.targetEle) {
+      this.scale =
+        sign < 0 ? this.scale - this.scaleStep : this.scale + this.scaleStep;
       if (this.scale < this.minScale) this.scale = this.minScale;
       else if (this.scale > this.maxScale) this.scale = this.maxScale;
       this.updateTransform();

@@ -65,33 +65,39 @@
 </script> -->
 <script type="module">
     /* ------------interceptors-----------------*/
-    import jafetch from '../js/utils/jafetch.js';
+    import jafetch from "../js/utils/jafetch.js";
     const Service = jafetch.create({
-        mode: 'cors',
-        // credentials: 'include' // cookie
+      mode: "cors",
+      // credentials: 'include' // cookie
     });
 
-    Service.interceptors.request.use((url, config) => {
-        config.headers.userToken = '11111';
+    Service.interceptors.request.use(
+  (url, config) => {
+        config.headers.userToken = "11111";
         return config;
-    }, (err) => {
-        console.log('request interceptor err:', err);
+      },
+  (err) => {
+        console.log("request interceptor err:", err);
         return Promise.reject(err);
-    });
+      }
+);
 
-
-    Service.interceptors.response.use((data, conf) => {
-        if (data.code === 1){
-            console.log(data, conf, 'response interceptor: ok');
-            document.body.innerText += 'response interceptor: ok,' + JSON.stringify(data) + '\n';
-            return data;
+    Service.interceptors.response.use(
+  (data, conf) => {
+        if (data.code === 1) {
+          console.log(data, conf, "response interceptor: ok");
+          document.body.innerText +=
+            "response interceptor: ok," + JSON.stringify(data) + "\n";
+          return data;
         } else {
-            return Promise.reject('response.data.code is ' + data.code);
+          return Promise.reject("response.data.code is " + data.code);
         }
-    }, (err) => {
-        console.log('response interceptor err:', err);
+      },
+  (err) => {
+        console.log("response interceptor err:", err);
         return Promise.reject(err);
-    });
+      }
+);
 
     // Service.get('http://localhost:8080/getTestData', {
     //     params: { type: 'aa' },
@@ -179,43 +185,47 @@
 </script> -->
 <script type="module">
     /* test interceptor abortController*/
-    import jafetch from '../js/utils/jafetch.js';
+    import jafetch from "../js/utils/jafetch.js";
     let Service = jafetch.create();
     let cacheArr = [];
     Service.interceptors.request.use((url, config) => {
-        cacheArr.forEach(item => {
-            if (item.url === url){
-                item.controller.abort();
-                item.canceled = true;
-            }
-        });
-        let abController = new AbortController();
-        config.signal = abController.signal;
-        cacheArr.push({
-            url,
-            controller: abController,
-            cancel: false
-        });
+      cacheArr.forEach((item) => {
+        if (item.url === url) {
+          item.controller.abort();
+          item.canceled = true;
+        }
+      });
+      let abController = new AbortController();
+      config.signal = abController.signal;
+      cacheArr.push({
+        url,
+        controller: abController,
+        cancel: false,
+      });
     });
     Service.interceptors.response.use((url, config) => {
-        cacheArr = cacheArr.filter(item => !item.canceled); // 仅保留未清除的,对象回收
+      cacheArr = cacheArr.filter((item) => !item.canceled); // 仅保留未清除的,对象回收
     });
 
-    const fetchBtn = document.querySelector('#fetch');
-    const abortBtn = document.querySelector('#abort');
-    fetchBtn.addEventListener('click', () => {
-        console.log('发起fetch 请求... 4s后返回结果');
-        Service.get('http://localhost:8080/timeoutTestData', { params: { timeout: 4000 } }).then(response => {
-            console.log('fetch response :>> ', response);
-        }).catch(err => {
-            console.warn('fetch请求已被取消', err);
+    const fetchBtn = document.querySelector("#fetch");
+    const abortBtn = document.querySelector("#abort");
+    fetchBtn.addEventListener("click", () => {
+      console.log("发起fetch 请求... 4s后返回结果");
+      Service.get("http://localhost:8080/timeoutTestData", {
+    params: { timeout: 4000 },
+  })
+    .then((response) => {
+          console.log("fetch response :>> ", response);
+        })
+    .catch((err) => {
+          console.warn("fetch请求已被取消", err);
         });
     });
-    abortBtn.addEventListener('click', () => {
-        console.log('使用AbortController 取消所有请求');
-        cacheArr.forEach(item => {
-            item.controller.abort();
-        });
+    abortBtn.addEventListener("click", () => {
+      console.log("使用AbortController 取消所有请求");
+      cacheArr.forEach((item) => {
+        item.controller.abort();
+      });
     });
 </script>
 </html>

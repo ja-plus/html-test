@@ -92,31 +92,25 @@
   </div>
 </body>
 <script type="module">
-  import h from '../js/utils/h.js';
-  let tbody = document.querySelector('table.linear-gradient > tbody');
-  for (let i = 0;i < 100;i++){
-    tbody.append(h('tr', [
-      h('td', { textContent: i }),
-      h('td', { textContent: 'tom' + i })
-    ]));
+  import h from "../js/utils/h.js";
+  let tbody = document.querySelector("table.linear-gradient > tbody");
+  for (let i = 0; i < 100; i++) {
+    tbody.append(
+      h("tr", [h("td", { textContent: i }), h("td", { textContent: "tom" + i })])
+    );
   }
-  tbody = document.querySelector('table.collapse-separate > tbody');
-  for (let i = 0;i < 100;i++){
-    tbody.append(h('tr', [
-      h('td', { textContent: i }),
-      h('td', { textContent: 'tom' + i })
-    ]));
+  tbody = document.querySelector("table.collapse-separate > tbody");
+  for (let i = 0; i < 100; i++) {
+    tbody.append(
+      h("tr", [h("td", { textContent: i }), h("td", { textContent: "tom" + i })])
+    );
   }
 
-  let fixColThead = document.querySelector('table.fix-col > thead');
-  let fixColTbody = document.querySelector('table.fix-col > thead');
-  let tr = h('tr');
-  for (let i = 0 ;i < 100; i++){
-    fixColThead.append(
-      h('tr', [
-        h('th', { textContent: i })
-      ])
-    );
+  let fixColThead = document.querySelector("table.fix-col > thead");
+  let fixColTbody = document.querySelector("table.fix-col > thead");
+  let tr = h("tr");
+  for (let i = 0; i < 100; i++) {
+    fixColThead.append(h("tr", [h("th", { textContent: i })]));
   }
 </script>
 </html>

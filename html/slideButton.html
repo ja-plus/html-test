@@ -78,9 +78,9 @@
   </label>
 </body>
 <script>
-  let checkbox = document.querySelector('.slide .checkbox');
-  let btn = document.querySelector('.slide .my-button');
-  let circle = document.querySelector('.slide .my-button .circle');
+  let checkbox = document.querySelector(".slide .checkbox");
+  let btn = document.querySelector(".slide .my-button");
+  let circle = document.querySelector(".slide .my-button .circle");
   const btnOffset = btn.getBoundingClientRect(); // 获取元素相对于视窗位置集合
   const btnLeft = btnOffset.left; // 距离页面左侧位置
   const btnStyle = getComputedStyle(btn); // 获取元素渲染后的样式
@@ -99,17 +99,18 @@
     }
   }
   // 按下鼠标
-  circle.addEventListener('mousedown', (e) => {
+  circle.addEventListener("mousedown", (e) => {
     circleMouseOffset = e.offsetX; // 记录鼠标与圆形滑块左侧位置
-    circle.style.transitionDuration = '0s'; // 拖动时禁用动画
-    btn.addEventListener('mousemove', mouseMove); // 移动鼠标事件
-    btn.addEventListener('mouseup', clearListeners); // 抬起鼠标
-    btn.addEventListener('mouseleave', leave); // 鼠标移出按钮事件
-  })
+    circle.style.transitionDuration = "0s"; // 拖动时禁用动画
+    btn.addEventListener("mousemove", mouseMove); // 移动鼠标事件
+    btn.addEventListener("mouseup", clearListeners); // 抬起鼠标
+    btn.addEventListener("mouseleave", leave); // 鼠标移出按钮事件
+  });
 
-  function leave(e){
+  function leave(e) {
     let left = parseInt(circleStyle.left);
-    if (left < (circleLeftRange[0] + circleLeftRange[1]) / 2 ){ // 移动小于一半
+    if (left < (circleLeftRange[0] + circleLeftRange[1]) / 2) {
+      // 移动小于一半
       checkbox.checked = false;
     } else {
       checkbox.checked = true;
@@ -119,13 +120,12 @@
   
   // 清除事件
   function clearListeners(e) {
-    circle.style.left = '';
-    circle.style.transitionDuration = '';
-    btn.removeEventListener('mousemove', mouseMove);
-    btn.removeEventListener('mouseleave', leave);
-    btn.removeEventListener('mouseup', clearListeners);
+    circle.style.left = "";
+    circle.style.transitionDuration = "";
+    btn.removeEventListener("mousemove", mouseMove);
+    btn.removeEventListener("mouseleave", leave);
+    btn.removeEventListener("mouseup", clearListeners);
   }
-
 </script>
 
 </html>

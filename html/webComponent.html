@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh_CN">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -47,58 +47,58 @@
     <ul is="my-ul" data-items='["aa","bb"]'></ul>
 </body>
 <script>
-    function removeMyTemplate(){
-        let myTemp = document.querySelector('.myTemplate');
-        myTemp.remove();
+    function removeMyTemplate() {
+      let myTemp = document.querySelector(".myTemplate");
+      myTemp.remove();
     }
-    function addMyTemplate(){
-        let myTemp = document.createElement('my-template');
-        myTemp.setAttribute('class', 'myTemplate');
-        myTemp.innerHTML = ` <h1 slot="myslot">插槽内容</h1>`;
-        let hr = document.querySelector('hr');
-        document.body.insertBefore(myTemp, hr);
+    function addMyTemplate() {
+      let myTemp = document.createElement("my-template");
+      myTemp.setAttribute("class", "myTemplate");
+      myTemp.innerHTML = ` <h1 slot="myslot">插槽内容</h1>`;
+      let hr = document.querySelector("hr");
+      document.body.insertBefore(myTemp, hr);
     }
-    function alterMyTemplateAttr(){
-        let myTemp = document.querySelector('.myTemplate');
-        myTemp.setAttribute('data-title', '修改的头部');
+    function alterMyTemplateAttr() {
+      let myTemp = document.querySelector(".myTemplate");
+      myTemp.setAttribute("data-title", "修改的头部");
     }
     
     // ------custom element
-    class MyPanel extends HTMLElement{
-        constructor() {
-            super();
-            const shadow = this.attachShadow({ mode: 'open' });
-            // let header = document.createElement('header');
-            // let title = document.createElement('div');
-            // title.classList.add('title');
-            // title.textContent = this.dataset.title || 'no header';
-            // header.append(title);
-            // let body = document.createElement('div');
-            // body.classList.add('body');
-            // body.textContent = this.dataset.body || 'no data';
-            // let slot = document.createElement('slot');
-            // body.appendChild(slot);
+    class MyPanel extends HTMLElement {
+      constructor() {
+        super();
+        const shadow = this.attachShadow({ mode: "open" });
+        // let header = document.createElement('header');
+        // let title = document.createElement('div');
+        // title.classList.add('title');
+        // title.textContent = this.dataset.title || 'no header';
+        // header.append(title);
+        // let body = document.createElement('div');
+        // body.classList.add('body');
+        // body.textContent = this.dataset.body || 'no data';
+        // let slot = document.createElement('slot');
+        // body.appendChild(slot);
     
-            // let style = document.createElement('style');
-            // style.textContent = `
-            //     header{
-            //         background-color: #ddd;
-            //         padding: 10px;
-            //     }
-            //     header .title {
-            //         font-size: 20px;
-            //         font-weight: bolder;
-            //     }
-            //     .body{
-            //         border: 1px solid #ddd;
-            //         padding: 10px;
-            //     }
-            // `;
-            // shadow.appendChild(style);
-            // shadow.appendChild(header);
-            // shadow.appendChild(body);
+        // let style = document.createElement('style');
+        // style.textContent = `
+        //     header{
+        //         background-color: #ddd;
+        //         padding: 10px;
+        //     }
+        //     header .title {
+        //         font-size: 20px;
+        //         font-weight: bolder;
+        //     }
+        //     .body{
+        //         border: 1px solid #ddd;
+        //         padding: 10px;
+        //     }
+        // `;
+        // shadow.appendChild(style);
+        // shadow.appendChild(header);
+        // shadow.appendChild(body);
     
-            shadow.innerHTML += `
+        shadow.innerHTML += `
                 <style>
                     header{
                         background-color: #ddd;
@@ -114,63 +114,63 @@
                     }    
                 </style>
                 <header>
-                    <div class="title">${this.dataset.title || 'no header'}</div>
+                    <div class="title">${this.dataset.title || "no header"}</div>
                 </header>
                 <div class="body">
-                    ${this.dataset.body || 'no data'}
+                    ${this.dataset.body || "no data"}
                     <slot></slot>
                 </div>
             `;
-        }
+      }
     }
-    customElements.define('my-panel', MyPanel);
-
+    customElements.define("my-panel", MyPanel);
 
     class MyUl extends HTMLUListElement {
-        constructor() {
-            super();
-            this.style.width = '100px';
-            this.style.height = '100px';
-            this.style.backgroundColor = '#aaa';
-            let items = eval(this.dataset.items);
-            items.forEach(item => {
-                let li = document.createElement('li');
-                li.textContent = item
-                this.appendChild(li);
-            })
-        }
+      constructor() {
+        super();
+        this.style.width = "100px";
+        this.style.height = "100px";
+        this.style.backgroundColor = "#aaa";
+        let items = eval(this.dataset.items);
+        items.forEach((item) => {
+          let li = document.createElement("li");
+          li.textContent = item;
+          this.appendChild(li);
+        });
+      }
     }
-    customElements.define('my-ul', MyUl, { extends: 'ul' });
+    customElements.define("my-ul", MyUl, { extends: "ul" });
 
-    customElements.define("my-template",
-        class extends HTMLElement{
-            constructor() {
-                super();
-                /** @type{HTMLTemplateElement}*/
-                let template = document.querySelector('#aTemplate');
-                let shadowRoot = this.attachShadow({ mode: 'open' });
-                let templateContent = template.content;
-                let fgmt = templateContent.cloneNode(true);
-                shadowRoot.appendChild(fgmt);
-            }
-            connectedCallback(){
-                console.log('当自定义元素第一次被连接到文档DOM时被调用');
-                // alert('当自定义元素第一次被连接到文档DOM时被调用');
-            }
-            disconnectedCallback(){
-                console.log('自定义元素与文档dom断开连接时被调用');
-                alert('自定义元素与文档dom断开连接时被调用');
-            }
-            adoptedCallback(){
-                console.log('自定义元素被移动到新文档时被调用');
-                alert('自定义元素被移动到新文档时被调用')
-            }
-            attributeChangedCallback(){
-                // 浏览器未实现？不支持?
-                console.log('自定义元素的一个属性被增加、移除或更改时被调用');
-                alert('自定义元素的一个属性被增加、移除或更改时被调用');
-            }
+    customElements.define(
+  "my-template",
+      class extends HTMLElement {
+        constructor() {
+          super();
+          /** @type{HTMLTemplateElement}*/
+          let template = document.querySelector("#aTemplate");
+          let shadowRoot = this.attachShadow({ mode: "open" });
+          let templateContent = template.content;
+          let fgmt = templateContent.cloneNode(true);
+          shadowRoot.appendChild(fgmt);
         }
-    )
+        connectedCallback() {
+          console.log("当自定义元素第一次被连接到文档DOM时被调用");
+          // alert('当自定义元素第一次被连接到文档DOM时被调用');
+        }
+        disconnectedCallback() {
+          console.log("自定义元素与文档dom断开连接时被调用");
+          alert("自定义元素与文档dom断开连接时被调用");
+        }
+        adoptedCallback() {
+          console.log("自定义元素被移动到新文档时被调用");
+          alert("自定义元素被移动到新文档时被调用");
+        }
+        attributeChangedCallback() {
+          // 浏览器未实现？不支持?
+          console.log("自定义元素的一个属性被增加、移除或更改时被调用");
+          alert("自定义元素的一个属性被增加、移除或更改时被调用");
+        }
+      }
+    );
 </script>
 </html>
