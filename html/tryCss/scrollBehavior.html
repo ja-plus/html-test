@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scroll behavior</title>
+</head>
+<style>
+  body{
+    margin: 0;
+    scroll-behavior: smooth;
+  }
+  nav{
+    position: sticky;
+    top: 0px;
+    border: 1px solid #aaa;
+    padding: 10px;
+    background-color: #eee;
+  }
+  .page{
+    height: 100vh;
+    border: 1px solid #aaa;
+    font-size: 80px;
+    display: flex;
+    align-items: center;
+    justify-content:center
+  }
+</style>
+<body>
+  <nav>
+    <a href="#A">A</a>
+    <a href="#B">B</a>
+    <a href="#C">C</a>
+  </nav>
+  <div id="A" class="page">A</div>
+  <div id="B" class="page">B</div>
+  <div id="C" class="page">C</div>
+</body>
+</html>
