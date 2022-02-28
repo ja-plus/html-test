@@ -7,61 +7,70 @@
     <title>Document</title>
 </head>
 <body>
-    <button id="fetch">fetch</button>
-    <button id="abort">AbortController</button>
+    
 </body>
 <!-- <script type="module">
     /* -------basic request---------------*/
-    import jatch from '../js/utils/jafetch.js';
+    import jafetch from "../js/utils/jafetch.js";
     const body = document.body;
-    jatch.get('http://localhost:8080/getTestData', {
-        params: { type: 'aa' },
-        mode: 'cors',
+    jafetch
+  .get("http://localhost:8080/getTestData", {
+        params: { type: "aa", data: "ddd" },
+        mode: "cors",
         // credentials: 'include',
         // responseType: 'text'
-    }).then(res => {
-        console.log(res, 'get: ok');
-        body.innerText += 'GET: ok,' + JSON.stringify(res) + '\n';
-    });
+      })
+  .then((res) => {
+        console.log(res, "get: ok");
+        body.innerText += "GET: ok," + JSON.stringify(res) + "\n";
+  });
 
-    jatch.post('http://localhost:8080/postTestData', {
-        params: { id: '11' },
-        body: { type: 'json' },
-        mode: 'cors',
-    }).then(res => {
-        console.log(res, 'post jons: ok');
-        body.innerText += 'POST json: ok,' + JSON.stringify(res) + '\n';
-    });
+    jafetch
+  .post("http://localhost:8080/postTestData", {
+        params: { id: "11" },
+        body: { type: "json" },
+        mode: "cors",
+      })
+  .then((res) => {
+        console.log(res, "post jons: ok");
+        body.innerText += "POST json: ok," + JSON.stringify(res) + "\n";
+  });
 
     let formData = new FormData();
-    formData.append('type', 'formData');
+    formData.append("type", "formData");
 
-    jatch.post('http://localhost:8080/postTestData', {
-        params: { id: '11' },
+    jafetch
+  .post("http://localhost:8080/postTestData", {
+        params: { id: "11" },
         body: formData,
-        mode: 'cors',
-    }).then(res => {
-        console.log(res, 'post form data: ok');
-        body.innerText += 'POST form data: ok,' + JSON.stringify(res) + '\n';
-    });
+        mode: "cors",
+      })
+  .then((res) => {
+        console.log(res, "post form data: ok");
+        body.innerText += "POST form data: ok," + JSON.stringify(res) + "\n";
+  });
 
-    jatch.put('http://localhost:8080/putTestData', {
-        params: { id: 'pp' },
-        body: { type: 'put' },
-        mode: 'cors',
-    }).then(res => {
-        console.log(res, 'put json: ok');
-        body.innerText += 'PUT json: ok,' + JSON.stringify(res) + '\n';
-    });
+    jafetch
+  .put("http://localhost:8080/putTestData", {
+        params: { id: "pp" },
+        body: { type: "put" },
+        mode: "cors",
+      })
+  .then((res) => {
+        console.log(res, "put json: ok");
+        body.innerText += "PUT json: ok," + JSON.stringify(res) + "\n";
+  });
 
-    jatch.del('http://localhost:8080/delTestData', {
-        params: { id: 'del' },
-        body: { type: 'delete' },
-        mode: 'cors',
-    }).then(res => {
-        console.log(res, 'delete : ok');
-        body.innerText += 'DELETE : ok,' + JSON.stringify(res) + '\n';
-    });
+    jafetch
+  .del("http://localhost:8080/delTestData", {
+        params: { id: "del" },
+        body: { type: "delete" },
+        mode: "cors",
+      })
+  .then((res) => {
+        console.log(res, "delete : ok");
+        body.innerText += "DELETE : ok," + JSON.stringify(res) + "\n";
+  });
 </script> -->
 <script type="module">
     /* ------------interceptors-----------------*/
@@ -72,18 +81,18 @@
     });
 
     Service.interceptors.request.use(
-  (url, config) => {
+      (url, config) => {
         config.headers.userToken = "11111";
         return config;
       },
-  (err) => {
+      (err) => {
         console.log("request interceptor err:", err);
         return Promise.reject(err);
       }
-);
+    );
 
     Service.interceptors.response.use(
-  (data, conf) => {
+      (data, conf) => {
         if (data.code === 1) {
           console.log(data, conf, "response interceptor: ok");
           document.body.innerText +=
@@ -93,11 +102,11 @@
           return Promise.reject("response.data.code is " + data.code);
         }
       },
-  (err) => {
+      (err) => {
         console.log("response interceptor err:", err);
         return Promise.reject(err);
       }
-);
+    );
 
     // Service.get('http://localhost:8080/getTestData', {
     //     params: { type: 'aa' },
@@ -183,9 +192,12 @@
         controller.abort();
     });
 </script> -->
+
+
 <script type="module">
     /* test interceptor abortController*/
     import jafetch from "../js/utils/jafetch.js";
+    import h from "../js/utils/h.js";
     let Service = jafetch.create();
     let cacheArr = [];
     Service.interceptors.request.use((url, config) => {
@@ -206,9 +218,9 @@
     Service.interceptors.response.use((url, config) => {
       cacheArr = cacheArr.filter((item) => !item.canceled); // 仅保留未清除的,对象回收
     });
-
-    const fetchBtn = document.querySelector("#fetch");
-    const abortBtn = document.querySelector("#abort");
+    const fetchBtn = h("button", "fetch");
+    const abortBtn = h("button", "AnortController");
+    document.body.append(fetchBtn, abortBtn);
     fetchBtn.addEventListener("click", () => {
       console.log("发起fetch 请求... 4s后返回结果");
       Service.get("http://localhost:8080/timeoutTestData", {

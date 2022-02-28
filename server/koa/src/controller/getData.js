@@ -34,7 +34,7 @@ exports.getTestData = async function (ctx) {
 };
 exports.postTestData = async function (ctx) {
   let data = ctx.request.body; // 请求头必须要 Content-Type: application/json
-  console.log("get headers:", ctx.request.headers);
+  // console.log("get headers:", ctx.request.headers);
   console.log("post query:", ctx.request.query);
   console.log("post body:", data);
   ctx.body = {

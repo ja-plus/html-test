@@ -5,15 +5,16 @@
  ***********/
 /**
  * 拼接url参数
+ * @param {String} url url字符串
  * @param {Object} params url参数对象
  * @returns {String}
  */
-function _createUrlParamStr(params) {
-  let str = "?";
+function _createUrlParamStr(url, params) {
+  let tmpUrl = new URL(url);
   for (const key in params) {
-    str += key + "=" + params[key] + "&";
+    tmpUrl.searchParams.append(key, params[key]);
   }
-  return str === "?" ? "" : str.substring(0, str.length - 1);
+  return tmpUrl.href;
 }
 
 /**
@@ -24,7 +25,7 @@ function _createUrlParamStr(params) {
 function _originRequest(url, config) {
   const params = config.params;
   // 拼url参数
-  if (params) url += _createUrlParamStr(params);
+  if (params) url = _createUrlParamStr(url, params);
 
   if (config.body) {
     // conf.body is object
