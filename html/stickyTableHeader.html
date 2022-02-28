@@ -63,12 +63,13 @@
   /*table 2*/
   table.collapse-separate{
     border-collapse: separate;
-    border-spacing: 0; 
+    border-spacing: 1px; 
+    background-color:#aaa;
   }
   table.collapse-separate td,
   table.collapse-separate th {
     background-color: #fff;
-    border: 1px solid #aaa;
+    /* border: 1px solid #aaa; */
   }
 </style>
 <style>
@@ -119,7 +120,7 @@
   </div>
   <div class="table-wrapper" >
     <table class="collapse-separate">
-      <caption>border-collapse:separate</caption>
+      <caption>separate + background</caption>
       <thead>
         <tr> <th>No.</th> <th>Name</th> </tr>
       </thead>
@@ -129,7 +130,7 @@
   </div>
   <div class="table-wrapper" >
     <table class="fix-col">
-      <caption>separate fix-col</caption>
+      <caption>separate + border</caption>
       <thead> </thead>
       <tbody> </tbody>
     </table>
