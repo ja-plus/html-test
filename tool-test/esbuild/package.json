@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build":"esbuild officialDoc/app.jsx --bundle --outfile=officical/out.js"
+    "bd":"node ./build.js"
   },
   "author": "",
   "license": "ISC",
