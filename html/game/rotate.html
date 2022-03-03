@@ -60,20 +60,20 @@
 </body>
 <script>
   let arr = [4, 1, 1, 1];
-  let btn1 = document.querySelector("#btn1");
-  let btn2 = document.querySelector("#btn2");
-  let btn3 = document.querySelector("#btn3");
-  let btn4 = document.querySelector("#btn4");
+  let btn1 = document.querySelector('#btn1');
+  let btn2 = document.querySelector('#btn2');
+  let btn3 = document.querySelector('#btn3');
+  let btn4 = document.querySelector('#btn4');
   updateBtnNum();
   function updateBtnNum() {
     btn1.textContent = arr[0];
-    btn1.className = "r" + arr[0];
+    btn1.className = 'r' + arr[0];
     btn2.textContent = arr[1];
-    btn2.className = "r" + arr[1];
+    btn2.className = 'r' + arr[1];
     btn3.textContent = arr[2];
-    btn3.className = "r" + arr[2];
+    btn3.className = 'r' + arr[2];
     btn4.textContent = arr[3];
-    btn4.className = "r" + arr[3];
+    btn4.className = 'r' + arr[3];
   }
   function updateArr(e, i) {
     arr[i] = e.target.value;
@@ -118,7 +118,7 @@ function checkFinish() {
       btn4.textContent == 1
     ) {
       setTimeout(() => {
-        alert("成功！");
+        alert('成功！');
       }, 200);
   }
 }

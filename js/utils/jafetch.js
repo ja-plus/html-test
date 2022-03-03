@@ -29,21 +29,21 @@ function _originRequest(url, config) {
 
   if (config.body) {
     // conf.body is object
-    if (!(config.body instanceof FormData) && typeof config.body === "object") {
+    if (!(config.body instanceof FormData) && typeof config.body === 'object') {
       config.headers = Object.assign(
         {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         config.headers || {}
       );
       try {
         config.body = JSON.stringify(config.body);
       } catch (e) {
-        throw new Error("cannot stringify body json");
+        throw new Error('cannot stringify body json');
       }
     }
   }
-  if (!config.credentials) config.credentials = "same-origin"; // 自 2017 年 8 月 25 日以后，默认的 credentials 政策变更为 same-origin
+  if (!config.credentials) config.credentials = 'same-origin'; // 自 2017 年 8 月 25 日以后，默认的 credentials 政策变更为 same-origin
 
   return fetch(url, config);
 }
@@ -59,10 +59,10 @@ function _requestAdapter(type, url, config = {}) {
   const responseType = config.responseType;
   return _originRequest(url, config).then((response) => {
     if (response.ok) {
-      if (responseType === "blob") return response.blob();
-      if (responseType === "text") return response.text();
-      if (responseType === "arraybuffer") return response.arrayBuffer();
-      if (responseType === "response") return response; // response.body
+      if (responseType === 'blob') return response.blob();
+      if (responseType === 'text') return response.text();
+      if (responseType === 'arraybuffer') return response.arrayBuffer();
+      if (responseType === 'response') return response; // response.body
       return response.json();
     } else {
       return Promise.reject({
@@ -78,7 +78,7 @@ function _requestAdapter(type, url, config = {}) {
  * @returns
  */
 function _get(url, config) {
-  return _requestAdapter("GET", url, config);
+  return _requestAdapter('GET', url, config);
 }
 /**
  * @param {String} url
@@ -86,7 +86,7 @@ function _get(url, config) {
  * @returns
  */
 function _post(url, config) {
-  return _requestAdapter("POST", url, config);
+  return _requestAdapter('POST', url, config);
 }
 /**
  * @param {String} url
@@ -94,7 +94,7 @@ function _post(url, config) {
  * @returns
  */
 function _put(url, config) {
-  return _requestAdapter("PUT", url, config);
+  return _requestAdapter('PUT', url, config);
 }
 /**
  * @param {String} url
@@ -102,7 +102,7 @@ function _put(url, config) {
  * @returns
  */
 function _del(url, config) {
-  return _requestAdapter("DELETE", url, config);
+  return _requestAdapter('DELETE', url, config);
 }
 
 class Interceptor {
@@ -113,14 +113,14 @@ class Interceptor {
   /** @type {Function} */
   onRejected = null;
   use(onFulfilled, onRejected) {
-    if (onFulfilled && typeof onFulfilled !== "function") {
+    if (onFulfilled && typeof onFulfilled !== 'function') {
       throw new TypeError(
-        "interceptor.add(onFulfilled, onRejected), parameter onFulfilled is not a function"
+        'interceptor.add(onFulfilled, onRejected), parameter onFulfilled is not a function'
       );
     }
-    if (onRejected && typeof onRejected !== "function") {
+    if (onRejected && typeof onRejected !== 'function') {
       throw new TypeError(
-        "interceptor.add(onFulfilled, onRejected), parameter onRejected is not a function"
+        'interceptor.add(onFulfilled, onRejected), parameter onRejected is not a function'
       );
     }
     this.onFulfilled = onFulfilled;
@@ -168,11 +168,11 @@ class Service {
         if (response.ok) {
           const responseType = assignedConf.responseType;
           let prom;
-          if (responseType === "blob") prom = response.blob();
-          else if (responseType === "text") prom = response.text();
-          else if (responseType === "arraybuffer")
+          if (responseType === 'blob') prom = response.blob();
+          else if (responseType === 'text') prom = response.text();
+          else if (responseType === 'arraybuffer')
             prom = response.arrayBuffer();
-          else if (responseType === "response") prom = response;
+          else if (responseType === 'response') prom = response;
           // response.body
           else prom = response.json();
           return prom.then((data) => {
@@ -206,19 +206,19 @@ class Service {
     return fetchPromise;
   }
   get(url, config = {}) {
-    config.method = "GET";
+    config.method = 'GET';
     return this.#requestAdapter(url, config);
   }
   post(url, config = {}) {
-    config.method = "POST";
+    config.method = 'POST';
     return this.#requestAdapter(url, config);
   }
   put(url, config = {}) {
-    config.method = "PUT";
+    config.method = 'PUT';
     return this.#requestAdapter(url, config);
   }
   del(url, config = {}) {
-    config.method = "DELETE";
+    config.method = 'DELETE';
     return this.#requestAdapter(url, config);
   }
 }

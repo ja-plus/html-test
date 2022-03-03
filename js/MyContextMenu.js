@@ -3,9 +3,9 @@
  * 问题，多次new 会一直向dom中添加元素
  * TODO: 图标
  */
-import h from "./utils/h.js";
-import debounce from "./utils/debounce.js";
-const _wrapperClassName = "mycontextmenu";
+import h from './utils/h.js';
+import debounce from './utils/debounce.js';
+const _wrapperClassName = 'mycontextmenu';
 const _mainMenuWidth = 200;
 const _childMenuWidth = 150;
 const _menuItemHeight = 24;
@@ -109,9 +109,9 @@ class MyContextMenu {
    * @param {String} type ['main' | 'child']
    * @returns {HTMLElement}
    */
-  #createMenuEle(items, type = "main", mainContextMenuEle) {
+  #createMenuEle(items, type = 'main', mainContextMenuEle) {
     let contextMenuEle;
-    if (type === "main") {
+    if (type === 'main') {
       contextMenuEle = h(
         `ul.${_wrapperClassName}`,
         {
@@ -123,13 +123,13 @@ class MyContextMenu {
         },
         [
           ...items.map((it) => {
-            if (it.type === "divide" || it.type?.indexOf("--") === 0) {
-              return h("li.divide");
+            if (it.type === 'divide' || it.type?.indexOf('--') === 0) {
+              return h('li.divide');
             }
             return h(
-              "li",
+              'li',
               {
-                classList: it.disabled ? ["disabled"] : [],
+                classList: it.disabled ? ['disabled'] : [],
                 onclick: (e) => {
                   if (!it.disabled) {
                     it.onclick && it.onclick(e, contextMenuEle.payload);
@@ -141,16 +141,16 @@ class MyContextMenu {
                   : () => this.#hideChildMenu(contextMenuEle),
               },
               [
-                h("span.label", it.label),
-                it.tip && h("span.tip", it.tip),
-                type === "main" && it.children && h("span.right-arrow"),
+                h('span.label', it.label),
+                it.tip && h('span.tip', it.tip),
+                type === 'main' && it.children && h('span.right-arrow'),
               ]
             );
           }),
         ]
       );
     }
-    if (type === "child") {
+    if (type === 'child') {
       contextMenuEle = h(
         `ul.${_wrapperClassName}.${_wrapperClassName}_child`,
         {
@@ -162,13 +162,13 @@ class MyContextMenu {
         },
         [
           ...items.map((child) => {
-            if (child.type === "divide" || child.type?.indexOf("--") === 0) {
-              return h("li.divide");
+            if (child.type === 'divide' || child.type?.indexOf('--') === 0) {
+              return h('li.divide');
             }
             return h(
-              "li",
+              'li',
               {
-                classList: child.disabled ? ["disabled"] : [],
+                classList: child.disabled ? ['disabled'] : [],
                 onclick: (e) => {
                   if (!child.disabled) {
                     child.onclick &&
@@ -178,8 +178,8 @@ class MyContextMenu {
                 },
               },
               [
-                h("span.label", child.label),
-                child.tip && h("span.tip", child.tip),
+                h('span.label', child.label),
+                child.tip && h('span.tip', child.tip),
               ]
             );
           }),
@@ -189,10 +189,10 @@ class MyContextMenu {
     return contextMenuEle;
   }
   #injectCss() {
-    let style = document.querySelector("#myContextMenu");
+    let style = document.querySelector('#myContextMenu');
     if (!style) {
       // if not be injected
-      style = h("style#myContextMenu", {
+      style = h('style#myContextMenu', {
         innerHTML: _cssStr,
       });
       document.head.appendChild(style);
@@ -205,7 +205,7 @@ class MyContextMenu {
       this.#clickEventFunc = () => {
         this.hideMenu();
       };
-      window.addEventListener("click", this.#clickEventFunc);
+      window.addEventListener('click', this.#clickEventFunc);
     }
   }
   /**
@@ -219,13 +219,13 @@ class MyContextMenu {
     /** @type {HTMLElement} */
     let childMenuEle = e.target.querySelector(`ul.${_wrapperClassName}_child`);
     if (!childMenuEle) {
-      childMenuEle = this.#createMenuEle(children, "child", contextMenuEle);
+      childMenuEle = this.#createMenuEle(children, 'child', contextMenuEle);
       e.target.appendChild(childMenuEle);
     }
     // if childMenuEle is hidden
-    if (!childMenuEle.style.display || childMenuEle.style.display === "none") {
-      e.target.classList.add(_wrapperClassName + "_hover");
-      childMenuEle.style.display = "block";
+    if (!childMenuEle.style.display || childMenuEle.style.display === 'none') {
+      e.target.classList.add(_wrapperClassName + '_hover');
+      childMenuEle.style.display = 'block';
 
       const childMenuHeight = parseFloat(getComputedStyle(childMenuEle).height);
       const liPosition = e.target.getBoundingClientRect();
@@ -252,10 +252,10 @@ class MyContextMenu {
     // remove main menu selected
     let hovers = contextMenuEle.querySelectorAll(`.${_wrapperClassName}_hover`);
     hovers.forEach((li) => {
-      li.classList.remove(_wrapperClassName + "_hover");
+      li.classList.remove(_wrapperClassName + '_hover');
       // close child menu
       let childMenu = li.querySelector(`ul.${_wrapperClassName}`);
-      childMenu.style.display = "none";
+      childMenu.style.display = 'none';
     });
   }
   /** when adjust window size */
@@ -267,7 +267,7 @@ class MyContextMenu {
         height: window.innerHeight,
       };
     });
-    window.addEventListener("resize", resizeFunc);
+    window.addEventListener('resize', resizeFunc);
   }
   /** open menu */
   showContextMenuFunc(contextMenuEle, payload) {
@@ -276,12 +276,12 @@ class MyContextMenu {
     contextMenuEle.payload = payload;
     return (e) => {
       this.#storeEle.forEach((ele) => {
-        if (ele !== contextMenuEle) ele.style.display = "none"; // close other menus
+        if (ele !== contextMenuEle) ele.style.display = 'none'; // close other menus
       });
       e.preventDefault();
       e.stopPropagation(); // 防止触发祖先元素定义的contextmenu事件
       this.#hideChildMenu(contextMenuEle);
-      contextMenuEle.style.display = "block";
+      contextMenuEle.style.display = 'block';
 
       const mainMenuHeight = parseFloat(
         getComputedStyle(contextMenuEle).height
@@ -301,7 +301,7 @@ class MyContextMenu {
   }
   hideMenu() {
     this.#storeEle.forEach((contextMenuEle) => {
-      contextMenuEle.style.display = "none";
+      contextMenuEle.style.display = 'none';
       this.#hideChildMenu(contextMenuEle);
     });
   }

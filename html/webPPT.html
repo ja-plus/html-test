@@ -96,69 +96,69 @@
   </div>
 </body>
 <script>
-  let wp = document.querySelector(".web-ppt");
-  let pages = document.querySelectorAll(".web-ppt>.page");
+  let wp = document.querySelector('.web-ppt');
+  let pages = document.querySelectorAll('.web-ppt>.page');
   let _isMini = false;
   let i = 0;
   pages.forEach((page, i) => {
-    page.id = "page" + i;
-    page.addEventListener("click", (e) => {
+    page.id = 'page' + i;
+    page.addEventListener('click', (e) => {
       if (_isMini) {
         e.stopPropagation(); // stop to wp.addEventListener('click'
         i = Number(e.target.id.match(/\d+/)[0]);
         for (let j = 0; j < i; j++) {
-          pages[j].classList.remove("active");
-          pages[j].classList.add("leave");
+          pages[j].classList.remove('active');
+          pages[j].classList.add('leave');
         }
-        pages[i].classList.remove("leave");
-        pages[i].classList.add("active");
+        pages[i].classList.remove('leave');
+        pages[i].classList.add('active');
         for (let j = i + 1; j < pages.length; j++) {
-          pages[j].classList.remove("leave");
-          pages[j].classList.remove("active");
+          pages[j].classList.remove('leave');
+          pages[j].classList.remove('active');
         }
         toggleMiniPage();
       }
     });
   });
-  wp.addEventListener("wheel", (e) => {
+  wp.addEventListener('wheel', (e) => {
     if (e.wheelDeltaY < 0) {
       nextPage();
     } else {
       lastPage();
     }
   });
-  wp.addEventListener("click", (e) => {
+  wp.addEventListener('click', (e) => {
     nextPage();
   });
 
   function nextPage() {
     if (!_isMini && i <= pages.length) {
-      pages[i - 1]?.classList.remove("active");
-      pages[i - 1]?.classList.add("leave");
-      pages[i].classList.add("active");
+      pages[i - 1]?.classList.remove('active');
+      pages[i - 1]?.classList.add('leave');
+      pages[i].classList.add('active');
       i++;
     }
   }
   function lastPage() {
     if (!_isMini && i > 0) {
       i--;
-      pages[i].classList.remove("active");
-      pages[i - 1]?.classList.remove("leave");
-      pages[i - 1]?.classList.add("active");
+      pages[i].classList.remove('active');
+      pages[i - 1]?.classList.remove('leave');
+      pages[i - 1]?.classList.add('active');
     }
   }
 
-  window.addEventListener("keydown", (e) => {
+  window.addEventListener('keydown', (e) => {
     e.preventDefault();
-    if (e.shiftKey && e.code === "Tab") {
-      console.log("tab");
+    if (e.shiftKey && e.code === 'Tab') {
+      console.log('tab');
       toggleMiniPage();
     }
   });
-  window.addEventListener("keyup", (e) => {
+  window.addEventListener('keyup', (e) => {
     e.preventDefault();
   });
-  window.addEventListener("blur", (e) => {});
+  window.addEventListener('blur', (e) => {});
 
   function toggleMiniPage() {
     const scale = 0.2;
@@ -172,10 +172,10 @@
           Math.floor(i / 4) * minHeight + 10
         }px; transform-origin: left top;transform:scale(${scale});border:1px solid #aaa`;
         // page.style.cssText = `width:300px;height:200px;left: ${i * 300 + 20 * (i + 1)}px;top: ${Math.floor(i / 4) * 200 + 10}px;transform:none;border:1px solid #aaa`;
-        page.classList.add("mini-hover");
+        page.classList.add('mini-hover');
       } else {
-        page.style.cssText = "transform-origin: left top;";
-        page.classList.remove("mini-hover");
+        page.style.cssText = 'transform-origin: left top;';
+        page.classList.remove('mini-hover');
       }
     });
   }

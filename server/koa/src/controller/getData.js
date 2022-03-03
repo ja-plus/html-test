@@ -1,5 +1,5 @@
-const fs = require("fs");
-const getData = require("../service/spider");
+const fs = require('fs');
+const getData = require('../service/spider');
 
 exports.getData = async function (ctx) {
   let cookie = ctx.request.body.cookie;
@@ -10,23 +10,23 @@ exports.saveData = async function (ctx) {
   let data = ctx.request.query.data;
   console.log(data);
   ctx.body = {
-    data: "hello world",
+    data: 'hello world',
   };
 };
 
 exports.getTestData = async function (ctx) {
   let data = ctx.request.query;
   // console.log('get headers:', ctx.request.headers);
-  console.log("get cookies:", ctx.cookies.get("name"));
-  console.log("get query:", data);
-  console.log("get body:", data);
-  ctx.cookies.set("name", "serverSetCookie", {
+  console.log('get cookies:', ctx.cookies.get('name'));
+  console.log('get query:', data);
+  console.log('get body:', data);
+  ctx.cookies.set('name', 'serverSetCookie', {
     // secure: true,
     // sameSite: 'none'
   });
   ctx.body = {
     code: 1,
-    type: "get",
+    type: 'get',
     query: ctx.request.query,
     body: data,
   };
@@ -35,11 +35,11 @@ exports.getTestData = async function (ctx) {
 exports.postTestData = async function (ctx) {
   let data = ctx.request.body; // 请求头必须要 Content-Type: application/json
   // console.log("get headers:", ctx.request.headers);
-  console.log("post query:", ctx.request.query);
-  console.log("post body:", data);
+  console.log('post query:', ctx.request.query);
+  console.log('post body:', data);
   ctx.body = {
     code: 1,
-    type: "post",
+    type: 'post',
     query: ctx.request.query,
     body: data,
   };
@@ -47,20 +47,20 @@ exports.postTestData = async function (ctx) {
 };
 exports.putTestData = async function (ctx) {
   let data = ctx.request.body;
-  console.log("put query:", ctx.request.query);
-  console.log("put body:", data);
+  console.log('put query:', ctx.request.query);
+  console.log('put body:', data);
   ctx.body = {
-    type: "put",
+    type: 'put',
     query: ctx.request.query,
     body: data,
   };
 };
 exports.delTestData = async function (ctx) {
   let data = ctx.request.body;
-  console.log("delete query:", ctx.request.query);
-  console.log("delete body:", data);
+  console.log('delete query:', ctx.request.query);
+  console.log('delete body:', data);
   ctx.body = {
-    type: "delete",
+    type: 'delete',
     query: ctx.request.query,
     body: data,
   };
@@ -68,7 +68,7 @@ exports.delTestData = async function (ctx) {
 
 /** 延时 */
 exports.timeoutTestData = async function (ctx) {
-  console.log("get query:", ctx.request.query);
+  console.log('get query:', ctx.request.query);
   const query = ctx.request.query;
   let timeout = +query.timeout || 2000;
   await new Promise((resolve) => {

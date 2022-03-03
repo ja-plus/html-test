@@ -41,14 +41,14 @@
 </body>
 <script>
     function exportTable() {
-      let wb = window.XLSX.utils.table_to_book(document.querySelector(".table"));
+      let wb = window.XLSX.utils.table_to_book(document.querySelector('.table'));
       console.log(wb);
       let wbout = window.XLSX.write(wb, {
-        bookType: "xlsx", // 要生成的文件类型
+        bookType: 'xlsx', // 要生成的文件类型
         bookSST: false, // 是否生成Shared String Table，官方解释是，如果开启生成速度会下降，但在低版本IOS设备上有更好的兼容性
-        type: "binary",
+        type: 'binary',
       });
-      let blob = new Blob([s2ab(wbout)], { type: "application/octet-stream" });
+      let blob = new Blob([s2ab(wbout)], { type: 'application/octet-stream' });
       download(blob);
     }
     function s2ab(s) {
@@ -59,9 +59,9 @@
     }
     function download(blob) {
       let url = URL.createObjectURL(blob);
-      let a = document.createElement("a");
+      let a = document.createElement('a');
       a.href = url;
-      a.download = "export_table_book.xlsx";
+      a.download = 'export_table_book.xlsx';
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
@@ -69,35 +69,35 @@
 
     function aoa_to_sheet() {
       let aoa = [
-        ["姓名", "性别", "年龄"],
-        ["王五", "女", 20],
-        ["一二", "男", 22],
+        ['姓名', '性别', '年龄'],
+        ['王五', '女', 20],
+        ['一二', '男', 22],
       ];
       let sheet = window.XLSX.utils.aoa_to_sheet(aoa);
       let wbout = window.XLSX.write(
         {
-          SheetNames: ["工作表"],
+          SheetNames: ['工作表'],
           Sheets: {
             工作表: sheet,
           },
         },
         {
-          bootType: "xlsx",
+          bootType: 'xlsx',
           bootSST: false,
-          type: "binary",
+          type: 'binary',
         }
   );
-      console.log("wbout :>> ", wbout);
-      let blob = new Blob([s2ab(wbout)], { type: "application/octet-stream" });
+      console.log('wbout :>> ', wbout);
+      let blob = new Blob([s2ab(wbout)], { type: 'application/octet-stream' });
       download(blob);
     }
 
     function json_to_sheet() {
       let jsonArr = [
         // { name: 'name', age: 'age' }, //此行做表头，skipHeader: true
-        { name: "11", age: "2" },
-        { name: "22", age: "1" },
-        { name: "33", age: "3" },
+        { name: '11', age: '2' },
+        { name: '22', age: '1' },
+        { name: '33', age: '3' },
       ];
       // let opt = {
       //     header: ['name', 'age'],
@@ -106,18 +106,18 @@
       let sheet = window.XLSX.utils.json_to_sheet(jsonArr /* , opt */);
       let wbout = window.XLSX.write(
         {
-          SheetNames: ["jsonToSheet"],
+          SheetNames: ['jsonToSheet'],
           Sheets: {
             jsonToSheet: sheet,
           },
         },
         {
-          bootType: "xlsx",
+          bootType: 'xlsx',
           bootSST: false,
-          type: "binary",
+          type: 'binary',
         }
       );
-  let blob = new Blob([s2ab(wbout)], { type: "application/octet-stream" });
+  let blob = new Blob([s2ab(wbout)], { type: 'application/octet-stream' });
       download(blob);
     }
 
@@ -126,14 +126,14 @@
       let fr = new FileReader();
       fr.onload = (ev) => {
         let str = ev.target.result;
-        let wb = window.XLSX.read(str, { type: "binary" });
+        let wb = window.XLSX.read(str, { type: 'binary' });
         // console.log(wb);
         let json = window.XLSX.utils.sheet_to_json(wb.Sheets.jsonToSheet);
         // wb.Sheets.jsonToSheet.A1.v = '那么';
-        console.table(json, ["name", "age"]);
+        console.table(json, ['name', 'age']);
       };
       fr.readAsBinaryString(e.target.files[0]);
-      e.target.value = "";
+      e.target.value = '';
     }
 </script>
 </html>

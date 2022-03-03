@@ -1,10 +1,10 @@
 const ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPlugin');
 module.exports = {
   entry: {
-    app: './index.js'
+    app: './index.js',
   },
   devServer: {
-    port: 3000
+    port: 3000,
   },
   plugins: [
     new ModuleFederationPlugin({
@@ -15,8 +15,8 @@ module.exports = {
       exposes: {
         // 左边是使用该模块时import(${name}/ ${key})
         './index': './index',
-        './console': './func'
-      }
-    })
-  ]
+        './console': './func',
+      },
+    }),
+  ],
 };

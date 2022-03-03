@@ -26,64 +26,64 @@
     <div class="content2"> another element</div>
 </body>
 <script type="module">
-    import MyContextMenu from "../js/MyContextMenu.js";
-    const content = document.querySelector(".content");
-    const content2 = document.querySelector(".content2");
+    import MyContextMenu from '../js/MyContextMenu.js';
+    const content = document.querySelector('.content');
+    const content2 = document.querySelector('.content2');
 
     const myContextMenu = new MyContextMenu();
     let menu1 = myContextMenu.create({
       items: [
         {
-          label: "返回",
-          tip: "返回上一页",
+          label: '返回',
+          tip: '返回上一页',
           disabled: true,
           onclick() {
-            console.log("item1 click");
+            console.log('item1 click');
           },
         },
         {
-          label: "前进",
-          tip: "提示文字",
+          label: '前进',
+          tip: '提示文字',
           onclick(e, payload) {
-            console.log("item2 click", payload);
+            console.log('item2 click', payload);
           },
         },
         {
-          type: "divide",
+          type: 'divide',
         },
         {
-          label: "更多",
-          tip: "more",
+          label: '更多',
+          tip: 'more',
           children: [
             {
-              label: "二级菜单1",
+              label: '二级菜单1',
               disabled: true,
               onclick() {
-                console.log("二级菜单被点击");
+                console.log('二级菜单被点击');
               },
             },
-            { type: "divide" },
+            { type: 'divide' },
             {
-              label: "二级菜单2",
+              label: '二级菜单2',
               onclick(e, payload) {
-                console.log("二级菜单2被点击", payload);
+                console.log('二级菜单2被点击', payload);
               },
             },
           ],
         },
         {
-          label: "更多2",
+          label: '更多2',
           children: [
             {
-              label: "二级菜单2-1",
+              label: '二级菜单2-1',
               onclick() {
-                console.log("二级菜单2-1被点击");
+                console.log('二级菜单2-1被点击');
               },
             },
             {
-              label: "二级菜单2-2",
+              label: '二级菜单2-2',
               onclick() {
-                console.log("二级菜单2-2被点击");
+                console.log('二级菜单2-2被点击');
               },
             },
           ],
@@ -93,15 +93,15 @@
     let menu2 = myContextMenu.create({
       items: [
         {
-          label: "第一",
+          label: '第一',
           onclick() {
-            console.log("ggggg");
+            console.log('ggggg');
           },
         },
         {
-          label: "第二",
+          label: '第二',
           onclick() {
-            console.log("aaaaa");
+            console.log('aaaaa');
           },
         },
       ],
@@ -109,35 +109,35 @@
     let menu3 = myContextMenu.create({
       items: [
         {
-          label: "body1",
+          label: 'body1',
           onclick() {
-            console.log("body1");
+            console.log('body1');
           },
         },
         {
-          label: "body2",
+          label: 'body2',
           onclick() {
-            console.log("body2");
+            console.log('body2');
           },
           children: [
             {
-              label: "二级菜单1",
+              label: '二级菜单1',
               onclick() {
-                console.log("二级菜单被点击");
+                console.log('二级菜单被点击');
               },
             },
-            { type: "------------" },
+            { type: '------------' },
             {
-              label: "二级菜单2",
+              label: '二级菜单2',
               onclick() {
-                console.log("二级菜单2被点击");
+                console.log('二级菜单2被点击');
               },
             },
           ],
         },
       ],
     });
-    content.oncontextmenu = myContextMenu.showContextMenuFunc(menu1, "datadata");
+    content.oncontextmenu = myContextMenu.showContextMenuFunc(menu1, 'datadata');
     content2.oncontextmenu = myContextMenu.showContextMenuFunc(menu2);
     window.oncontextmenu = myContextMenu.showContextMenuFunc(menu3);
     // remove contextmenu

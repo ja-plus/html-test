@@ -20,8 +20,8 @@
 
 </body>
 <script>
-  const pwd = document.querySelector("#pwd");
-  const pwdChar = "●";
+  const pwd = document.querySelector('#pwd');
+  const pwdChar = '●';
   let tout = null; // timeout
   let p = []; // password
   function handleInput(e) {
@@ -32,7 +32,7 @@
 
     if (tout) {
       // console.log(pwd.value);
-      let pwdArr = pwd.value.split("");
+      let pwdArr = pwd.value.split('');
       for (let i = 0; i < pwdArr.length; i++) {
         if (pwdArr[i] === inputChar) {
           if (i !== pwdArr.length - 1) {
@@ -44,7 +44,7 @@
           pwdArr[i] = pwdChar; // 非原字符都变星号
         }
       }
-      pwd.value = pwdArr.join("");
+      pwd.value = pwdArr.join('');
       clearTimeout(tout);
     }
 
@@ -53,7 +53,7 @@
       tout = null;
     }, 1000);
 
-    console.log(p.join(""));
+    console.log(p.join(''));
   }
 </script>
 </html>

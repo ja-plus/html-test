@@ -49,10 +49,10 @@
     const lineHeight = 20; // 行高
     const total = 10000; // 总数
     const sumHeight = lineHeight * total; // 总高度
-    const outerEle = document.querySelector(".outer");
-    const innerEle = document.querySelector(".inner");
-    let liEles = document.querySelectorAll(".inner li");
-    outerEle.addEventListener("scroll", (e) => {
+    const outerEle = document.querySelector('.outer');
+    const innerEle = document.querySelector('.inner');
+    let liEles = document.querySelectorAll('.inner li');
+    outerEle.addEventListener('scroll', (e) => {
       let scrollTop = e.target.scrollTop;
       if (
         scrollTop <= sumHeight - 10 * lineHeight ||
@@ -60,7 +60,7 @@
       ) {
         let i = Math.ceil(scrollTop / lineHeight); // 从第几个数开始
         innerEle.style.marginTop =
-          scrollTop - (lineHeight - (i % lineHeight)) + "px";
+          scrollTop - (lineHeight - (i % lineHeight)) + 'px';
         // 周期减去一个数，假装有滚动效果
         liEles.forEach((ele, index) => {
           ele.textContent = i + index;

@@ -18,22 +18,23 @@ module.exports = {
         corejs: '3.21',
         targets: {
           // esmodules: true,
-          chrome: 49
+          chrome: 49,
           // browsers: ['chrome > 49']
         },
         // shippedProposals: true
-      }
-    ]
+      },
+    ],
   ],
   plugins: [
-    // [
-    //   '@babel/plugin-transform-runtime',
-    //   {
-    //     corejs: 3, // 配置这个polyfill方法才不污染全局
-    //   }
-    // ]
+    [
+      // _regeneratorRuntime 用于async await
+      '@babel/plugin-transform-runtime',
+      {
+        corejs: 3, // 配置这个polyfill方法才不污染全局
+      },
+    ],
     // "@babel/plugin-transform-arrow-functions",
     // "@babel/plugin-transform-exponentiation-operator",
     // '@babel/plugin-proposal-object-rest-spread'
-  ]
+  ],
 };

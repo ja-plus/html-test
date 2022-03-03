@@ -12,7 +12,7 @@ export default class MyTooltip {
 
   showTimeout = null;
   // config
-  content = ""; // 文字
+  content = ''; // 文字
   delay = 500;
   offset = [16, 0];
   /**
@@ -39,7 +39,7 @@ export default class MyTooltip {
     this.initListeners();
   }
   initTooltip() {
-    this.tooltip = document.createElement("div");
+    this.tooltip = document.createElement('div');
     this.tooltip.textContent = this.content;
     this.tooltip.style.cssText = ` 
       font-size: 14px;
@@ -56,9 +56,9 @@ export default class MyTooltip {
     this.mountedEle.append(this.tooltip);
   }
   initListeners() {
-    this.targetEle.addEventListener("mousemove", this.mouseMove.bind(this));
-    this.targetEle.addEventListener("mouseleave", () => {
-      this.tooltip.style.display = "none";
+    this.targetEle.addEventListener('mousemove', this.mouseMove.bind(this));
+    this.targetEle.addEventListener('mouseleave', () => {
+      this.tooltip.style.display = 'none';
       clearTimeout(this.showTimeout);
     });
   }
@@ -66,12 +66,12 @@ export default class MyTooltip {
    * @param {Event} e
    */
   mouseMove(e) {
-    this.tooltip.style.display = "none";
+    this.tooltip.style.display = 'none';
     clearTimeout(this.showTimeout);
     this.showTimeout = setTimeout(() => {
-      this.tooltip.style.left = e.x + this.offset[0] + "px";
-      this.tooltip.style.top = e.y + this.offset[1] + "px";
-      this.tooltip.style.display = "inline-block";
+      this.tooltip.style.left = e.x + this.offset[0] + 'px';
+      this.tooltip.style.top = e.y + this.offset[1] + 'px';
+      this.tooltip.style.display = 'inline-block';
     }, this.delay);
   }
 }

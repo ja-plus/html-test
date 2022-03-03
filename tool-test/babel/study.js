@@ -15,10 +15,13 @@ Object.entries({});
 new Promise(() => {});
 new Map();
 
-class Parent{}
+class Parent {}
 [].flat();
 new Vue({});
 String('a').matchAll('a', '1');
 structuredClone({ a: 1 });
 
 Promise.allSettled([Promise.resolve()]);
+async function asaw() {
+  await Promise.resolve();
+}

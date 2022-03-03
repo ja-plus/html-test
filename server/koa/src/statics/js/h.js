@@ -22,19 +22,19 @@ export default function h(tag, attrs, children) {
 
   if (Array.isArray(attrs)) {
     children = attrs;
-  } else if (typeof attrs === "object" && attrs !== null) {
+  } else if (typeof attrs === 'object' && attrs !== null) {
     for (const attr in attrs) {
-      if (attr === "style") {
+      if (attr === 'style') {
         for (const key in attrs.style) {
           elem.style[key] = attrs.style[key];
         }
-      } else if (attr === "classList" && Array.isArray(attrs[attr])) {
+      } else if (attr === 'classList' && Array.isArray(attrs[attr])) {
         classArr = classArr.concat(attrs[attr]);
       } else {
         elem[attr] = attrs[attr];
       }
     }
-  } else if (typeof attrs === "string" || typeof attrs === "number") {
+  } else if (typeof attrs === 'string' || typeof attrs === 'number') {
     elem.textContent = String(attrs);
   }
 
@@ -42,7 +42,7 @@ export default function h(tag, attrs, children) {
     children.forEach((child) => {
       if (child instanceof HTMLElement) elem.appendChild(child);
       else if (child !== null && child !== undefined)
-        console.error(child, "not instance of HTMLElement");
+        console.error(child, 'not instance of HTMLElement');
     });
   }
 

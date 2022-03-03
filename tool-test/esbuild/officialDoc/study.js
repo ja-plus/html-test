@@ -13,9 +13,9 @@ Object.entries({});
 // 新增API
 new Promise(() => {});
 let map = new Map();
-map.set("k", "v");
+map.set('k', 'v');
 let set = new Set();
-set.add("v");
+set.add('v');
 
 class Parent {
   static a = 1;
@@ -29,7 +29,7 @@ let parent = new Parent();
 let numSplit = 1_000_000;
 console.log(numSplit);
 [].flat();
-String("a").matchAll("a", "1");
+String('a').matchAll('a', '1');
 structuredClone({ a: 1 });
 
 Promise.allSettled([Promise.resolve()]);

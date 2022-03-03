@@ -1,17 +1,17 @@
 module.exports = {
   presets: [
     [
-      "@babel/preset-env",
+      '@babel/preset-env',
       {
         modules: false,
-        useBuiltIns: "entry", // webpack在使用usage配置时会出问题
+        useBuiltIns: 'entry', // webpack在使用usage配置时会出问题
         corejs: 3,
         targets: {
           chrome: 49,
         },
       },
     ],
-    "@babel/preset-react",
+    '@babel/preset-react',
   ],
   plugins: [
     // [

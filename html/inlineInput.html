@@ -55,15 +55,15 @@
   </fieldset>
 </body>
 <script>
-  let inputInner = document.querySelector("#inputInner");
-  let outInput = document.querySelector("#inputOuter");
-  inputInner.addEventListener("focus", (e) => {
-    outInput.classList.add("active");
+  let inputInner = document.querySelector('#inputInner');
+  let outInput = document.querySelector('#inputOuter');
+  inputInner.addEventListener('focus', (e) => {
+    outInput.classList.add('active');
   });
-  inputInner.addEventListener("blur", (e) => {
+  inputInner.addEventListener('blur', (e) => {
     if (!inputInner.value)
       // input失焦时如果无内容则移除active class
-      outInput.classList.remove("active");
+      outInput.classList.remove('active');
   });
 </script>
 </html>

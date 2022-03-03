@@ -49,11 +49,11 @@
 <script>
     class Calendar {
       weekI18n = {
-        en: ["Sun", "Mon", "Tue", "Wen", "Thu", "Fir", "Sat"],
+        en: ['Sun', 'Mon', 'Tue', 'Wen', 'Thu', 'Fir', 'Sat'],
       };
       constructor() {
-        this.calendarHeader = this.myh("div", { class: "header" });
-        this.calendarBody = this.myh("div", { class: "body" });
+        this.calendarHeader = this.myh('div', { class: 'header' });
+        this.calendarBody = this.myh('div', { class: 'body' });
         this.month = 7;
         this.year = 2021;
       }
@@ -63,7 +63,7 @@
         // header
         let headerWeekNames = this.weekI18n.en; // TODO: i18n
         headerWeekNames.forEach((name) => {
-          let item = this.myh("div", { class: "week" }, name);
+          let item = this.myh('div', { class: 'week' }, name);
           this.calendarHeader.append(item);
         });
         this.calendar.append(this.calendarHeader, this.calendarBody);
@@ -95,10 +95,10 @@
         }
         date.setDate(0);
         let lastMonthLastDate = date.getDate();
-        daysArr.unshift({ day: lastMonthLastDate, class: "gray" });
+        daysArr.unshift({ day: lastMonthLastDate, class: 'gray' });
         lastMonthDate--;
         for (let i = 1; i <= lastMonthDate; i++) {
-          daysArr.unshift({ day: lastMonthLastDate - i, class: "gray" });
+          daysArr.unshift({ day: lastMonthLastDate - i, class: 'gray' });
         }
         // thisMonth
         let day = 1;
@@ -113,7 +113,7 @@
         // nextMonth
         let resetDay = 7 * 6 - daysArr.length;
         for (let i = 1; i <= resetDay; i++) {
-          daysArr.push({ day: i, class: "gray" });
+          daysArr.push({ day: i, class: 'gray' });
         }
         // console.log(daysArr);
         return daysArr;
@@ -123,7 +123,7 @@
       drawCalendarBody(daysArr) {
         let fgmt = document.createDocumentFragment();
         daysArr.forEach((item) => {
-          let div = this.myh("div", { class: "cube" });
+          let div = this.myh('div', { class: 'cube' });
           if (item.class) div.classList.add(item.class);
           div.textContent = item.day;
           fgmt.append(div);
@@ -145,7 +145,7 @@
         /** @type{HTMLElement}*/
         let ele = document.createElement(tag);
         for (const key in attrs) {
-          if (key === "class") {
+          if (key === 'class') {
             ele.classList.add(attrs[key]);
           } else {
             ele[key] = attrs[key];
@@ -157,7 +157,7 @@
     }
 
     let calendar = new Calendar();
-    calendar.init(document.querySelector("#calendar"));
+    calendar.init(document.querySelector('#calendar'));
 
     function yearChange(ele) {
       calendar.updateCalendar(ele.value);

@@ -1,27 +1,27 @@
-const path = require("path");
-const ModuleFederationPlugin = require("webpack/lib/container/ModuleFederationPlugin");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-const { ESBuildPlugin } = require("esbuild-loader");
-const SpeedMeasurePlugin = require("speed-measure-webpack-plugin");
+const path = require('path');
+const ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPlugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { ESBuildPlugin } = require('esbuild-loader');
+const SpeedMeasurePlugin = require('speed-measure-webpack-plugin');
 const smp = new SpeedMeasurePlugin();
 module.exports = smp.wrap({
   entry: {
-    app: "./src/app.js",
-    federation: "./src/federation.js",
-    reactapp: "./src/reactApp.jsx",
+    app: './src/app.js',
+    federation: './src/federation.js',
+    reactapp: './src/reactApp.jsx',
   },
   devServer: {
     static: {
-      directory: path.join(__dirname, "public"),
+      directory: path.join(__dirname, 'public'),
     },
     compress: true,
     port: 8080,
     open: true,
   },
   resolve: {
-    extensions: [".js", ".json"], // 解析扩展。（当我们通过路导入文件，找不到改文件时，会尝试加入这些后缀继续寻找文件）
+    extensions: ['.js', '.json'], // 解析扩展。（当我们通过路导入文件，找不到改文件时，会尝试加入这些后缀继续寻找文件）
     alias: {
-      "@": path.join(__dirname, "..", "src"), // 在项目中使用@符号代替src路径，导入文件路径更方便
+      '@': path.join(__dirname, '..', 'src'), // 在项目中使用@符号代替src路径，导入文件路径更方便
     },
   },
   module: {
@@ -29,33 +29,34 @@ module.exports = smp.wrap({
       {
         test: /\.jsx$/, // 一个匹配loaders所处理的文件的拓展名的正则表达式，这里用来匹配js和jsx文件（必须）
         exclude: /node_modules/, // 屏蔽不需要处理的文件（文件夹）（可选）
-        loader: "babel-loader", // loader的名称（必须）
+        loader: 'babel-loader', // loader的名称（必须）
       },
       {
         test: /\.m?js$/,
-        loader: "esbuild-loader",
+        loader: 'esbuild-loader',
+        exclude: /node_modules/,
         options: {
-          target: "es2015",
+          target: 'es2015',
         },
       },
       {
         test: /\.css$/,
-        use: ["style-loader", "css-loader", "postcss-loader"],
+        use: ['style-loader', 'css-loader', 'postcss-loader'],
       },
     ],
   },
   plugins: [
     new ESBuildPlugin(),
     new ModuleFederationPlugin({
-      name: "app",
+      name: 'app',
       // library: { type: 'var', name: 'app' },
       remotes: {
-        remoteApp: "app@http://localhost:3000/remoteEntry",
+        remoteApp: 'app@http://localhost:3000/remoteEntry',
       },
     }),
     new HtmlWebpackPlugin({
-      template: "./public/index.html",
-      filename: "index.html",
+      template: './public/index.html',
+      filename: 'index.html',
       inject: true, // true：默认值，script标签位于html文件的 body 底部
       hash: true, // 在打包的资源插入html会加上hash
       //  html 文件进行压缩

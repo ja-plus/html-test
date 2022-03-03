@@ -1,10 +1,10 @@
-import Vue from "vue";
+import Vue from 'vue';
 /**
  * 参数是距离顶部的偏移量
  * 使用
  * <div v-sticky="10"></div>
  */
-Vue.directive("sticky", {
+Vue.directive('sticky', {
   inserted(el, binding) {
     const rect = el.getBoundingClientRect();
     /** 这里加上滚动条的位置，原因：
@@ -27,12 +27,12 @@ Vue.directive("sticky", {
                     box-shadow: 0 0 15px #ddd;
                 `;
       } else {
-        el.style.cssText = "";
+        el.style.cssText = '';
       }
     };
-    window.addEventListener("scroll", window.stickyScrollCallback);
+    window.addEventListener('scroll', window.stickyScrollCallback);
   },
   unbind() {
-    window.removeEventListener("scroll", window.stickyScrollCallback);
+    window.removeEventListener('scroll', window.stickyScrollCallback);
   },
 });

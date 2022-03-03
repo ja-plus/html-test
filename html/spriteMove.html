@@ -51,36 +51,36 @@
   <div class="background"></div>
 </body>
 <script>
-  let sprite = document.querySelector(".background");
+  let sprite = document.querySelector('.background');
   let keyPressFlag = false;
-  document.addEventListener("keydown", (e) => {
+  document.addEventListener('keydown', (e) => {
     if (keyPressFlag) return;
     let keyCode = e.keyCode;
-    console.log("keyCode :>> ", keyCode);
+    console.log('keyCode :>> ', keyCode);
     keyPressFlag = true;
     if ([37, 38, 39, 40].includes(+keyCode)) {
-      sprite.classList.add("move");
+      sprite.classList.add('move');
       switch (keyCode) {
         case 39:
-          move("right");
+          move('right');
           break;
         case 37:
-          move("left");
+          move('left');
           break;
         case 38:
-          move("up");
+          move('up');
           break;
         case 40:
-          move("down");
+          move('down');
           break;
       }
     }
   });
-  document.addEventListener("keyup", (e) => {
+  document.addEventListener('keyup', (e) => {
     let keyCode = e.keyCode;
     if ([39, 37, 38, 40].includes(+keyCode)) {
       keyPressFlag = false;
-      sprite.classList.remove("move");
+      sprite.classList.remove('move');
     }
   });
 
@@ -89,20 +89,20 @@
   let moveSpeed = 5;
   function move(direction) {
     if (keyPressFlag) {
-      if (["right", "left"].includes(direction)) {
+      if (['right', 'left'].includes(direction)) {
         if (left < window.innerWidth - 200 && left >= 0) {
-          if (direction == "right") left += moveSpeed;
-          if (direction == "left") left -= moveSpeed;
-          sprite.style.setProperty("--left", left + "px");
+          if (direction == 'right') left += moveSpeed;
+          if (direction == 'left') left -= moveSpeed;
+          sprite.style.setProperty('--left', left + 'px');
         }
       } else {
         if (
           sprite.offsetTop < window.innerHeight - 200 &&
           sprite.offsetTop >= -10
         ) {
-          if (direction == "up") y -= moveSpeed;
-          if (direction == "down") y += moveSpeed;
-          sprite.style.setProperty("--top", y + "px");
+          if (direction == 'up') y -= moveSpeed;
+          if (direction == 'down') y += moveSpeed;
+          sprite.style.setProperty('--top', y + 'px');
         }
       }
       requestAnimationFrame(() => {

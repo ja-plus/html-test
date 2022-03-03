@@ -13,7 +13,7 @@
     <div id="echarts" style="height: 600px;width:800px"></div>
 </body>
 <script>
-    let myChart = window.echarts.init(document.getElementById("echarts"));
+    let myChart = window.echarts.init(document.getElementById('echarts'));
     let base = +new Date(1988, 9, 3);
     let oneDay = 24 * 3600 * 1000;
     let data = [[base, Math.random() * 300]];
@@ -24,33 +24,33 @@
     let tmpArr = []; // 存放已经显示的年份数组
     let option = {
       tooltip: {
-        trigger: "axis",
+        trigger: 'axis',
         position: function (pt) {
-          return [pt[0], "10%"];
+          return [pt[0], '10%'];
         },
       },
       grid: {
         bottom: 90,
       },
       title: {
-        left: "center",
-        text: "Large Ara Chart",
+        left: 'center',
+        text: 'Large Ara Chart',
       },
       toolbox: {
         feature: {
           dataZoom: {
-            yAxisIndex: "none",
+            yAxisIndex: 'none',
           },
           restore: {},
           saveAsImage: {},
         },
       },
       xAxis: {
-        type: "time",
+        type: 'time',
         boundaryGap: false,
         axisLabel: {
           formatter: (val, index) => {
-            let date = new Date(val).toLocaleDateString().replace(/\//g, "-");
+            let date = new Date(val).toLocaleDateString().replace(/\//g, '-');
             let year = date.substring(0, 4);
             console.log(date, index);
             if (!tmpArr.includes(year)) {
@@ -77,12 +77,12 @@
             // -----end 方案1
             // -----方案2画竖线
             paddingLeft: {
-              align: "left",
+              align: 'left',
               width: 8,
             },
             verticalLine: {
-              align: "left",
-              borderColor: "#000",
+              align: 'left',
+              borderColor: '#000',
               borderWidth: 0.5, // 由于是左右border，所以画0.5 + 0.5 = 1
               height: 6,
             },
@@ -91,26 +91,26 @@
         },
       },
       yAxis: {
-        type: "value",
-        boundaryGap: [0, "100%"],
+        type: 'value',
+        boundaryGap: [0, '100%'],
       },
       dataZoom: [
-        { type: "inside", start: 0, end: 20 },
+        { type: 'inside', start: 0, end: 20 },
         { start: 0, end: 20 },
       ],
       series: [
         {
-          name: "Fake Data",
-          type: "line",
+          name: 'Fake Data',
+          type: 'line',
           smooth: true,
-          symbol: "none",
+          symbol: 'none',
           areaStyle: {},
           data: data,
         },
       ],
     };
     myChart.setOption(option);
-    myChart.on("datazoom", () => {
+    myChart.on('datazoom', () => {
       tmpArr = []; // 拖动dataZoom 时，重置该数组
     });
 </script>

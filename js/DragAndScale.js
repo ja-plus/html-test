@@ -38,33 +38,33 @@ export default class DragAndScale {
       linstenerEle instanceof HTMLElement
         ? linstenerEle
         : document.querySelector(linstenerEle);
-    this.listenerEle.style.cursor = "move";
+    this.listenerEle.style.cursor = 'move';
     this.targetEle =
       targetEle instanceof HTMLElement
         ? targetEle
         : document.querySelector(targetEle);
-    this.targetEle.style.transformOrigin = "center";
+    this.targetEle.style.transformOrigin = 'center';
     this.initEventListener();
   }
   initEventListener() {
     if (this.listenerEle) {
       this.listenerEle.addEventListener(
-        "wheel",
+        'wheel',
         (this.onWheelCb = this.onWheel.bind(this))
       );
       this.listenerEle.addEventListener(
-        "mousedown",
+        'mousedown',
         (this.onMouseDownCb = this.onMouseDown.bind(this))
       );
       this.listenerEle.addEventListener(
-        "mousemove",
+        'mousemove',
         (this.onMouseMoveCb = this.onMouseMove.bind(this))
       );
       this.listenerEle.addEventListener(
-        "mouseup",
+        'mouseup',
         (this.onMouseUpCb = this.onMouseUp.bind(this))
       );
-      this.listenerEle.addEventListener("mouseleave", this.onMouseUpCb);
+      this.listenerEle.addEventListener('mouseleave', this.onMouseUpCb);
     }
   }
   /**
@@ -106,11 +106,11 @@ export default class DragAndScale {
   }
   removeListeners() {
     if (this.listenerEle) {
-      this.listenerEle.removeEventListener("wheel", this.onWheelCb);
-      this.listenerEle.removeEventListener("mousedown", this.onMouseDownCb);
-      this.listenerEle.removeEventListener("mousemove", this.onMouseMoveCb);
-      this.listenerEle.removeEventListener("mouseup", this.onMouseUpCb);
-      this.listenerEle.removeEventListener("mouseleave", this.onMouseDownCb);
+      this.listenerEle.removeEventListener('wheel', this.onWheelCb);
+      this.listenerEle.removeEventListener('mousedown', this.onMouseDownCb);
+      this.listenerEle.removeEventListener('mousemove', this.onMouseMoveCb);
+      this.listenerEle.removeEventListener('mouseup', this.onMouseUpCb);
+      this.listenerEle.removeEventListener('mouseleave', this.onMouseDownCb);
     }
   }
   /**
