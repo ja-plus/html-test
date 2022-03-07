@@ -10,7 +10,7 @@
 export default {
   components:{Inject},
 props:{
-  data: String
+  data: Number
 },
 provide() {
   return {

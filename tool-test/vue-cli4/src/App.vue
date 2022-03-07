@@ -5,6 +5,9 @@
     <CompositionAPI user="props.user"/>
     <Provider :data="num" />
     <button @click="num++">+++</button>
+    <button @click="updateObj" @mouseover="updateObj">updateObj</button>
+    <button @click="updateObj2" @mouseover="updateObj2">updateOBj</button>
+    {{obj}}
   </div>
 </template>
 
@@ -21,7 +24,20 @@ export default {
   },
   data(){
     return {
-      num: 0
+      num: 0,
+      obj:{}
+    }
+  },
+  methods:{
+    updateObj(){
+      // this.$delete(this.obj, 'isHover')
+      // this.obj.isHover = false
+      console.log('aaa');
+      this.$set(this.obj, 'isHover', false)
+    },
+    updateObj2(){
+      console.log('bbb');
+      this.$set(this.obj, 'isHover', true)
     }
   }
 }

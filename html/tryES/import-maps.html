@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>import-maps</title>
+</head>
+<body>
+  
+</body>
+<!-- importmap 内为json -->
+<script type="importmap">
+  {
+    "imports":{
+      "h": "../../js/utils/h.js",
+      "utils/": "../../js/utils/",
+      "js/": "../../js/"
+    }
+  }
+</script>
+<script type="module">
+  import h from 'h';
+  document.body.append(h('h1', 'hello world'));
+</script>
+<script type="module">
+  import MyTooltip from 'js/Mytooltip.js';
+  new MyTooltip(document.body, { content: 'hello tooltip' });
+</script>
+</html>
