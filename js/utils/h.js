@@ -18,7 +18,6 @@ export default function h(tag, attrs, children) {
 
   let elem = document.createElement(tag);
   if (id) elem.id = id[0].substring(1);
-  if (classArr) elem.classList.add(...classArr);
 
   if (Array.isArray(attrs)) {
     children = attrs;
@@ -38,6 +37,7 @@ export default function h(tag, attrs, children) {
     elem.textContent = String(attrs);
   }
 
+  if (classArr) elem.classList.add(...classArr);
   if (children) {
     children.forEach((child) => {
       if (child instanceof HTMLElement) elem.appendChild(child);
