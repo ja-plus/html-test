@@ -29,12 +29,8 @@ export default class MyTooltip {
     this.content = content;
     if (delay) this.delay = delay;
     if (offset) this.offset = offset;
-    this.targetEle =
-      target instanceof HTMLElement ? target : document.querySelector(target);
-    this.mountedEle =
-      mounted instanceof HTMLElement
-        ? mounted
-        : document.querySelector(mounted) || document.body;
+    this.targetEle = target instanceof HTMLElement ? target : document.querySelector(target);
+    this.mountedEle = mounted instanceof HTMLElement ? mounted : document.querySelector(mounted) || document.body;
     this.initTooltip();
     this.initListeners();
   }
