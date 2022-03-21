@@ -15,7 +15,7 @@ module.exports = {
          * 使用useBuiltIns 需要定义corejs版本，不定义默认为2
          * 注意：这里写corejs: 3的话为3.0，所以一定要带小版本号
          */
-        corejs: '3.21',
+        corejs: '3.21.1',
         targets: {
           // esmodules: true,
           chrome: 49,

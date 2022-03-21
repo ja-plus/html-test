@@ -6,6 +6,7 @@
 import Vue from 'vue/dist/vue.esm';
 import comm from './comm.js';
 console.log(comm.a);
+comm?.a;
 const study = () => {};
 const a = 1 ** 2;
 const arr = [11, ...[1, 2, 3]];
