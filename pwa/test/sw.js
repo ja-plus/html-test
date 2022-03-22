@@ -1,4 +1,4 @@
-var cacheName = 'minimal-pwa-6'; // 用来控制静态资源缓存
+var cacheName = 'minimal-pwa-2'; // 用来控制静态资源缓存
 
 var cacheList = ['/', 'index.html', 'main.css', 'favicon.ico', '../../html/img/searah.jpg', 'images/icon_256x256.png'];
 
@@ -9,10 +9,18 @@ self.addEventListener('install', e => {
     //     .open(cacheName)
     //     .then(cache => cache.addAll(cacheList))
     //     .then(() => self.skipWaiting()),
-    caches.open(cacheName).then(function (cache) {
-      console.log('[Service Worker] Caching all: app shell and content');
-      return cache.addAll(cacheList);
-    }),
+    caches
+      .open(cacheName)
+      .then(function (cache) {
+        console.log('[Service Worker] Caching all: app shell and content');
+        return cache.addAll(cacheList);
+      })
+      /**
+       * 改动相关js等缓存的静态文件后，更改cacheName，
+       * 则浏览器会直接使用新的service worker。
+       * 而非检测到sw有变更，等待当前sw停止后再更新（用户刷新）
+       */
+      .then(() => self.skipWaiting()),
   );
 });
 // 清除缓存
