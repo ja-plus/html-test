@@ -1,0 +1,17 @@
+{
+  "name": "一个PWA示例", // 允许单行注释
+  "short_name": "PWA示例",
+  "description": "App description",
+  "start_url": ".", // 如果以相对URL的形式给出，则基本URL将是manifest的URL
+  "display": "standalone",
+  "background_color": "#999",
+  "theme_color": "#3eaf7c",
+  "icons": [
+    {
+      "src": "/pwa/test/images/icon_256x256.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    }
+  ],
+  "lang": "zh-CN"
+}

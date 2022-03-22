@@ -1,6 +1,6 @@
-var cacheName = 'minimal-pwa-2';
+var cacheName = 'minimal-pwa-6'; // 用来控制静态资源缓存
 
-var cacheList = ['/', 'index.html', 'main.css', 'favicon.ico'];
+var cacheList = ['/', 'index.html', 'main.css', 'favicon.ico', '../../html/img/searah.jpg', 'images/icon_256x256.png'];
 
 self.addEventListener('install', e => {
   console.log('sw installed', e);
@@ -17,6 +17,7 @@ self.addEventListener('install', e => {
 });
 // 清除缓存
 self.addEventListener('activate', function (e) {
+  console.log('[Service Worker] Activated');
   e.waitUntil(
     caches.keys().then(function (keyList) {
       return Promise.all(
