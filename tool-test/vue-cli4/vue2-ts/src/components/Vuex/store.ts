@@ -9,7 +9,7 @@ const person:Person = {
     name: 'person name',
     age: 1
 }
-export default new Vuex.Store({
+const store =  new Vuex.Store({
     state: {
         count: 0,
         inputText: 'inputText',
@@ -29,3 +29,4 @@ export default new Vuex.Store({
         }
     }
 })
+export default store
