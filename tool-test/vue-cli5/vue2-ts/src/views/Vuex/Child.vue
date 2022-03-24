@@ -50,9 +50,13 @@ export default class Child extends Vue {
     return num;
   }
 
-  /**供父组件调用的ref 方法 */
-  refFunc(): void {
+  /**
+   * 供父组件调用的ref 方法
+   * @param {String} text 传入的参数
+   */
+  refFunc(text?: string): string {
     console.log('refFunc 被调用');
+    return text || '';
   }
 }
 </script>

@@ -1,6 +1,6 @@
 const { defineConfig } = require('@vue/cli-service');
 module.exports = defineConfig({
-  lintOnSave: 'warning',
+  lintOnSave: false,
   transpileDependencies: true,
   chainWebpack: config => {
     config.module

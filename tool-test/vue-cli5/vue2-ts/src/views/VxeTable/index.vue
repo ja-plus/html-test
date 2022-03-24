@@ -1,6 +1,5 @@
 <template>
   <div>
-    vxeTable
     <vxe-table
       ref="xTable"
       :max-height="400"
@@ -23,8 +22,9 @@ import VXETable from 'vxe-table';
 import 'vxe-table/lib/style.css';
 import { Component, Vue } from 'vue-property-decorator';
 Vue.use(VXETable);
+
 @Component
-export default class VxeTable extends Vue {
+export default class extends Vue {
   tableData = [
     { id: 10000, parentId: null, name: 'Test1', type: 'mp3', size: 1024, date: '2020-08-01' },
     { id: 10050, parentId: null, name: 'Test2', type: 'mp4', size: null, date: '2021-04-01' },
@@ -46,9 +46,9 @@ export default class VxeTable extends Vue {
     { id: 24577, parentId: 24555, name: 'Test18', type: 'js', size: 1024, date: '2021-06-01' },
   ];
   created(): void {
-    // for (let i = 0; i < 1000; i++) {
-    //   this.tableData.push({ id: 24578 + i, parentId: null, name: 'Test18', type: 'js', size: 1024, date: '2021-06-01' });
-    // }
+    for (let i = 0; i < 100; i++) {
+      this.tableData.push({ id: 24578 + i, parentId: null, name: 'Test' + (18 + i), type: 'js', size: 1024, date: '2021-06-01' });
+    }
   }
 }
 </script>

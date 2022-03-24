@@ -23,7 +23,7 @@ div
 <script lang="ts">
 import Child from './Child.vue';
 import { Component, Provide, Ref, Vue, Watch } from 'vue-property-decorator';
-import { mapActions } from 'vuex';
+// import { mapActions } from 'vuex';
 import store from './store';
 @Component({
   components: {

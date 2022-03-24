@@ -1,7 +1,6 @@
 import Vue from 'vue';
 import VueRouter, { RouteConfig } from 'vue-router';
 import Vuex from '../views/Vuex/index.vue';
-import vxeTable from '../views/VxeTable/index.vue';
 
 Vue.use(VueRouter);
 
@@ -23,6 +22,11 @@ const routes: Array<RouteConfig> = [
     path: '/vxeTable',
     name: 'vxeTable',
     component: () => import(/*webpackChunkName: "vxeTable" */ '../views/VxeTable/index.vue'),
+  },
+  {
+    path: '/pinia',
+    name: 'pinia',
+    component: () => import(/*webpackChunkName: "Pinia" */ '../views/Pinia/index.vue'),
   },
 ];
 

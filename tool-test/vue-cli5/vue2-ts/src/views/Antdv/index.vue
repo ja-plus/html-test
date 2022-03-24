@@ -1,6 +1,6 @@
 <template lang="pug">
   div
-    img(src="https://next.antdv.com/assets/logo.1ef800a8.svg" alt="Ant design vue" srcset="" style="height:20px;")
+    img(src="https://next.antdv.com/assets/logo.1ef800a8.svg" alt="Ant design vue" srcset="" style="height:60px;")
     Button
     Table
 </template>

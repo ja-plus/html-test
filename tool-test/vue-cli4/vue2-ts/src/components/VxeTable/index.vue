@@ -36,8 +36,9 @@ import VXETable from 'vxe-table';
 import 'vxe-table/lib/style.css';
 import {Component, Vue} from 'vue-property-decorator';
 Vue.use(VXETable)
+
 @Component
-export default class VxeTable extends Vue{
+export default class vxetable extends Vue{
   tableData = [
     { id: 10000, parentId: null, name: 'Test1', type: 'mp3', size: 1024, date: '2020-08-01' },
     { id: 10050, parentId: null, name: 'Test2', type: 'mp4', size: null, date: '2021-04-01' },

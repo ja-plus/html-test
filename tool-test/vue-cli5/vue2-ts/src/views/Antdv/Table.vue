@@ -3,7 +3,7 @@
     <template #action>
       <a href="javascript:;">action</a>
     </template>
-    <template #html="{ text }">
+    <template #html="text">
       <div v-html="text" />
     </template>
   </a-table>
@@ -13,13 +13,14 @@ import { Component, Vue } from 'vue-property-decorator';
 @Component
 export default class Table extends Vue {
   columns = [
+    // { title: 'Age', width: 100, dataIndex: 'age', key: 'age', fixed: 'left' },
     {
       title: 'Full Name',
       width: 100,
       dataIndex: 'name',
       key: 'name',
       children: [
-        { title: 'Age', width: 100, dataIndex: 'age', key: 'age', fixed: 'left' },
+        { title: 'Age', width: 100, dataIndex: 'age', key: 'age' /* , fixed: 'left'  children中不能用fixed*/ },
         { title: 'Column 1', dataIndex: 'address', key: '1' },
         { title: 'Column 2', dataIndex: 'address', key: '2' },
         { title: 'Column 3', dataIndex: 'address', key: '3' },

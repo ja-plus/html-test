@@ -2,12 +2,17 @@
   <div id="app">
     <nav>
       <router-link to="/">Vuex</router-link>
-      |<router-link to="/antdv">Antdv</router-link> |<router-link to="/vxeTable">VxeTable</router-link>
+      <span> | </span>
+      <router-link to="/antdv">Antdv</router-link>
+      <span> | </span>
+      <router-link to="/vxeTable">VxeTable</router-link>
+      <span> | </span>
+      <router-link to="/pinia">Pinia</router-link>
     </nav>
     <router-view />
   </div>
 </template>
-
+<script lang="ts"></script>
 <style lang="less">
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
