@@ -60,3 +60,70 @@ export default class Child extends Vue {
   }
 }
 </script>
+<!--
+<script lang="ts">
+import Vue from 'vue';
+import { mapState } from 'vuex';
+import store from './store';
+export default Vue.extend({
+  inject: {
+    provide: { from: 'provide' },
+    provideAlias: { from: 'provide' },
+  },
+  props: {
+    value: {
+      type: String,
+    },
+    name: {
+      type: String,
+      default: 'defaultName',
+    },
+    inputData: {
+      type: String,
+      default: 'no data',
+    },
+  },
+  computed: {
+    ...mapState(['count', 'inputText']), // 将没有类型检查
+    // count: () => store.state.count,
+    // inputText: () => store.state.inputText,
+    inputDataSync: {
+      get() {
+        return this.inputData;
+      },
+      set(value) {
+        this.$emit('update:inputData', value);
+      },
+    },
+    modelVal: {
+      get() {
+        return this.value;
+      },
+      set(val) {
+        this.$emit('input', val);
+      },
+    },
+  },
+  data() {
+    return {};
+  },
+  created() {},
+  mounted() {},
+  methods: {
+    btnClick(e: PointerEvent): void {
+      this.$emit('btnClick3', '不用装饰器');
+      this.$emit('btnClick2', 12);
+      this.$emit('btn-click', 'emit btn click', e);
+    },
+    /**
+     * 供父组件调用的ref 方法
+     * @param {String} text 传入的参数
+     */
+    refFunc(text?: string): string {
+      console.log('refFunc 被调用');
+      return text || '';
+    },
+  },
+});
+</script>
+-->

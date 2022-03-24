@@ -77,5 +77,60 @@ export default class extends Vue {
   }
 }
 </script>
+<!--
+<script lang="ts">
+import Vue from 'vue';
+import Child from './Child.vue';
+import store from './store';
+export default Vue.extend({
+  components: {
+    Child,
+  },
+  provide: {
+    provide: 'provideVal',
+  },
+  data() {
+    return {
+      name: 'propName',
+      inputData: '1',
+      childValue: '1',
+    };
+  },
+  computed: {
+    computedVal: {
+      get() {
+        return this.name + '_' + this.inputData; // 类型问题
+      },
+      set(val: string) {
+        const splitted = val.split('_');
+        this.name = splitted[0];
+        this.inputData = splitted[1];
+      },
+    },
+  },
+  watch: {
+    inputData(val: string) {
+      store.commit('increment'); // 没有代码提示
+      store.dispatch('updateInputText', val); // 没有代码提示
+    },
+  },
+  methods: {
+    callRefFunc(): void {
+      this.$refs.childComp.refFunc(); // 没有代码提示
+    },
 
+    btnClick(value: string, e: PointerEvent): void {
+      console.log('receive emit event:', value, e);
+    },
+
+    btnClick2(value: number): void {
+      console.log('revice emit evnet2:', value);
+    },
+    btnClick3(value: string): void {
+      console.log('revice emit evnet3:', value);
+    },
+  },
+});
+</script>
+-->
 <style lang="less" scoped></style>

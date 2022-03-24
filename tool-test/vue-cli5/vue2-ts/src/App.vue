@@ -12,7 +12,12 @@
     <router-view />
   </div>
 </template>
-<script lang="ts"></script>
+<script lang="ts">
+import { cloneDeep } from 'lodash-es';
+import axios from 'axios';
+// axios.get('http://localhost:8080/getTestData');
+export default {};
+</script>
 <style lang="less">
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
