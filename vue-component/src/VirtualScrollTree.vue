@@ -1,6 +1,13 @@
 <template>
   <div ref="container" class="vtScroll-tree" :style="{ height: height }">
-    <ul v-if="displayList.length" :style="ulStyle">
+    <ul
+      v-if="displayList.length"
+      :style="{
+        height: lineHeight * pageSize + 'px',
+        paddingTop: offsetTop + 'px',
+        paddingBottom: offsetBottom + 'px',
+      }"
+    >
       <li v-for="item in displayList" :key="item[assignedFields.key]">
         <div
           class="list-item"
@@ -94,8 +101,8 @@ export default {
       // v scroll
       startIndex: 0,
       endIndex: 30,
-      marginTop: 0,
-      marginBottom: 0,
+      offsetTop: 0,
+      offsetBottom: 0,
       pageSize: 30,
     };
   },
@@ -103,12 +110,6 @@ export default {
     /** 合并传入的fields */
     assignedFields() {
       return Object.assign({}, _defaultFields, this.replaceFields);
-    },
-    ulStyle() {
-      return {
-        marginTop: this.marginTop + 'px',
-        marginBottom: this.marginBottom + 'px',
-      };
     },
     /** 实际显示的列表*/
     displayList() {
@@ -118,38 +119,38 @@ export default {
     allHeight() {
       return this.treeDataFlat.length * this.lineHeight;
     },
+    /** 活动页面高度 */
+    mainPageHeight() {
+      return this.pageSize * this.lineHeight;
+    },
   },
   watch: {
     treeData() {
       // 列表发生改变，重置已选，重置虚拟滚动
-      this.reset();
+      this.init();
     },
   },
   mounted() {
-    this.reset();
     this.init();
-
     // event listener
     this.rootEl.addEventListener('scroll', this.setIndex);
-    window.addEventListener('resize', () => {
-      this.$nextTick(this.init);
-    });
+    // window.addEventListener('resize', () => {
+    //   this.$nextTick(this.init);
+    // });
   },
   methods: {
     init() {
       this.rootEl = document.querySelector('.vtScroll-tree');
       const containerHeight = this.rootEl.offsetHeight;
-      this.pageSize = Math.ceil(containerHeight / this.lineHeight) + 1; // +1 考虑上下各半行情况
+      this.pageSize = Math.floor(containerHeight / this.lineHeight + 1);
       this.startIndex = 0;
       this.endIndex = this.pageSize;
-    },
-    // 列表总数据改变，重置已选，重置虚拟滚动
-    reset() {
+      this.offsetTop = 0;
+      this.setTreeDataFlat('init'); // 展开树，获得总长度
+      this.offsetBottom = this.allHeight - this.mainPageHeight;
+
       this.selectedItems = [];
-      this.setTreeDataFlat('reset');
       this.setDefaultSelect(); // 设置默认选中状态
-      this.marginTop = 0;
-      this.marginBottom = this.allHeight - this.displayList.length * this.lineHeight;
     },
     setDefaultSelect() {
       this.treeDataFlat.forEach(obj => {
@@ -159,7 +160,7 @@ export default {
     },
     /**
      * 设置当前展开数组
-     * @param {String} type 'reset'
+     * @param {String} type 'init'
      */
     setTreeDataFlat(type) {
       const treeDataFlat = [];
@@ -173,7 +174,7 @@ export default {
             item.isCurrent = false; // 取消选中叶子节点
           }
           treeDataFlat.push(item);
-          if (type === 'reset') {
+          if (type === 'init') {
             item.isExpand = that.defaultExpandedKeys.includes(item[that.assignedFields.key]);
           }
           if (item.isExpand) {
@@ -186,14 +187,14 @@ export default {
     },
     /** 展开收起事件回调 */
     changeList(item) {
-      this.marginBottom = 0;
-      this.marginTop = 0;
+      this.offsetBottom = 0;
+      this.offsetTop = 0;
       // this.$set(item, 'isExpand', !item.isExpand);
       item.isExpand = !item.isExpand;
       // 若当前节点选中,则展开时清空子节点选中
       this.setTreeDataFlat();
-      this.marginTop = this.startIndex * this.lineHeight;
-      this.marginBottom = this.allHeight - (this.displayList.length + this.startIndex) * this.lineHeight;
+      this.offsetTop = this.startIndex * this.lineHeight;
+      this.offsetBottom = this.allHeight - (this.displayList.length + this.startIndex) * this.lineHeight;
     },
     /** 选中一项 */
     selectChange(item) {
@@ -237,15 +238,12 @@ export default {
     setIndex(e) {
       const top = e.target.scrollTop;
       this.startIndex = Math.floor(top / this.lineHeight);
-      this.endIndex = this.startIndex + this.pageSize;
       const offset = top % this.lineHeight; // 半行偏移量
-      this.marginTop = top - offset;
-      if (this.endIndex >= this.treeDataFlat.length - 1) {
-        this.marginBottom = 0;
-      } else {
-        this.marginBottom = this.allHeight - this.displayList.length * this.lineHeight - top;
-      }
-      this.setTreeDataFlat();
+      this.offsetTop = top - offset;
+      this.endIndex = this.startIndex + this.pageSize;
+
+      this.offsetBottom = this.allHeight - this.mainPageHeight - this.offsetTop;
+      // this.setTreeDataFlat();
     },
     /** 清除选中项 */
     clearSelected() {
@@ -299,6 +297,7 @@ export default {
   ul {
     height: 100%;
     padding: 0;
+    margin: 0;
     flex: 1;
     // width: max-content;
     width: 100%;
