@@ -1,4 +1,3 @@
-​
 性能优化
 工程化相关（webpack）：
 提取公共代码(Webpack4 webpack.optimize.splitChunks)，拆分出入口文件main.js中import导入的依赖，不包括异步加载（() => import()）的依赖。
@@ -22,7 +21,7 @@ web-webpack-plugin为每个js生成一个入口文件 AutoWebPlugin插件的使
 若代码中使用了a() ，则打包时会抽取出util.js的function a(){}的部分代码。util.js中的其他未使用的function代码不会打包。（可以优化lodash-es等工具类）
 若util.js用export default导出。则无法触发TreeShaking。
 
-打包后：
+打包后:
 
 unesed harmony export 未使用的function不打包
 
