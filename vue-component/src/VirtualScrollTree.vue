@@ -1,5 +1,5 @@
 <template>
-  <div ref="container" class="vscroll-tree" :style="{ height: height }">
+  <div ref="container" class="vtScroll-tree" :style="{ height: height }">
     <ul v-if="displayList.length" :style="ulStyle">
       <li v-for="item in displayList" :key="item[assignedFields.key]">
         <div
@@ -27,7 +27,7 @@
         </div>
       </li>
     </ul>
-    <div v-else class="vscroll-nodata">暂无数据</div>
+    <div v-else class="vtScroll-empty">暂无数据</div>
   </div>
 </template>
 
@@ -75,7 +75,7 @@ export default {
       type: Array,
       default: () => [],
     },
-    /** 默认选中的项数组 */
+    /** 默认选中的项数组 TODO: 不能用 */
     defaultSelectedKeys: {
       type: Array,
       default: () => [],
@@ -137,7 +137,7 @@ export default {
   },
   methods: {
     init() {
-      this.rootEl = document.querySelector('.vscroll-tree');
+      this.rootEl = document.querySelector('.vtScroll-tree');
       const containerHeight = this.rootEl.offsetHeight;
       this.pageSize = Math.ceil(containerHeight / this.lineHeight) + 1; // +1 考虑上下各半行情况
       this.startIndex = 0;
@@ -157,7 +157,10 @@ export default {
         // this.$set(obj, 'isCurrent', this.defaultSelectedKeys.includes(obj[this.assignedFields.key]));
       });
     },
-    // 设置当前展开数组
+    /**
+     * 设置当前展开数组
+     * @param {String} type 'reset'
+     */
     setTreeDataFlat(type) {
       const treeDataFlat = [];
       const that = this;
@@ -166,7 +169,7 @@ export default {
         arr.forEach(item => {
           item.isParent = Boolean(item[that.assignedFields.children]);
           item.level = level;
-          if (!item[that.assignedFields.children]) {
+          if (!item.isParent) {
             item.isCurrent = false; // 取消选中叶子节点
           }
           treeDataFlat.push(item);
@@ -187,6 +190,7 @@ export default {
       this.marginTop = 0;
       // this.$set(item, 'isExpand', !item.isExpand);
       item.isExpand = !item.isExpand;
+      // 若当前节点选中,则展开时清空子节点选中
       this.setTreeDataFlat();
       this.marginTop = this.startIndex * this.lineHeight;
       this.marginBottom = this.allHeight - (this.displayList.length + this.startIndex) * this.lineHeight;
@@ -251,6 +255,16 @@ export default {
         }
       }
     },
+    /** 清除子节点选中 */
+    clearChildrenSelected(item) {
+      (function recursion(list) {
+        if (!list?.length) return;
+        list.forEach(it => {
+          it.isCurrent = false;
+          recursion(it[this.assignedFields.children]);
+        });
+      })(item[this.assignedFields.children]);
+    },
     onContextMenu(e, item) {
       this.$emit('rightClick', { event: e, item });
     },
@@ -259,7 +273,7 @@ export default {
 </script>
 
 <style scoped lang="less">
-.vscroll-tree {
+.vtScroll-tree {
   user-select: none;
   width: 100%;
   height: 100%;
@@ -333,7 +347,7 @@ export default {
       }
     }
   }
-  .vscroll-nodata {
+  .vtScroll-empty {
     height: 100%;
     display: flex;
     align-items: center;

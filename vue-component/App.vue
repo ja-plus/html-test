@@ -1,10 +1,17 @@
 <template lang="pug">
-div(style="border:1px solid #ddd;")
-  VirtualScrollTree(
-    style="width: 200px;"
-    height="300px"
-    :treeData="treeData"
-  )
+div 
+  div(style="border:1px solid #ddd;")
+    VirtualScrollTree(
+      style="width: 200px;"
+      height="300px"
+      parent-selectable
+      :default-expanded-keys="[0,'0-0']"
+      :default-selected-keys="['0-1-1']"
+      :treeData="treeData"
+      @select="itemSelect"
+    )
+  div {{treeData}}
+ 
 </template>
 
 <script>
@@ -16,10 +23,10 @@ export default {
   props: {},
   data() {
     let treeData = [];
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 2; i++) {
       let children = [];
-      for (let j = 0; j < 100; j++) {
-        children.push({ title: i + '-' + j, key: i + '-' + j });
+      for (let j = 0; j < 2; j++) {
+        children.push({ title: i + '-' + j, key: i + '-' + j, children: [{ title: i + '-' + j + '-' + j, key: i + '-' + j + '-' + j }] });
       }
       treeData.push({ key: i, title: String(i), children });
     }
