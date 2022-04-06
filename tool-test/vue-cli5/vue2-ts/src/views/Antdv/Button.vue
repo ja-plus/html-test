@@ -7,6 +7,8 @@
     <a-button type="link"> Link Button </a-button>
   </div>
 </template>
-<script>
-export default {};
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator';
+@Component
+export default class AntdvButton extends Vue {}
 </script>
