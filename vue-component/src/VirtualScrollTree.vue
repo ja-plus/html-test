@@ -195,11 +195,11 @@ export default {
     setTreeDataFlat(type) {
       const treeDataFlat = [];
       // level 树层级
-      (function func(arr, level = 0, parent = null) {
+      (function func(arr, level = 0) {
         arr.forEach(item => {
           item.isParent = Boolean(item[this.assignedFields.children]);
           item.level = level;
-          item.parent = parent;
+          // item.parent = parent; // 持有父节点引用
           treeDataFlat.push(item);
           if (type === 'init') {
             if (this.defaultExpandAll) {
@@ -209,7 +209,7 @@ export default {
             }
           }
           if (item.isExpand) {
-            func.bind(this)(item[this.assignedFields.children] || [], level + 1, item);
+            func.bind(this)(item[this.assignedFields.children] || [], level + 1);
           }
         });
       }.bind(this)(this.treeData));
