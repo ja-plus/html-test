@@ -8,15 +8,15 @@ div(style="display:flex;align-items:flex-start")
     div startIndex:{{$refs.vScrollTree?.startIndex}}
     div endIndex:{{$refs.vScrollTree?.endIndex}}
     div pageSize:{{$refs.vScrollTree?.pageSize}}
+    hr
+    div currentItem:{{$refs.vScrollTree?.currentItem}}
+    div selectedItems:{{$refs.vScrollTree?.selectedItems}}
   div(style="width: 200px;border:1px solid #ddd;")
     VirtualScrollTree(
       ref="vScrollTree"
-      height="300px"
-      parent-selectable
-      :default-expanded-keys="[]"
-      :default-selected-keys="['0-1-1']"
+      v-bind="vScrollTreeProps"
       :treeData="treeData"
-      @select="itemSelect"
+      @itemClick="itemSelect"
     )
   pre {{JSON.stringify(treeData,null,2)}}
  
@@ -40,6 +40,15 @@ export default {
     }
     return {
       treeData,
+      vScrollTreeProps: {
+        height: '300px',
+        // lineHeight: 20,
+        indentWidth: 10,
+        showCheckbox: true,
+        parentSelectable: true,
+        defaultExpandedKeys: [0, '0-1'],
+        defaultSelectedKeys: ['0-1-1'],
+      },
     };
   },
   computed: {},

@@ -9,15 +9,18 @@
       }"
     >
       <li v-for="item in displayList" :key="item[assignedFields.key]">
+        <!-- 20: arrow width -->
         <div
           class="list-item"
-          :class="{ isSelected: item.isCurrent }"
+          :class="{
+            'item-current': item[assignedFields.key] === currentItem[assignedFields.key],
+            'item-parent': item.isParent,
+          }"
           :style="{
             height: lineHeight + 'px',
-            paddingLeft: indentWidth * item.level + 'px',
-            fontWeight: item.isParent ? 'bold' : 'normal',
+            paddingLeft: item.isParent ? indentWidth * item.level + 'px' : indentWidth * (item.level - 1) + 20 + 'px',
           }"
-          @click="selectChange(item)"
+          @click="handleItemClick(item)"
           @dblclick="onDblClick(item)"
           @contextmenu="e => onContextMenu(e, item)"
         >
@@ -26,8 +29,12 @@
             <div class="list-item-arrow" :class="{ 'list-item-arrow-active': item.isExpand }"></div>
             <!-- TODO: slot 箭头样式 -->
           </div>
+          <!-- 多选框 TODO: item.isChecked -->
+          <div v-if="showCheckbox">
+            <input :checked="selectedItems.includes(item)" type="checkbox" @change="onCheckboxChange" />
+          </div>
           <!-- 文字 -->
-          <div class="list-item-title" :style="{ marginLeft: !item.isParent ? '10px' : 0 }" :title="item[assignedFields.title]">
+          <div class="list-item-title" :title="item[assignedFields.title]">
             <span>{{ item[assignedFields.title] }}</span>
             <!-- TODO:slot? -->
           </div>
@@ -62,6 +69,11 @@ export default {
       type: Number,
       default: 20,
     },
+    /** 展示checkbox */
+    showCheckbox: {
+      type: Boolean,
+      default: false,
+    },
     /** 是否支持多选 */
     multiple: {
       type: Boolean,
@@ -77,12 +89,12 @@ export default {
       type: Array,
       default: () => [],
     },
-    /** 默认展开的键数组 */
+    /** 默认展开的键数组 (区分Number、String类型) */
     defaultExpandedKeys: {
       type: Array,
       default: () => [],
     },
-    /** 默认选中的项数组 TODO: 不能用 */
+    /** 默认选中的项数组 (父元素必须默认展开) */
     defaultSelectedKeys: {
       type: Array,
       default: () => [],
@@ -98,6 +110,8 @@ export default {
       rootEl: null, // 根元素
       treeDataFlat: [], // 展平的一维数组
       selectedItems: [], // 多选选中
+      // var
+      currentItem: {}, // 点击后高亮的行
       // v scroll
       startIndex: 0,
       endIndex: 30,
@@ -146,18 +160,13 @@ export default {
       this.startIndex = 0;
       this.endIndex = this.pageSize;
       this.offsetTop = 0;
-      this.setTreeDataFlat('init'); // 展开树，获得总长度
+      this.setTreeDataFlat('init'); // 展开树，获得总高度 allHeight
       this.offsetBottom = this.allHeight - this.mainPageHeight;
 
       this.selectedItems = [];
       this.setDefaultSelect(); // 设置默认选中状态
     },
-    setDefaultSelect() {
-      this.treeDataFlat.forEach(obj => {
-        obj.isCurrent = this.defaultSelectedKeys.includes(obj[this.assignedFields.key]);
-        // this.$set(obj, 'isCurrent', this.defaultSelectedKeys.includes(obj[this.assignedFields.key]));
-      });
-    },
+    setDefaultSelect() {},
     /**
      * 设置当前展开数组
      * @param {String} type 'init'
@@ -170,9 +179,6 @@ export default {
         arr.forEach(item => {
           item.isParent = Boolean(item[that.assignedFields.children]);
           item.level = level;
-          if (!item.isParent) {
-            item.isCurrent = false; // 取消选中叶子节点
-          }
           treeDataFlat.push(item);
           if (type === 'init') {
             item.isExpand = that.defaultExpandedKeys.includes(item[that.assignedFields.key]);
@@ -196,44 +202,6 @@ export default {
       this.offsetTop = this.startIndex * this.lineHeight;
       this.offsetBottom = this.allHeight - (this.displayList.length + this.startIndex) * this.lineHeight;
     },
-    /** 选中一项 */
-    selectChange(item) {
-      if (!this.parentSelectable) {
-        if (item[this.assignedFields.children]) return;
-      }
-      if (!this.multiple) {
-        // single
-        this.clearSelected();
-        // this.$set(item, 'isCurrent', true);
-        item.isCurrent = true;
-        this.selectedItems = [item];
-      } else {
-        if (!item.isCurrent) {
-          this.selectedItems.push(item);
-        } else {
-          let i = this.selectedItems.findIndex(it => it === item);
-          this.selectedItems.splice(i, 1); //  删除选中
-        }
-        // vue3
-        item.isCurrent = !item.isCurrent; // vue2 // this.$set(item, 'isCurrent', !item.isCurrent);
-      }
-      this.$emit('select', item, this.selectedItems);
-    },
-    /** 双击一项 */
-    onDblClick(item) {
-      if (item.children?.length) {
-        // 展开父节点
-        this.changeList(item);
-      } else {
-        // 选中子节点
-        this.clearSelected(); // 取消选中
-        item.isCurrent = true; // this.$set(item, 'isCurrent', true);
-      }
-      if (!this.parentSelectable) {
-        if (item[this.assignedFields.children]) return;
-      }
-      this.$emit('dblClick', item);
-    },
     /** 根据滚动条位置，设置展示的区间 */
     setIndex(e) {
       const top = e.target.scrollTop;
@@ -245,26 +213,52 @@ export default {
       this.offsetBottom = this.allHeight - this.mainPageHeight - this.offsetTop;
       // this.setTreeDataFlat();
     },
-    /** 清除选中项 */
-    clearSelected() {
-      for (const item of this.treeDataFlat) {
-        if (item.isCurrent) {
-          item.isCurrent = false; // this.$set(item, 'isCurrent', false);
+    /** 点击一项 */
+    handleItemClick(item) {
+      if (!this.parentSelectable) {
+        if (item[this.assignedFields.children]) return;
+      }
+      this.currentItem = item;
+      if (!this.multiple) {
+        // single
+        this.selectedItems = this.selectedItems[0] === item ? [] : [item];
+      } else {
+        // multiple
+        if (!this.selectedItems.includes(item)) {
+          this.selectedItems.push(item);
         }
       }
+      this.$emit('itemClick', item, this.selectedItems);
     },
-    /** 清除子节点选中 */
-    clearChildrenSelected(item) {
-      (function recursion(list) {
-        if (!list?.length) return;
-        list.forEach(it => {
-          it.isCurrent = false;
-          recursion(it[this.assignedFields.children]);
-        });
-      })(item[this.assignedFields.children]);
+    /** 双击一项 */
+    onDblClick(item) {
+      if (item.children?.length) {
+        // 展开父节点
+        this.changeList(item);
+      } else {
+        // 选中子节点
+        // item.isCurrent = true; // this.$set(item, 'isCurrent', true);
+      }
+      if (!this.parentSelectable) {
+        if (item[this.assignedFields.children]) return;
+      }
+      this.$emit('dblClick', item);
     },
+    // /** 清除子节点选中 */
+    // clearChildrenSelected(item) {
+    //   (function recursion(list) {
+    //     if (!list?.length) return;
+    //     list.forEach(it => {
+    //       it.isCurrent = false;
+    //       recursion(it[this.assignedFields.children]);
+    //     });
+    //   })(item[this.assignedFields.children]);
+    // },
     onContextMenu(e, item) {
       this.$emit('rightClick', { event: e, item });
+    },
+    onCheckboxChange(e) {
+      console.log(e.target.checked);
     },
   },
 };
@@ -305,32 +299,35 @@ export default {
     li {
       list-style-type: none;
       .list-item {
+        color: #000;
         // width: 100%;
         display: flex;
         padding-right: 10px;
-        // height: var(--lineHeight);
         cursor: pointer;
         align-items: center;
-        &.isSelected {
+        &.item-current {
           padding-left: 4px;
           font-weight: bold;
           color: #fff;
           background-color: #1b63d9;
         }
-        &:hover:not(.isSelected) {
-          background-color: #fff;
+        &:hover:not(.item-current) {
+          background-color: #eee;
+        }
+        // 父节点
+        &.item-parent {
+          font-weight: bold;
         }
         .list-item-expand {
           height: 20px;
           width: 20px;
-          margin-right: 5px;
           &:hover {
             opacity: 0.5;
           }
           .list-item-arrow {
-            transform: translate(10px, 3px);
+            transform: translate(10px, 6px);
             transform-origin: left center;
-            border-left: 5px solid #000;
+            border-left: 5px solid; // color 继承自祖先元素
             border-top: 5px solid transparent;
             border-bottom: 5px solid transparent;
             border-right: 5px solid transparent;
@@ -341,6 +338,7 @@ export default {
           }
         }
         .list-item-title {
+          margin-left: 5px;
           white-space: nowrap;
         }
       }
