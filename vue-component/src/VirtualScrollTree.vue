@@ -1,5 +1,5 @@
 <template>
-  <div ref="container" class="vtScroll-tree" :style="{ height: height }">
+  <div id="vScrollTree" class="vtScroll-tree" :style="{ height: height }">
     <ul
       v-if="displayList.length"
       :style="{
@@ -13,8 +13,9 @@
         <div
           class="list-item"
           :class="{
-            'item-current': item[assignedFields.key] === currentItem[assignedFields.key],
             'item-parent': item.isParent,
+            'item-current': item[assignedFields.key] === currentItem[assignedFields.key],
+            'item-highlight': highlightCurrent && item[assignedFields.key] === currentItem[assignedFields.key],
           }"
           :style="{
             height: lineHeight + 'px',
@@ -29,9 +30,9 @@
             <div class="list-item-arrow" :class="{ 'list-item-arrow-active': item.isExpand }"></div>
             <!-- TODO: slot 箭头样式 -->
           </div>
-          <!-- 多选框 TODO: item.isChecked -->
+          <!-- 多选框 -->
           <div v-if="showCheckbox">
-            <input :checked="selectedItems.includes(item)" type="checkbox" @change="onCheckboxChange" />
+            <input :checked="selectedItems.includes(item)" type="checkbox" @click="onCheckboxClick" @change="onCheckboxChange($event, item)" />
           </div>
           <!-- 文字 -->
           <div class="list-item-title" :title="item[assignedFields.title]">
@@ -41,7 +42,7 @@
         </div>
       </li>
     </ul>
-    <div v-else class="vtScroll-empty">暂无数据</div>
+    <div v-else class="vtScroll-empty">{{ emptyText }}</div>
   </div>
 </template>
 
@@ -79,10 +80,25 @@ export default {
       type: Boolean,
       default: false,
     },
-    /** 父节点是否可选中 */
-    parentSelectable: {
+    /** 高亮选中行 */
+    highlightCurrent: {
+      type: Boolean,
+      default: true,
+    },
+    /** 当前行是否可取消 */
+    currentCancelable: {
       type: Boolean,
       default: false,
+    },
+    /** 父节点是否可点击为current */
+    parentClickable: {
+      type: Boolean,
+      default: false,
+    },
+    /** 无数据时显示的内容 */
+    emptyText: {
+      type: String,
+      default: '暂无数据',
     },
     /** 数据 */
     treeData: {
@@ -98,6 +114,11 @@ export default {
     defaultSelectedKeys: {
       type: Array,
       default: () => [],
+    },
+    /** 默认展开所有节点 */
+    defaultExpandAll: {
+      type: Boolean,
+      default: false,
     },
     /** 替换数据title,key,children字段 */
     replaceFields: {
@@ -154,7 +175,7 @@ export default {
   },
   methods: {
     init() {
-      this.rootEl = document.querySelector('.vtScroll-tree');
+      this.rootEl = document.getElementById('vScrollTree');
       const containerHeight = this.rootEl.offsetHeight;
       this.pageSize = Math.floor(containerHeight / this.lineHeight + 1);
       this.startIndex = 0;
@@ -173,21 +194,25 @@ export default {
      */
     setTreeDataFlat(type) {
       const treeDataFlat = [];
-      const that = this;
       // level 树层级
-      (function func(arr, level = 0) {
+      (function func(arr, level = 0, parent = null) {
         arr.forEach(item => {
-          item.isParent = Boolean(item[that.assignedFields.children]);
+          item.isParent = Boolean(item[this.assignedFields.children]);
           item.level = level;
+          item.parent = parent;
           treeDataFlat.push(item);
           if (type === 'init') {
-            item.isExpand = that.defaultExpandedKeys.includes(item[that.assignedFields.key]);
+            if (this.defaultExpandAll) {
+              item.isExpand = true;
+            } else {
+              item.isExpand = this.defaultExpandedKeys.includes(item[this.assignedFields.key]);
+            }
           }
           if (item.isExpand) {
-            func(item[that.assignedFields.children] || [], level + 1);
+            func.bind(this)(item[this.assignedFields.children] || [], level + 1, item);
           }
         });
-      })(this.treeData);
+      }.bind(this)(this.treeData));
 
       this.treeDataFlat = treeDataFlat;
     },
@@ -211,54 +236,67 @@ export default {
       this.endIndex = this.startIndex + this.pageSize;
 
       this.offsetBottom = this.allHeight - this.mainPageHeight - this.offsetTop;
-      // this.setTreeDataFlat();
     },
     /** 点击一项 */
     handleItemClick(item) {
-      if (!this.parentSelectable) {
+      if (!this.parentClickable) {
+        // 父节点不可点击
         if (item[this.assignedFields.children]) return;
       }
-      this.currentItem = item;
-      if (!this.multiple) {
-        // single
-        this.selectedItems = this.selectedItems[0] === item ? [] : [item];
+      if (this.currentCancelable) {
+        this.currentItem = this.currentItem === item ? {} : item;
       } else {
-        // multiple
-        if (!this.selectedItems.includes(item)) {
-          this.selectedItems.push(item);
-        }
+        this.currentItem = item;
       }
-      this.$emit('itemClick', item, this.selectedItems);
+      this.$emit('itemClick', item);
+      // this.setSelectedItem(item);
+    },
+    /** 设置选中项 */
+    setSelectedItem(item, checked) {
+      if (this.multiple) {
+        // multiple
+        if (checked) {
+          this.selectedItems.push(item);
+        } else {
+          const i = this.selectedItems.indexOf(item);
+          if (i === -1) {
+            this.selectedItems.splice(i, 1); // FIXME: 数据量大有性能问题？
+          }
+        }
+      } else {
+        // single
+        this.selectedItems = checked ? [item] : [];
+      }
+      this.$emit('itemSelect', {
+        checked,
+        item,
+        selectedItems: this.selectedItems,
+      });
     },
     /** 双击一项 */
     onDblClick(item) {
-      if (item.children?.length) {
-        // 展开父节点
-        this.changeList(item);
-      } else {
-        // 选中子节点
-        // item.isCurrent = true; // this.$set(item, 'isCurrent', true);
-      }
-      if (!this.parentSelectable) {
-        if (item[this.assignedFields.children]) return;
-      }
-      this.$emit('dblClick', item);
+      // this.currentItem = item;
+      // if (item[this.assignedFields.children]) {
+      //   // 展开父节点
+      //   this.changeList(item);
+      // } else {
+      //   // 选中节点
+      //   // this.setSelectedItem(item);
+      //   // item.isCurrent = true; // this.$set(item, 'isCurrent', true);
+      // }
+      // if (!this.parentClickable) {
+      //   if (item[this.assignedFields.children]) return;
+      // }
+      // this.$emit('dblClick', item);
     },
-    // /** 清除子节点选中 */
-    // clearChildrenSelected(item) {
-    //   (function recursion(list) {
-    //     if (!list?.length) return;
-    //     list.forEach(it => {
-    //       it.isCurrent = false;
-    //       recursion(it[this.assignedFields.children]);
-    //     });
-    //   })(item[this.assignedFields.children]);
-    // },
     onContextMenu(e, item) {
       this.$emit('rightClick', { event: e, item });
     },
-    onCheckboxChange(e) {
-      console.log(e.target.checked);
+    onCheckboxChange(e, item) {
+      this.setSelectedItem(item, e.target.checked);
+    },
+    onCheckboxClick(e) {
+      // e.stopPropagation();
     },
   },
 };
@@ -306,14 +344,15 @@ export default {
         cursor: pointer;
         align-items: center;
         &.item-current {
-          padding-left: 4px;
-          font-weight: bold;
+        }
+        &.item-highlight {
           color: #fff;
           background-color: #1b63d9;
         }
-        &:hover:not(.item-current) {
+        &:hover:not(.item-highlight) {
           background-color: #eee;
         }
+
         // 父节点
         &.item-parent {
           font-weight: bold;

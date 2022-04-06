@@ -16,9 +16,12 @@ div(style="display:flex;align-items:flex-start")
       ref="vScrollTree"
       v-bind="vScrollTreeProps"
       :treeData="treeData"
-      @itemClick="itemSelect"
+      @itemClick="itemClick"
+      @itemSelect="itemSelect"
+      @dblClick="itemDblClick"
+      @rightClick="itemRightClick"
     )
-  pre {{JSON.stringify(treeData,null,2)}}
+  //- pre {{JSON.stringify(treeData,null,2)}}
  
 </template>
 
@@ -43,9 +46,14 @@ export default {
       vScrollTreeProps: {
         height: '300px',
         // lineHeight: 20,
-        indentWidth: 10,
+        // multiple: true,
+        // indentWidth: 10,
+        // highlightCurrent: false,
+        // currentCancelable: true,
         showCheckbox: true,
-        parentSelectable: true,
+        parentClickable: true,
+        // emptyText: 'no Data',
+        // defaultExpandAll: true,
         defaultExpandedKeys: [0, '0-1'],
         defaultSelectedKeys: ['0-1-1'],
       },
@@ -54,7 +62,20 @@ export default {
   computed: {},
   created() {},
   mounted() {},
-  methods: {},
+  methods: {
+    itemClick(item) {
+      console.log('itemClick', item);
+    },
+    itemSelect(option) {
+      console.log('itemSelect', option);
+    },
+    itemDblClick(item) {
+      console.log('itemDblClick', item);
+    },
+    itemRightClick(item) {
+      console.log('itemRightClick', item);
+    },
+  },
 };
 </script>
 
