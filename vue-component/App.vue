@@ -1,13 +1,16 @@
 <template lang="pug">
-VirtualScrollTreeTest
+//- VirtualScrollTreeTest
+EasyTableTest
  
 </template>
 
 <script>
 import VirtualScrollTreeTest from './test/VirtualScrollTree.vue';
+import EasyTableTest from './test/EasyTable.vue';
 export default {
   components: {
     VirtualScrollTreeTest,
+    EasyTableTest,
   },
 };
 </script>

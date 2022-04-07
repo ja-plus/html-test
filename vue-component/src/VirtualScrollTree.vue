@@ -70,7 +70,7 @@ export default {
       type: Number,
       default: 20,
     },
-    /** 展示checkbox */
+    /** 展示checkbox,可多选 */
     showCheckbox: {
       type: Boolean,
       default: false,
