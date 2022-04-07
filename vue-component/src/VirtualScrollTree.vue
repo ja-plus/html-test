@@ -1,5 +1,5 @@
 <template>
-  <div id="vScrollTree" class="vtScroll-tree" :style="{ height: height }">
+  <div ref="vScrollTree" class="vtScroll-tree" :style="{ height: height }">
     <ul
       v-if="displayList.length"
       :style="{
@@ -75,7 +75,12 @@ export default {
       type: Boolean,
       default: false,
     },
-    /** 是否支持多选 */
+    /**
+     * @deprecated
+     * 是否支持多选
+     * 单选用this.currentItem 高亮行
+     * 多选用selectedItems 开启多选框来支持
+     */
     multiple: {
       type: Boolean,
       default: false,
@@ -110,7 +115,12 @@ export default {
       type: Array,
       default: () => [],
     },
-    /** 默认选中的项数组 (父元素必须默认展开) */
+    /** 默认高亮的当前行key */
+    defaultCurrentKey: {
+      type: String,
+      default: '',
+    },
+    /** 默认选中的项数组 */
     defaultSelectedKeys: {
       type: Array,
       default: () => [],
@@ -168,14 +178,12 @@ export default {
   mounted() {
     this.init();
     // event listener
-    this.rootEl.addEventListener('scroll', this.setIndex);
-    // window.addEventListener('resize', () => {
-    //   this.$nextTick(this.init);
-    // });
+    this.initEvent();
   },
   methods: {
     init() {
-      this.rootEl = document.getElementById('vScrollTree');
+      this.rootEl = this.$refs.vScrollTree; // document.getElementById('vScrollTree');// 不能使用getElementById 因为多个组件时，获取会出问题
+      this.rootEl.scrollTop = 0; // 重置滚动条
       const containerHeight = this.rootEl.offsetHeight;
       this.pageSize = Math.floor(containerHeight / this.lineHeight + 1);
       this.startIndex = 0;
@@ -185,9 +193,42 @@ export default {
       this.offsetBottom = this.allHeight - this.mainPageHeight;
 
       this.selectedItems = [];
-      this.setDefaultSelect(); // 设置默认选中状态
+      this.setDefaultCurrent(); // 设置默认高亮行
+      this.setDefaultSelected(); // 设置默认选中
     },
-    setDefaultSelect() {},
+    initEvent() {
+      this.rootEl.addEventListener('scroll', this.setIndex);
+      let timeout = null;
+      window.addEventListener('resize', () => {
+        // debounce
+        if (timeout) clearTimeout(timeout);
+        setTimeout(() => {
+          this.init();
+          timeout = null;
+        }, 200);
+      });
+    },
+    /** 设置默认高亮当前行 （仅单选）*/
+    setDefaultCurrent() {
+      this.traverseTreeData(item => {
+        if (!this.defaultCurrentKey) return;
+        const defaultKey = this.defaultCurrentKey;
+        if (item[this.assignedFields.key] === defaultKey) {
+          this.currentItem = item;
+          return 0;
+        }
+      });
+    },
+    /** 设置选中的项 （可多选）*/
+    setDefaultSelected() {
+      if (!this.defaultSelectedKeys?.length) return;
+      this.traverseTreeData(item => {
+        if (this.defaultSelectedKeys.includes(item[this.assignedFields.key])) {
+          this.selectedItems.push(item);
+          if (this.selectedItems.length === this.defaultSelectedKeys.length) return 0;
+        }
+      });
+    },
     /**
      * 设置当前展开数组
      * @param {String} type 'init'
@@ -253,19 +294,13 @@ export default {
     },
     /** 设置选中项 */
     setSelectedItem(item, checked) {
-      if (this.multiple) {
-        // multiple
-        if (checked) {
-          this.selectedItems.push(item);
-        } else {
-          const i = this.selectedItems.indexOf(item);
-          if (i === -1) {
-            this.selectedItems.splice(i, 1); // FIXME: 数据量大有性能问题？
-          }
-        }
+      if (checked) {
+        this.selectedItems.push(item);
       } else {
-        // single
-        this.selectedItems = checked ? [item] : [];
+        const i = this.selectedItems.indexOf(item);
+        if (i === -1) {
+          this.selectedItems.splice(i, 1); // FIXME: 数据量大有性能问题？
+        }
       }
       this.$emit('itemSelect', {
         checked,
@@ -297,6 +332,25 @@ export default {
     },
     onCheckboxClick(e) {
       // e.stopPropagation();
+    },
+
+    // ---------- utils
+    /**
+     * 遍历treeData方法
+     * return 0 跳出循环
+     */
+    traverseTreeData(callback) {
+      (function recursion(arr) {
+        for (let i = 0; i < arr.length; i++) {
+          const item = arr[i];
+          const cbRes = callback(item, i);
+          if (cbRes === 0) return 0;
+          if (item[this.assignedFields.children]) {
+            const res = recursion.bind(this)(item[this.assignedFields.children]);
+            if (res === 0) return 0;
+          }
+        }
+      }.bind(this)(this.treeData));
     },
   },
 };
@@ -360,19 +414,21 @@ export default {
         .list-item-expand {
           height: 20px;
           width: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           &:hover {
             opacity: 0.5;
           }
           .list-item-arrow {
-            transform: translate(10px, 6px);
-            transform-origin: left center;
+            transform-origin: 2px center;
             border-left: 5px solid; // color 继承自祖先元素
             border-top: 5px solid transparent;
             border-bottom: 5px solid transparent;
-            border-right: 5px solid transparent;
+            border-right: 0px;
             transition: transform 0.2s ease;
             &.list-item-arrow-active {
-              transform: translate(10px, 3px) rotate(90deg);
+              transform: rotate(90deg);
             }
           }
         }

@@ -1,16 +1,16 @@
 <template lang="pug">
 div(style="display:flex;align-items:flex-start")
   div(style="width:200px")
-    div allHeight:{{$refs.vScrollTree?.allHeight}}
-    div mainPageHeight:{{$refs.vScrollTree?.mainPageHeight}}
-    div offsetTop:{{$refs.vScrollTree?.offsetTop}}
-    div offsetBottom:{{$refs.vScrollTree?.offsetBottom}}
-    div startIndex:{{$refs.vScrollTree?.startIndex}}
-    div endIndex:{{$refs.vScrollTree?.endIndex}}
-    div pageSize:{{$refs.vScrollTree?.pageSize}}
+    div allHeight:{{vScrollTree.allHeight}}
+    div mainPageHeight:{{vScrollTree.mainPageHeight}}
+    div offsetTop:{{vScrollTree.offsetTop}}
+    div offsetBottom:{{vScrollTree.offsetBottom}}
+    div startIndex:{{vScrollTree.startIndex}}
+    div endIndex:{{vScrollTree.endIndex}}
+    div pageSize:{{vScrollTree.pageSize}}
     hr
-    div currentItem:{{$refs.vScrollTree?.currentItem}}
-    div selectedItems:{{$refs.vScrollTree?.selectedItems}}
+    div currentItem:{{vScrollTree.currentItem}}
+    div selectedItems:{{vScrollTree.selectedItems}}
   div(style="width: 200px;border:1px solid #ddd;")
     VirtualScrollTree(
       ref="vScrollTree"
@@ -43,6 +43,7 @@ export default {
     }
     return {
       treeData,
+      vScrollTree: {},
       vScrollTreeProps: {
         height: '300px',
         // lineHeight: 20,
@@ -55,13 +56,16 @@ export default {
         // emptyText: 'no Data',
         // defaultExpandAll: true,
         defaultExpandedKeys: [0, '0-1'],
+        defaultCurrentKey: '0-1-1',
         defaultSelectedKeys: ['0-1-1'],
       },
     };
   },
   computed: {},
   created() {},
-  mounted() {},
+  mounted() {
+    this.vScrollTree = this.$refs.vScrollTree;
+  },
   methods: {
     itemClick(item) {
       console.log('itemClick', item);
