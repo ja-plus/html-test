@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>非等间距坐标</title>
+</head>
+<script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.1.2/echarts.common.js"></script>
+<!-- <script src="https://cdn.bootcdn.net/ajax/libs/echarts/4.9.0-rc.1/echarts-en.common.min.js"></script> -->
+<body>
+    <div id="echarts" style="height: 300px;width:800px"></div>
+</body>
+<script>
+    let myChart = window.echarts.init(document.getElementById('echarts'));
+
+    let option = {
+      tooltip: { trigger: 'axis' },
+      xAxis: {
+        type: 'value',
+        min: 0,
+        max: 100,
+        axisTick: { show: false }, // 隐藏刻度线
+        splitLine: { show: false }, // 隐藏分割线
+        axisLabel: { show: false }, // 隐藏刻度值
+      },
+      yAxis: [{ type: 'value' }],
+      series: [
+        {
+          name: 'Fake Data',
+          type: 'line',
+          smooth: true,
+          data: [
+            [0, 10],
+            [2, 20],
+            [5, 30],
+            [10, 40],
+            [14, 45],
+            [20, 50],
+            [30, 57],
+            [50, 60],
+            [60, 65],
+            [90, 70],
+            [100, 75],
+          ],
+          markLine: {
+            symbol: false, // 取消箭头
+            silent: true, // 取消鼠标hover事件
+            label: {
+              position: 'start', // 改变label位置
+              formatter: obj => obj.value + 'd', // 格式化标签文本
+            },
+            lineStyle: { color: '#ddd', type: 'solid' },
+            data: [2, 5, 10, 20, 50, 100].map(val => {
+              return {
+                xAxis: val,
+              };
+            }),
+          },
+          z: 10, // markLine应该有一个默认的z,但是不能修改，这里控制曲线z > markLine层级，保证markLine在曲线下方。
+        },
+      ],
+    };
+    myChart.setOption(option);
+</script>
+</html>
