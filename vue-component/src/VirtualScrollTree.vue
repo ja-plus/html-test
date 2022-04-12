@@ -1,5 +1,5 @@
 <template>
-  <div ref="vScrollTree" class="vtScroll-tree" :style="{ height: height }">
+  <div ref="vScrollTree" class="vtScroll-tree" :style="{ height: height }" @click="$event.stopPropagation()">
     <ul
       v-if="displayList.length"
       :style="{
@@ -359,10 +359,11 @@ export default {
 
 <style scoped lang="less">
 .vtScroll-tree {
+  background-color: #fff;
   user-select: none;
   width: 100%;
   height: 100%;
-  min-height: 300px;
+  // min-height: 300px;
   display: flex;
   flex-direction: column;
   overflow: auto;
