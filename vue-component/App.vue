@@ -1,6 +1,6 @@
 <template lang="pug">
-//- VirtualScrollTreeTest
-EasyTableTest
+VirtualScrollTreeTest
+//- EasyTableTest
  
 </template>
 

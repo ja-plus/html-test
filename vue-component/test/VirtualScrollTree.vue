@@ -37,7 +37,11 @@ export default {
     for (let i = 0; i < 20; i++) {
       let children = [];
       for (let j = 0; j < 2; j++) {
-        children.push({ title: i + '-' + j, key: i + '-' + j, children: [{ title: i + '-' + j + '-' + j, key: i + '-' + j + '-' + j }] });
+        children.push({
+          title: i + '-' + j,
+          key: i + '-' + j,
+          children: [{ title: i + '-' + j + '-' + j + 'longlonglonglong longlonglonglong', key: i + '-' + j + '-' + j }],
+        });
       }
       treeData.push({ key: i, title: String(i), children });
     }

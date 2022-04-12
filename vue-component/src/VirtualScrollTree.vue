@@ -300,7 +300,7 @@ export default {
         this.selectedItems.push(item);
       } else {
         const i = this.selectedItems.indexOf(item);
-        if (i === -1) {
+        if (i > -1) {
           this.selectedItems.splice(i, 1); // FIXME: 数据量大有性能问题？
         }
       }
@@ -392,8 +392,10 @@ export default {
     li {
       list-style-type: none;
       .list-item {
+        box-sizing: border-box; //确保padding-right在min-width: 100%;里
         color: #000;
-        // width: 100%;
+        min-width: 100%;
+        width: max-content;
         display: flex;
         padding-right: 10px;
         cursor: pointer;
