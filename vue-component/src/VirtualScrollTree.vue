@@ -4,8 +4,8 @@
       v-if="displayList.length"
       :style="{
         height: lineHeight * pageSize + 'px',
-        paddingTop: offsetTop + 'px',
-        paddingBottom: offsetBottom + 'px',
+        marginTop: offsetTop + 'px',
+        marginBottom: offsetBottom > 0 ? offsetBottom + 'px' : 0,
       }"
     >
       <li v-for="item in displayList" :key="item[assignedFields.key]">
@@ -173,10 +173,14 @@ export default {
     treeData() {
       // 列表发生改变，重置已选，重置虚拟滚动
       this.init();
+      this.setDefaultCurrent(); // 设置默认高亮行
+      this.setDefaultSelected(); // 设置默认选中
     },
   },
   mounted() {
     this.init();
+    this.setDefaultCurrent(); // 设置默认高亮行
+    this.setDefaultSelected(); // 设置默认选中
     // event listener
     this.initEvent();
   },
@@ -193,8 +197,6 @@ export default {
       this.offsetBottom = this.allHeight - this.mainPageHeight;
 
       this.selectedItems = [];
-      this.setDefaultCurrent(); // 设置默认高亮行
-      this.setDefaultSelected(); // 设置默认选中
     },
     initEvent() {
       this.rootEl.addEventListener('scroll', this.setIndex);
@@ -310,7 +312,6 @@ export default {
     },
     /** 双击一项 */
     onDblClick(item) {
-      // this.currentItem = item;
       // if (item[this.assignedFields.children]) {
       //   // 展开父节点
       //   this.changeList(item);
