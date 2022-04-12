@@ -1,6 +1,20 @@
 <template lang="pug">
 div
-    VirtualTreeSelect(:value="selectedId" :treeData="treeData" @change="onSelectChange")
+    VirtualTreeSelect(
+        :replaceFields="{key:'id', title:'label'}" 
+        :value="selectedId" 
+        :treeData="treeData"
+        :vsTreeProps="{lineHeight:20}" 
+        @change="onSelectChange"
+        )
+    VirtualTreeSelect(:replaceFields="{key:'id', title:'label'}" disabled :value="selectedId" :treeData="treeData" @change="onSelectChange")
+    VirtualTreeSelect(
+        :replaceFields="{key:'id', title:'label'}" 
+        :value="selectedId" 
+        :treeData="treeData"
+        :vsTreeProps="{lineHeight:20}" 
+        @change="onSelectChange"
+    )
 br
 div selectedId: {{selectedId}}
 </template>
@@ -16,24 +30,21 @@ export default {
       let children = [];
       for (let j = 0; j < 2; j++) {
         children.push({
-          title: i + '-' + j,
-          key: i + '-' + j,
-          children: [{ title: i + '-' + j + '-' + j + 'longlonglonglong longlonglonglong', key: i + '-' + j + '-' + j }],
+          label: i + '-' + j,
+          id: i + '-' + j,
+          children: [{ label: i + '-' + j + '-' + j + 'longlonglonglong longlonglonglong', id: i + '-' + j + '-' + j }],
         });
       }
-      treeData.push({ key: i, title: String(i), children });
+      treeData.push({ id: i, label: String(i), children });
     }
     return {
       selectedId: '0-0',
       treeData,
     };
   },
-  computed: {},
-  created() {},
-  mounted() {},
   methods: {
-    onSelectChange(val) {
-      this.selectedId = val;
+    onSelectChange(item) {
+      this.selectedId = item.id;
     },
   },
 };

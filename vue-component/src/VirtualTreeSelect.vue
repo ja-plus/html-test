@@ -1,7 +1,7 @@
 <template>
-  <div class="v-tree-select-wrapper">
+  <div class="v-tree-select-wrapper" :class="{ disabled: disabled }">
     <!-- <input type="text" @click="onInputClick($event)" /> -->
-    <div class="tree-select-main" @click="onInputClick($event)">
+    <div class="tree-select-main" @click="onInputClick">
       <div class="tree-select-main-label">{{ selectedTitle }}</div>
       <div class="tree-select-main-arrow" :class="{ expand: showDropdown }"></div>
     </div>
@@ -9,6 +9,8 @@
       v-if="showDropdown"
       class="dropdown-panel"
       style="height: 200px"
+      v-bind="vsTreeProps"
+      :replace-fields="replaceFields"
       :highlight-current="false"
       :tree-data="treeData"
       @itemClick="onTreeItemClick"
@@ -20,23 +22,12 @@
  * TODO: dropdown position up down
  */
 import VirtualScrollTree from './VirtualScrollTree.vue';
-function _getItemByKey(dataSource, key) {
-  let result = {};
-  (function recursion(dataSource) {
-    for (let i = 0; i < dataSource.length; i++) {
-      const item = dataSource[i];
-      if (item.key === key) {
-        result = item;
-        return 0;
-      }
-      if (item.children) {
-        let res = recursion(item.children || []);
-        if (res === 0) return 0;
-      }
-    }
-  })(dataSource);
-  return result;
-}
+
+const _defaultFields = {
+  key: 'key',
+  title: 'title',
+  children: 'children',
+};
 export default {
   components: { VirtualScrollTree },
   props: {
@@ -48,6 +39,17 @@ export default {
       type: Array,
       default: () => [],
     },
+    disabled: Boolean,
+    /** 替换数据title,key,children字段 */
+    replaceFields: {
+      type: Object,
+      default: () => _defaultFields,
+    },
+    /** VirtualScrollTree 的prop*/
+    vsTreeProps: {
+      type: Object,
+      default: () => ({}),
+    },
   },
   data() {
     return {
@@ -55,30 +57,72 @@ export default {
     };
   },
   computed: {
+    /** 合并传入的fields */
+    assignedFields() {
+      return Object.assign({}, _defaultFields, this.replaceFields);
+    },
     selectedTitle() {
-      return _getItemByKey(this.treeData, this.value).title;
+      return this.getItemByKey(this.value)[this.assignedFields.title];
     },
   },
-  created() {
-    window.addEventListener('click', () => {
-      this.showDropdown = false;
-    });
-  },
+  created() {},
   mounted() {},
   methods: {
-    onInputClick(e) {
-      e.stopPropagation();
-      this.showDropdown = !this.showDropdown;
+    closeFunc() {
+      this.showDropdown = false;
+      // 关闭下拉框后，移除监听
+      window.removeEventListener('click', this.closeFunc);
+    },
+    onInputClick() {
+      if (this.disabled) return;
+      if (!this.showDropdown) {
+        this.showDropdown = true;
+        // 打开下拉框后，监听点击关闭
+        setTimeout(() => {
+          window.addEventListener('click', this.closeFunc);
+        });
+      } else {
+        // 关闭下拉框后，移除监听。防止点击多个下拉框后，同时展开多个下拉框。
+        this.showDropdown = false;
+        window.removeEventListener('click', this.closeFunc);
+      }
     },
     onTreeItemClick(item) {
-      this.selectedTitle = item.title;
       this.showDropdown = false;
-      this.$emit('change', item.key);
+      this.$emit('change', item);
+    },
+    // -----------
+    getItemByKey(key) {
+      let result = {};
+      (function recursion(dataSource) {
+        for (let i = 0; i < dataSource.length; i++) {
+          const item = dataSource[i];
+          if (item[this.assignedFields.key] === key) {
+            result = item;
+            return 0;
+          }
+          if (item[this.assignedFields.children]) {
+            let res = recursion.bind(this)(item[this.assignedFields.children] || []);
+            if (res === 0) return 0;
+          }
+        }
+      }.bind(this)(this.treeData));
+      return result;
     },
   },
 };
 </script>
 <style lang="less" scoped>
+.v-tree-select-wrapper.disabled {
+  .tree-select-main {
+    border: 1px solid #cbcbe1;
+    background-color: rgb(246, 246, 246);
+    cursor: not-allowed;
+    .tree-select-main-label {
+      color: #ccc;
+    }
+  }
+}
 .v-tree-select-wrapper {
   position: relative;
   width: 200px;
@@ -86,6 +130,7 @@ export default {
   .tree-select-main {
     display: flex;
     justify-content: space-between;
+    cursor: pointer;
     width: 100%;
     height: 100%;
     border: 1px solid #ddd;
@@ -117,6 +162,7 @@ export default {
   .dropdown-panel {
     border: 1px solid #ddd;
     position: absolute;
+    z-index: 1;
   }
 }
 </style>
