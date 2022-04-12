@@ -5,23 +5,26 @@
       <div class="tree-select-main-label">{{ selectedTitle }}</div>
       <div class="tree-select-main-arrow" :class="{ expand: showDropdown }"></div>
     </div>
-    <VirtualScrollTree
-      v-if="showDropdown"
+    <VirtualTree
+      v-if="!disabled && showDropdown"
       class="dropdown-panel"
       style="height: 200px"
+      :style="{ zIndex: zIndex + 1 }"
       v-bind="vsTreeProps"
-      :replace-fields="replaceFields"
+      :replace-fields="assignedFields"
       :highlight-current="false"
       :tree-data="treeData"
       @itemClick="onTreeItemClick"
     />
+    <!-- 遮罩：用于点击区域外关闭 -->
+    <div v-if="!disabled && showDropdown" class="dropdown-mask" :style="{ zIndex: zIndex }" @click="showDropdown = false"></div>
   </div>
 </template>
 <script>
 /**
  * TODO: dropdown position up down
  */
-import VirtualScrollTree from './VirtualScrollTree.vue';
+import VirtualTree from './VirtualTree.vue';
 
 const _defaultFields = {
   key: 'key',
@@ -29,16 +32,22 @@ const _defaultFields = {
   children: 'children',
 };
 export default {
-  components: { VirtualScrollTree },
+  components: { VirtualTree },
   props: {
     value: {
       type: String,
       default: '',
     },
+    /** 下拉框的z-index */
+    zIndex: {
+      type: Number,
+      default: 10,
+    },
     treeData: {
       type: Array,
       default: () => [],
     },
+    /** 是否禁用 */
     disabled: Boolean,
     /** 替换数据title,key,children字段 */
     replaceFields: {
@@ -68,24 +77,9 @@ export default {
   created() {},
   mounted() {},
   methods: {
-    closeFunc() {
-      this.showDropdown = false;
-      // 关闭下拉框后，移除监听
-      window.removeEventListener('click', this.closeFunc);
-    },
     onInputClick() {
       if (this.disabled) return;
-      if (!this.showDropdown) {
-        this.showDropdown = true;
-        // 打开下拉框后，监听点击关闭
-        setTimeout(() => {
-          window.addEventListener('click', this.closeFunc);
-        });
-      } else {
-        // 关闭下拉框后，移除监听。防止点击多个下拉框后，同时展开多个下拉框。
-        this.showDropdown = false;
-        window.removeEventListener('click', this.closeFunc);
-      }
+      this.showDropdown = !this.showDropdown;
     },
     onTreeItemClick(item) {
       this.showDropdown = false;
@@ -162,7 +156,16 @@ export default {
   .dropdown-panel {
     border: 1px solid #ddd;
     position: absolute;
-    z-index: 1;
+  }
+  /**遮罩 */
+  .dropdown-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 100vh;
+    width: 100vw;
   }
 }
 </style>

@@ -338,7 +338,7 @@ export default {
     // ---------- utils
     /**
      * 遍历treeData方法
-     * return 0 跳出循环
+     * @return 0 跳出循环
      */
     traverseTreeData(callback) {
       (function recursion(arr) {

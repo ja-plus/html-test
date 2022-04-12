@@ -12,7 +12,7 @@ div(style="display:flex;align-items:flex-start")
     div currentItem:{{vScrollTree.currentItem}}
     div selectedItems:{{vScrollTree.selectedItems}}
   div(style="width: 200px;border:1px solid #ddd;")
-    VirtualScrollTree(
+    VirtualTree(
       ref="vScrollTree"
       v-bind="vScrollTreeProps"
       :treeData="treeData"
@@ -26,10 +26,10 @@ div(style="display:flex;align-items:flex-start")
 </template>
 
 <script>
-import VirtualScrollTree from '../src/VirtualScrollTree.vue';
+import VirtualTree from '../src/VirtualTree.vue';
 export default {
   components: {
-    VirtualScrollTree,
+    VirtualTree,
   },
   props: {},
   data() {
