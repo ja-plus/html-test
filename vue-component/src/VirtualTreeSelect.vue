@@ -1,21 +1,21 @@
 <template>
-  <div class="v-tree-select-wrapper" :class="{ disabled: disabled }">
+  <div ref="vTreeSelect" class="v-tree-select-wrapper" :class="{ disabled: disabled }">
     <!-- <input type="text" @click="onInputClick($event)" /> -->
     <div class="tree-select-main" @click="onInputClick">
-      <div class="tree-select-main-label">{{ selectedTitle }}</div>
+      <div class="tree-select-main-label" :class="{ placeholder: !selectedTitle }">{{ selectedTitle || placeholder }}</div>
       <div class="tree-select-main-arrow" :class="{ expand: showDropdown }"></div>
     </div>
-    <VirtualTree
-      v-if="!disabled && showDropdown"
-      class="dropdown-panel"
-      style="height: 200px"
-      :style="{ zIndex: zIndex + 1 }"
-      v-bind="vsTreeProps"
-      :replace-fields="assignedFields"
-      :highlight-current="false"
-      :tree-data="treeData"
-      @itemClick="onTreeItemClick"
-    />
+    <!-- 下拉框 -->
+    <div v-if="!disabled && showDropdown" class="dropdown-menu" :style="dropdownMenuStyle">
+      <VirtualTree
+        v-bind="vsTreeProps"
+        height="100%"
+        :replace-fields="assignedFields"
+        :highlight-current="false"
+        :tree-data="treeData"
+        @itemClick="onTreeItemClick"
+      />
+    </div>
     <!-- 遮罩：用于点击区域外关闭 -->
     <div v-if="!disabled && showDropdown" class="dropdown-mask" :style="{ zIndex: zIndex }" @click="showDropdown = false"></div>
   </div>
@@ -38,10 +38,19 @@ export default {
       type: String,
       default: '',
     },
+    /** 下拉框高度 */
+    dropdownHeight: {
+      type: Number,
+      default: 200,
+    },
     /** 下拉框的z-index */
     zIndex: {
       type: Number,
       default: 10,
+    },
+    placeholder: {
+      type: String,
+      default: '请选择',
     },
     treeData: {
       type: Array,
@@ -62,6 +71,7 @@ export default {
   },
   data() {
     return {
+      dropdownMenuStyle: {},
       showDropdown: false,
     };
   },
@@ -71,14 +81,13 @@ export default {
       return Object.assign({}, _defaultFields, this.replaceFields);
     },
     selectedTitle() {
-      return this.getItemByKey(this.value)[this.assignedFields.title];
+      return this.getItemByKey(this.value)[this.assignedFields.title] || this.value;
     },
   },
-  created() {},
-  mounted() {},
   methods: {
-    onInputClick() {
+    onInputClick(e) {
       if (this.disabled) return;
+      this.setDropdownMenuStyle(e);
       this.showDropdown = !this.showDropdown;
     },
     onTreeItemClick(item) {
@@ -86,6 +95,33 @@ export default {
       this.$emit('change', item);
     },
     // -----------
+    /**
+     * 设置下拉框从上方弹出还是下方
+     */
+    setDropdownMenuStyle() {
+      const rect = this.$refs.vTreeSelect.getBoundingClientRect();
+      const bottom = window.innerHeight - rect.top - rect.height;
+      // reset style
+      this.dropdownMenuStyle = {
+        position: 'absolute',
+        width: rect.width + 'px',
+        height: this.dropdownHeight + 'px',
+        zIndex: this.zIndex + 1,
+      };
+
+      if (bottom >= this.dropdownHeight) {
+        // 下方有充足空间
+        this.dropdownMenuStyle.top = null;
+      } else if (rect.top >= this.dropdownHeight) {
+        // 上方有充足空间
+        this.dropdownMenuStyle.top = -1 * this.dropdownHeight + 'px';
+      } else {
+        this.dropdownMenuStyle.top = 0;
+        this.dropdownMenuStyle.position = 'fixed';
+        this.dropdownMenuStyle.height = window.innerHeight + 'px';
+      }
+    },
+    /** 通过key值查找一项 */
     getItemByKey(key) {
       let result = {};
       (function recursion(dataSource) {
@@ -137,6 +173,9 @@ export default {
       width: 100%;
       overflow: hidden;
       text-overflow: ellipsis;
+      &.placeholder {
+        color: #bbb;
+      }
     }
     .tree-select-main-arrow {
       margin-left: 10px;
@@ -153,9 +192,12 @@ export default {
       }
     }
   }
-  .dropdown-panel {
+  .dropdown-menu {
+    overflow: hidden;
     border: 1px solid #ddd;
     position: absolute;
+    box-sizing: border-box;
+    width: 100%;
   }
   /**遮罩 */
   .dropdown-mask {

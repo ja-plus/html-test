@@ -53,7 +53,7 @@ const _defaultFields = {
   children: 'children',
 };
 export default {
-  name: 'VirtualScrollTree',
+  name: 'VirtualTree',
   props: {
     /** 树高度 默认auto */
     height: {
@@ -188,8 +188,9 @@ export default {
     init() {
       this.rootEl = this.$refs.vScrollTree; // document.getElementById('vScrollTree');// 不能使用getElementById 因为多个组件时，获取会出问题
       this.rootEl.scrollTop = 0; // 重置滚动条
-      const containerHeight = this.rootEl.offsetHeight;
-      this.pageSize = Math.floor(containerHeight / this.lineHeight + 1);
+      const containerHeight = this.rootEl.clientHeight;
+      console.log('Tree containerHeight:', containerHeight);
+      this.pageSize = Math.ceil(containerHeight / this.lineHeight) + 1;
       this.startIndex = 0;
       this.endIndex = this.pageSize;
       this.offsetTop = 0;
@@ -359,6 +360,7 @@ export default {
 
 <style scoped lang="less">
 .vtScroll-tree {
+  box-sizing: border-box;
   background-color: #fff;
   user-select: none;
   width: 100%;

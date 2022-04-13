@@ -10,7 +10,7 @@ div
     VirtualTreeSelect(:replaceFields="{key:'id', title:'label'}" disabled :value="selectedId" :treeData="treeData" @change="onSelectChange")
     VirtualTreeSelect(
         :replaceFields="{key:'id', title:'label'}" 
-        :value="selectedId" 
+        placeholder="请选择..."
         :treeData="treeData"
         :vsTreeProps="{lineHeight:20}" 
         @change="onSelectChange"
