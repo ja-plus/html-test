@@ -10,7 +10,7 @@
  * @returns {String}
  */
 function _createUrlParamStr(url, params) {
-  let tmpUrl = new URL(url);
+  let tmpUrl = new URL(url, window.location); // 如果是url是相对路径，则会加上第二个参数
   for (const key in params) {
     tmpUrl.searchParams.append(key, params[key]);
   }
@@ -34,7 +34,7 @@ function _originRequest(url, config) {
         {
           'Content-Type': 'application/json',
         },
-        config.headers || {}
+        config.headers || {},
       );
       try {
         config.body = JSON.stringify(config.body);
@@ -57,7 +57,7 @@ function _originRequest(url, config) {
 function _requestAdapter(type, url, config = {}) {
   config.method = type;
   const responseType = config.responseType;
-  return _originRequest(url, config).then((response) => {
+  return _originRequest(url, config).then(response => {
     if (response.ok) {
       if (responseType === 'blob') return response.blob();
       if (responseType === 'text') return response.text();
@@ -114,14 +114,10 @@ class Interceptor {
   onRejected = null;
   use(onFulfilled, onRejected) {
     if (onFulfilled && typeof onFulfilled !== 'function') {
-      throw new TypeError(
-        'interceptor.add(onFulfilled, onRejected), parameter onFulfilled is not a function'
-      );
+      throw new TypeError('interceptor.add(onFulfilled, onRejected), parameter onFulfilled is not a function');
     }
     if (onRejected && typeof onRejected !== 'function') {
-      throw new TypeError(
-        'interceptor.add(onFulfilled, onRejected), parameter onRejected is not a function'
-      );
+      throw new TypeError('interceptor.add(onFulfilled, onRejected), parameter onRejected is not a function');
     }
     this.onFulfilled = onFulfilled;
     this.onRejected = onRejected;
@@ -165,18 +161,17 @@ class Service {
     }
 
     const fetchPromise = _originRequest(url, assignedConf)
-      .then((response) => {
+      .then(response => {
         if (response.ok) {
           const responseType = assignedConf.responseType;
           let prom;
           if (responseType === 'blob') prom = response.blob();
           else if (responseType === 'text') prom = response.text();
-          else if (responseType === 'arraybuffer')
-            prom = response.arrayBuffer();
+          else if (responseType === 'arraybuffer') prom = response.arrayBuffer();
           else if (responseType === 'response') prom = response;
           // response.body
           else prom = response.json();
-          return prom.then((data) => {
+          return prom.then(data => {
             // 添加响应拦截器
             return resInterceptor.onFulfilled
               ? resInterceptor.onFulfilled(data, assignedConf, response) // 可能要把response对象传给拦截器使用
@@ -190,18 +185,14 @@ class Service {
           });
         }
       })
-      .catch((err) => {
+      .catch(err => {
         // 错误交给拦截器处理
         if (err.response?.ok) {
           // 响应错误
-          return resInterceptor.onRejected
-            ? resInterceptor.onRejected({ err, config: assignedConf })
-            : Promise.reject({ err, config: assignedConf });
+          return resInterceptor.onRejected ? resInterceptor.onRejected({ err, config: assignedConf }) : Promise.reject({ err, config: assignedConf });
         } else {
           // 请求错误,(浏览器阻止请求)
-          return reqInterceptor.onRejected
-            ? reqInterceptor.onRejected({ err, config: assignedConf })
-            : Promise.reject({ err, config: assignedConf });
+          return reqInterceptor.onRejected ? reqInterceptor.onRejected({ err, config: assignedConf }) : Promise.reject({ err, config: assignedConf });
         }
       });
     return fetchPromise;
