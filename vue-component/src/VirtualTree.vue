@@ -19,7 +19,9 @@
           }"
           :style="{
             height: lineHeight + 'px',
-            paddingLeft: item.isParent ? indentWidth * item.level + 'px' : indentWidth * (item.level - 1) + 20 + 'px',
+            paddingLeft: item.isParent
+              ? baseIndentWidth + indentWidth * item.level + 'px'
+              : baseIndentWidth + indentWidth * (item.level - 1) + 20 + 'px',
           }"
           @click="handleItemClick(item)"
           @dblclick="onDblClick(item)"
@@ -27,8 +29,10 @@
         >
           <!-- 展开箭头 -->
           <div v-if="item.isParent" class="list-item-expand" @click.stop="changeList(item)">
-            <div class="list-item-arrow" :class="{ 'list-item-arrow-active': item.isExpand }"></div>
-            <!-- TODO: slot 箭头样式 -->
+            <!-- slot 箭头 -->
+            <slot name="icon" :isExpand="item.isExpand">
+              <div class="list-item-arrow" :class="{ 'list-item-arrow-active': item.isExpand }"></div>
+            </slot>
           </div>
           <!-- 多选框 -->
           <div v-if="showCheckbox">
@@ -36,8 +40,10 @@
           </div>
           <!-- 文字 -->
           <div class="list-item-title" :title="item[assignedFields.title]">
-            <span>{{ item[assignedFields.title] }}</span>
-            <!-- TODO:slot? -->
+            <!-- 文字slot -->
+            <slot name="text" :text="item[assignedFields.title]">
+              <span>{{ item[assignedFields.title] }}</span>
+            </slot>
           </div>
         </div>
       </li>
@@ -65,7 +71,12 @@ export default {
       type: Number,
       default: 30,
     },
-    /** 缩进距离 */
+    /** 基础缩进距离 */
+    baseIndentWidth: {
+      type: Number,
+      default: 4,
+    },
+    /** 每个层级的缩进距离 */
     indentWidth: {
       type: Number,
       default: 20,
@@ -185,16 +196,16 @@ export default {
     this.initEvent();
   },
   methods: {
-    init() {
+    init(type = 'init') {
       this.rootEl = this.$refs.vScrollTree; // document.getElementById('vScrollTree');// 不能使用getElementById 因为多个组件时，获取会出问题
-      this.rootEl.scrollTop = 0; // 重置滚动条
+      // this.rootEl.scrollTop = 0; // 重置滚动条
       const containerHeight = this.rootEl.clientHeight;
       console.log('Tree containerHeight:', containerHeight);
       this.pageSize = Math.ceil(containerHeight / this.lineHeight) + 1;
       this.startIndex = 0;
       this.endIndex = this.pageSize;
       this.offsetTop = 0;
-      this.setTreeDataFlat('init'); // 展开树，获得总高度 allHeight
+      this.setTreeDataFlat(type); // 默认展开树，获得总高度 allHeight
       this.offsetBottom = this.allHeight - this.mainPageHeight;
 
       this.selectedItems = [];
@@ -205,8 +216,9 @@ export default {
       window.addEventListener('resize', () => {
         // debounce
         if (timeout) clearTimeout(timeout);
-        setTimeout(() => {
-          this.init();
+        timeout = setTimeout(() => {
+          this.init('resize');
+          this.setIndex();
           timeout = null;
         }, 200);
       });
@@ -271,9 +283,13 @@ export default {
       this.offsetTop = this.startIndex * this.lineHeight;
       this.offsetBottom = this.allHeight - (this.displayList.length + this.startIndex) * this.lineHeight;
     },
-    /** 根据滚动条位置，设置展示的区间 */
+    /**
+     * 根据滚动条位置，设置展示的区间
+     * 不传参数则默认获取rootEl的scrollTop
+     * @param {MouseEvent} e default this.rootEl.scrollTop
+     */
     setIndex(e) {
-      const top = e.target.scrollTop;
+      const top = e ? e.target.scrollTop : this.rootEl.scrollTop;
       this.startIndex = Math.floor(top / this.lineHeight);
       const offset = top % this.lineHeight; // 半行偏移量
       this.offsetTop = top - offset;
@@ -371,18 +387,21 @@ export default {
   overflow: auto;
   overflow: overlay;
   &::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
   }
   &::-webkit-scrollbar-track {
     border-radius: 5px;
   }
   &::-webkit-scrollbar-thumb {
-    background: rgba(200, 200, 208, 0.7);
+    background: rgba(74, 75, 114, 0.4);
     border-radius: 5px;
     &:hover {
-      background: rgba(200, 200, 208, 1);
+      background: rgba(74, 75, 114, 0.6);
     }
+  }
+  &::-webkit-scrollbar-corner {
+    background: transparent;
   }
   ul {
     height: 100%;
@@ -408,6 +427,9 @@ export default {
         &.item-highlight {
           color: #fff;
           background-color: #1b63d9;
+          .list-item-expand .list-item-arrow {
+            border-left: 5px solid #fff;
+          }
         }
         &:hover:not(.item-highlight) {
           background-color: #eee;
@@ -418,19 +440,20 @@ export default {
           font-weight: bold;
         }
         .list-item-expand {
-          height: 20px;
-          width: 20px;
+          height: 16px;
+          width: 16px;
           display: flex;
           align-items: center;
           justify-content: center;
           &:hover {
-            opacity: 0.5;
+            opacity: 0.6;
           }
+          /*箭头 */
           .list-item-arrow {
             transform-origin: 2px center;
-            border-left: 5px solid; // color 继承自祖先元素
-            border-top: 5px solid transparent;
-            border-bottom: 5px solid transparent;
+            border-left: 5px solid #757699; // color 继承自祖先元素
+            border-top: 4.5px solid transparent;
+            border-bottom: 4.5px solid transparent;
             border-right: 0px;
             transition: transform 0.2s ease;
             &.list-item-arrow-active {

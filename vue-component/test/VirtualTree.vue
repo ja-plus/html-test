@@ -21,6 +21,10 @@ div(style="display:flex;align-items:flex-start")
       @dblClick="itemDblClick"
       @rightClick="itemRightClick"
     )
+      //- template(#icon="{isExpand}")
+      //-   span {{isExpand ? 1 : 2}}
+      //- template(#text="{text}")
+      //-   div(style="color:red") 11{{text}}
   //- pre {{JSON.stringify(treeData,null,2)}}
  
 </template>
@@ -52,6 +56,7 @@ export default {
         height: '300px',
         // lineHeight: 20,
         // multiple: true,
+        // baseIndentWidth: 8,
         // indentWidth: 10,
         // highlightCurrent: false,
         // currentCancelable: true,
