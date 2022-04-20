@@ -149,6 +149,7 @@ export default {
   },
   data() {
     return {
+      resizeTimeout: null, // window resize debounce
       rootEl: null, // 根元素
       treeDataFlat: [], // 展平的一维数组
       selectedItems: [], // 多选选中
@@ -212,17 +213,24 @@ export default {
     },
     initEvent() {
       this.rootEl.addEventListener('scroll', this.setIndex);
-      let timeout = null;
       window.addEventListener('resize', () => {
-        // debounce
-        if (timeout) clearTimeout(timeout);
-        timeout = setTimeout(() => {
-          this.init('resize');
-          this.setIndex();
-          timeout = null;
-        }, 200);
+        this.resize();
       });
     },
+    /**
+     * 重新初始化并计算大小
+     * @public
+     */
+    resize() {
+      // debounce
+      if (this.resizeTimeout) clearTimeout(this.resizeTimeout);
+      this.resizeTimeout = setTimeout(() => {
+        this.init('resize');
+        this.setIndex();
+        this.resizeTimeout = null;
+      }, 200);
+    },
+
     /** 设置默认高亮当前行 （仅单选）*/
     setDefaultCurrent() {
       this.traverseTreeData(item => {

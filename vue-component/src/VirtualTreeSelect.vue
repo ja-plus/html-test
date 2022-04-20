@@ -1,9 +1,9 @@
 <template>
   <div ref="vTreeSelect" class="v-tree-select-wrapper" :class="{ disabled: disabled }">
     <!-- <input type="text" @click="onInputClick($event)" /> -->
-    <div class="tree-select-main" @click="onInputClick">
+    <div class="tree-select-main" :class="{ expand: showDropdown }" @click="onInputClick">
       <div class="tree-select-main-label" :class="{ placeholder: !selectedTitle }">{{ selectedTitle || placeholder }}</div>
-      <div class="tree-select-main-arrow" :class="{ expand: showDropdown }"></div>
+      <div class="tree-select-main-arrow"></div>
     </div>
     <!-- 下拉框 -->
     <div v-if="!disabled && showDropdown" class="dropdown-menu" :style="dropdownMenuStyle">
@@ -143,6 +143,10 @@ export default {
 };
 </script>
 <style lang="less" scoped>
+::v-deep .vtScroll-tree ul li .list-item:hover:not(.item-highlight) {
+  background-color: #f7f7fc;
+}
+
 .v-tree-select-wrapper.disabled {
   .tree-select-main {
     border: 1px solid #cbcbe1;
@@ -151,12 +155,21 @@ export default {
     .tree-select-main-label {
       color: #ccc;
     }
+    .tree-select-main-arrow {
+      border-top: 5.5px solid #ccc;
+    }
   }
 }
 .v-tree-select-wrapper {
   position: relative;
   width: 200px;
   height: 25px;
+  transition: all 0.3s;
+  &:hover:not(.disabled) {
+    .tree-select-main {
+      border: 1px solid #8f90b5;
+    }
+  }
   .tree-select-main {
     display: flex;
     justify-content: space-between;
@@ -164,17 +177,24 @@ export default {
     width: 100%;
     height: 100%;
     border: 1px solid #ddd;
-    border-radius: 2px;
+    border-radius: 4px;
     overflow: hidden;
     white-space: nowrap;
     box-sizing: border-box;
     padding: 0 10px;
+    transition: all 0.3s;
+    &.expand {
+      border: 1px solid #8f90b5;
+      .tree-select-main-arrow {
+        transform: rotate(180deg);
+      }
+    }
     .tree-select-main-label {
       width: 100%;
       overflow: hidden;
       text-overflow: ellipsis;
       &.placeholder {
-        color: #bbb;
+        color: #7d7d94;
       }
     }
     .tree-select-main-arrow {
@@ -182,9 +202,9 @@ export default {
       align-self: center;
       width: 0;
       height: 0;
-      border-top: 5px solid #000;
-      border-left: 5px solid transparent;
-      border-right: 5px solid transparent;
+      border-top: 5.5px solid #757699;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
       border-bottom: 0px;
       transition: transform 0.2s ease;
       &.expand {
@@ -198,6 +218,11 @@ export default {
     position: absolute;
     box-sizing: border-box;
     width: 100%;
+    margin-top: 2px;
+    border-radius: 4px;
+    outline: none;
+    box-shadow: 0 4px 12px rgba(10, 39, 86, 0.15);
+    border: 1px solid #ececf7;
   }
   /**遮罩 */
   .dropdown-mask {
