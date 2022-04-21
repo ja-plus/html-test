@@ -3,11 +3,17 @@ class Child extends React.Component {
   constructor(props) {
     super(props);
   }
+  /** like computed */
+  get doubleNum() {
+    return this.props.num * 2;
+  }
   render() {
     return (
       <div>
         <h2>child</h2>
-        <div>num: {this.props.num}</div>
+        <div>
+          num: {this.props.num}, doubleNum: {this.doubleNum}
+        </div>
         <input type="text" value={this.props.num} onChange={this.handleInputChange.bind(this)} />
       </div>
     );
