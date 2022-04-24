@@ -131,6 +131,14 @@ export default {
       type: String,
       default: '',
     },
+    /**
+     * 滚动条默认的位置的key
+     * 如果有父节点，则父节点必须要展开，否则不会定位
+     */
+    defaultScrollKey: {
+      type: String,
+      default: '',
+    },
     /** 默认选中的项数组 */
     defaultSelectedKeys: {
       type: Array,
@@ -186,12 +194,14 @@ export default {
       // 列表发生改变，重置已选，重置虚拟滚动
       this.init();
       this.setDefaultCurrent(); // 设置默认高亮行
+      this.setDefaultScrollTop();
       this.setDefaultSelected(); // 设置默认选中
     },
   },
   mounted() {
     this.init();
     this.setDefaultCurrent(); // 设置默认高亮行
+    this.setDefaultScrollTop();
     this.setDefaultSelected(); // 设置默认选中
     // event listener
     this.initEvent();
@@ -240,6 +250,12 @@ export default {
           this.currentItem = item;
           return 0;
         }
+      });
+    },
+    /** 滚动条默认的位置*/
+    setDefaultScrollTop() {
+      this.$nextTick(() => {
+        this.rootEl.scrollTop = this.treeDataFlat.findIndex(it => it[this.assignedFields.key] === this.defaultScrollKey) * this.lineHeight;
       });
     },
     /** 设置选中的项 （可多选）*/

@@ -64,8 +64,9 @@ export default {
         parentClickable: true,
         // emptyText: 'no Data',
         // defaultExpandAll: true,
-        defaultExpandedKeys: [0, '0-1'],
-        defaultCurrentKey: '0-1-1',
+        defaultExpandedKeys: [10, '10-0'],
+        defaultCurrentKey: '10-0-0',
+        defaultScrollKey: '10-0-0',
         defaultSelectedKeys: ['0-1-1'],
       },
     };
