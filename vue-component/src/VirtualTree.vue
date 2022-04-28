@@ -212,12 +212,13 @@ export default {
       // this.rootEl.scrollTop = 0; // 重置滚动条
       const containerHeight = this.rootEl.clientHeight;
       console.log('Tree containerHeight:', containerHeight);
-      this.pageSize = Math.ceil(containerHeight / this.lineHeight) + 1;
-      this.startIndex = 0;
-      this.endIndex = this.pageSize;
-      this.offsetTop = 0;
       this.setTreeDataFlat(type); // 默认展开树，获得总高度 allHeight
-      this.offsetBottom = this.allHeight - this.mainPageHeight;
+      this.pageSize = Math.ceil(containerHeight / this.lineHeight) + 1;
+      this.setIndex();
+      // this.startIndex = 0;
+      // this.endIndex = this.pageSize;
+      // this.offsetTop = 0;
+      // this.offsetBottom = this.allHeight - this.mainPageHeight;
 
       this.selectedItems = [];
     },
@@ -313,7 +314,7 @@ export default {
      * @param {MouseEvent} e default this.rootEl.scrollTop
      */
     setIndex(e) {
-      const top = e ? e.target.scrollTop : this.rootEl.scrollTop;
+      const top = e ? e.target.scrollTop : this.rootEl?.scrollTop;
       this.startIndex = Math.floor(top / this.lineHeight);
       const offset = top % this.lineHeight; // 半行偏移量
       this.offsetTop = top - offset;
