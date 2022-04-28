@@ -1,0 +1,1 @@
+{"version":3,"sources":["\\\\?\\D:\\html-test\\tool-test\\swc\\src\\a.js","\\\\?\\D:\\html-test\\tool-test\\swc\\src\\index.js"],"sourcesContent":["export default {\r\n  name: '11',\r\n};\r\n","import a from './a.js';\r\nconsole.log('index', a.name);\r\n"],"names":[],"mappings":"kBAAe;IACb,IAAI,EAAE,IAAI;CACX;ACDD,OAAO,CAAC,GAAG,CAAC,OAAO,EAAE,UAAE,IAAI,CAAC,CAAC"}

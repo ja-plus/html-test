@@ -1,0 +1,16 @@
+{
+  "name": "swc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "study": "swc ./study.js -o study.out.js",
+    "bd": "spack"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@swc/cli": "^0.1.57",
+    "@swc/core": "^1.2.173"
+  }
+}
