@@ -1,0 +1,9 @@
+[package]
+name = "gretting"
+version = "0.1.0"
+authors = ["JA+ <601286825@qq.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
