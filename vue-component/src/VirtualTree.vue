@@ -395,6 +395,12 @@ export default {
         }
       }.bind(this)(this.treeData));
     },
+
+    // ----- refFunc
+    /** 清除当前选中的高亮 */
+    clearCurrent() {
+      this.currentItem = {};
+    },
   },
 };
 </script>
