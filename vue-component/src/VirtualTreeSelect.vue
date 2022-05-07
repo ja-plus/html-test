@@ -2,7 +2,7 @@
   <div ref="vTreeSelect" class="v-tree-select-wrapper" :class="{ disabled: disabled }">
     <!-- <input type="text" @click="onInputClick($event)" /> -->
     <div class="tree-select-main" :class="{ expand: showDropdown }" @click="onInputClick">
-      <div class="tree-select-main-label" :class="{ placeholder: !selectedTitle }">{{ selectedTitle || placeholder }}</div>
+      <div class="tree-select-main-label" :class="{ placeholder: !selectedLabel }">{{ selectedLabel || placeholder }}</div>
       <div class="tree-select-main-arrow"></div>
     </div>
     <!-- 下拉框 -->
@@ -43,6 +43,11 @@ export default {
       type: Number,
       default: 200,
     },
+    /** 格式化选中展示的label */
+    labelFormatter: {
+      type: Function,
+      default: null,
+    },
     /** 下拉框的z-index */
     zIndex: {
       type: Number,
@@ -80,8 +85,17 @@ export default {
     assignedFields() {
       return Object.assign({}, _defaultFields, this.replaceFields);
     },
-    selectedTitle() {
-      return this.getItemByKey(this.value)[this.assignedFields.title] || this.value;
+    selectedLabel() {
+      let label = '';
+      let item = this.getItemByKey(this.value);
+      if (item) {
+        if (this.labelFormatter) {
+          label = this.labelFormatter(item);
+        } else {
+          label = item[this.assignedFields.title];
+        }
+      }
+      return label || this.value;
     },
   },
   methods: {
@@ -123,7 +137,7 @@ export default {
     },
     /** 通过key值查找一项 */
     getItemByKey(key) {
-      let result = {};
+      let result = null;
       (function recursion(dataSource) {
         for (let i = 0; i < dataSource.length; i++) {
           const item = dataSource[i];
