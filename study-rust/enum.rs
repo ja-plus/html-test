@@ -4,8 +4,8 @@
 //   V6
 // }
 struct IpAddr {
-  kind: IpAddrKind
-  address: String
+  kind: IpAddrKind,
+  address: String,
 }
 enum IpAddrKind{
   V4(u8,u8,u8,u8),
@@ -20,7 +20,7 @@ fn main() {
   //   kind: IpAddrKind::V4,
   //   address: "hello address"
   // }
-  let home = IpAddrKind::V4(10,19,0,10)
+  let home = IpAddrKind::V4(10,19,0,10);
   
 }
 
