@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>柱状图显示在坐标轴刻度右侧</title>
+</head>
+<script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.1.2/echarts.common.js"></script>
+<!-- <script src="https://cdn.bootcdn.net/ajax/libs/echarts/4.9.0-rc.1/echarts-en.common.min.js"></script> -->
+
+<body>
+  <div id="echarts" style="height: 300px;width:100%"></div>
+</body>
+<script>
+  let myChart = window.echarts.init(document.getElementById('echarts'));
+  const barMaxWidth = 20;
+  let dataSource = [
+    [0, 10],
+    [2, 20],
+    [5, 30],
+    [10, 40],
+    [14, 45],
+    [20, 50],
+    [30, 57],
+    [50, 60],
+    [60, 65],
+    [90, 70],
+    [100, 75],
+  ];
+  /* 横坐标*/
+  const xAxisData = dataSource.map(it => it[0]);
+  const xMin = Math.min(...xAxisData);
+  let xMax = Math.max(...xAxisData);
+  if (xMax === xMin) xMax = 2 * xMin;
+  const grid = [
+    { left: 50, right: 50, top: 20, bottom: 30 },
+    { left: 50, right: 50, top: 20, bottom: 30 },
+  ];
+  const echartsEl = document.getElementById('echarts');
+  const xAxisWidth = echartsEl.offsetWidth - grid[0].left - grid[0].right;
+  // const xUnitValue = xAxisWidth / (xMax - xMin);
+
+  /* 最小间距*/
+  let minGap = Infinity;
+  for (let i = 0; i < xAxisData.length - 1; i++) {
+    minGap = Math.min(minGap, xAxisData[i + 1] - xAxisData[i]);
+  }
+
+  const barMaxWidthValue = (barMaxWidth * (xMax - xMin)) / (xAxisWidth - barMaxWidth);
+  let barWidthValue = minGap;
+  if (minGap > barMaxWidthValue * 2) {
+    barWidthValue = barMaxWidthValue * 2;
+  }
+  
+  const option = {
+    tooltip: [{ trigger: 'axis' }],
+    grid,
+    xAxis: [
+      {
+        gridIndex: 0,
+        type: 'value',
+        min: xMin - barWidthValue / 2,
+        max: xMax + barWidthValue / 2,
+        axisTick: { show: false }, // 隐藏刻度线
+        splitLine: { show: false }, // 隐藏分割线
+        axisLabel: { show: false }, // 隐藏刻度值
+        axisPointer: {
+          type: 'none',
+          // show: false // tooltip会不显示
+        },
+      },
+      {
+        gridIndex: 1,
+        type: 'value',
+        min: xMin,
+        max: xMax + barWidthValue,
+        axisTick: { show: false }, // 隐藏刻度线
+        splitLine: { show: false }, // 隐藏分割线
+        axisLabel: { show: false }, // 隐藏刻度值
+        axisPointer: {
+          triggerTooltip: false,
+        },
+      },
+    ],
+    yAxis: [
+      {
+        gridIndex: 0,
+        type: 'value',
+        axisLine: {
+          onZero: false,
+        },
+      },
+      {
+        gridIndex: 1,
+        type: 'value',
+        axisLine: {
+          onZero: false,
+        },
+        axisTick: { show: false }, // 隐藏刻度线
+        splitLine: { show: false }, // 隐藏分割线
+        axisLabel: { show: false }, // 隐藏刻度值
+      },
+    ],
+    series: [
+      {
+        xAxisIndex: 0,
+        yAxisIndex: 0,
+        name: 'Fake Data',
+        type: 'bar',
+        barCategoryGap: 0,
+        barMaxWidth,
+        barGap: 0,
+        data: dataSource,
+        // markLine: {
+        //   symbol: false, // 取消箭头
+        //   silent: true, // 取消鼠标hover事件
+        //   label: { position: 'start' }, // 改变label位置
+        //   lineStyle: { color: '#ddd', type: 'solid' },
+        //   data: dataSource.map(val => {
+        //     return {
+        //       xAxis: val[0],
+        //     };
+        //   }),
+        // },
+        // z: 10,
+      },
+      {
+        xAxisIndex: 0,
+        yAxisIndex: 0,
+        name: 'Fake Data2',
+        type: 'bar',
+        barCategoryGap: 0,
+        barMaxWidth,
+        data: dataSource,
+      },
+      {
+        xAxisIndex: 1,
+        yAxisIndex: 1,
+        type: 'bar',
+        data: dataSource.map(it => [it[0], 0]),
+        markLine: {
+          symbol: false, // 取消箭头
+          silent: true, // 取消鼠标hover事件
+          label: { position: 'start' }, // 改变label位置
+          lineStyle: { color: '#ddd', type: 'solid' },
+          data: dataSource.map(val => {
+            return {
+              xAxis: val[0],
+            };
+          }),
+        },
+        z: 10,
+      },
+    ],
+  };
+  myChart.setOption(option);
+</script>
+<!-- <script>
+  let myChart = window.echarts.init(document.getElementById('echarts2'));
+  let dataSource = [
+    [0, 10],
+    [2, 20],
+    [5, 30],
+    [10, 40],
+    [14, 45],
+    [20, 50],
+    [30, 57],
+    [50, 60],
+    // [60, 65],
+    // [90, 70],
+    // [100, 75],
+  ];
+  /* 横坐标*/
+  const xAxisData = dataSource.map(it => it[0]);
+  const xMax = Math.max(...xAxisData);
+  const xMin = Math.min(...xAxisData);
+  const grid = { left: 50, right: 50 };
+  const echartsEl = document.getElementById('echarts');
+  const xAxisWidth = echartsEl.offsetWidth - grid.left - grid.right;
+  const xUnitValue = xAxisWidth / (xMax - xMin);
+
+  /* 最小间距*/
+  let minGap = Infinity;
+  for (let i = 0; i < xAxisData.length - 1; i++) {
+    minGap = Math.min(minGap, xAxisData[i + 1] - xAxisData[i]);
+  }
+
+  const barWidthValue = minGap / xUnitValue;
+  console.log('barWidthValue :>> ', barWidthValue);
+
+  const option = {
+    tooltip: { trigger: 'axis' },
+    grid,
+    xAxis: {
+      type: 'value',
+      // min: xMin - minGap / 2,
+      // max: xMax + minGap / 2,
+      axisTick: { show: false }, // 隐藏刻度线
+      splitLine: { show: false }, // 隐藏分割线
+      axisLabel: { show: false }, // 隐藏刻度值
+    },
+    yAxis: [
+      {
+        type: 'value',
+        // axisLine: {
+        //   onZero: false,
+        // },
+      },
+    ],
+    series: [
+      {
+        name: 'Fake Data',
+        type: 'bar',
+        barCategoryGap: 0,
+        data: dataSource.map(it => {
+          return [it[0] + minGap / 2, it[1]];
+        }),
+        markLine: {
+          symbol: false, // 取消箭头
+          silent: true, // 取消鼠标hover事件
+          label: { position: 'start' }, // 改变label位置
+          lineStyle: { color: '#ddd', type: 'solid' },
+          data: dataSource.map(val => {
+            return {
+              xAxis: val[0],
+            };
+          }),
+        },
+        z: 10,
+      },
+    ],
+  };
+  myChart.setOption(option);
+</script> -->
+
+</html>
