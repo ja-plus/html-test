@@ -29,6 +29,18 @@
     [90, 70],
     [100, 75],
   ];
+  const series = new Array(3).fill(null).map((item, i) => {
+    return {
+      xAxisIndex: 0,
+      yAxisIndex: 0,
+      name: 'Fake Data' + i,
+      type: 'bar',
+      barCategoryGap: 0,
+      barMaxWidth,
+      barGap: 0,
+      data: dataSource,
+    };
+  });
   /* 横坐标*/
   const xAxisData = dataSource.map(it => it[0]);
   const xMin = Math.min(...xAxisData);
@@ -48,10 +60,14 @@
     minGap = Math.min(minGap, xAxisData[i + 1] - xAxisData[i]);
   }
 
-  const barMaxWidthValue = (barMaxWidth * (xMax - xMin)) / (xAxisWidth - barMaxWidth);
+  let barMaxWidthValue = (barMaxWidth * (xMax - xMin)) / (xAxisWidth - barMaxWidth);
+  if (xAxisWidth > barMaxWidth * series.length) {
+    // 处理系列宽度比x轴还宽的情况
+    barMaxWidthValue = (barMaxWidth * (xMax - xMin)) / (xAxisWidth - barMaxWidth * series.length);
+  }
   let barWidthValue = minGap;
-  if (minGap > barMaxWidthValue * 2) {
-    barWidthValue = barMaxWidthValue * 2;
+  if (minGap > barMaxWidthValue * series.length) {
+    barWidthValue = barMaxWidthValue * series.length;
   }
   
   const option = {
@@ -104,37 +120,7 @@
       },
     ],
     series: [
-      {
-        xAxisIndex: 0,
-        yAxisIndex: 0,
-        name: 'Fake Data',
-        type: 'bar',
-        barCategoryGap: 0,
-        barMaxWidth,
-        barGap: 0,
-        data: dataSource,
-        // markLine: {
-        //   symbol: false, // 取消箭头
-        //   silent: true, // 取消鼠标hover事件
-        //   label: { position: 'start' }, // 改变label位置
-        //   lineStyle: { color: '#ddd', type: 'solid' },
-        //   data: dataSource.map(val => {
-        //     return {
-        //       xAxis: val[0],
-        //     };
-        //   }),
-        // },
-        // z: 10,
-      },
-      {
-        xAxisIndex: 0,
-        yAxisIndex: 0,
-        name: 'Fake Data2',
-        type: 'bar',
-        barCategoryGap: 0,
-        barMaxWidth,
-        data: dataSource,
-      },
+      ...series,
       {
         xAxisIndex: 1,
         yAxisIndex: 1,
