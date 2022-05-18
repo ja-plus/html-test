@@ -106,8 +106,13 @@ export default {
       type: Boolean,
       default: false,
     },
-    /** 父节点是否可点击为current */
-    parentClickable: {
+    /** 父节点是否可点击为current（是否可选中） */
+    parentSelectable: {
+      type: Boolean,
+      default: false,
+    },
+    /** 点击一项也可以展开，而非只能点击箭头*/
+    clickItemExpand: {
       type: Boolean,
       default: false,
     },
@@ -324,8 +329,11 @@ export default {
     },
     /** 点击一项 */
     handleItemClick(item) {
-      if (!this.parentClickable) {
-        // 父节点不可点击
+      if (this.clickItemExpand && item[this.assignedFields.children]) {
+        this.changeList(item); // 展开
+      }
+      if (!this.parentSelectable) {
+        // 父节点不可选中
         if (item[this.assignedFields.children]) return;
       }
       if (this.currentCancelable) {
@@ -362,7 +370,7 @@ export default {
       //   // this.setSelectedItem(item);
       //   // item.isCurrent = true; // this.$set(item, 'isCurrent', true);
       // }
-      // if (!this.parentClickable) {
+      // if (!this.parentSelectable) {
       //   if (item[this.assignedFields.children]) return;
       // }
       // this.$emit('dblClick', item);
