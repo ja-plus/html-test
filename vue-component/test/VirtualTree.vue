@@ -61,7 +61,7 @@ export default {
         // highlightCurrent: false,
         // currentCancelable: true,
         showCheckbox: true,
-        parentSelectable: true,
+        // parentSelectable: true,
         clickItemExpand: true,
         // emptyText: 'no Data',
         // defaultExpandAll: true,

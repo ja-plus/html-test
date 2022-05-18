@@ -449,8 +449,11 @@ export default {
     flex: 1;
     // width: max-content;
     width: 100%;
+    min-width: max-content;
 
     li {
+      width: 100%;
+      min-width: max-content;
       list-style-type: none;
       .list-item {
         box-sizing: border-box; //确保padding-right在min-width: 100%;里

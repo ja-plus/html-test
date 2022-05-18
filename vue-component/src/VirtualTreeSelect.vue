@@ -200,6 +200,7 @@ export default {
     &.expand {
       border: 1px solid #8f90b5;
       .tree-select-main-arrow {
+        border-top: 5.5px solid #4a4b72;
         transform: rotate(180deg);
       }
     }
@@ -232,11 +233,15 @@ export default {
     position: absolute;
     box-sizing: border-box;
     width: 100%;
+    // min-width: max-content;
     margin-top: 2px;
     border-radius: 4px;
     outline: none;
     box-shadow: 0 4px 12px rgba(10, 39, 86, 0.15);
     border: 1px solid #ececf7;
+    // ::v-deep .vtScroll-tree {
+    //   min-width: max-content;
+    // }
   }
   /**遮罩 */
   .dropdown-mask {
