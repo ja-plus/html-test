@@ -21,9 +21,6 @@
   </div>
 </template>
 <script>
-/**
- * TODO: dropdown position up down
- */
 import VirtualTree from './VirtualTree.vue';
 
 const _defaultFields = {
@@ -42,6 +39,11 @@ export default {
     dropdownHeight: {
       type: Number,
       default: 200,
+    },
+    /** 下拉框宽度 */
+    dropdownWidth: {
+      type: Number,
+      default: null,
     },
     /** 格式化选中展示的label */
     labelFormatter: {
@@ -113,15 +115,29 @@ export default {
      * 设置下拉框从上方弹出还是下方
      */
     setDropdownMenuStyle() {
+      /** @type {DOMRect} */
       const rect = this.$refs.vTreeSelect.getBoundingClientRect();
       const bottom = window.innerHeight - rect.top - rect.height;
+      const dropdownWidth = this.dropdownWidth ? this.dropdownWidth : rect.width;
       // reset style
       this.dropdownMenuStyle = {
         position: 'absolute',
-        width: rect.width + 'px',
+        width: dropdownWidth + 'px',
         height: this.dropdownHeight + 'px',
         zIndex: this.zIndex + 1,
       };
+      if (dropdownWidth > window.innerWidth) {
+        this.dropdownMenuStyle.width = '96vw';
+        this.dropdownMenuStyle.right = -1 * (window.innerWidth - rect.right) + 'px';
+      } else {
+        this.dropdownMenuStyle.width = dropdownWidth + 'px';
+        if (window.innerWidth - rect.left < dropdownWidth) {
+          // 右边没有空间时
+          this.dropdownMenuStyle.right = 0;
+        } else {
+          this.dropdownMenuStyle.right = null;
+        }
+      }
 
       if (bottom >= this.dropdownHeight) {
         // 下方有充足空间
@@ -178,7 +194,12 @@ export default {
   position: relative;
   width: 200px;
   height: 25px;
-  transition: all 0.3s;
+  transition: border 0.3s;
+  &.disabled {
+    .tree-select-main {
+      border: 1px solid #cccccc;
+    }
+  }
   &:hover:not(.disabled) {
     .tree-select-main {
       border: 1px solid #8f90b5;
