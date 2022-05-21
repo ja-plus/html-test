@@ -7,3 +7,8 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+rand = "0.5.5"
+
+# 发生恐慌，则操作系统回收内存
+[profile.release]
+panic = 'abort'

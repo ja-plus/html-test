@@ -1,14 +1,35 @@
+// use rand::{Rng};
+use std::fs::File;
+use std::io::ErrorKind;
 fn main() {
-    println!("Hello, world!");
-    // let v:Vec<i32> = Vec::new();
-    let mut v = vec![1,2,3];
-    v.push(1);
-    let third:&i32 = &v[2];
-    let third2 = v.get(0);
-    println!("{}", third);
+    // panic!("panic");
+    // let v =vec![1,2];
+    // v[99];
 
-    match third2 {
-        Some(third) => println!("{}", third),
-        None => println!("no"),
-    }
+    let f = File::open("hello.txt");
+    let f = match f {
+        Ok(file) => {
+            file
+        },
+        // Err(error) => {
+        //     panic!("Error painc in file {:?}",error);
+        // }
+        Err(error) => {
+            match error.kind() {
+                ErrorKind::NotFound => {
+                    match File::create("hello.txt"){
+                        Ok(fc) => fc,
+                        Err(e) => panic!("{}",e)
+                    }
+                },
+                other_error => panic!("Error opening the file {:?}",other_error),
+            }
+        }
+
+
+    };
+
+    let f = File::open("hello.txt").unwrap();
+    let f = File::open("hello.txt").expect("无法打开文件");
+
 }
