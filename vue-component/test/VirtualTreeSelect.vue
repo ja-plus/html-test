@@ -13,7 +13,7 @@ div(style="display:flex;justify-content:center;width:100vw;")
         placeholder="请选择..."
         :treeData="treeData"
         :vsTreeProps="{lineHeight:20}" 
-        :dropdownWidth="1000"
+        :dropdownWidth="800"
         @change="onSelectChange"
     )
 br

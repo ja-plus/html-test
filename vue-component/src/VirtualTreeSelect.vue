@@ -2,7 +2,7 @@
   <div ref="vTreeSelect" class="v-tree-select-wrapper" :class="{ disabled: disabled }">
     <!-- <input type="text" @click="onInputClick($event)" /> -->
     <div class="tree-select-main" :class="{ expand: showDropdown }" @click="onInputClick">
-      <div class="tree-select-main-label" :class="{ placeholder: !selectedLabel }">{{ selectedLabel || placeholder }}</div>
+      <div class="tree-select-main-label" :class="{ placeholder: !selectedLabel }" :title="selectedLabel">{{ selectedLabel || placeholder }}</div>
       <div class="tree-select-main-arrow"></div>
     </div>
     <!-- 下拉框 -->
@@ -126,17 +126,16 @@ export default {
         height: this.dropdownHeight + 'px',
         zIndex: this.zIndex + 1,
       };
-      if (dropdownWidth > window.innerWidth) {
+
+      if (window.innerWidth - rect.left >= dropdownWidth) {
+        // 右边有空间
+        this.dropdownMenuStyle.right = null;
+      } else if (rect.right >= dropdownWidth) {
+        // 左边有空间
+        this.dropdownMenuStyle.right = 0;
+      } else {
         this.dropdownMenuStyle.width = '96vw';
         this.dropdownMenuStyle.right = -1 * (window.innerWidth - rect.right) + 'px';
-      } else {
-        this.dropdownMenuStyle.width = dropdownWidth + 'px';
-        if (window.innerWidth - rect.left < dropdownWidth) {
-          // 右边没有空间时
-          this.dropdownMenuStyle.right = 0;
-        } else {
-          this.dropdownMenuStyle.right = null;
-        }
       }
 
       if (bottom >= this.dropdownHeight) {
@@ -186,7 +185,7 @@ export default {
       color: #ccc;
     }
     .tree-select-main-arrow {
-      border-top: 5.5px solid #ccc;
+      border-top: 5px solid #ccc;
     }
   }
 }
@@ -221,7 +220,7 @@ export default {
     &.expand {
       border: 1px solid #8f90b5;
       .tree-select-main-arrow {
-        border-top: 5.5px solid #4a4b72;
+        border-top: 5px solid #4a4b72;
         transform: rotate(180deg);
       }
     }
@@ -238,7 +237,7 @@ export default {
       align-self: center;
       width: 0;
       height: 0;
-      border-top: 5.5px solid #757699;
+      border-top: 5px solid #757699;
       border-left: 4px solid transparent;
       border-right: 4px solid transparent;
       border-bottom: 0px;
