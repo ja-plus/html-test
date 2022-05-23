@@ -4,7 +4,7 @@ div(style="display:flex;justify-content:center;width:100vw;")
         :replaceFields="{key:'id', title:'label'}" 
         :value="selectedId" 
         :treeData="treeData"
-        :vsTreeProps="{lineHeight:20}" 
+        :vsTreeProps="{lineHeight:24,clickItemExpand:true}" 
         @change="onSelectChange"
         )
     VirtualTreeSelect(:replaceFields="{key:'id', title:'label'}" disabled :value="selectedId" :treeData="treeData" @change="onSelectChange")
@@ -12,7 +12,7 @@ div(style="display:flex;justify-content:center;width:100vw;")
         :replaceFields="{key:'id', title:'label'}" 
         placeholder="请选择..."
         :treeData="treeData"
-        :vsTreeProps="{lineHeight:20}" 
+        :vsTreeProps="{lineHeight:24}" 
         :dropdownWidth="800"
         @change="onSelectChange"
     )

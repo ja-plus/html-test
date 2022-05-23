@@ -6,12 +6,12 @@
       <div class="tree-select-main-arrow"></div>
     </div>
     <!-- 下拉框 -->
-    <div v-if="!disabled && showDropdown" class="dropdown-menu" :style="dropdownMenuStyle">
+    <div v-show="!disabled && showDropdown" class="dropdown-menu" :style="dropdownMenuStyle">
       <VirtualTree
+        ref="virtualTree"
         v-bind="vsTreeProps"
         height="100%"
         :replace-fields="assignedFields"
-        :highlight-current="false"
         :tree-data="treeData"
         @itemClick="onTreeItemClick"
       />
@@ -38,12 +38,17 @@ export default {
     /** 下拉框高度 */
     dropdownHeight: {
       type: Number,
-      default: 200,
+      default: 240, // 8行
     },
     /** 下拉框宽度 */
     dropdownWidth: {
       type: Number,
       default: null,
+    },
+    /** 下拉菜单与下拉框间的距离 */
+    dropdownSpace: {
+      type: Number,
+      default: 2,
     },
     /** 格式化选中展示的label */
     labelFormatter: {
@@ -105,6 +110,7 @@ export default {
       if (this.disabled) return;
       this.setDropdownMenuStyle(e);
       this.showDropdown = !this.showDropdown;
+      this.$refs.virtualTree.resize();
     },
     onTreeItemClick(item) {
       this.showDropdown = false;
@@ -140,10 +146,10 @@ export default {
 
       if (bottom >= this.dropdownHeight) {
         // 下方有充足空间
-        this.dropdownMenuStyle.top = null;
+        this.dropdownMenuStyle.top = rect.height + this.dropdownSpace + 'px';
       } else if (rect.top >= this.dropdownHeight) {
         // 上方有充足空间
-        this.dropdownMenuStyle.top = -1 * this.dropdownHeight + 'px';
+        this.dropdownMenuStyle.top = -1 * this.dropdownHeight - this.dropdownSpace + 'px';
       } else {
         this.dropdownMenuStyle.top = 0;
         this.dropdownMenuStyle.position = 'fixed';
@@ -254,7 +260,7 @@ export default {
     box-sizing: border-box;
     width: 100%;
     // min-width: max-content;
-    margin-top: 2px;
+    // margin-top: 2px;
     border-radius: 4px;
     outline: none;
     box-shadow: 0 4px 12px rgba(10, 39, 86, 0.15);
