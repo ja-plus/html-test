@@ -162,12 +162,16 @@ export default {
   },
   data() {
     return {
-      resizeTimeout: null, // window resize debounce
-      rootEl: null, // 根元素
-      treeDataFlat: [], // 展平的一维数组
-      selectedItems: [], // 多选选中
+      /** window resize debounce */
+      resizeTimeout: null,
+      // rootEl: null, // 根元素
+      /** 展平的一维数组 */
+      treeDataFlat: [],
+      /** 多选选中*/
+      selectedItems: [],
       // var
-      currentItem: {}, // 点击后高亮的行
+      /** 点击后高亮的行 */
+      currentItem: {},
       // v scroll
       startIndex: 0,
       endIndex: 30,
@@ -213,38 +217,36 @@ export default {
   },
   methods: {
     init(type = 'init') {
-      this.rootEl = this.$refs.vScrollTree; // document.getElementById('vScrollTree');// 不能使用getElementById 因为多个组件时，获取会出问题
-      // this.rootEl.scrollTop = 0; // 重置滚动条
-      const containerHeight = this.rootEl.clientHeight;
-      console.log('Tree containerHeight:', containerHeight);
+      let containerHeight = this.$el?.clientHeight;
+      if (!containerHeight) {
+        containerHeight = 1080;
+        console.warn("Can't get virtualTree clientHeight");
+      }
+      // console.log('Tree containerHeight:', containerHeight);
       this.setTreeDataFlat(type); // 默认展开树，获得总高度 allHeight
       this.pageSize = Math.ceil(containerHeight / this.lineHeight) + 1;
       this.setIndex();
-      // this.startIndex = 0;
-      // this.endIndex = this.pageSize;
-      // this.offsetTop = 0;
-      // this.offsetBottom = this.allHeight - this.mainPageHeight;
 
       this.selectedItems = [];
     },
     initEvent() {
-      this.rootEl.addEventListener('scroll', this.setIndex);
+      this.$el.addEventListener('scroll', this.setIndex);
       window.addEventListener('resize', () => {
         this.resize();
       });
     },
     /**
      * 重新初始化并计算大小
+     * @param {number} option.debounce
      * @public
      */
-    resize() {
+    resize(option = {}) {
       // debounce
       if (this.resizeTimeout) clearTimeout(this.resizeTimeout);
       this.resizeTimeout = setTimeout(() => {
         this.init('resize');
-        this.setIndex();
         this.resizeTimeout = null;
-      }, 200);
+      }, option.debounce || 200);
     },
 
     /** 设置默认高亮当前行 （仅单选）*/
@@ -261,7 +263,7 @@ export default {
     /** 滚动条默认的位置*/
     setDefaultScrollTop() {
       this.$nextTick(() => {
-        this.rootEl.scrollTop = this.treeDataFlat.findIndex(it => it[this.assignedFields.key] === this.defaultScrollKey) * this.lineHeight;
+        this.$el.scrollTop = this.treeDataFlat.findIndex(it => it[this.assignedFields.key] === this.defaultScrollKey) * this.lineHeight;
       });
     },
     /** 设置选中的项 （可多选）*/
@@ -315,11 +317,11 @@ export default {
     },
     /**
      * 根据滚动条位置，设置展示的区间
-     * 不传参数则默认获取rootEl的scrollTop
-     * @param {MouseEvent} e default this.rootEl.scrollTop
+     * 不传参数则默认获取$el的scrollTop
+     * @param {MouseEvent} e default this.$el.scrollTop
      */
     setIndex(e) {
-      const top = e ? e.target.scrollTop : this.rootEl?.scrollTop;
+      const top = e ? e.target.scrollTop : this.$el?.scrollTop;
       this.startIndex = Math.floor(top / this.lineHeight);
       const offset = top % this.lineHeight; // 半行偏移量
       this.offsetTop = top - offset;
@@ -408,6 +410,10 @@ export default {
     /** 清除当前选中的高亮 */
     clearCurrent() {
       this.currentItem = {};
+    },
+    /** 设置当前选中行 */
+    setCurrent() {
+      // TODO:
     },
   },
 };

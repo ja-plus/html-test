@@ -6,7 +6,7 @@
       <div class="tree-select-main-arrow"></div>
     </div>
     <!-- 下拉框 -->
-    <div v-show="!disabled && showDropdown" class="dropdown-menu" :style="dropdownMenuStyle">
+    <div v-if="vIfLoadComponent" v-show="!disabled && showDropdown" class="dropdown-menu" :style="dropdownMenuStyle">
       <VirtualTree
         ref="virtualTree"
         v-bind="vsTreeProps"
@@ -85,6 +85,8 @@ export default {
     return {
       dropdownMenuStyle: {},
       showDropdown: false,
+      /** 展开下拉框时才加载组件 */
+      vIfLoadComponent: false,
     };
   },
   computed: {
@@ -108,9 +110,13 @@ export default {
   methods: {
     onInputClick(e) {
       if (this.disabled) return;
+      this.vIfLoadComponent = true;
+
       this.setDropdownMenuStyle(e);
       this.showDropdown = !this.showDropdown;
-      this.$refs.virtualTree.resize();
+      this.$nextTick(() => {
+        this.$refs.virtualTree.resize();
+      });
     },
     onTreeItemClick(item) {
       this.showDropdown = false;
