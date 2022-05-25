@@ -9,17 +9,17 @@ div(style="display:flex;align-items:flex-start")
     div endIndex:{{vScrollTree.endIndex}}
     div pageSize:{{vScrollTree.pageSize}}
     hr
-    div currentItem:{{vScrollTree.currentItem}}
-    div selectedItems:{{vScrollTree.selectedItems}}
+    //- div currentItem:{{vScrollTree.currentItem}}
+    //- div selectedItems:{{vScrollTree.selectedItems}}
   div(style="width: 200px;border:1px solid #ddd;")
     VirtualTree(
       ref="vScrollTree"
       v-bind="vScrollTreeProps"
       :treeData="treeData"
-      @itemClick="itemClick"
-      @itemSelect="itemSelect"
-      @dblClick="itemDblClick"
-      @rightClick="itemRightClick"
+      @item-click="itemClick"
+      @item-select="itemSelect"
+      @item-dblclick="itemDblClick"
+      @right-click="itemRightClick"
     )
       //- template(#icon="{isExpand}")
       //-   span {{isExpand ? 1 : 2}}

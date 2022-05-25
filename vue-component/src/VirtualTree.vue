@@ -13,25 +13,25 @@
         <div
           class="list-item"
           :class="{
-            'item-parent': item.isParent,
+            'item-parent': item._vt_isParent,
             'item-current': item[assignedFields.key] === currentItem[assignedFields.key],
             'item-highlight': highlightCurrent && item[assignedFields.key] === currentItem[assignedFields.key],
           }"
           :style="{
             height: lineHeight + 'px',
-            paddingLeft: item.isParent
-              ? baseIndentWidth + indentWidth * item.level + 'px'
-              : baseIndentWidth + indentWidth * (item.level - 1) + 20 + 'px',
+            paddingLeft: item._vt_isParent
+              ? baseIndentWidth + indentWidth * item._vt_level + 'px'
+              : baseIndentWidth + indentWidth * (item._vt_level - 1) + 20 + 'px',
           }"
           @click="handleItemClick(item)"
-          @dblclick="onDblClick(item)"
+          @dblclick="onItemDblClick(item)"
           @contextmenu="e => onContextMenu(e, item)"
         >
           <!-- 展开箭头 -->
-          <div v-if="item.isParent" class="list-item-expand" @click.stop="changeList(item)">
+          <div v-if="item._vt_isParent" class="list-item-expand" @click.stop="changeList(item)">
             <!-- slot 箭头 -->
-            <slot name="icon" :isExpand="item.isExpand">
-              <div class="list-item-arrow" :class="{ 'list-item-arrow-active': item.isExpand }"></div>
+            <slot name="icon" :isExpand="item._vt_isExpand">
+              <div class="list-item-arrow" :class="{ 'list-item-arrow-active': item._vt_isExpand }"></div>
             </slot>
           </div>
           <!-- 多选框 -->
@@ -96,6 +96,14 @@ export default {
       type: Boolean,
       default: false,
     },
+    /**
+     * 点击一项时，是否设置currentItem。
+     * 设置false，一般用于this.setCurrent 手动指定当前选中项
+     */
+    setCurrentWhenClick: {
+      type: Boolean,
+      default: true,
+    },
     /** 高亮选中行 */
     highlightCurrent: {
       type: Boolean,
@@ -121,7 +129,7 @@ export default {
       type: String,
       default: '暂无数据',
     },
-    /** 数据 */
+    /** 数据,出于性能考虑，不进行深拷贝复制一份维护 */
     treeData: {
       type: Array,
       default: () => [],
@@ -203,24 +211,30 @@ export default {
       // 列表发生改变，重置已选，重置虚拟滚动
       this.init();
       this.setDefaultCurrent(); // 设置默认高亮行
-      this.setDefaultScrollTop();
+      this.scrollTo(); // 滚动条默认的位置
       this.setDefaultSelected(); // 设置默认选中
     },
   },
   mounted() {
     this.init();
     this.setDefaultCurrent(); // 设置默认高亮行
-    this.setDefaultScrollTop();
+    this.scrollTo(); // 滚动条默认的位置
     this.setDefaultSelected(); // 设置默认选中
     // event listener
     this.initEvent();
   },
   methods: {
+    /**
+     * @param {"init"|"resize"} [type="init"]
+     */
     init(type = 'init') {
       let containerHeight = this.$el?.clientHeight;
       if (!containerHeight) {
         containerHeight = 1080;
         console.warn("Can't get virtualTree clientHeight");
+      }
+      if (type === 'init') {
+        this.initTreeDataPrivateProp();
       }
       // console.log('Tree containerHeight:', containerHeight);
       this.setTreeDataFlat(type); // 默认展开树，获得总高度 allHeight
@@ -235,18 +249,20 @@ export default {
         this.resize();
       });
     },
-    /**
-     * 重新初始化并计算大小
-     * @param {number} option.debounce
-     * @public
-     */
-    resize(option = {}) {
-      // debounce
-      if (this.resizeTimeout) clearTimeout(this.resizeTimeout);
-      this.resizeTimeout = setTimeout(() => {
-        this.init('resize');
-        this.resizeTimeout = null;
-      }, option.debounce || 200);
+    /** 向treeData中添加私有属性 */
+    initTreeDataPrivateProp() {
+      // level 树层级
+      (function func(arr, level = 0, parent) {
+        arr.forEach(item => {
+          item._vt_isParent = Boolean(item[this.assignedFields.children]);
+          item._vt_level = level;
+          item._vt_parent = parent; // 持有父节点引用
+          item._vt_isExpand = false; // 是否展开
+          if (item._vt_isParent) {
+            func.bind(this)(item[this.assignedFields.children] || [], level + 1, item);
+          }
+        });
+      }.bind(this)(this.treeData, 0, null));
     },
 
     /** 设置默认高亮当前行 （仅单选）*/
@@ -258,12 +274,6 @@ export default {
           this.currentItem = item;
           return 0;
         }
-      });
-    },
-    /** 滚动条默认的位置*/
-    setDefaultScrollTop() {
-      this.$nextTick(() => {
-        this.$el.scrollTop = this.treeDataFlat.findIndex(it => it[this.assignedFields.key] === this.defaultScrollKey) * this.lineHeight;
       });
     },
     /** 设置选中的项 （可多选）*/
@@ -283,21 +293,14 @@ export default {
     setTreeDataFlat(type) {
       const treeDataFlat = [];
       // level 树层级
-      (function func(arr, level = 0) {
+      (function func(arr) {
         arr.forEach(item => {
-          item.isParent = Boolean(item[this.assignedFields.children]);
-          item.level = level;
-          // item.parent = parent; // 持有父节点引用
           treeDataFlat.push(item);
           if (type === 'init') {
-            if (this.defaultExpandAll) {
-              item.isExpand = true;
-            } else {
-              item.isExpand = this.defaultExpandedKeys.includes(item[this.assignedFields.key]);
-            }
+            item._vt_isExpand = this.defaultExpandAll ? true : this.defaultExpandedKeys.includes(item[this.assignedFields.key]);
           }
-          if (item.isExpand) {
-            func.bind(this)(item[this.assignedFields.children] || [], level + 1);
+          if (item._vt_isExpand) {
+            func.bind(this)(item[this.assignedFields.children] || []);
           }
         });
       }.bind(this)(this.treeData));
@@ -308,8 +311,8 @@ export default {
     changeList(item) {
       this.offsetBottom = 0;
       this.offsetTop = 0;
-      // this.$set(item, 'isExpand', !item.isExpand);
-      item.isExpand = !item.isExpand;
+      // this.$set(item, '_vt_isExpand', !item._vt_isExpand);
+      item._vt_isExpand = !item._vt_isExpand;
       // 若当前节点选中,则展开时清空子节点选中
       this.setTreeDataFlat();
       this.offsetTop = this.startIndex * this.lineHeight;
@@ -338,12 +341,14 @@ export default {
         // 父节点不可选中
         if (item[this.assignedFields.children]) return;
       }
-      if (this.currentCancelable) {
-        this.currentItem = this.currentItem === item ? {} : item;
-      } else {
-        this.currentItem = item;
+      if (this.setCurrentWhenClick) {
+        if (this.currentCancelable) {
+          this.currentItem = this.currentItem === item ? {} : item;
+        } else {
+          this.currentItem = item;
+        }
       }
-      this.$emit('itemClick', item);
+      this.$emit('item-click', item);
       // this.setSelectedItem(item);
     },
     /** 设置选中项 */
@@ -356,14 +361,14 @@ export default {
           this.selectedItems.splice(i, 1); // FIXME: 数据量大有性能问题？
         }
       }
-      this.$emit('itemSelect', {
+      this.$emit('item-select', {
         checked,
         item,
         selectedItems: this.selectedItems,
       });
     },
     /** 双击一项 */
-    onDblClick(item) {
+    onItemDblClick(item) {
       // if (item[this.assignedFields.children]) {
       //   // 展开父节点
       //   this.changeList(item);
@@ -375,16 +380,17 @@ export default {
       // if (!this.parentSelectable) {
       //   if (item[this.assignedFields.children]) return;
       // }
-      // this.$emit('dblClick', item);
+      this.$emit('item-dblclick', item);
     },
     onContextMenu(e, item) {
-      this.$emit('rightClick', { event: e, item });
+      this.$emit('right-click', { event: e, item });
     },
     onCheckboxChange(e, item) {
       this.setSelectedItem(item, e.target.checked);
     },
     onCheckboxClick(e) {
-      // e.stopPropagation();
+      e.stopPropagation();
+      // TODO: if parent checked ,check children
     },
 
     // ---------- utils
@@ -406,14 +412,95 @@ export default {
       }.bind(this)(this.treeData));
     },
 
-    // ----- refFunc
+    // ------ ref Func------
     /** 清除当前选中的高亮 */
     clearCurrent() {
       this.currentItem = {};
     },
-    /** 设置当前选中行 */
-    setCurrent() {
-      // TODO:
+    /**
+     * 重新初始化并计算大小
+     * @param {number} options.debounce
+     */
+    resize(options = {}) {
+      // debounce
+      if (this.resizeTimeout) clearTimeout(this.resizeTimeout);
+      this.resizeTimeout = setTimeout(() => {
+        this.init('resize');
+        this.resizeTimeout = null;
+      }, options.debounce || 200);
+    },
+    /**
+     * 设置当前选中行
+     * @param {string | object} key 选中行的唯一键,或者传入一个对象
+     * @return {object} currentItem 当前选中的项
+     */
+    setCurrent(key) {
+      if (typeof key !== 'object') {
+        this.traverseTreeData(item => {
+          if (item[this.assignedFields.key] === key) {
+            this.currentItem = item;
+            return 0;
+          }
+        });
+      } else {
+        this.currentItem = key;
+      }
+      return this.currentItem;
+    },
+    /**
+     * 展开行
+     * @param {string[]} keys
+     * @param {boolean} options.expandParent 是否展开其父节点
+     * @param {boolean} options.foldOthers 是否折叠其他父节点
+     */
+    expandItem(keys, options = {}) {
+      options = Object.assign({ expandParent: true, foldOthers: false }, options);
+
+      if (!keys?.length) {
+        if (Object.keys(this.currentItem).length) {
+          keys = [this.currentItem];
+        } else {
+          throw new Error('vScrollTree.expandItem Error: keys is empty');
+        }
+      }
+      // 需要展开的项的数量
+      let itemsLen = 0;
+      this.traverseTreeData(item => {
+        if (options.foldOthers) {
+          item._vt_isExpand = false;
+        }
+        if (keys.includes(item[this.assignedFields.key])) {
+          // 找到该项，设置为展开
+          item._vt_isExpand = true;
+          if (options.expandParent) {
+            // 展开其所有父节点
+            while (item._vt_parent) {
+              item = item._vt_parent;
+              item._vt_isExpand = true;
+            }
+          }
+          if (!options.foldOthers) {
+            itemsLen++;
+            if (itemsLen >= keys.length) {
+              // 已经找到所有，终止遍历
+              return 0;
+            }
+          }
+        }
+      });
+
+      // 更新展开数组
+      this.setTreeDataFlat();
+    },
+    /**
+     * 滚动到某一项,此项必须已经展开可见
+     * 默认滚动到defaultScrollKey
+     * @param {string} key
+     */
+    scrollTo(key = this.defaultScrollKey) {
+      this.$nextTick(() => {
+        this.$el.scrollTop = this.treeDataFlat.findIndex(it => it[this.assignedFields.key] === key) * this.lineHeight;
+      });
     },
   },
 };

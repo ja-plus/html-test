@@ -13,7 +13,7 @@
         height="100%"
         :replace-fields="assignedFields"
         :tree-data="treeData"
-        @itemClick="onTreeItemClick"
+        @item-click="onTreeItemClick"
       />
     </div>
     <!-- 遮罩：用于点击区域外关闭 -->
@@ -21,6 +21,7 @@
   </div>
 </template>
 <script>
+/** 不支持v-model 只能通过 :value + change事件更新 */
 import VirtualTree from './VirtualTree.vue';
 
 const _defaultFields = {
@@ -87,6 +88,10 @@ export default {
       showDropdown: false,
       /** 展开下拉框时才加载组件 */
       vIfLoadComponent: false,
+      /** 保存的prop value */
+      storedValue: null,
+      /** 记录下次打开下拉框时，是否需要执行这些操作1.高亮2.展开父节点3.滚动至选中的位置 */
+      resetVTree: false,
     };
   },
   computed: {
@@ -96,7 +101,7 @@ export default {
     },
     selectedLabel() {
       let label = '';
-      let item = this.getItemByKey(this.value);
+      let item = this.getItemByKey(this.storedValue);
       if (item) {
         if (this.labelFormatter) {
           label = this.labelFormatter(item);
@@ -104,13 +109,31 @@ export default {
           label = item[this.assignedFields.title];
         }
       }
-      return label || this.value;
+      return label || this.storedValue;
     },
+  },
+  watch: {
+    value(v) {
+      this.storedValue = v;
+      // this.$refs.virtualTree?.setCurrent(v);
+      // this.$refs.virtualTree?.expandItem([v] /* , { foldOthers: true } */);
+    },
+  },
+  mounted() {
+    this.storedValue = this.value;
   },
   methods: {
     onInputClick(e) {
       if (this.disabled) return;
-      this.vIfLoadComponent = true;
+      if (!this.vIfLoadComponent || this.resetVTree) {
+        this.vIfLoadComponent = true;
+        this.resetVTree = false;
+        this.$nextTick(() => {
+          this.$refs.virtualTree?.setCurrent(this.storedValue);
+          this.$refs.virtualTree?.expandItem([this.storedValue] /* , { foldOthers: true } */);
+          this.$refs.virtualTree?.scrollTo(this.storedValue); // 滚动至
+        });
+      }
 
       this.setDropdownMenuStyle(e);
       this.showDropdown = !this.showDropdown;
@@ -179,6 +202,22 @@ export default {
         }
       }.bind(this)(this.treeData));
       return result;
+    },
+
+    // --------------- ref Func
+    /**
+     * 设置当前选中的项（高亮）,会触发change事件
+     */
+    setValue(item) {
+      let currentItem = item;
+      if (typeof item !== 'object') {
+        currentItem = this.getItemByKey(item);
+      }
+      if (currentItem) {
+        this.storedValue = currentItem[this.assignedFields.key];
+        this.resetVTree = true; // 下次打开下拉框时是否设置虚拟树
+        this.onTreeItemClick(currentItem);
+      }
     },
   },
 };

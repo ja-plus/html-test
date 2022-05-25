@@ -12,10 +12,10 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@parcel/transformer-less": "^2.4.0",
-    "@parcel/transformer-pug": "^2.4.0",
-    "@parcel/transformer-vue": "^2.4.0",
-    "parcel": "^2.4.0"
+    "@parcel/transformer-less": "^2.5.0",
+    "@parcel/transformer-pug": "^2.5.0",
+    "@parcel/transformer-vue": "^2.5.0",
+    "parcel": "^2.5.0"
   },
   "dependencies": {
     "vue": "^3.2.31"
