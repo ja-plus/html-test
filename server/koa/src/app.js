@@ -5,6 +5,7 @@ const views = require('koa-views');
 const koaBody = require('koa-body');
 const cors = require('koa-cors');
 const staticMid = require('koa-static');
+const compress = require('koa-compress');
 const path = require('path');
 const chalk = require('chalk');
 const logger = require('./logger.js');
@@ -45,7 +46,7 @@ app.use(
     maxAge: 1000,
   }),
 );
-
+app.use(compress()); // gzip br 压缩
 app.use(webRouter.routes());
 app.use(serverRouter.routes());
 

@@ -12,4 +12,8 @@ router.put('/putTestData', controller.putTestData);
 router.del('/delTestData', controller.delTestData);
 router.get('/timeoutTestData', controller.timeoutTestData);
 
+router.get('/getHugeData', controller.getHugeData);
+
+router.get('/setStatusCode', controller.setStatusCode);
+
 module.exports = router;

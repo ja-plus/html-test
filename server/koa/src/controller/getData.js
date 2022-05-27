@@ -71,10 +71,40 @@ exports.timeoutTestData = async function (ctx) {
   console.log('get query:', ctx.request.query);
   const query = ctx.request.query;
   let timeout = +query.timeout || 2000;
-  await new Promise((resolve) => {
+  await new Promise(resolve => {
     setTimeout(resolve, timeout);
   });
   ctx.body = {
     timeout,
+  };
+};
+
+/** 获取大量数据 */
+exports.getHugeData = async function (ctx) {
+  const dataLen = ctx.request.query.dataLength || 5000;
+  let data = new Array(+dataLen).fill({
+    prop1: '2.9315',
+    prop2: '--',
+    prop3: '1.4499',
+    prop4: '--',
+    prop5: '100.0040',
+    prop6: '3.0200',
+    prop7: 'AA+',
+    prop8: '21汉口银行CD065',
+    prop9: '--',
+    prop10: '112180245.IB',
+  });
+  ctx.body = {
+    data,
+  };
+};
+
+/** 返回状态码 */
+exports.setStatusCode = async function (ctx) {
+  let code = ctx.request.query.code;
+  // ctx.throw(code);
+  ctx.response.status = +code;
+  ctx.body = {
+    query: ctx.request.query,
   };
 };

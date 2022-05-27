@@ -1,10 +1,13 @@
+// use rand::{Rng};
 use std::fs::File;
 use std::io::ErrorKind;
 fn main() {
     // panic!("panic");
+    // let v =vec![1,2];
+    // v[99];
 
-    let _f = File::open("hello.txt");
-    let _f = match _f {
+    let f = File::open("hello.txt");
+    let f = match f {
         Ok(file) => {
             file
         },
@@ -22,9 +25,11 @@ fn main() {
                 other_error => panic!("Error opening the file {:?}",other_error),
             }
         }
+
+
     };
 
-    // let _f = File::open("hello.txt").unwrap();
-    // let _f = File::open("hello.txt").expect("无法打开文件");
+    let f = File::open("hello.txt").unwrap();
+    let f = File::open("hello.txt").expect("无法打开文件");
 
 }
