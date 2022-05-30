@@ -5,7 +5,7 @@ let ServiceAB = jafetch.create();
 ServiceAB.interceptors.use(commonCancelRequest());
 
 const fetchBtn = document.createElement('button');
-fetchBtn.textContent = 'fetch';
+fetchBtn.textContent = 'ja-fetch';
 document.body.append(fetchBtn);
 fetchBtn.addEventListener('click', () => {
   console.log('发起fetch 请求... 1s后返回结果');

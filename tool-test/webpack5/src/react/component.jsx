@@ -10,7 +10,7 @@ class Child extends React.Component {
   render() {
     return (
       <div>
-        <h2>child</h2>
+        <h2>Child Component</h2>
         <div>
           num: {this.props.num}, doubleNum: {this.doubleNum}
         </div>
@@ -42,13 +42,13 @@ export default class HelloMessage extends React.Component {
   render() {
     return (
       <div>
-        <h1>
-          Hello {this.props.name} {this.state.date.toLocaleDateString()}
-        </h1>
-        <h2>{this.props.defaultProp}</h2>
+        <div>
+          props.name: {this.props.name} {this.state.date.toLocaleDateString()}
+        </div>
+        <div>{this.props.defaultProp}</div>
         <button onClick={this.handleClick.bind(this)}>click{this.state.num}</button>
 
-        <ul>{this.list()}</ul>
+        <div>{this.list()}</div>
         <Child /* ref="child" */ ref={this.childRef} num={this.state.num} changeNum={this.handleChangeNum.bind(this)}></Child>
       </div>
     );
@@ -75,13 +75,13 @@ export default class HelloMessage extends React.Component {
 
   list() {
     let els = [];
-    for (let i = 0; i < 3; i++) {
-      els.push(<li key={i}>{i}</li>);
+    for (let i = 0; i < 10; i++) {
+      els.push(<span key={i}>{i},</span>);
     }
     return els;
   }
 }
 // HelloMessage 一定在声明后使用
 HelloMessage.defaultProps = {
-  defaultProp: 'aaaa',
+  defaultProp: 'defaultProp',
 };

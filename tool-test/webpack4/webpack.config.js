@@ -9,11 +9,10 @@ module.exports = smp.wrap({
   devtool: 'eval',
   entry: {
     app: './src/app.js',
-    svelteApp: './src/svelteApp.js'
   },
   devServer: {
     open: true,
-    hot: true
+    hot: true,
   },
   // resolve: {
   //   alias: {
@@ -21,9 +20,9 @@ module.exports = smp.wrap({
   //   }
   // },
   resolve: {
-    alias: {
-      svelte: path.resolve(__dirname, 'node_modules', 'svelte')
-    },
+    // alias: {
+    //   svelte: path.resolve(__dirname, 'node_modules', 'svelte')
+    // },
     extensions: ['.mjs', '.js', '.svelte'],
     mainFields: ['svelte', 'browser', 'module', 'main'],
   },
@@ -37,8 +36,8 @@ module.exports = smp.wrap({
         test: /\.m?js$/,
         loader: 'esbuild-loader',
         options: {
-          target: 'es2015'
-        }
+          target: 'es2015',
+        },
       },
       {
         test: /\.svelte$/,
@@ -46,18 +45,11 @@ module.exports = smp.wrap({
       },
       {
         test: /\.css$/,
-        use: [
-          'style-loader',
-          'css-loader'
-        ]
+        use: ['style-loader', 'css-loader'],
       },
       {
         test: /\.s(c|a)ss$/,
-        use: [
-          'style-loader',
-          'css-loader',
-          'sass-loader'
-        ]
+        use: ['style-loader', 'css-loader', 'sass-loader'],
       },
       {
         test: /\.ts$/,
@@ -65,20 +57,20 @@ module.exports = smp.wrap({
         loader: 'esbuild-loader',
         options: {
           loader: 'ts',
-          target: 'es2015'
-        }
-      }
-    ]
+          target: 'es2015',
+        },
+      },
+    ],
   },
   plugins: [
     new ESBuildPlugin(),
     new HtmlWebpackPlugin({
       template: './index.html',
-      filename: 'index.html'
+      filename: 'index.html',
     }),
     new BundleAnalyzerPlugin({ openAnalyzer: false }),
     new webpack.DefinePlugin({
-      version: '"hahahaha"' // 替换代码中的这个字符
-    })
-  ]
+      version: '"hahahaha"', // 替换代码中的这个字符
+    }),
+  ],
 });
