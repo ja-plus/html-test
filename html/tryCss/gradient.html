@@ -105,6 +105,24 @@
     color: rgba(255,165,0,0.5);
     box-shadow: 0 0 0 calc(var(--width) / 2) inset;
   }
+
+  @property --lbgw {
+    syntax: '<percentage>';
+    inherits: false;
+    initial-value: 0%;
+  }
+
+  @keyframes lg {
+    to{ --lbgw: 100%; }
+  }
+  .content:nth-child(16) {
+    border: 1px solid #aaa;
+    background: linear-gradient(90deg, #fff 0,rgb(1, 204, 1) var(--lbgw), transparent var(--lbgw));
+    animation: lg 3s linear infinite;
+  }
+  .content:nth-child(16):hover{  
+    animation-play-state: paused;
+  }
 </style>
 
 <body>
@@ -125,6 +143,7 @@
   <div class="content">13</div>
   <div class="content">14</div>
   <div class="content">15 box-shadow颜色继承自color</div>
+  <div class="content">16</div>
 </body>
 
 </html>

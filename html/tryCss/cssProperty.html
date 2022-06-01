@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>@property</title>
+</head>
+<style>
+  @property --color {
+    syntax: '<color>';
+    inherits: false;
+    initial-value: #ee6666;
+  }
+
+  @property --percentage {
+    syntax: '<percentage>';
+    inherits: false;
+    initial-value: 10%
+  }
+
+  .conic {
+    width: 100px;
+    height: 100px;
+    background-image: conic-gradient(var(--color) var(--percentage), transparent var(--percentage));
+    transition: --color ease .5s,
+      --percentage ease 1s;
+  }
+
+  .conic:hover {
+    --color: orange;
+    --percentage: 100%
+  }
+
+
+  @property --offset {
+    syntax: '<length>';
+    inherits: false;
+    initial-value: 0;
+  }
+
+  .underline {
+    cursor:pointer;
+    font-size: 32px;
+    text-underline-offset: var(--offset, 1px);
+    text-decoration: underline;
+    transition: --offset 400ms, text-decoration-color 400ms;
+  }
+
+  .underline:hover {
+    --offset: 10px;
+    color: orange;
+    text-decoration-color: orange;
+  }
+
+  
+  .liner-gd {
+    --start-color: #000;
+    --end-color: #fff;
+    width: 200px;
+    height: 100px;
+    background: linear-gradient(45deg, var(--start-color), var(--end-color));
+    transition: --start-color .5s, --end-color .5s;
+  }
+  .liner-gd:hover{
+    --start-color: rgb(207, 58, 58);
+    --end-color: rgb(91, 191, 248);
+    
+  }
+</style>
+
+<body>  
+  <div class="conic"></div>
+  <div class="underline">abcdefghijklmnopqrstuvwxyz</div>
+  <div class="liner-gd"></div>
+</body>
+<script>
+  CSS.registerProperty({
+    name: '--start-color',
+    syntax: '<color>',
+    inherits: false,
+    initialValue: '#000',
+  });
+  CSS.registerProperty({
+    name: '--end-color',
+    syntax: '<color>',
+    inherits: false,
+    initialValue: '#fff',
+  });
+</script>
+</html>
