@@ -2,12 +2,14 @@
   <div id="app">
     <!-- <img alt="Vue logo" src="./assets/logo.png"> -->
     <!-- <HelloWorld msg="Welcome to Your Vue.js App"/> -->
-    <CompositionAPI user="props.user"/>
+    <CompositionAPI   user="props.user"/>
     <Provider :data="num" />
     <button @click="num++">+++</button>
     <button @click="updateObj" @mouseover="updateObj">updateObj</button>
     <button @click="updateObj2" @mouseover="updateObj2">updateOBj</button>
     {{obj}}
+    <!-- 点击num变更，此组件data会一直监听 -->
+    <Child :data="{data:[]}"/>
   </div>
 </template>
 
@@ -15,17 +17,19 @@
 // import HelloWorld from './components/HelloWorld.vue'
 import CompositionAPI from './components/CompositionApi.vue'
 import Provider from './components/Provider.vue'
+import Child from './components/Child.vue'
 export default {
   name: 'App',
   components: {
     // HelloWorld
     CompositionAPI,
-    Provider
+    Provider,
+    Child
   },
   data(){
     return {
       num: 0,
-      obj:{}
+      obj:{},
     }
   },
   methods:{
@@ -38,7 +42,7 @@ export default {
     updateObj2(){
       console.log('bbb');
       this.$set(this.obj, 'isHover', true)
-    }
+    },
   }
 }
 </script>

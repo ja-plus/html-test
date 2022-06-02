@@ -12,7 +12,7 @@
         v-bind="vsTreeProps"
         height="100%"
         :replace-fields="assignedFields"
-        :tree-data="treeData"
+        :tree-data="treeDataClone"
         @item-click="onTreeItemClick"
       />
     </div>
@@ -95,6 +95,9 @@ export default {
     };
   },
   computed: {
+    treeDataClone() {
+      return cloneDeep(this.treeData);
+    },
     /** 合并传入的fields */
     assignedFields() {
       return Object.assign({}, _defaultFields, this.replaceFields);

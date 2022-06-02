@@ -8,15 +8,15 @@ div(style="display:flex;justify-content:center;width:100vw;")
         :vsTreeProps="vsTreeProps" 
         @change="onSelectChange"
     )
-    VirtualTreeSelect(:replaceFields="{key:'id', title:'label'}" disabled :value="selectedId" :treeData="treeData" @change="onSelectChange")
+    VirtualTreeSelect(:replaceFields="{key:'id', title:'label'}" :value="selectedId2" :treeData="treeData" @change="onSelectChange2")
     VirtualTreeSelect(
         ref="vsTreeSelect2"
         :replaceFields="{key:'id', title:'label'}" 
         placeholder="请选择..."
-        :treeData="treeData2"
-        :vsTreeProps="vsTreeProps2" 
+        :treeData="treeData3"
+        :vsTreeProps="vsTreeProps3" 
         :dropdownWidth="800"
-        @change="onSelectChange2"
+        @change="onSelectChange3"
     )
 br
 div selectedId: {{selectedId}}
@@ -47,12 +47,13 @@ export default {
         // 点击时不设置current，需要手动通过setValue方法设置current以高亮
         // setCurrentWhenClick: false,
       },
-      vsTreeProps2: {
+      vsTreeProps3: {
         lineHeight: 24,
       },
       selectedId: '0-0',
+      selectedId2: '',
       treeData,
-      treeData2: structuredClone(treeData),
+      treeData3: structuredClone(treeData),
     };
   },
   methods: {
@@ -60,6 +61,9 @@ export default {
       this.selectedId = item.id;
     },
     onSelectChange2(item) {
+      this.selectedId2 = item.id;
+    },
+    onSelectChange3(item) {
       // 其他地方更改value时，须手动指定高亮的项
       this.$refs.vsTreeSelect.setValue(item.id);
     },

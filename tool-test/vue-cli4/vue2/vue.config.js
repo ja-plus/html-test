@@ -5,6 +5,7 @@ process.env.VERSION = buf.toString()
 console.log(process.env.BASE_URL);
 
 module.exports = {
+  lintOnSave:false,
   chainWebpack:config => {
     config.plugin('html').tap(args => {
       args[0]['templateParameters'].VERSION = JSON.stringify(process.env.VERSION)
