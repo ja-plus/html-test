@@ -12,12 +12,20 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@parcel/transformer-less": "^2.5.0",
-    "@parcel/transformer-pug": "^2.5.0",
-    "@parcel/transformer-vue": "^2.5.0",
-    "parcel": "^2.5.0"
+    "@babel/core": "^7.18.2",
+    "@babel/eslint-parser": "^7.18.2",
+    "@parcel/transformer-less": "^2.6.0",
+    "@parcel/transformer-pug": "^2.6.0",
+    "@parcel/transformer-vue": "^2.6.0",
+    "eslint": "^8.10.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-html": "^6.2.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-vue": "^8.5.0",
+    "parcel": "^2.6.0",
+    "prettier": "^2.5.1"
   },
   "dependencies": {
-    "vue": "^3.2.31"
+    "vue": "^3.2.37"
   }
 }

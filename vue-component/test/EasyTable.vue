@@ -5,7 +5,7 @@ div height:
 div width:
   input(type="range" min="100" max="1000"  @input="e => tableWidth = e.target.value + 'px'") 
   | {{tableWidth}}
-div(:style="{width: tableWidth}")
+div(:style="{width: tableWidth}" style="padding:10px;")
   EasyTable(ref="easyTable" :height="props.height" :columns="columns" :dataSource="dataSource")
 div columns:{{columns}}
 //- div dataSource:{{dataSource}}
@@ -28,10 +28,15 @@ export default {
         // minWidth: 'auto',
       },
       columns: [
-        { title: 'Name', dataIndex: 'name' },
-        { title: 'Age', dataIndex: 'age' },
+        { title: 'Name', dataIndex: 'name', /* fixed: 'left', */ width: '200px', minWidth: '200px', sorter: true },
+        { title: 'Age', dataIndex: 'age', /* fixed: 'left', */ width: '200px', minWidth: '200px' },
+        { title: 'Gender', dataIndex: 'gender' },
+        { title: 'Email', dataIndex: 'email' },
+        { title: 'Address', dataIndex: 'address' },
       ],
-      dataSource: new Array(100).fill(0).map((it, i) => ({ name: 'name', age: i, email: 'add@sa.com' })),
+      dataSource: new Array(100)
+        .fill(0)
+        .map((it, i) => ({ name: 'name', age: i, email: 'add@sa.com', gender: 'a', address: 'ahshshsshshhs' })),
     };
   },
   computed: {},

@@ -1,13 +1,14 @@
 <template>
   <div>
-    <vxe-table
+    <!-- <vxe-table
       ref="xTable"
       :max-height="400"
       resizable
       border="inner"
       :tree-config="{ transform: true, rowField: 'id', parentField: 'parentId' }"
       :data="tableData"
-    >
+    > -->
+    <vxe-table ref="xTable" :max-height="400" resizable border="inner" :data="tableData" :cell-class-name="cellClassName">
       <vxe-column field="name" title="labelName" tree-node />
       <vxe-column field="size" title="Size" />
       <vxe-column field="type" title="Type" />
@@ -22,7 +23,6 @@ import VXETable from 'vxe-table';
 import 'vxe-table/lib/style.css';
 import { Component, Vue } from 'vue-property-decorator';
 Vue.use(VXETable);
-
 @Component
 export default class extends Vue {
   tableData = [
@@ -50,7 +50,19 @@ export default class extends Vue {
       this.tableData.push({ id: 24578 + i, parentId: null, name: 'Test' + (18 + i), type: 'js', size: 1024, date: '2021-06-01' });
     }
   }
+
+  cellClassName({ row, column }) {
+    console.log(row, column);
+    if (row.id === 10000 && column.property === 'name') {
+      return 'highlight';
+    }
+    return '';
+  }
 }
 </script>
 
-<style></style>
+<style>
+.highlight {
+  background: cyan;
+}
+</style>

@@ -21,7 +21,9 @@ export default {
 <style>
 body {
   height: 100vh;
-  margin: 0;
+  /* margin: 0; */
+  box-sizing: border-box;
+  /* padding: 10px; */
   display: flex;
   /* flex-direction: column; */
   /* align-items: center; */

@@ -146,16 +146,12 @@
   /* table 1*/
   let tbody = document.querySelector('table.linear-gradient > tbody');
   for (let i = 0; i < 100; i++) {
-    tbody.append(
-      h('tr', [h('td', { textContent: i }), h('td', { textContent: 'tom' + i })])
-    );
+    tbody.append(h('tr', [h('td', { textContent: i }), h('td', { textContent: 'tom' + i })]));
   }
   /* tbody 2*/
   tbody = document.querySelector('table.collapse-separate > tbody');
   for (let i = 0; i < 100; i++) {
-    tbody.append(
-      h('tr', [h('td', { textContent: i }), h('td', { textContent: 'tom' + i })])
-    );
+    tbody.append(h('tr', [h('td', { textContent: i }), h('td', { textContent: 'tom' + i })]));
   }
   /* table 3*/
   let fixColThead = document.querySelector('table.fix-col > thead');
