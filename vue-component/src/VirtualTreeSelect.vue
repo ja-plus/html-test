@@ -1,8 +1,10 @@
 <template>
-  <div ref="vTreeSelect" class="v-tree-select-wrapper" :class="{ disabled: disabled }">
+  <div class="v-tree-select-wrapper" :class="{ disabled: disabled }">
     <!-- <input type="text" @click="onInputClick($event)" /> -->
     <div class="tree-select-main" :class="{ expand: showDropdown }" @click="onInputClick">
-      <div class="tree-select-main-label" :class="{ placeholder: !selectedLabel }" :title="selectedLabel">{{ selectedLabel || placeholder }}</div>
+      <div class="tree-select-main-label" :class="{ placeholder: !selectedLabel }" :title="selectedLabel">
+        {{ selectedLabel || placeholder }}
+      </div>
       <div class="tree-select-main-arrow"></div>
     </div>
     <!-- 下拉框 -->
@@ -17,7 +19,12 @@
       />
     </div>
     <!-- 遮罩：用于点击区域外关闭 -->
-    <div v-if="!disabled && showDropdown" class="dropdown-mask" :style="{ zIndex: zIndex }" @click="showDropdown = false"></div>
+    <div
+      v-if="!disabled && showDropdown"
+      class="dropdown-mask"
+      :style="{ zIndex: zIndex }"
+      @click="showDropdown = false"
+    ></div>
   </div>
 </template>
 <script>
@@ -154,7 +161,7 @@ export default {
      */
     setDropdownMenuStyle() {
       /** @type {DOMRect} */
-      const rect = this.$refs.vTreeSelect.getBoundingClientRect();
+      const rect = this.$el.getBoundingClientRect();
       const bottom = window.innerHeight - rect.top - rect.height;
       const dropdownWidth = this.dropdownWidth ? this.dropdownWidth : rect.width;
       // reset style
