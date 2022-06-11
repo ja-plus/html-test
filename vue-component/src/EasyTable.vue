@@ -20,11 +20,12 @@
             :class="{ sortable: col.sorter }"
             @click="onHeadClick(col)"
           >
-            <slot name="table-header" :column="col">
-              <span class="table-header-title">{{ col.title }}</span>
-            </slot>
-            <!-- <component :is="col.customHeaderCell(col)" v-if="col.customHeaderCell" />
-            <span v-else class="table-header-title">{{ col.title }}</span> -->
+            <component :is="col.customHeaderCell(col)" v-if="col.customHeaderCell" />
+            <template v-else>
+              <slot name="table-header" :column="col">
+                <span class="table-header-title">{{ col.title }}</span>
+              </slot>
+            </template>
 
             <!-- 排序图图标 -->
             <span
