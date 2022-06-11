@@ -1,6 +1,6 @@
 <template>
   <div class="stk-table-wrapper" :style="{ height: height }">
-    <table class="stk-table" :style="{ minWidth: minWidth }">
+    <table class="stk-table dark" :style="{ minWidth: minWidth }">
       <!-- <colgroup>
           <col v-for="(col, i) in tableProps" :key="i" :style="{}" />
         </colgroup> -->
@@ -20,8 +20,18 @@
             :class="{ sortable: col.sorter }"
             @click="onHeadClick(col)"
           >
-            <span class="table-header-title">{{ col.title }}</span>
-            <span v-if="col.sorter" class="table-header-sorter" :class="sortOrder[sortOrderIndex]">
+            <slot name="table-header" :column="col">
+              <span class="table-header-title">{{ col.title }}</span>
+            </slot>
+            <!-- <component :is="col.customHeaderCell(col)" v-if="col.customHeaderCell" />
+            <span v-else class="table-header-title">{{ col.title }}</span> -->
+
+            <!-- 排序图图标 -->
+            <span
+              v-if="col.sorter"
+              class="table-header-sorter"
+              :class="col.dataIndex === sortCol && sortOrder[sortOrderIndex]"
+            >
               <svg xmlns="http://www.w3.org/2000/svg" width="16px" height="16px" viewBox="0 0 16 16">
                 <g id="sort-btn" fill-rule="nonzero">
                   <rect id="rect" opacity="0" x="0" y="0" width="16" height="16"></rect>
@@ -44,7 +54,12 @@
       </thead>
 
       <tbody>
-        <tr v-for="(item, i) in dataSource" :key="rowKey ? item[rowKey] : i">
+        <tr
+          v-for="(item, i) in dataSourceCopy"
+          :key="rowKey ? item[rowKey] : i"
+          :class="{ active: item === currentItem }"
+          @click="onRowClick(item)"
+        >
           <td
             v-for="(it, j) in tableProps"
             :key="it.dataIndex"
@@ -94,12 +109,14 @@ export default {
   },
   data() {
     return {
+      currentItem: {}, // 当前选中的一行
       sortCol: '',
       sortOrderIndex: 0,
       sortOrder: [null, 'desc', 'asc'],
       tableHeaders: [],
       /** 若有多级表头时，的tableHeaders */
       tableProps: [],
+      dataSourceCopy: [],
     };
   },
   computed: {},
@@ -111,11 +128,13 @@ export default {
       deep: true,
     },
     dataSource(val) {
-      this.dealColumns(val);
+      // this.dealColumns(val);
+      this.dataSourceCopy = val;
     },
   },
   created() {
     this.dealColumns();
+    this.dataSourceCopy = [...this.dataSource];
   },
   mounted() {},
   methods: {
@@ -151,23 +170,13 @@ export default {
         let colArr = [];
         let childrenArr = [];
         arr.forEach(col => {
-          let colObj = {
-            title: col.title,
-            rowSpan: col.children ? false : deep - level,
-            colSpan: col.children?.length,
-            width: col.width,
-            minWidth: col.minWidth,
-            align: col.align,
-            headerAlign: col.headerAlign,
-            dataIndex: col.dataIndex,
-            fixed: col.fixed,
-            sorter: col.sorter,
-          };
-          colArr.push(colObj);
+          col.rowSpan = col.children ? false : deep - level;
+          col.colSpan = col.children?.length;
+          colArr.push(col);
           if (col.children) {
             childrenArr.push(...col.children);
           } else {
-            tmpProps.push(colObj); // 没有children的组合作为colgroup
+            tmpProps.push(col); // 没有children的组合作为colgroup
           }
         });
         tmpHeader.push(colArr);
@@ -179,9 +188,27 @@ export default {
     /** 表头点击排序 */
     onHeadClick(col) {
       if (!col.sorter) return;
-      this.sortCol = col.dataIndex;
+      if (this.sortCol !== col.dataIndex) {
+        // 改变排序的列时，重置排序
+        this.sortCol = col.dataIndex;
+        this.sortOrderIndex = 0;
+      }
       this.sortOrderIndex++;
       if (this.sortOrderIndex > 2) this.sortOrderIndex = 0;
+      const order = this.sortOrder[this.sortOrderIndex];
+      if (order) {
+        if (order === 'asc') {
+          this.dataSourceCopy.sort((a, b) => (a[this.sortCol] < b[this.sortCol] ? -1 : 1));
+        } else {
+          this.dataSourceCopy.sort((a, b) => (a[this.sortCol] > b[this.sortCol] ? -1 : 1));
+        }
+      } else {
+        this.dataSourceCopy = [...this.dataSource];
+      }
+    },
+    onRowClick(row) {
+      this.currentItem = row;
+      this.$emit('current-change', row);
     },
   },
 };
@@ -193,57 +220,67 @@ export default {
   overflow: auto;
   .stk-table {
     --border: 1px #ececf7 solid;
+    --td-bg-color: #fff;
+    --th-bg-color: #eee;
+    --tr-active-bg-color: rgb(230, 247, 255);
     border-spacing: 0;
     table-layout: fixed;
     th,
     td {
-      background-color: #fff;
+      height: 30px;
+      font-size: 14px;
       box-sizing: border-box;
       border-bottom: var(--border);
       border-right: var(--border);
       padding: 2px 5px;
       overflow: hidden;
+      padding: 0 8px;
     }
     thead {
-      tr:first-child {
-        th {
+      tr {
+        &:first-child th {
           position: sticky;
           top: 0;
           border-top: var(--border);
         }
-      }
-      tr th:first-child {
-        border-left: var(--border);
-      }
-      th {
-        .table-header-title {
-        }
-        &.sortable {
-          cursor: pointer;
-        }
-        .table-header-sorter {
-          &:not(.sorter-desc):not(.sorter-asc):hover {
-            #arrow-up {
-              fill: #8f90b5;
-            }
-            #arrow-down {
-              fill: #8f90b5;
-            }
+        th {
+          background-color: var(--th-bg-color);
+          .table-header-title {
           }
-          &.desc {
-            #arrow-up {
-              fill: #cbcbe1;
-            }
-            #arrow-down {
-              fill: #1b63d9;
-            }
+          &.sortable {
+            cursor: pointer;
           }
-          &.asc {
-            #arrow-up {
-              fill: #1b63d9;
+          &:first-child {
+            border-left: var(--border);
+            padding-left: 12px;
+          }
+          &:last-child {
+            padding-right: 12px;
+          }
+          .table-header-sorter {
+            &:not(.sorter-desc):not(.sorter-asc):hover {
+              #arrow-up {
+                fill: #8f90b5;
+              }
+              #arrow-down {
+                fill: #8f90b5;
+              }
             }
-            #arrow-down {
-              fill: #cbcbe1;
+            &.desc {
+              #arrow-up {
+                fill: #cbcbe1;
+              }
+              #arrow-down {
+                fill: #1b63d9;
+              }
+            }
+            &.asc {
+              #arrow-up {
+                fill: #1b63d9;
+              }
+              #arrow-down {
+                fill: #cbcbe1;
+              }
             }
           }
         }
@@ -251,18 +288,41 @@ export default {
     }
     tbody {
       tr {
-        td:first-child {
-          border-left: var(--border);
+        &.active td {
+          background-color: var(--tr-active-bg-color);
+        }
+        td {
+          &:first-child {
+            padding-left: 12px;
+          }
+          &:last-child {
+            padding-right: 12px;
+          }
+          background-color: var(--td-bg-color);
         }
       }
-      tr td {
-        background-color: #fff;
-      }
-      tr:nth-child(2n) td {
-        background-color: #fafafc;
-      }
-      tr:hover {
-        background-color: #ebf3ff;
+      // 斑马纹
+      // tr:nth-child(2n) td {
+      //   background-color: #fafafc;
+      // }
+      // tr:hover {
+      //   background-color: #ebf3ff;
+      // }
+    }
+  }
+
+  .stk-table.dark {
+    --th-bg-color: #26272c;
+    --td-bg-color: #181c21;
+    --border: 1px #2e2e33 solid;
+    --tr-active-bg-color: #1a2b46;
+    th,
+    td {
+      color: #d0d1d2;
+    }
+    tbody {
+      tr:hover td {
+        border-bottom: 1px solid #1b63d9;
       }
     }
   }

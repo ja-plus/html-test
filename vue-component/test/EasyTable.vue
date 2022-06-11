@@ -6,7 +6,9 @@ div width:
   input(type="range" min="100" max="1000"  @input="e => tableWidth = e.target.value + 'px'") 
   | {{tableWidth}}
 div(:style="{width: tableWidth}" style="padding:10px;")
-  EasyTable(ref="easyTable" :height="props.height" :columns="columns" :dataSource="dataSource")
+  EasyTable(ref="easyTable" :height="props.height" :columns="columns" :dataSource="dataSource" @current-change="onCurrentChange")
+    template(#table-header="{ column }") 
+      span {{column.title}} slot
 div columns:{{columns}}
 //- div dataSource:{{dataSource}}
 hr
@@ -29,14 +31,14 @@ export default {
       },
       columns: [
         { title: 'Name', dataIndex: 'name', /* fixed: 'left', */ width: '200px', minWidth: '200px', sorter: true },
-        { title: 'Age', dataIndex: 'age', /* fixed: 'left', */ width: '200px', minWidth: '200px' },
+        { title: 'Age', dataIndex: 'age', /* fixed: 'left', */ width: '200px', minWidth: '200px', sorter: true },
         { title: 'Gender', dataIndex: 'gender' },
         { title: 'Email', dataIndex: 'email' },
         { title: 'Address', dataIndex: 'address' },
       ],
-      dataSource: new Array(100)
+      dataSource: new Array(500)
         .fill(0)
-        .map((it, i) => ({ name: 'name', age: i, email: 'add@sa.com', gender: 'a', address: 'ahshshsshshhs' })),
+        .map((it, i) => ({ name: 'name' + i, age: i, email: 'add@sa.com', gender: 'a', address: 'ahshshsshshhs' })),
     };
   },
   computed: {},
@@ -44,7 +46,11 @@ export default {
   mounted() {
     this.easyTable = this.$refs.easyTable;
   },
-  methods: {},
+  methods: {
+    onCurrentChange(row) {
+      console.log('current', row);
+    },
+  },
 };
 </script>
 
