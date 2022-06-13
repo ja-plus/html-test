@@ -1,11 +1,11 @@
 <template>
-  <div class="stk-table-wrapper" :style="{ height: height }" @scroll="onTableScroll">
-    <!-- 横向滚动时固定列的阴影 -->
-    <div
+  <div class="stk-table-wrapper dark" :style="{ height: height }" @scroll="onTableScroll">
+    <!-- 横向滚动时固定列的阴影，TODO: 覆盖一层在整个表上，使用linear-gradient 绘制阴影-->
+    <!-- <div
       :class="showFixedLeftShadow && 'stk-table-fixed-left-col-box-shadow'"
       :style="{ width: fixedLeftColWidth + 'px' }"
-    ></div>
-    <table class="stk-table dark" :style="{ minWidth: minWidth }">
+    ></div> -->
+    <table class="stk-table" :style="{ minWidth: minWidth }">
       <!-- <colgroup>
           <col v-for="(col, i) in tableProps" :key="i" :style="{}" />
         </colgroup> -->
@@ -25,36 +25,38 @@
             :class="{ sortable: col.sorter }"
             @click="onHeadClick(col)"
           >
-            <component :is="col.customHeaderCell(col)" v-if="col.customHeaderCell" />
-            <template v-else>
-              <slot name="table-header" :column="col">
-                <span class="table-header-title">{{ col.title }}</span>
-              </slot>
-            </template>
+            <div class="table-header-cell-wrapper">
+              <component :is="col.customHeaderCell(col)" v-if="col.customHeaderCell" />
+              <template v-else>
+                <slot name="table-header" :column="col">
+                  <span class="table-header-title">{{ col.title }}</span>
+                </slot>
+              </template>
 
-            <!-- 排序图图标 -->
-            <span
-              v-if="col.sorter"
-              class="table-header-sorter"
-              :class="col.dataIndex === sortCol && sortOrder[sortOrderIndex]"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16px" height="16px" viewBox="0 0 16 16">
-                <g id="sort-btn" fill-rule="nonzero">
-                  <rect id="rect" opacity="0" x="0" y="0" width="16" height="16"></rect>
-                  <polygon
-                    id="arrow-up"
-                    fill="#757699"
-                    points="7.99693049 2.00077299 4.79705419 6.00077299 11.1722317 6.00077299"
-                  ></polygon>
-                  <polygon
-                    id="arrow-down"
-                    fill="#757699"
-                    transform="translate(7.984643, 11.999227) scale(-1, 1) rotate(-180.000000) translate(-7.984643, -11.999227) "
-                    points="7.99693049 9.999227 4.79705419 13.999227 11.1722317 13.999227"
-                  ></polygon>
-                </g>
-              </svg>
-            </span>
+              <!-- 排序图图标 -->
+              <span
+                v-if="col.sorter"
+                class="table-header-sorter"
+                :class="col.dataIndex === sortCol && 'sorter-' + sortOrder[sortOrderIndex]"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16px" height="16px" viewBox="0 0 16 16">
+                  <g id="sort-btn" fill-rule="nonzero">
+                    <rect id="rect" opacity="0" x="0" y="0" width="16" height="16"></rect>
+                    <polygon
+                      id="arrow-up"
+                      fill="#757699"
+                      points="7.99693049 2.00077299 4.79705419 6.00077299 11.1722317 6.00077299"
+                    ></polygon>
+                    <polygon
+                      id="arrow-down"
+                      fill="#757699"
+                      transform="translate(7.984643, 11.999227) scale(-1, 1) rotate(-180.000000) translate(-7.984643, -11.999227) "
+                      points="7.99693049 9.999227 4.79705419 13.999227 11.1722317 13.999227"
+                    ></polygon>
+                  </g>
+                </svg>
+              </span>
+            </div>
           </th>
         </tr>
       </thead>
@@ -130,15 +132,15 @@ export default {
     };
   },
   computed: {
-    fixedLeftColWidth() {
-      let fixedLeftColumns = this.tableProps.filter(it => it.fixed === 'left');
-      let width = 0;
-      for (let i = 0; i < fixedLeftColumns.length; i++) {
-        const col = fixedLeftColumns[i];
-        width += parseInt(col.width);
-      }
-      return width;
-    },
+    // fixedLeftColWidth() {
+    //   let fixedLeftColumns = this.tableProps.filter(it => it.fixed === 'left');
+    //   let width = 0;
+    //   for (let i = 0; i < fixedLeftColumns.length; i++) {
+    //     const col = fixedLeftColumns[i];
+    //     width += parseInt(col.width);
+    //   }
+    //   return width;
+    // },
   },
   watch: {
     columns: {
@@ -159,7 +161,7 @@ export default {
   mounted() {},
   methods: {
     fixedStyle(row, index, type) {
-      row = row.filter(col => col.fixed);
+      row = row.filter(col => col.fixed === 'left');
       if (index >= row.length) return {};
       let left = 0;
       for (let i = 0; i < index; i++) {
@@ -230,8 +232,8 @@ export default {
       this.currentItem = row;
       this.$emit('current-change', row);
     },
-    onTableScroll(e) {
-      this.showFixedLeftShadow = e.target.scrollLeft > 0;
+    onTableScroll() {
+      // this.showFixedLeftShadow = e.target.scrollLeft > 0;
     },
   },
 };
@@ -239,24 +241,29 @@ export default {
 
 <style lang="less" scoped>
 .stk-table-wrapper {
+  --border-color: #e8eaec;
+  // --border: 1px #ececf7 solid;
+  --td-bg-color: #fff;
+  --th-bg-color: #f8f8f9;
+  --tr-active-bg-color: rgb(230, 247, 255);
+  --bg-border-top: linear-gradient(180deg, var(--border-color) 1px, transparent 1px);
+  --bg-border-right: linear-gradient(270deg, var(--border-color) 1px, transparent 1px);
+  --bg-border-bottom: linear-gradient(0deg, var(--border-color) 1px, transparent 1px);
+  --bg-border-left: linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
   position: relative;
   overflow: auto;
-  .stk-table-fixed-left-col-box-shadow {
-    position: sticky;
-    left: 0;
-    top: 0;
-    height: 100%;
-    box-shadow: 0 0 10px;
-    z-index: 1;
-    pointer-events: none;
-  }
+  // .stk-table-fixed-left-col-box-shadow {
+  //   position: sticky;
+  //   left: 0;
+  //   top: 0;
+  //   height: 100%;
+  //   box-shadow: 0 0 10px;
+  //   z-index: 1;
+  //   pointer-events: none;
+  // }
   .stk-table {
-    --border: 1px #ececf7 solid;
-    --td-bg-color: #fff;
-    --th-bg-color: #eee;
-    --tr-active-bg-color: rgb(230, 247, 255);
-    position: absolute;
-    top: 0;
+    // position: absolute;
+    // top: 0;
     border-spacing: 0;
     table-layout: fixed;
     th,
@@ -264,58 +271,69 @@ export default {
       height: 30px;
       font-size: 14px;
       box-sizing: border-box;
-      border-bottom: var(--border);
-      border-right: var(--border);
       padding: 2px 5px;
       overflow: hidden;
       padding: 0 8px;
+      background-image: var(--bg-border-right), var(--bg-border-bottom);
     }
     thead {
       tr {
         &:first-child th {
           position: sticky;
           top: 0;
-          border-top: var(--border);
+          // border-top: 1px solid var(--border-color);
+          background-image: var(--bg-border-top), var(--bg-border-right), var(--bg-border-bottom);
+          &:first-child {
+            background-image: var(--bg-border-top), var(--bg-border-right), var(--bg-border-bottom),
+              var(--bg-border-left);
+          }
         }
         th {
           background-color: var(--th-bg-color);
-          .table-header-title {
-          }
           &.sortable {
             cursor: pointer;
           }
           &:first-child {
-            border-left: var(--border);
+            // border-left: 1px solid var(--border-color);
+            background-image: var(--bg-border-top), var(--bg-border-right), var(--bg-border-bottom),
+              var(--bg-border-left);
             padding-left: 12px;
           }
           &:last-child {
             padding-right: 12px;
           }
-          .table-header-sorter {
-            vertical-align: middle;
-            margin-left: 4px;
-            &:not(.sorter-desc):not(.sorter-asc):hover {
-              #arrow-up {
-                fill: #8f90b5;
-              }
-              #arrow-down {
-                fill: #8f90b5;
-              }
+          .table-header-cell-wrapper {
+            display: inline-flex;
+            align-items: center;
+            .table-header-title {
             }
-            &.desc {
-              #arrow-up {
-                fill: #cbcbe1;
+            .table-header-sorter {
+              margin-left: 4px;
+              width: 16px;
+              height: 16px;
+              &:not(.sorter-desc):not(.sorter-asc):hover {
+                #arrow-up {
+                  fill: #8f90b5;
+                }
+                #arrow-down {
+                  fill: #8f90b5;
+                }
               }
-              #arrow-down {
-                fill: #1b63d9;
+              &.sorter-desc {
+                #arrow-up {
+                  fill: #cbcbe1;
+                }
+                #arrow-down {
+                  fill: #1b63d9;
+                }
               }
-            }
-            &.asc {
-              #arrow-up {
-                fill: #1b63d9;
-              }
-              #arrow-down {
-                fill: #cbcbe1;
+              &.sorter-asc {
+                #arrow-up {
+                  fill: #1b63d9;
+                }
+                #arrow-down {
+                  fill: #cbcbe1;
+                }
               }
             }
           }
@@ -329,6 +347,8 @@ export default {
         }
         td {
           &:first-child {
+            // border-left: 1px solid var(--border-color);
+            background-image: var(--bg-border-right), var(--bg-border-bottom), var(--bg-border-left);
             padding-left: 12px;
           }
           &:last-child {
@@ -346,19 +366,22 @@ export default {
       // }
     }
   }
-
-  .stk-table.dark {
-    --th-bg-color: #26272c;
-    --td-bg-color: #181c21;
-    --border: 1px #2e2e33 solid;
-    --tr-active-bg-color: #1a2b46;
+}
+/**深色模式 */
+.stk-table-wrapper.dark {
+  --th-bg-color: #26272c;
+  --td-bg-color: #181c21;
+  --border-color: #2e2e33;
+  --tr-active-bg-color: #1a2b46;
+  background-color: var(--th-bg-color);
+  .stk-table {
     th,
     td {
       color: #d0d1d2;
     }
     tbody {
       tr:hover td {
-        border-bottom: 1px solid #1b63d9;
+        box-shadow: 0px -1px 0 #1b63d9 inset;
       }
     }
   }
