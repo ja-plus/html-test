@@ -1,5 +1,10 @@
 <template>
-  <div class="stk-table-wrapper" :style="{ height: height }">
+  <div class="stk-table-wrapper" :style="{ height: height }" @scroll="onTableScroll">
+    <!-- 横向滚动时固定列的阴影 -->
+    <div
+      :class="showFixedLeftShadow && 'stk-table-fixed-left-col-box-shadow'"
+      :style="{ width: fixedLeftColWidth + 'px' }"
+    ></div>
     <table class="stk-table dark" :style="{ minWidth: minWidth }">
       <!-- <colgroup>
           <col v-for="(col, i) in tableProps" :key="i" :style="{}" />
@@ -14,7 +19,7 @@
             :style="{
               textAlign: col.headerAlign,
               width: col.width || 'auto',
-              minWidth: col.minWidth,
+              minWidth: col.fixed ? col.width : col.minWidth,
               ...fixedStyle(row, i, 'th'),
             }"
             :class="{ sortable: col.sorter }"
@@ -62,11 +67,12 @@
           @click="onRowClick(item)"
         >
           <td
-            v-for="(it, j) in tableProps"
-            :key="it.dataIndex"
-            :style="{ textAlign: it.align, ...fixedStyle(tableProps, j, 'td') }"
+            v-for="(col, j) in tableProps"
+            :key="col.dataIndex"
+            :style="{ textAlign: col.align, ...fixedStyle(tableProps, j, 'td') }"
           >
-            <span> {{ item[it.dataIndex] }} </span>
+            <component :is="col.customCell(col)" v-if="col.customCell" />
+            <span v-else> {{ item[col.dataIndex] }} </span>
           </td>
         </tr>
       </tbody>
@@ -110,6 +116,9 @@ export default {
   },
   data() {
     return {
+      /** 是否展示横向滚动固定列的阴影 */
+      showFixedLeftShadow: false,
+
       currentItem: {}, // 当前选中的一行
       sortCol: '',
       sortOrderIndex: 0,
@@ -120,7 +129,17 @@ export default {
       dataSourceCopy: [],
     };
   },
-  computed: {},
+  computed: {
+    fixedLeftColWidth() {
+      let fixedLeftColumns = this.tableProps.filter(it => it.fixed === 'left');
+      let width = 0;
+      for (let i = 0; i < fixedLeftColumns.length; i++) {
+        const col = fixedLeftColumns[i];
+        width += parseInt(col.width);
+      }
+      return width;
+    },
+  },
   watch: {
     columns: {
       handler(val) {
@@ -211,6 +230,9 @@ export default {
       this.currentItem = row;
       this.$emit('current-change', row);
     },
+    onTableScroll(e) {
+      this.showFixedLeftShadow = e.target.scrollLeft > 0;
+    },
   },
 };
 </script>
@@ -219,11 +241,22 @@ export default {
 .stk-table-wrapper {
   position: relative;
   overflow: auto;
+  .stk-table-fixed-left-col-box-shadow {
+    position: sticky;
+    left: 0;
+    top: 0;
+    height: 100%;
+    box-shadow: 0 0 10px;
+    z-index: 1;
+    pointer-events: none;
+  }
   .stk-table {
     --border: 1px #ececf7 solid;
     --td-bg-color: #fff;
     --th-bg-color: #eee;
     --tr-active-bg-color: rgb(230, 247, 255);
+    position: absolute;
+    top: 0;
     border-spacing: 0;
     table-layout: fixed;
     th,
@@ -259,6 +292,8 @@ export default {
             padding-right: 12px;
           }
           .table-header-sorter {
+            vertical-align: middle;
+            margin-left: 4px;
             &:not(.sorter-desc):not(.sorter-asc):hover {
               #arrow-up {
                 fill: #8f90b5;

@@ -34,15 +34,24 @@ export default {
         {
           title: 'Name',
           dataIndex: 'name',
-          /* fixed: 'left', */ width: '200px',
-          minWidth: '200px',
+          fixed: 'left',
+          width: '200px',
+          // minWidth: '200px', // 组件处理固定列的minWidth = width
           sorter: true,
           customHeaderCell(column) {
             return h('span', column.title + '(render)');
           },
         },
-        { title: 'Age', dataIndex: 'age', /* fixed: 'left', */ width: '200px', minWidth: '200px', sorter: true },
-        { title: 'Gender', dataIndex: 'gender' },
+        {
+          title: 'Age',
+          dataIndex: 'age',
+          fixed: 'left',
+          width: '200px',
+          sorter: true,
+          align: 'right',
+          headerAlign: 'right',
+        },
+        { title: 'Gender', dataIndex: 'gender', width: '100px' },
         { title: 'Email', dataIndex: 'email' },
         { title: 'Address', dataIndex: 'address' },
       ],
