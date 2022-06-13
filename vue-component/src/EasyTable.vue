@@ -1,5 +1,5 @@
 <template>
-  <div class="stk-table-wrapper dark" :style="{ height: height }" @scroll="onTableScroll">
+  <div class="stk-table-wrapper" :style="{ height: height }" @scroll="onTableScroll">
     <!-- 横向滚动时固定列的阴影，TODO: 覆盖一层在整个表上，使用linear-gradient 绘制阴影-->
     <!-- <div
       :class="showFixedLeftShadow && 'stk-table-fixed-left-col-box-shadow'"
@@ -65,13 +65,14 @@
         <tr
           v-for="(item, i) in dataSourceCopy"
           :key="rowKey ? item[rowKey] : i"
-          :class="{ active: item === currentItem }"
+          :class="{ active: item === currentItem, 'highlight-row': highlightDimRows.has(item[rowKey]) }"
           @click="onRowClick(item)"
         >
           <td
             v-for="(col, j) in tableProps"
             :key="col.dataIndex"
             :style="{ textAlign: col.align, ...fixedStyle(tableProps, j, 'td') }"
+            :class="{ 'highlight-cell': highlightDimCells.get(item[rowKey]) === col.dataIndex }"
           >
             <component :is="col.customCell(col)" v-if="col.customCell" />
             <span v-else> {{ item[col.dataIndex] }} </span>
@@ -129,6 +130,10 @@ export default {
       /** 若有多级表头时，的tableHeaders */
       tableProps: [],
       dataSourceCopy: [],
+      /** 高亮后渐暗的单元格 */
+      highlightDimCells: new Map(),
+      /** 高亮后渐暗的行 */
+      highlightDimRows: new Set(),
     };
   },
   computed: {
@@ -235,6 +240,21 @@ export default {
     onTableScroll() {
       // this.showFixedLeftShadow = e.target.scrollLeft > 0;
     },
+    // ---- ref function-----
+    /** 高亮一个单元格 */
+    setHighlightDimCell(rowKey, dataIndex) {
+      this.highlightDimCells.delete(rowKey);
+      setTimeout(() => {
+        this.highlightDimCells.set(rowKey, dataIndex);
+      });
+    },
+    /** 高亮一行 */
+    setHighlightDimRow(rowKey) {
+      this.highlightDimRows.delete(rowKey);
+      setTimeout(() => {
+        this.highlightDimRows.add(rowKey);
+      });
+    },
   },
 };
 </script>
@@ -250,6 +270,8 @@ export default {
   --bg-border-right: linear-gradient(270deg, var(--border-color) 1px, transparent 1px);
   --bg-border-bottom: linear-gradient(0deg, var(--border-color) 1px, transparent 1px);
   --bg-border-left: linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
+  --highlight-color-from: rgba(113, 162, 253, 1);
+  --highlight-color-to: rgba(113, 162, 253, 0);
   position: relative;
   overflow: auto;
   // .stk-table-fixed-left-col-box-shadow {
@@ -341,11 +363,24 @@ export default {
       }
     }
     tbody {
+      /**高亮渐暗 */
+      @keyframes dim {
+        from {
+          background-color: var(--highlight-color-from);
+        }
+        to {
+          background-color: var(--highlight-color-to);
+        }
+      }
       tr {
+        &.highlight-row td {
+          animation: dim 2s linear;
+        }
         &.active td {
           background-color: var(--tr-active-bg-color);
         }
         td {
+          background-color: var(--td-bg-color);
           &:first-child {
             // border-left: 1px solid var(--border-color);
             background-image: var(--bg-border-right), var(--bg-border-bottom), var(--bg-border-left);
@@ -354,7 +389,10 @@ export default {
           &:last-child {
             padding-right: 12px;
           }
-          background-color: var(--td-bg-color);
+
+          &.highlight-cell {
+            animation: dim 2s linear;
+          }
         }
       }
       // 斑马纹
@@ -373,6 +411,8 @@ export default {
   --td-bg-color: #181c21;
   --border-color: #2e2e33;
   --tr-active-bg-color: #1a2b46;
+  --highlight-color-from: rgba(19, 55, 125, 1);
+  --highlight-color-to: rgba(19, 55, 125, 0);
   background-color: var(--th-bg-color);
   .stk-table {
     th,

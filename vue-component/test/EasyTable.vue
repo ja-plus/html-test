@@ -6,7 +6,7 @@ div width:
   input(type="range" min="100" max="2000"  @input="e => tableWidth = e.target.value + 'px'") 
   | {{tableWidth}}
 div(:style="{width: tableWidth}" style="padding:10px;")
-  EasyTable(ref="easyTable" :height="props.height" :columns="columns" :dataSource="dataSource" @current-change="onCurrentChange")
+  EasyTable(ref="easyTable" rowKey="name" :height="props.height" :columns="columns" :dataSource="dataSource" @current-change="onCurrentChange")
     template(#table-header="{ column }") 
       span {{column.title}} (slot)
 div columns:{{columns}}
@@ -64,6 +64,13 @@ export default {
   created() {},
   mounted() {
     this.easyTable = this.$refs.easyTable;
+    this.$refs.easyTable.setHighlightDimCell('name1', 'age');
+    setInterval(() => {
+      this.$refs.easyTable.setHighlightDimCell('name2', 'age');
+    }, 2000);
+    setInterval(() => {
+      this.$refs.easyTable.setHighlightDimRow('name3');
+    }, 3000);
   },
   methods: {
     onCurrentChange(row) {
