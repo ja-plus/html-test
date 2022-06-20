@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Worker</title>
+</head>
+<body>
+    
+</body>
+<script>
+    let hugeArr = new Array(100000).fill(null).map(() => Math.random() * 1000);
+    console.time('normalSort');
+    hugeArr.sort();
+    console.timeEnd('normalSort');
+
+    let worker = new Worker('../js/webWorker.js');
+    console.time('workerSort');
+
+    hugeArr = new Array(100000).fill(null).map(() => Math.random() * 1000);
+    worker.postMessage(hugeArr.slice(0, 50000));
+    let work1Arr = null;
+    worker.onmessage = function (e) {
+      work1Arr = e.data;
+      gb();
+    };
+    
+    let worker2 = new Worker('../js/webWorker.js');
+    let work2Arr = null;
+    worker2.postMessage(hugeArr.slice(50000));
+    worker2.onmessage = function (e) {
+      work2Arr = e.data;
+      gb();
+    };
+
+    function gb() {
+      let arr = []; // new Array(100000);
+      if (work1Arr && work2Arr) {
+        let i = 0;
+        let j = 0;
+        while (i < work1Arr.length || j < work2Arr.length) {
+          if (i >= work1Arr.length) {
+            arr.push(work2Arr[j++]);
+            continue;
+          }
+          if (j >= work2Arr.length) {
+            arr.push(work1Arr[i++]);
+            continue;
+          }
+          if (work1Arr[i] < work2Arr[j]) {
+            arr.push(work1Arr[i++]);
+          } else {
+            arr.push(work2Arr[j++]);
+          }
+        }
+        console.timeEnd('workerSort');
+        return arr;
+      } else {
+        return;
+      }
+    }
+</script>
+</html>
