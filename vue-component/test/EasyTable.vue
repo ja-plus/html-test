@@ -5,11 +5,13 @@ div height:
 div width:
   input(type="range" min="100" max="2000"  @input="e => tableWidth = e.target.value + 'px'") 
   | {{tableWidth}}
+div 
+  button(@click="handleClearSorter") clearSorter
 div(:style="{width: tableWidth}" style="padding:10px;")
-  EasyTable(ref="easyTable" rowKey="name" :height="props.height" :columns="columns" :dataSource="dataSource" @current-change="onCurrentChange")
+  EasyTable(ref="easyTable" rowKey="name" :style="{height:props.height}" :columns="columns" :dataSource="dataSource" @current-change="onCurrentChange" @row-dblclick="onRowDblclick")
     template(#table-header="{ column }") 
       span {{column.title}} (slot)
-div columns:{{columns}}
+div columns:{{columns}} 
 //- div dataSource:{{dataSource}}
 hr
 div tableHeaders:{{easyTable.tableHeaders}}
@@ -46,27 +48,40 @@ export default {
           title: 'Age',
           dataIndex: 'age',
           fixed: 'left',
-          width: '200px',
+          width: '100px',
           sorter: true,
           align: 'right',
           headerAlign: 'right',
         },
-        { title: 'Gender', dataIndex: 'gender', width: '100px' },
+        {
+          title: 'Gender',
+          dataIndex: 'gender',
+          fixed: 'left',
+          width: '100px',
+          textOverflow: 'title',
+        },
         { title: 'Email', dataIndex: 'email' },
         { title: 'Address', dataIndex: 'address' },
       ],
-      dataSource: new Array(500)
-        .fill(0)
-        .map((it, i) => ({ name: 'name' + i, age: i, email: 'add@sa.com', gender: 'a', address: 'ahshshsshshhs' })),
+      dataSource: new Array(50).fill(0).map((it, i) => ({
+        name: 'name' + i,
+        age: i,
+        email: 'add@sa.com',
+        gender: 'aadfasdfasdfasdfasdf',
+        address: 'ahshshsshshhs',
+      })),
+      // dataSource: [],
     };
   },
   computed: {},
   created() {},
   mounted() {
     this.easyTable = this.$refs.easyTable;
+    this.$refs.easyTable.setCurrentRow('name0');
     this.$refs.easyTable.setHighlightDimCell('name1', 'age');
     setInterval(() => {
       this.$refs.easyTable.setHighlightDimCell('name2', 'age');
+      this.$refs.easyTable.setHighlightDimCell('name2', 'gender');
     }, 2000);
     setInterval(() => {
       this.$refs.easyTable.setHighlightDimRow('name3');
@@ -75,6 +90,12 @@ export default {
   methods: {
     onCurrentChange(row) {
       console.log('current', row);
+    },
+    onRowDblclick(row) {
+      console.log('row-dblclick', row);
+    },
+    handleClearSorter() {
+      this.$refs.easyTable.resetSorter();
     },
   },
 };

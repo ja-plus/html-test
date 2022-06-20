@@ -1,5 +1,5 @@
 <template>
-  <div class="stk-table-wrapper" :style="{ height: height }" @scroll="onTableScroll">
+  <div class="stk-table-wrapper dark" @scroll="onTableScroll">
     <!-- 横向滚动时固定列的阴影，TODO: 覆盖一层在整个表上，使用linear-gradient 绘制阴影-->
     <!-- <div
       :class="showFixedLeftShadow && 'stk-table-fixed-left-col-box-shadow'"
@@ -20,6 +20,7 @@
               textAlign: col.headerAlign,
               width: col.width || 'auto',
               minWidth: col.fixed ? col.width : col.minWidth,
+              maxWidth: col.fixed ? col.width : col.maxWidth,
               ...fixedStyle(row, i, 'th'),
             }"
             :class="{ sortable: col.sorter }"
@@ -37,7 +38,7 @@
               <span
                 v-if="col.sorter"
                 class="table-header-sorter"
-                :class="col.dataIndex === sortCol && 'sorter-' + sortOrder[sortOrderIndex]"
+                :class="col.dataIndex === sortCol && 'sorter-' + sortSwitchOrder[sortOrderIndex]"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16px" height="16px" viewBox="0 0 16 16">
                   <g id="sort-btn" fill-rule="nonzero">
@@ -62,21 +63,37 @@
       </thead>
 
       <tbody>
-        <tr
-          v-for="(item, i) in dataSourceCopy"
-          :key="rowKey ? item[rowKey] : i"
-          :class="{ active: item === currentItem, 'highlight-row': highlightDimRows.has(item[rowKey]) }"
-          @click="onRowClick(item)"
-        >
-          <td
-            v-for="(col, j) in tableProps"
-            :key="col.dataIndex"
-            :style="{ textAlign: col.align, ...fixedStyle(tableProps, j, 'td') }"
-            :class="{ 'highlight-cell': highlightDimCells.get(item[rowKey]) === col.dataIndex }"
+        <template v-if="dataSourceCopy && dataSourceCopy.length">
+          <tr
+            v-for="(item, i) in dataSourceCopy"
+            :key="rowKey ? item[rowKey] : i"
+            :class="{
+              active: rowKey ? item[rowKey] === currentItem[rowKey] : item === currentItem,
+              'highlight-row': highlightDimRowsArr.includes(item[rowKey]),
+            }"
+            @click="onRowClick(item)"
+            @dblclick="onRowDblClick(item)"
           >
-            <component :is="col.customCell(col)" v-if="col.customCell" />
-            <span v-else> {{ item[col.dataIndex] }} </span>
-          </td>
+            <td
+              v-for="(col, j) in tableProps"
+              :key="col.dataIndex"
+              :style="{
+                textAlign: col.align,
+                maxWidth: col.fixed ? col.width : col.maxWidth,
+                textOverflow: col.textOverflow && 'ellipsis',
+                overflow: col.textOverflow && 'hidden',
+                ...fixedStyle(tableProps, j, 'td'),
+              }"
+              :title="col.textOverflow === 'title' ? item[col.dataIndex] : undefined"
+              :class="{ 'highlight-cell': highlightDimCells[item[rowKey]]?.has(col.dataIndex) }"
+            >
+              <component :is="col.customCell(col, item)" v-if="col.customCell" />
+              <span v-else> {{ item[col.dataIndex] }} </span>
+            </td>
+          </tr>
+        </template>
+        <tr v-else>
+          <td class="stk-table-no-data-cell" :colspan="tableProps.length">暂无数据</td>
         </tr>
       </tbody>
     </table>
@@ -96,10 +113,6 @@ function _howDeepTheColumn(arr, level = 1) {
 
 export default {
   props: {
-    height: {
-      type: String,
-      default: '100%',
-    },
     minWidth: {
       type: String,
       default: '100%',
@@ -122,21 +135,27 @@ export default {
       /** 是否展示横向滚动固定列的阴影 */
       showFixedLeftShadow: false,
 
-      currentItem: {}, // 当前选中的一行
-      sortCol: '',
+      /** 当前选中的一行*/
+      currentItem: {},
+      /** 排序的列*/
+      sortCol: null,
       sortOrderIndex: 0,
-      sortOrder: [null, 'desc', 'asc'],
+      /** 排序切换顺序 */
+      sortSwitchOrder: [null, 'desc', 'asc'],
       tableHeaders: [],
       /** 若有多级表头时，的tableHeaders */
       tableProps: [],
       dataSourceCopy: [],
       /** 高亮后渐暗的单元格 */
-      highlightDimCells: new Map(),
+      highlightDimCells: {},
       /** 高亮后渐暗的行 */
       highlightDimRows: new Set(),
     };
   },
   computed: {
+    highlightDimRowsArr() {
+      return Array.from(this.highlightDimRows);
+    },
     // fixedLeftColWidth() {
     //   let fixedLeftColumns = this.tableProps.filter(it => it.fixed === 'left');
     //   let width = 0;
@@ -156,7 +175,7 @@ export default {
     },
     dataSource(val) {
       // this.dealColumns(val);
-      this.dataSourceCopy = val;
+      this.dataSourceCopy = [...val];
     },
   },
   created() {
@@ -222,7 +241,7 @@ export default {
       }
       this.sortOrderIndex++;
       if (this.sortOrderIndex > 2) this.sortOrderIndex = 0;
-      const order = this.sortOrder[this.sortOrderIndex];
+      const order = this.sortSwitchOrder[this.sortOrderIndex];
       if (order) {
         if (order === 'asc') {
           this.dataSourceCopy.sort((a, b) => (a[this.sortCol] < b[this.sortCol] ? -1 : 1));
@@ -237,23 +256,47 @@ export default {
       this.currentItem = row;
       this.$emit('current-change', row);
     },
+    onRowDblClick(row) {
+      this.$emit('row-dblclick', row);
+    },
     onTableScroll() {
       // this.showFixedLeftShadow = e.target.scrollLeft > 0;
     },
     // ---- ref function-----
+    /**
+     * 选中一行，
+     * @param {string} rowKey
+     * @param {boolean} option.silent 是否触发回调
+     */
+    setCurrentRow(rowKey, option = { silent: false }) {
+      this.currentItem = this.dataSourceCopy.find(it => it[this.rowKey] === rowKey);
+      if (!option.silent) {
+        this.$emit('current-change', this.currentItem);
+      }
+    },
     /** 高亮一个单元格 */
-    setHighlightDimCell(rowKey, dataIndex) {
-      this.highlightDimCells.delete(rowKey);
+    setHighlightDimCell(rowKeyValue, dataIndex) {
+      // this.highlightDimCells.delete(rowKey);
+      if (!this.highlightDimCells[rowKeyValue]) {
+        this.highlightDimCells[rowKeyValue] = new Set();
+      }
+      this.highlightDimCells[rowKeyValue].delete(dataIndex);
       setTimeout(() => {
-        this.highlightDimCells.set(rowKey, dataIndex);
+        this.highlightDimCells[rowKeyValue].add(dataIndex);
       });
     },
     /** 高亮一行 */
-    setHighlightDimRow(rowKey) {
-      this.highlightDimRows.delete(rowKey);
+    setHighlightDimRow(rowKeyValue) {
+      this.highlightDimRows.delete(rowKeyValue);
       setTimeout(() => {
-        this.highlightDimRows.add(rowKey);
+        this.highlightDimRows.add(rowKeyValue);
       });
+    },
+    /** 重置排序 */
+    resetSorter() {
+      this.sortCol = null;
+      this.sortOrderIndex = 0;
+      this.dataSourceCopy = [...this.dataSource];
     },
   },
 };
@@ -270,8 +313,8 @@ export default {
   --bg-border-right: linear-gradient(270deg, var(--border-color) 1px, transparent 1px);
   --bg-border-bottom: linear-gradient(0deg, var(--border-color) 1px, transparent 1px);
   --bg-border-left: linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
-  --highlight-color-from: rgba(113, 162, 253, 1);
-  --highlight-color-to: rgba(113, 162, 253, 0);
+  --highlight-color: rgba(113, 162, 253, 1);
+  // --highlight-color-to: rgba(113, 162, 253, 0);
   position: relative;
   overflow: auto;
   // .stk-table-fixed-left-col-box-shadow {
@@ -288,6 +331,7 @@ export default {
     // top: 0;
     border-spacing: 0;
     table-layout: fixed;
+    height: 100%;
     th,
     td {
       height: 30px;
@@ -366,10 +410,10 @@ export default {
       /**高亮渐暗 */
       @keyframes dim {
         from {
-          background-color: var(--highlight-color-from);
+          background-color: var(--highlight-color);
         }
         to {
-          background-color: var(--highlight-color-to);
+          background-color: var(--td-bg-color);
         }
       }
       tr {
@@ -393,6 +437,9 @@ export default {
           &.highlight-cell {
             animation: dim 2s linear;
           }
+          &.stk-table-no-data-cell {
+            text-align: center;
+          }
         }
       }
       // 斑马纹
@@ -411,8 +458,8 @@ export default {
   --td-bg-color: #181c21;
   --border-color: #2e2e33;
   --tr-active-bg-color: #1a2b46;
-  --highlight-color-from: rgba(19, 55, 125, 1);
-  --highlight-color-to: rgba(19, 55, 125, 0);
+  --highlight-color: rgba(19, 55, 125, 1);
+  // --highlight-color-to: rgba(19, 55, 125, 0);
   background-color: var(--th-bg-color);
   .stk-table {
     th,
