@@ -69,10 +69,10 @@
             :key="rowKey ? item[rowKey] : i"
             :class="{
               active: rowKey ? item[rowKey] === currentItem[rowKey] : item === currentItem,
-              'highlight-row': highlightDimRowsArr.includes(item[rowKey]),
+              'highlight-row': highlightDimRows.has(item[rowKey]),
             }"
             @click="onRowClick(item)"
-            @dblclick="onRowDblClick(item)"
+            @dblclick="onRowDblclick(item)"
           >
             <td
               v-for="(col, j) in tableProps"
@@ -153,9 +153,6 @@ export default {
     };
   },
   computed: {
-    highlightDimRowsArr() {
-      return Array.from(this.highlightDimRows);
-    },
     // fixedLeftColWidth() {
     //   let fixedLeftColumns = this.tableProps.filter(it => it.fixed === 'left');
     //   let width = 0;
@@ -242,11 +239,24 @@ export default {
       this.sortOrderIndex++;
       if (this.sortOrderIndex > 2) this.sortOrderIndex = 0;
       const order = this.sortSwitchOrder[this.sortOrderIndex];
-      if (order) {
-        if (order === 'asc') {
-          this.dataSourceCopy.sort((a, b) => (a[this.sortCol] < b[this.sortCol] ? -1 : 1));
+      if (typeof col.sorter === 'function') {
+        const customSorterData = col.sorter([...this.dataSource], { order, column: col });
+        if (customSorterData) this.dataSourceCopy = customSorterData;
+        else this.dataSourceCopy = [...this.dataSource]; // 还原数组
+      } else if (order) {
+        if (col.sortType === 'number') {
+          if (order === 'asc') {
+            this.dataSourceCopy.sort((a, b) => +a[col.dataIndex] - +b[col.dataIndex]);
+          } else {
+            this.dataSourceCopy.sort((a, b) => +b[col.dataIndex] - +a[col.dataIndex]);
+          }
         } else {
-          this.dataSourceCopy.sort((a, b) => (a[this.sortCol] > b[this.sortCol] ? -1 : 1));
+          // 按string 排序
+          if (order === 'asc') {
+            this.dataSourceCopy.sort((a, b) => (a[col.dataIndex] < b[col.dataIndex] ? -1 : 1));
+          } else {
+            this.dataSourceCopy.sort((a, b) => (a[col.dataIndex] > b[col.dataIndex] ? -1 : 1));
+          }
         }
       } else {
         this.dataSourceCopy = [...this.dataSource];
@@ -256,7 +266,7 @@ export default {
       this.currentItem = row;
       this.$emit('current-change', row);
     },
-    onRowDblClick(row) {
+    onRowDblclick(row) {
       this.$emit('row-dblclick', row);
     },
     onTableScroll() {
@@ -331,7 +341,6 @@ export default {
     // top: 0;
     border-spacing: 0;
     table-layout: fixed;
-    height: 100%;
     th,
     td {
       height: 30px;
@@ -454,7 +463,8 @@ export default {
 }
 /**深色模式 */
 .stk-table-wrapper.dark {
-  --th-bg-color: #26272c;
+  // --th-bg-color: #26272c;
+  --th-bg-color: #181c21;
   --td-bg-color: #181c21;
   --border-color: #2e2e33;
   --tr-active-bg-color: #1a2b46;

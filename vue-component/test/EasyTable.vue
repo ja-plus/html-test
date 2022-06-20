@@ -49,7 +49,11 @@ export default {
           dataIndex: 'age',
           fixed: 'left',
           width: '100px',
-          sorter: true,
+          sorter(data, { order, column }) {
+            // console.log(data, order, column);
+            if (order === 'desc') return data.sort((a, b) => b.age - a.age);
+            else if (order === 'asc') return data.sort((a, b) => a.age - b.age);
+          },
           align: 'right',
           headerAlign: 'right',
         },
@@ -59,15 +63,17 @@ export default {
           fixed: 'left',
           width: '100px',
           textOverflow: 'title',
+          sorter: true,
+          sortType: 'number', // 指定为数字排序
         },
         { title: 'Email', dataIndex: 'email' },
         { title: 'Address', dataIndex: 'address' },
       ],
       dataSource: new Array(50).fill(0).map((it, i) => ({
         name: 'name' + i,
-        age: i,
+        age: parseInt(Math.random() * 100),
         email: 'add@sa.com',
-        gender: 'aadfasdfasdfasdfasdf',
+        gender: Number(Math.random() * 100 - 50).toFixed(2),
         address: 'ahshshsshshhs',
       })),
       // dataSource: [],
