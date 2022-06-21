@@ -7,6 +7,7 @@ div width:
   | {{tableWidth}}
 div 
   button(@click="handleClearSorter") clearSorter
+  button(@click="addRow") addRow
 div(:style="{width: tableWidth}" style="padding:10px;")
   EasyTable(ref="easyTable" rowKey="name" :style="{height:props.height}" :columns="columns" :dataSource="dataSource" @current-change="onCurrentChange" @row-dblclick="onRowDblclick")
     template(#table-header="{ column }") 
@@ -69,13 +70,14 @@ export default {
         { title: 'Email', dataIndex: 'email' },
         { title: 'Address', dataIndex: 'address' },
       ],
-      dataSource: new Array(50).fill(0).map((it, i) => ({
+      dataSource: new Array(4).fill(0).map((it, i) => ({
         name: 'name' + i,
         age: parseInt(Math.random() * 100),
         email: 'add@sa.com',
         gender: Number(Math.random() * 100 - 50).toFixed(2),
         address: 'ahshshsshshhs',
       })),
+      addIndex: 0,
       // dataSource: [],
     };
   },
@@ -102,6 +104,21 @@ export default {
     },
     handleClearSorter() {
       this.$refs.easyTable.resetSorter();
+    },
+    addRow() {
+      this.dataSource.push({
+        name: 'add' + this.addIndex,
+        age: parseInt(Math.random() * 100),
+        email: 'add@sa.com',
+        gender: Number(Math.random() * 100 - 50).toFixed(2),
+        address: 'add',
+      });
+      this.dataSource = [...this.dataSource]; // 没有监听deep
+      const addIndex = this.addIndex;
+      this.addIndex++;
+      this.$nextTick(() => {
+        this.$refs.easyTable.setHighlightDimRow('add' + addIndex);
+      });
     },
   },
 };

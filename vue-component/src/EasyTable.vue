@@ -24,7 +24,7 @@
               ...fixedStyle(row, i, 'th'),
             }"
             :class="{ sortable: col.sorter }"
-            @click="onHeadClick(col)"
+            @click="onColumnSort(col)"
           >
             <div class="table-header-cell-wrapper">
               <component :is="col.customHeaderCell(col)" v-if="col.customHeaderCell" />
@@ -88,7 +88,7 @@
               :class="{ 'highlight-cell': highlightDimCells[item[rowKey]]?.has(col.dataIndex) }"
             >
               <component :is="col.customCell(col, item)" v-if="col.customCell" />
-              <span v-else> {{ item[col.dataIndex] }} </span>
+              <span v-else> {{ item[col.dataIndex] ?? emptyCellText }} </span>
             </td>
           </tr>
         </template>
@@ -101,6 +101,9 @@
 </template>
 
 <script>
+/**
+ * 存在的问题：column.dataIndex 作为唯一键，不能重复
+ */
 function _howDeepTheColumn(arr, level = 1) {
   let levels = [level];
   arr.forEach(item => {
@@ -128,6 +131,10 @@ export default {
     rowKey: {
       type: String,
       default: '',
+    },
+    emptyCellText: {
+      type: String,
+      default: '--',
     },
   },
   data() {
@@ -170,9 +177,15 @@ export default {
       },
       deep: true,
     },
+    /** 监听表格数据变化 */
     dataSource(val) {
       // this.dealColumns(val);
       this.dataSourceCopy = [...val];
+      if (this.sortCol) {
+        // 排序
+        const column = this.columns.find(it => it.dataIndex === this.sortCol);
+        this.onColumnSort(column, false);
+      }
     },
   },
   created() {
@@ -229,14 +242,16 @@ export default {
       this.tableProps = tmpProps;
     },
     /** 表头点击排序 */
-    onHeadClick(col) {
+    onColumnSort(col, click = true) {
       if (!col.sorter) return;
       if (this.sortCol !== col.dataIndex) {
         // 改变排序的列时，重置排序
         this.sortCol = col.dataIndex;
         this.sortOrderIndex = 0;
       }
-      this.sortOrderIndex++;
+      if (click) {
+        this.sortOrderIndex++;
+      }
       if (this.sortOrderIndex > 2) this.sortOrderIndex = 0;
       const order = this.sortSwitchOrder[this.sortOrderIndex];
       if (typeof col.sorter === 'function') {
@@ -245,11 +260,29 @@ export default {
         else this.dataSourceCopy = [...this.dataSource]; // 还原数组
       } else if (order) {
         if (col.sortType === 'number') {
-          if (order === 'asc') {
-            this.dataSourceCopy.sort((a, b) => +a[col.dataIndex] - +b[col.dataIndex]);
-          } else {
-            this.dataSourceCopy.sort((a, b) => +b[col.dataIndex] - +a[col.dataIndex]);
+          // 按数字类型排序
+          const nanArr = []; // 非数字
+          const numArr = []; // 数字
+          // 非数字不进入排序，一直排在最后
+          for (let i = 0; i < this.dataSourceCopy.length; i++) {
+            const row = this.dataSourceCopy[i];
+            if (
+              row[col.dataIndex] === null ||
+              row[col.dataIndex] === '' ||
+              typeof row[col.dataIndex] === 'boolean' ||
+              Number.isNaN(+row[col.dataIndex])
+            ) {
+              nanArr.push(row);
+            } else {
+              numArr.push(row);
+            }
           }
+          if (order === 'asc') {
+            numArr.sort((a, b) => +a[col.dataIndex] - +b[col.dataIndex]);
+          } else {
+            numArr.sort((a, b) => +b[col.dataIndex] - +a[col.dataIndex]);
+          }
+          this.dataSourceCopy = [...numArr, ...nanArr];
         } else {
           // 按string 排序
           if (order === 'asc') {
@@ -347,7 +380,6 @@ export default {
       font-size: 14px;
       box-sizing: border-box;
       padding: 2px 5px;
-      overflow: hidden;
       padding: 0 8px;
       background-image: var(--bg-border-right), var(--bg-border-bottom);
     }
