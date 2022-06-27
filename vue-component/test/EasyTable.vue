@@ -9,7 +9,7 @@ div
   button(@click="handleClearSorter") clearSorter
   button(@click="addRow") addRow
 div(:style="{width: tableWidth}" style="padding:10px;")
-  EasyTable(ref="easyTable" rowKey="name" :style="{height:props.height}" :columns="columns" :dataSource="dataSource" @current-change="onCurrentChange" @row-dblclick="onRowDblclick")
+  EasyTable(ref="easyTable" rowKey="name" noDataFull :style="{height:props.height}" :columns="columns" :dataSource="dataSource" @current-change="onCurrentChange" @row-dblclick="onRowDblclick")
     template(#table-header="{ column }") 
       span {{column.title}} (slot)
 div columns:{{columns}} 
@@ -61,8 +61,9 @@ export default {
         {
           title: 'Gender',
           dataIndex: 'gender',
-          fixed: 'left',
-          width: '100px',
+          // fixed: 'left',
+          width: '150px',
+          minWidth: '150px',
           textOverflow: 'title',
           sorter: true,
           sortType: 'number', // 指定为数字排序
@@ -70,30 +71,32 @@ export default {
         { title: 'Email', dataIndex: 'email' },
         { title: 'Address', dataIndex: 'address' },
       ],
-      dataSource: new Array(4).fill(0).map((it, i) => ({
-        name: 'name' + i,
-        age: parseInt(Math.random() * 100),
-        email: 'add@sa.com',
-        gender: Number(Math.random() * 100 - 50).toFixed(2),
-        address: 'ahshshsshshhs',
-      })),
+      // dataSource: new Array(4).fill(0).map((it, i) => ({
+      //   name: 'name' + i,
+      //   age: parseInt(Math.random() * 100),
+      //   email: 'add@sa.com',
+      //   gender: Number(Math.random() * 100 - 50).toFixed(2),
+      //   address: 'ahshshsshshhs',
+      // })),
       addIndex: 0,
-      // dataSource: [],
+      dataSource: [],
     };
   },
   computed: {},
   created() {},
   mounted() {
     this.easyTable = this.$refs.easyTable;
-    this.$refs.easyTable.setCurrentRow('name0');
-    this.$refs.easyTable.setHighlightDimCell('name1', 'age');
+    // this.$refs.easyTable.setCurrentRow('name0');
+    // this.$refs.easyTable.setHighlightDimCell('add1', 'age');
     setInterval(() => {
-      this.$refs.easyTable.setHighlightDimCell('name2', 'age');
-      this.$refs.easyTable.setHighlightDimCell('name2', 'gender');
+      this.$refs.easyTable.setHighlightDimCell('add1', 'age');
+    }, 1500);
+    setInterval(() => {
+      this.$refs.easyTable.setHighlightDimCell('add2', 'gender');
     }, 2000);
     setInterval(() => {
-      this.$refs.easyTable.setHighlightDimRow('name3');
-    }, 3000);
+      this.$refs.easyTable.setHighlightDimRow('add0');
+    }, 1000);
   },
   methods: {
     onCurrentChange(row) {

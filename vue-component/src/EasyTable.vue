@@ -67,9 +67,9 @@
           <tr
             v-for="(item, i) in dataSourceCopy"
             :key="rowKey ? item[rowKey] : i"
+            :data-row-key="rowKey ? item[rowKey] : i"
             :class="{
-              active: rowKey ? item[rowKey] === currentItem[rowKey] : item === currentItem,
-              'highlight-row': highlightDimRows.has(item[rowKey]),
+              active: rowKey ? item[rowKey] === (currentItem && currentItem[rowKey]) : item === currentItem,
             }"
             @click="onRowClick(item)"
             @dblclick="onRowDblclick(item)"
@@ -77,6 +77,7 @@
             <td
               v-for="(col, j) in tableProps"
               :key="col.dataIndex"
+              :data-index="col.dataIndex"
               :style="{
                 textAlign: col.align,
                 maxWidth: col.fixed ? col.width : col.maxWidth,
@@ -85,18 +86,21 @@
                 ...fixedStyle(tableProps, j, 'td'),
               }"
               :title="col.textOverflow === 'title' ? item[col.dataIndex] : undefined"
-              :class="{ 'highlight-cell': highlightDimCells[item[rowKey]]?.has(col.dataIndex) }"
             >
               <component :is="col.customCell(col, item)" v-if="col.customCell" />
               <span v-else> {{ item[col.dataIndex] ?? emptyCellText }} </span>
             </td>
           </tr>
         </template>
-        <tr v-else>
-          <td class="stk-table-no-data-cell" :colspan="tableProps.length">暂无数据</td>
-        </tr>
       </tbody>
     </table>
+    <div
+      v-if="!dataSourceCopy || !dataSourceCopy.length"
+      class="stk-table-no-data"
+      :class="{ 'no-data-full': noDataFull }"
+    >
+      <slot name="no-data">暂无数据</slot>
+    </div>
   </div>
 </template>
 
@@ -136,6 +140,11 @@ export default {
       type: String,
       default: '--',
     },
+    /** 暂无数据兜底高度是否撑满 */
+    noDataFull: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -154,9 +163,9 @@ export default {
       tableProps: [],
       dataSourceCopy: [],
       /** 高亮后渐暗的单元格 */
-      highlightDimCells: {},
-      /** 高亮后渐暗的行 */
-      highlightDimRows: new Set(),
+      // highlightDimCells: {},
+      /** 高亮后渐暗的行定时器 */
+      highlightDimRowsTimeout: new Map(),
     };
   },
   computed: {
@@ -312,6 +321,7 @@ export default {
      * @param {boolean} option.silent 是否触发回调
      */
     setCurrentRow(rowKey, option = { silent: false }) {
+      if (!this.dataSourceCopy.length) return;
       this.currentItem = this.dataSourceCopy.find(it => it[this.rowKey] === rowKey);
       if (!option.silent) {
         this.$emit('current-change', this.currentItem);
@@ -319,21 +329,28 @@ export default {
     },
     /** 高亮一个单元格 */
     setHighlightDimCell(rowKeyValue, dataIndex) {
-      // this.highlightDimCells.delete(rowKey);
-      if (!this.highlightDimCells[rowKeyValue]) {
-        this.highlightDimCells[rowKeyValue] = new Set();
-      }
-      this.highlightDimCells[rowKeyValue].delete(dataIndex);
-      setTimeout(() => {
-        this.highlightDimCells[rowKeyValue].add(dataIndex);
-      });
+      const cellEl = this.$el.querySelector(`[data-row-key="${rowKeyValue}"]>[data-index="${dataIndex}"]`);
+      if (!cellEl) return;
+      cellEl.classList.remove('highlight-cell');
+      void cellEl.offsetHeight;
+      cellEl.classList.add('highlight-cell');
     },
     /** 高亮一行 */
     setHighlightDimRow(rowKeyValue) {
-      this.highlightDimRows.delete(rowKeyValue);
-      setTimeout(() => {
-        this.highlightDimRows.add(rowKeyValue);
-      });
+      const rowEl = this.$el.querySelector(`[data-row-key="${rowKeyValue}"]`);
+      if (!rowEl) return;
+      rowEl.classList.remove('highlight-row');
+      void rowEl.offsetWidth;
+      rowEl.classList.add('highlight-row');
+      // 动画结束移除class
+      window.clearTimeout(this.highlightDimRowsTimeout.get(rowKeyValue));
+      this.highlightDimRowsTimeout.set(
+        rowKeyValue,
+        window.setTimeout(() => {
+          rowEl.classList.remove('highlight-row');
+          this.highlightDimRowsTimeout.delete(rowKeyValue); // 回收内存
+        }, 2000),
+      );
     },
     /**
      * 设置排序
@@ -356,6 +373,7 @@ export default {
 
 <style lang="less" scoped>
 .stk-table-wrapper {
+  --row-height: 30px;
   --border-color: #e8eaec;
   // --border: 1px #ececf7 solid;
   --td-bg-color: #fff;
@@ -369,6 +387,8 @@ export default {
   // --highlight-color-to: rgba(113, 162, 253, 0);
   position: relative;
   overflow: auto;
+  display: flex;
+  flex-direction: column;
   // .stk-table-fixed-left-col-box-shadow {
   //   position: sticky;
   //   left: 0;
@@ -385,7 +405,7 @@ export default {
     table-layout: fixed;
     th,
     td {
-      height: 30px;
+      height: var(--row-height);
       font-size: 14px;
       box-sizing: border-box;
       padding: 2px 5px;
@@ -462,16 +482,15 @@ export default {
         from {
           background-color: var(--highlight-color);
         }
-        to {
-          background-color: var(--td-bg-color);
-        }
       }
       tr {
-        &.highlight-row td {
+        &.highlight-row td:not(.highlight-cell) {
           animation: dim 2s linear;
         }
-        &.active td {
-          background-color: var(--tr-active-bg-color);
+        &.active {
+          td {
+            background-color: var(--tr-active-bg-color);
+          }
         }
         td {
           background-color: var(--td-bg-color);
@@ -487,9 +506,6 @@ export default {
           &.highlight-cell {
             animation: dim 2s linear;
           }
-          &.stk-table-no-data-cell {
-            text-align: center;
-          }
         }
       }
       // 斑马纹
@@ -501,25 +517,39 @@ export default {
       // }
     }
   }
-}
-/**深色模式 */
-.stk-table-wrapper.dark {
-  // --th-bg-color: #26272c;
-  --th-bg-color: #181c21;
-  --td-bg-color: #181c21;
-  --border-color: #2e2e33;
-  --tr-active-bg-color: #1a2b46;
-  --highlight-color: rgba(19, 55, 125, 1);
-  // --highlight-color-to: rgba(19, 55, 125, 0);
-  background-color: var(--th-bg-color);
-  .stk-table {
-    th,
-    td {
-      color: #d0d1d2;
+  .stk-table-no-data {
+    line-height: var(--row-height);
+    text-align: center;
+    font-size: 14px;
+    position: sticky;
+    width: 100%;
+    left: 0px;
+    background: var(--bg-border-left), var(--bg-border-bottom), var(--bg-border-right);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    &.no-data-full {
+      flex: 1;
     }
-    tbody {
-      tr:hover td {
-        box-shadow: 0px -1px 0 #1b63d9 inset;
+  }
+
+  /**深色模式 */
+  &.dark {
+    // --th-bg-color: #26272c;
+    --th-bg-color: #181c21;
+    --td-bg-color: #181c21;
+    --border-color: #2e2e33;
+    --tr-active-bg-color: #1a2b46;
+    --highlight-color: rgba(19, 55, 125, 1);
+    // --highlight-color-to: rgba(19, 55, 125, 0);
+    background-color: var(--th-bg-color);
+    color: #d0d1d2;
+    .stk-table {
+      tbody {
+        tr:hover td {
+          box-shadow: 0px -1px 0 #1b63d9 inset;
+        }
       }
     }
   }
