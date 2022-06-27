@@ -1,21 +1,24 @@
-import _asyncToGenerator from "@babel/runtime-corejs3/helpers/asyncToGenerator";
+var _obj$fun;
 
-var _context, _context2;
+import "regenerator-runtime/runtime.js";
 
-import _regeneratorRuntime from "@babel/runtime-corejs3/regenerator";
-import _Object$entries from "@babel/runtime-corejs3/core-js-stable/object/entries";
-import _Promise from "@babel/runtime-corejs3/core-js-stable/promise";
-import _Map from "@babel/runtime-corejs3/core-js-stable/map";
-import _flatInstanceProperty from "@babel/runtime-corejs3/core-js-stable/instance/flat";
-import _matchAllInstanceProperty from "@babel/runtime-corejs3/core-js/instance/match-all";
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
 import "core-js/modules/es.array.iterator.js";
 import "core-js/modules/web.dom-collections.iterator.js";
 import "core-js/modules/es.array.at.js";
+import "core-js/modules/es.object.entries.js";
+import "core-js/modules/es.promise.js";
 import "core-js/modules/es.map.js";
+import "core-js/modules/es.array.flat.js";
+import "core-js/modules/es.array.unscopables.flat.js";
+import "core-js/modules/es.regexp.exec.js";
+import "core-js/modules/es.string.match-all.js";
 import "core-js/modules/es.set.js";
 import "core-js/modules/web.dom-exception.stack.js";
 import "core-js/modules/web.structured-clone.js";
-import "core-js/modules/es.promise.js";
 import "core-js/modules/es.promise.all-settled.js";
 // 不会自动替换？
 // import 'core-js/stable';
@@ -31,44 +34,42 @@ const study = () => {};
 const a = Math.pow(1, 2);
 const arr = [11, ...[1, 2, 3]];
 const b = [1, 2, 3].at(-1);
+Object.entries({}); // 新增API
 
-_Object$entries({}); // 新增API
-
-
-new _Promise(() => {});
-new _Map();
+new Promise(() => {});
+new Map();
 
 class Parent {}
 
-_flatInstanceProperty(_context = []).call(_context);
-
+[].flat();
 new Vue({});
-
-_matchAllInstanceProperty(_context2 = String('a')).call(_context2, 'a', '1');
-
+String('a').matchAll('a', '1');
 structuredClone({
   a: 1
 });
-
-_Promise.allSettled([_Promise.resolve()]);
+Promise.allSettled([Promise.resolve()]);
 
 function asaw() {
   return _asaw.apply(this, arguments);
 }
 
 function _asaw() {
-  _asaw = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee() {
-    return _regeneratorRuntime.wrap(function _callee$(_context3) {
-      while (1) switch (_context3.prev = _context3.next) {
+  _asaw = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+    return regeneratorRuntime.wrap(function _callee$(_context) {
+      while (1) switch (_context.prev = _context.next) {
         case 0:
-          _context3.next = 2;
-          return _Promise.resolve();
+          _context.next = 2;
+          return Promise.resolve();
 
         case 2:
         case "end":
-          return _context3.stop();
+          return _context.stop();
       }
     }, _callee);
   }));
   return _asaw.apply(this, arguments);
 }
+
+let obj = {};
+(_obj$fun = obj.fun) === null || _obj$fun === void 0 ? void 0 : _obj$fun.call(obj);
+obj === null || obj === void 0 ? void 0 : obj.a;

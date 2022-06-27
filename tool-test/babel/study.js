@@ -26,3 +26,7 @@ Promise.allSettled([Promise.resolve()]);
 async function asaw() {
   await Promise.resolve();
 }
+
+let obj = {};
+obj.fun?.();
+obj?.a;
