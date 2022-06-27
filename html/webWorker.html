@@ -7,54 +7,72 @@
     <title>Web Worker</title>
 </head>
 <body>
-    
+    <div>webWorker postMessage 传递所有权，并不能很好得提升性能</div>
+    <di>webWorker 来回通信大概需要200ms</div>
 </body>
 <script>
-    let hugeArr = new Array(100000).fill(null).map(() => Math.random() * 1000);
+    let hugeArr = new Float32Array(100000).fill(null).map(() => Math.random() * 1000);
+    let hugeArr2 = Float32Array.from(hugeArr);
     console.time('normalSort');
-    hugeArr.sort();
+    hugeArr.sort((a, b) => a - b);
     console.timeEnd('normalSort');
 
+    // 开启两个线程排序
     let worker = new Worker('../js/webWorker.js');
-    console.time('workerSort');
-
-    hugeArr = new Array(100000).fill(null).map(() => Math.random() * 1000);
-    worker.postMessage(hugeArr.slice(0, 50000));
+    
+    console.time('workerSortTotal');
+    // console.time('postMsgToWorker');
+    const halfArr = hugeArr2.slice(0, hugeArr.length / 2);
+    console.time('postMsgToWorkerBack');
+    // 所有权转移
+    worker.postMessage(halfArr, [halfArr.buffer]);
+    console.log('main halfArr 所有权已转移', halfArr);
+    // console.timeEnd('postMsgToWorker');
     let work1Arr = null;
     worker.onmessage = function (e) {
-      work1Arr = e.data;
+      console.timeEnd('postMsgToWorkerBack');
+      console.log('backArrbuffer', e.data);
+      work1Arr = new Float32Array(e.data);
       gb();
     };
     
     let worker2 = new Worker('../js/webWorker.js');
     let work2Arr = null;
-    worker2.postMessage(hugeArr.slice(50000));
+    const halfArr2 = hugeArr2.slice(hugeArr.length / 2);
+    worker2.postMessage(halfArr2);
     worker2.onmessage = function (e) {
       work2Arr = e.data;
+      // console.log('backArr2', work2Arr);
       gb();
     };
 
     function gb() {
-      let arr = []; // new Array(100000);
       if (work1Arr && work2Arr) {
+        let arr = new Array(100000);
+        console.time('gb');
         let i = 0;
         let j = 0;
         while (i < work1Arr.length || j < work2Arr.length) {
           if (i >= work1Arr.length) {
-            arr.push(work2Arr[j++]);
+            // arr.push(work2Arr[j++]);
+            arr[i + j] = work2Arr[j++];
             continue;
           }
           if (j >= work2Arr.length) {
-            arr.push(work1Arr[i++]);
+            // arr.push(work1Arr[i++]);
+            arr[i + j] = work1Arr[i++];
             continue;
           }
           if (work1Arr[i] < work2Arr[j]) {
-            arr.push(work1Arr[i++]);
+            // arr.push(work1Arr[i++]);
+            arr[i + j] = work2Arr[j++];
           } else {
-            arr.push(work2Arr[j++]);
+            // arr.push(work2Arr[j++]);
+            arr[i + j] = work1Arr[i++];
           }
         }
-        console.timeEnd('workerSort');
+        console.timeEnd('gb');
+        console.timeEnd('workerSortTotal');
         return arr;
       } else {
         return;

@@ -335,6 +335,15 @@ export default {
         this.highlightDimRows.add(rowKeyValue);
       });
     },
+    /**
+     * 设置排序
+     * @param {string} dataIndex
+     * @param {'asc'|'desc'|null} order
+     */
+    setSorter(dataIndex, order) {
+      this.sortCol = dataIndex;
+      this.sortOrderIndex = this.sortSwitchOrder.findIndex(it => it == order);
+    },
     /** 重置排序 */
     resetSorter() {
       this.sortCol = null;
