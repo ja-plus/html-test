@@ -16,7 +16,9 @@ Object.entries({});
 new Promise(() => {});
 new Map();
 
-class Parent {}
+class Parent {
+  name = 'a'
+}
 [].flat();
 new Vue({});
 String('a').matchAll('a', '1');
