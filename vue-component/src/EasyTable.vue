@@ -546,10 +546,48 @@ export default {
     background-color: var(--th-bg-color);
     color: #d0d1d2;
     .stk-table {
-      tbody {
-        tr:hover td {
-          box-shadow: 0px -1px 0 #1b63d9 inset;
+      thead {
+        tr {
+          th {
+            .table-header-cell-wrapper {
+              .table-header-sorter {
+                #arrow-up,
+                #arrow-down {
+                  fill: #5d5f69;
+                }
+                &:not(.sorter-desc):not(.sorter-asc):hover {
+                  #arrow-up {
+                    fill: #727782;
+                  }
+                  #arrow-down {
+                    fill: #727782;
+                  }
+                }
+                &.sorter-desc {
+                  #arrow-up {
+                    fill: #5d5f69;
+                  }
+                  #arrow-down {
+                    fill: #4f8df4;
+                  }
+                }
+                &.sorter-asc {
+                  #arrow-up {
+                    fill: #4f8df4;
+                  }
+                  #arrow-down {
+                    fill: #5d5f69;
+                  }
+                }
+              }
+            }
+          }
         }
+      }
+    }
+    tbody {
+      tr:hover td {
+        box-shadow: 0px -1px 0 #1b63d9 inset;
       }
     }
   }
