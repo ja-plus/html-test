@@ -48,7 +48,7 @@
     transform: translateY(-100vh);
   }
   .page.mini-hover:hover{
-    box-shadow: 0 0 50px rgba(255,255,255,0.7)
+    box-shadow: 0 0 30px 10px #fff;
   }
 
   .page:nth-child(1) {
@@ -102,7 +102,7 @@
   let i = 0;
   pages.forEach((page, i) => {
     page.id = 'page' + i;
-    page.addEventListener('click', (e) => {
+    page.addEventListener('click', e => {
       if (_isMini) {
         e.stopPropagation(); // stop to wp.addEventListener('click'
         i = Number(e.target.id.match(/\d+/)[0]);
@@ -120,14 +120,14 @@
       }
     });
   });
-  wp.addEventListener('wheel', (e) => {
+  wp.addEventListener('wheel', e => {
     if (e.wheelDeltaY < 0) {
       nextPage();
     } else {
       lastPage();
     }
   });
-  wp.addEventListener('click', (e) => {
+  wp.addEventListener('click', e => {
     nextPage();
   });
 
@@ -148,21 +148,21 @@
     }
   }
 
-  window.addEventListener('keydown', (e) => {
+  window.addEventListener('keydown', e => {
     e.preventDefault();
     if (e.shiftKey && e.code === 'Tab') {
       console.log('tab');
       toggleMiniPage();
     }
   });
-  window.addEventListener('keyup', (e) => {
+  window.addEventListener('keyup', e => {
     e.preventDefault();
   });
-  window.addEventListener('blur', (e) => {});
+  window.addEventListener('blur', e => {});
 
   function toggleMiniPage() {
     const scale = 0.2;
-    const gap = 20;
+    const gap = 15;
     const miniWidth = window.innerWidth * scale;
     const minHeight = window.innerHeight * scale;
     _isMini = !_isMini;
