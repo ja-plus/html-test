@@ -1,4 +1,4 @@
-import Game from '../js/gameCore.js';
+import Game from '../src/js/gameCore.js'
 
 let arr = [
   [0, 2, 4, 2],
@@ -8,14 +8,14 @@ let arr = [
   // [4, 0, 0, 4],
   // [4, 4, 2, 0],
   // [0, 0, 2, 0],
-];
-let game = new Game(arr);
+]
+let game = new Game(arr)
 // arr.forEach(item => {
 //   arrLeft(item)
 // });
-console.log(game.pushLeft());
-print();
-console.log(game.pushLeft());
+console.log(game.pushLeft())
+print()
+console.log(game.pushLeft())
 // game.pushRight();
 // print();
 // game.pushUp();
@@ -25,9 +25,9 @@ console.log(game.pushLeft());
 // game.switchXY();
 // print();
 
-function print(){
+function print() {
   game.GAME.forEach(it => {
-    console.log(it);
+    console.log(it)
   })
-  console.log('---------------');
+  console.log('---------------')
 }

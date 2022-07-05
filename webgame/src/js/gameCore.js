@@ -162,7 +162,6 @@ export default class Core {
   /**
    * 将一维数组左移
    * @param {Array<Number>} arr 一维数组
-   * @returns {Boolean} 表示矩阵是否有变化
    */
   arrLeft(arr) {
     for (let i = 0; i < arr.length; i++) {
@@ -220,18 +219,18 @@ export default class Core {
    */
   setEmptyNum() {
     this.newNumPosition = [] // 新生成的数字坐标，用于加动画
-    let temparr = [] // 矩阵空位的坐标
+    let tempArr = [] // 矩阵空位的坐标
     for (let i = 0; i < this.MATRIC_SIZE; i++) {
       for (let j = 0; j < this.MATRIC_SIZE; j++) {
         if (!this.GAME[i][j].value) {
-          temparr.push([i, j]) // 为0的坐标传入temparr
+          tempArr.push([i, j]) // 为0的坐标传入tempArr
         }
       }
     }
-    if (temparr.length !== 0) {
+    if (tempArr.length !== 0) {
       // 空位不为0
-      let rX = Math.floor(Math.random() * temparr.length)
-      let [x, y] = temparr[rX] // 随机的空位坐标
+      let rX = Math.floor(Math.random() * tempArr.length)
+      let [x, y] = tempArr[rX] // 随机的空位坐标
       this.newNumPosition.push(x + '-' + y)
       let newNum = this.rdNum[Math.floor(Math.random() * this.rdNum.length)] // 自动生成数字填入
       this.GAME[x][y].value = newNum

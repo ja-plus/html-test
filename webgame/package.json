@@ -26,19 +26,11 @@
       "category": "Game"
     }
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/601286825nj/2048.git"
-  },
   "author": {
     "name": "JA+",
     "email": "601286825@qq.com"
   },
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/601286825nj/2048/issues"
-  },
-  "homepage": "https://github.com/601286825nj/2048#readme",
   "devDependencies": {
     "electron": "^12.0.9",
     "electron-builder": "^22.10.5",
