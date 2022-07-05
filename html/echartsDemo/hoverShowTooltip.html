@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>外部控制echarts hover</title>
+</head>
+<script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.1.2/echarts.common.js"></script>
+<!-- <script src="https://cdn.bootcdn.net/ajax/libs/echarts/4.9.0-rc.1/echarts-en.common.min.js"></script> -->
+
+<body>
+  <div id="echarts" style="height: 300px;width:100%"></div>
+</body>
+<script>
+  let myChart = window.echarts.init(document.getElementById('echarts'));
+  
+  const option = {
+    tooltip: {},
+    xAxis: {},
+    yAxis: {},
+    series: [
+      {
+        symbolSize: 20,
+        emphasis: {
+          itemStyle: {
+            color: 'red',
+          },
+        },
+        data: [
+          [10.0, 8.04],
+          [8.07, 6.95],
+          [13.0, 7.58],
+          [9.05, 8.81],
+          [11.0, 8.33],
+          [14.0, 7.66],
+          [13.4, 6.81],
+          [10.0, 6.33],
+          [14.0, 8.96],
+          [12.5, 6.82],
+          [9.15, 7.2],
+          [11.5, 7.2],
+          [3.03, 4.23],
+          [12.2, 7.83],
+          [2.02, 4.47],
+          [1.05, 3.33],
+          [4.05, 4.96],
+          [6.03, 7.24],
+          [12.0, 6.26],
+          [12.0, 8.84],
+          [7.08, 5.82],
+          [5.02, 5.68],
+        ],
+        type: 'scatter',
+      },
+    ],
+  };
+  myChart.setOption(option);
+
+  let i = 0;
+  (function highlight() {
+    myChart.dispatchAction({
+      type: 'downplay',
+      // 用 index 或 id 或 name 来指定系列。
+      // 可以使用数组指定多个系列。
+      seriesIndex: 0,
+      // 数据项的 index，如果不指定也可以通过 name 属性根据名称指定数据项
+      dataIndex: i === 0 ? option.series[0].data.length - 1 : i - 1,
+    });
+  
+    myChart.dispatchAction({
+      type: 'highlight',
+      // 用 index 或 id 或 name 来指定系列。
+      // 可以使用数组指定多个系列。
+      seriesIndex: 0,
+      // 数据项的 index，如果不指定也可以通过 name 属性根据名称指定数据项
+      dataIndex: i,
+    });
+    myChart.dispatchAction({
+      type: 'showTip',
+      seriesIndex: 0,
+      dataIndex: i,
+    });
+    i = i + 1;
+    if (i >= option.series[0].data.length) i = 0;
+    setTimeout(() => {
+      highlight();
+    }, 500);
+  })();
+</script>
+
+</html>

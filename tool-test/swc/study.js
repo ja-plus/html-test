@@ -1,4 +1,3 @@
-// 不会自动替换？
 import Vue from 'vue/dist/vue.esm';
 import comm from './comm.js';
 console.log(comm.a);
@@ -12,7 +11,9 @@ Object.entries({});
 new Promise(() => {});
 new Map();
 
-class Parent {}
+class Parent {
+  name = 'a';
+}
 [].flat();
 new Vue({});
 String('a').matchAll('a', '1');
@@ -22,3 +23,7 @@ Promise.allSettled([Promise.resolve()]);
 async function asaw() {
   await Promise.resolve();
 }
+
+let obj = {};
+obj.fun?.();
+obj?.a;

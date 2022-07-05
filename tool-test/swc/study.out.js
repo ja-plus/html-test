@@ -40,6 +40,19 @@ function _classCallCheck(instance, Constructor) {
         throw new TypeError("Cannot call a class as a function");
     }
 }
+function _defineProperty(obj1, key, value) {
+    if (key in obj1) {
+        Object.defineProperty(obj1, key, {
+            value: value,
+            enumerable: true,
+            configurable: true,
+            writable: true
+        });
+    } else {
+        obj1[key] = value;
+    }
+    return obj1;
+}
 function _iterableToArray(iter) {
     if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
 }
@@ -58,9 +71,9 @@ function _unsupportedIterableToArray(o, minLen) {
     if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
 }
 import regeneratorRuntime from "regenerator-runtime";
-// 不会自动替换？
 import Vue from "vue/dist/vue.esm";
 import comm from "./comm.js";
+var ref;
 console.log(comm.a);
 comm === null || comm === void 0 ? void 0 : comm.a;
 var study = function() {};
@@ -84,6 +97,7 @@ new Map();
 var Parent = function Parent() {
     "use strict";
     _classCallCheck(this, Parent);
+    _defineProperty(this, "name", "a");
 };
 [].flat();
 new Vue({});
@@ -112,6 +126,9 @@ function _asaw() {
     }));
     return _asaw.apply(this, arguments);
 }
+var obj = {};
+(ref = obj.fun) === null || ref === void 0 ? void 0 : ref.call(obj);
+obj === null || obj === void 0 ? void 0 : obj.a;
 
 
 //# sourceMappingURL=study.out.js.map
