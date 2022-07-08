@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "2048 web game",
   "main": "main.js",
+  "homepage": "ja.2048.com",
   "scripts": {
     "dev": "electron .",
     "build": "electron-builder",

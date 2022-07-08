@@ -270,9 +270,9 @@ export default class Core {
         cubeEle.style.setProperty('--duration', '0s') // add translate time
 
         // 调整字体大小
-        if (num >= 1000 && num < 10000) cubeEle.style.fontSize = '22px'
-        else if (num >= 10000 && num < 100000) cubeEle.style.fontSize = '18px'
-        else if (num >= 10000) cubeEle.style.fontSize = '16px'
+        if (num >= 1000 && num < 10000) cubeEle.style.fontSize = '20px'
+        else if (num >= 10000 && num < 100000) cubeEle.style.fontSize = '16px'
+        else if (num >= 100000) cubeEle.style.fontSize = '14px'
 
         cubeEle.textContent = num || ''
         cubeEle.style.backgroundColor = num > 0 ? NUM_COLOR_MAP[num] || '#aaa' : '' // different number different color
