@@ -1,15 +1,15 @@
 const NUM_COLOR_MAP = {
   2: '#aaa',
-  4: 'green',
-  8: 'blue',
-  16: 'cyan',
-  32: 'orange',
+  4: 'rgb(61,180,204)',
+  8: 'rgb(69,139,209)',
+  16: 'rgb(242,163,85)',
+  32: 'rgb(242,97,170)',
   64: 'brown',
   128: 'violet',
   256: 'darkgreen',
   512: 'teal',
   1024: 'tomato',
-  2048: 'red',
+  2048: 'rgb(242,215,85)',
 }
 /**
  * 2048 game core
@@ -18,13 +18,13 @@ const NUM_COLOR_MAP = {
 export default class Core {
   constructor({ el }) {
     /** @type {HTMLElement} */
-    this.el = el
+    this.el = document.querySelector(el)
     /** @type {number} */
     this.GAME_SCORE = 0
     /** @type {{value:number}[][]} */
     this.GAME // 全局游戏矩阵
     /** @type {number} 默认矩阵大小为4*/
-    this.MATRIC_SIZE = 4
+    this.MATRIX_SIZE = 4
     /** @type {number[]} 随机生成的数字集合，新数字会随机从中选择一个，并随机生成在矩阵空位*/
     this.rdNum = [2, 4]
     /** 新生成数字的坐标['x1-y1','x2-y2']*/
@@ -37,6 +37,7 @@ export default class Core {
     this.tranDuration = 0.2
 
     this.createCubeElement() // 创建方块元素
+    this.touchAction() // touchListener
     this.initArr() // 不传入矩阵则生成矩阵
     this.showGameTimeout = null
     /** @type {function[]} 每走一步的回调*/
@@ -61,10 +62,10 @@ export default class Core {
 
   /** init game array*/
   initArr() {
-    this.GAME = new Array(this.MATRIC_SIZE)
-    for (let i = 0; i < this.MATRIC_SIZE; i++) {
-      this.GAME[i] = new Array(this.MATRIC_SIZE)
-      for (let j = 0; j < this.MATRIC_SIZE; j++) {
+    this.GAME = new Array(this.MATRIX_SIZE)
+    for (let i = 0; i < this.MATRIX_SIZE; i++) {
+      this.GAME[i] = new Array(this.MATRIX_SIZE)
+      for (let j = 0; j < this.MATRIX_SIZE; j++) {
         let number = {
           value: 0, // value after move
           added: false, // has added into this cube
@@ -78,18 +79,17 @@ export default class Core {
   }
   /** create cube element */
   createCubeElement() {
-    let gameDiv = document.querySelector(this.el)
-    if (!gameDiv) throw new Error('can not find the element:' + this.el)
+    if (!this.el) throw new Error('can not find the element:' + this.el)
     let gameBg = document.createElement('div')
     gameBg.classList.add('game-background')
-    gameDiv.append(gameBg) // add game background cube
+    this.el.append(gameBg) // add game background cube
 
-    for (let i = 0; i < this.MATRIC_SIZE ** 2; i++) {
+    for (let i = 0; i < this.MATRIX_SIZE ** 2; i++) {
       let bgCube = document.createElement('div')
       gameBg.append(bgCube)
       let cube = document.createElement('div')
       cube.classList.add('num-cube')
-      gameDiv.append(cube)
+      this.el.append(cube)
       this.cubeElements.push(cube)
     }
     this.moveUnit = parseFloat(getComputedStyle(this.cubeElements[0]).width) + 5
@@ -171,10 +171,10 @@ export default class Core {
       let tmpNum = 0
       if (val == 0) {
         // 是0的话就让下一个非零值占用这个位置
-        for (++j; j < this.MATRIC_SIZE; j++) {
+        for (++j; j < this.MATRIX_SIZE; j++) {
           // find the next number not 0
           if (arr[j].value > 0) break
-          else if (j == this.MATRIC_SIZE - 1) return // all 0
+          else if (j == this.MATRIX_SIZE - 1) return // all 0
         }
         tmpNum = arr[j].value // store value
         arr[j].value = 0
@@ -182,8 +182,8 @@ export default class Core {
       } else {
         tmpNum = arr[i].value // store value
       }
-
-      for (++j; j < this.MATRIC_SIZE; j++) {
+      // 与下个有数据的值相加
+      for (++j; j < this.MATRIX_SIZE; j++) {
         // find next number not 0
         if (arr[j].value != 0) {
           // not 0
@@ -204,8 +204,8 @@ export default class Core {
    * 交换矩阵的横纵坐标(斜对角翻折)
    */
   switchXY() {
-    for (let i = 0; i < this.MATRIC_SIZE; i++) {
-      for (let j = i + 1; j < this.MATRIC_SIZE; j++) {
+    for (let i = 0; i < this.MATRIX_SIZE; i++) {
+      for (let j = i + 1; j < this.MATRIX_SIZE; j++) {
         // 遍历行每行的i和每列的i交换
         let temp = this.GAME[j][i]
         this.GAME[j][i] = this.GAME[i][j]
@@ -220,8 +220,8 @@ export default class Core {
   setEmptyNum() {
     this.newNumPosition = [] // 新生成的数字坐标，用于加动画
     let tempArr = [] // 矩阵空位的坐标
-    for (let i = 0; i < this.MATRIC_SIZE; i++) {
-      for (let j = 0; j < this.MATRIC_SIZE; j++) {
+    for (let i = 0; i < this.MATRIX_SIZE; i++) {
+      for (let j = 0; j < this.MATRIX_SIZE; j++) {
         if (!this.GAME[i][j].value) {
           tempArr.push([i, j]) // 为0的坐标传入tempArr
         }
@@ -243,8 +243,8 @@ export default class Core {
     let isOver = true // 游戏结束判断标识符，默认结束
     // this.GAME_SCORE = 0;
     // 判断所有相邻位置没有相同的数
-    G1: for (let i = 0; i < this.MATRIC_SIZE; i++) {
-      for (let j = 0; j < this.MATRIC_SIZE; j++) {
+    G1: for (let i = 0; i < this.MATRIX_SIZE; i++) {
+      for (let j = 0; j < this.MATRIX_SIZE; j++) {
         if (
           this.GAME[i][j].value == this.GAME[i][j + 1]?.value ||
           this.GAME[j][i].value == this.GAME[j + 1]?.[i].value ||
@@ -260,14 +260,19 @@ export default class Core {
   }
   /** output array to html*/
   showGame() {
-    for (let i = 0; i < this.MATRIC_SIZE; i++) {
-      for (let j = 0; j < this.MATRIC_SIZE; j++) {
-        let cubeEle = this.cubeElements[this.MATRIC_SIZE * i + j]
+    for (let i = 0; i < this.MATRIX_SIZE; i++) {
+      for (let j = 0; j < this.MATRIX_SIZE; j++) {
+        let cubeEle = this.cubeElements[this.MATRIX_SIZE * i + j]
         let numObj = this.GAME[i][j]
         let num = numObj.value
         cubeEle.style.setProperty('--moveX', '0px')
         cubeEle.style.setProperty('--moveY', '0px')
         cubeEle.style.setProperty('--duration', '0s') // add translate time
+
+        // 调整字体大小
+        if (num >= 1000 && num < 10000) cubeEle.style.fontSize = '22px'
+        else if (num >= 10000 && num < 100000) cubeEle.style.fontSize = '18px'
+        else if (num >= 10000) cubeEle.style.fontSize = '16px'
 
         cubeEle.textContent = num || ''
         cubeEle.style.backgroundColor = num > 0 ? NUM_COLOR_MAP[num] || '#aaa' : '' // different number different color
@@ -290,10 +295,10 @@ export default class Core {
   }
   /** cube moving animation */
   setMoveAnimation(direction) {
-    for (let x = 0; x < this.MATRIC_SIZE; x++) {
-      for (let y = 0; y < this.MATRIC_SIZE; y++) {
+    for (let x = 0; x < this.MATRIX_SIZE; x++) {
+      for (let y = 0; y < this.MATRIX_SIZE; y++) {
         let numObj = this.GAME[x][y]
-        let cubeEle = this.cubeElements[this.MATRIC_SIZE * x + y]
+        let cubeEle = this.cubeElements[this.MATRIX_SIZE * x + y]
         cubeEle.style.setProperty('--duration', this.tranDuration + 's') // add translate time
         if (typeof numObj.to === 'number') {
           switch (direction) {
@@ -301,13 +306,13 @@ export default class Core {
               cubeEle.style.setProperty('--moveY', (numObj.to - x) * this.moveUnit + 'px')
               break
             case 'down':
-              cubeEle.style.setProperty('--moveY', (this.MATRIC_SIZE - 1 - numObj.to - x) * this.moveUnit + 'px')
+              cubeEle.style.setProperty('--moveY', (this.MATRIX_SIZE - 1 - numObj.to - x) * this.moveUnit + 'px')
               break
             case 'left':
               cubeEle.style.setProperty('--moveX', (numObj.to - y) * this.moveUnit + 'px')
               break
             case 'right':
-              cubeEle.style.setProperty('--moveX', (this.MATRIC_SIZE - 1 - numObj.to - y) * this.moveUnit + 'px')
+              cubeEle.style.setProperty('--moveX', (this.MATRIX_SIZE - 1 - numObj.to - y) * this.moveUnit + 'px')
               break
           }
         }
@@ -335,6 +340,42 @@ export default class Core {
   doCallback() {
     this.stepCallback.forEach(cb => {
       cb(this.GAME_SCORE)
+    })
+  }
+
+  touchAction() {
+    let touchStart = {}
+    this.el.addEventListener('touchstart', e => {
+      // console.log(e,'event');
+      e.preventDefault()
+      touchStart = e.changedTouches[0]
+    })
+    this.el.addEventListener('touchend', e => {
+      // console.log(e,'touchend');
+      e.preventDefault()
+      let endX = e.changedTouches[0].screenX
+      let endY = e.changedTouches[0].screenY
+      let xOffset = endX - touchStart.screenX
+      let yOffset = endY - touchStart.screenY
+      if (Math.abs(xOffset) > Math.abs(yOffset)) {
+        // 横向移动
+        if (xOffset > 0) {
+          // 右移
+          this.control('right')
+        } else {
+          // 左移
+          this.control('left')
+        }
+      } else {
+        // 纵向移动
+        if (yOffset > 0) {
+          // 下移
+          this.control('down')
+        } else {
+          // 上移
+          this.control('up')
+        }
+      }
     })
   }
 }

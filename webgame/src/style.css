@@ -31,23 +31,61 @@ body{
   justify-items: center;
 }
 
-.grid-container >button {
+.grid-container >.direction-btn {
   border: none;
   outline: none;
   border-radius: 3px;
   cursor: pointer;
+  transition:all .2s ease;
 }
-.grid-container >button:active{
+.grid-container >.direction-btn:active{
   background: gray;
 }
-.grid-container >button:hover{
+.grid-container >.direction-btn:hover{
   background: #ddd;
+  color:#555;
 }
-.grid-container .up-btn{
+.grid-container .direction-btn.up-btn{
   grid-column: span 3;
   width: 226px;
 }
-.grid-container .down-btn{
+.grid-container .direction-btn .arrow{
+  overflow: hidden;
+  position: relative;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+}
+.grid-container .direction-btn .arrow::before{
+  content: '';
+  position:absolute;
+  top:0;
+  left:0;
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  display:inline-block;
+  border-top: 4px solid ;
+  border-right: 4px solid ;
+  border-bottom: none ;
+  border-left: none ;
+  transform-origin: center;
+  transform: translate(-2px,6px);
+}
+.grid-container .direction-btn .arrow-up {
+  transform: rotate(-45deg);
+}
+.grid-container .direction-btn .arrow-right {
+  transform: rotate(45deg);
+}
+.grid-container .direction-btn .arrow-down {
+  transform: rotate(135deg);
+}
+.grid-container .direction-btn .arrow-left {
+  transform: rotate(-135deg);
+}
+
+.grid-container .direction-btn.down-btn{
   grid-column: span 3;
   width: 226px;
 }
@@ -82,8 +120,9 @@ body{
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
   color :#fff;
   text-shadow: 0 0 2px rgba(0,0,0,.5);
-  font-size: 20px; /*字体大小*/
+  font-size: 24px; /*字体大小*/
   font-weight: 700; /*加粗*/
+  white-space: nowrap;
   transition-property: all;
   transition-duration: var(--duration);
   transition-timing-function: ease-out;
@@ -113,7 +152,7 @@ body{
   user-select: none;
   cursor: pointer;
   margin: 20px;
-  border-radius: 10px;
+  border-radius: 5%/50%;
   width: 200px;
   height: 50px;
   background: repeating-linear-gradient(45deg, #ff7d00 0 10%, #FEA64C 0 20%);
@@ -126,7 +165,7 @@ body{
   font-weight: 900;
   vertical-align: center;
   box-shadow: 0px 0px 10px 0px #ff7d00;
-  transition: background-position ease .5s,
+  transition: background-position ease .8s,
               transform ease .2s,
               font-size ease .2s,
               background-clip ease .2s;
@@ -138,6 +177,7 @@ body{
   -webkit-background-clip: border-box;
   background-position: 100px;
   transform: scale(1.05);
+  box-shadow: 0px 0px 10px 0px #ff7d00,0px 0px 20px 2px #ff7d00;
   /* border: 4px dashed #ff7d00; */
 }
 .reset:active{
