@@ -10,7 +10,7 @@ const NUM_COLOR_MAP = {
   512: 'teal',
   1024: 'tomato',
   2048: 'rgb(242,215,85)',
-}
+};
 /**
  * 2048 game core
  * @author:JA+
@@ -18,81 +18,81 @@ const NUM_COLOR_MAP = {
 export default class Core {
   constructor({ el }) {
     /** @type {HTMLElement} */
-    this.el = document.querySelector(el)
+    this.el = document.querySelector(el);
     /** @type {number} */
-    this.GAME_SCORE = 0
+    this.GAME_SCORE = 0;
     /** @type {{value:number}[][]} */
-    this.GAME // 全局游戏矩阵
+    this.GAME; // 全局游戏矩阵
     /** @type {number} 默认矩阵大小为4*/
-    this.MATRIX_SIZE = 4
+    this.MATRIX_SIZE = 4;
     /** @type {number[]} 随机生成的数字集合，新数字会随机从中选择一个，并随机生成在矩阵空位*/
-    this.rdNum = [2, 4]
+    this.rdNum = [2, 4];
     /** 新生成数字的坐标['x1-y1','x2-y2']*/
-    this.newNumPosition = []
+    this.newNumPosition = [];
     /** @type {number} 移动距离单位，方块大小+边距*/
-    this.moveUnit = 0
+    this.moveUnit = 0;
     /** @type {HTMLElement[]} 创建的每个方块元素*/
-    this.cubeElements = []
+    this.cubeElements = [];
     /** @type {number} 动画持续时间*/
-    this.tranDuration = 0.2
+    this.tranDuration = 0.2;
 
-    this.createCubeElement() // 创建方块元素
-    this.touchAction() // touchListener
-    this.initArr() // 不传入矩阵则生成矩阵
-    this.showGameTimeout = null
+    this.createCubeElement(); // 创建方块元素
+    this.touchAction(); // touchListener
+    this.initArr(); // 不传入矩阵则生成矩阵
+    this.showGameTimeout = null;
     /** @type {function[]} 每走一步的回调*/
-    this.stepCallback = []
+    this.stepCallback = [];
 
     // 给Array原型加上判断数组是否相同的方法
     Array.prototype.equalTo = function equal(arr) {
-      if (this.length != arr.length) return false // array length not equal
+      if (this.length != arr.length) return false; // array length not equal
       for (let i = 0; i < this.length; i++) {
-        const row = this[i]
+        const row = this[i];
         if (Array.isArray(row)) {
-          if (row.length != arr[i].length) return false
+          if (row.length != arr[i].length) return false;
           for (let j = 0; j < row.length; j++) {
-            const val = row[j].value
-            if (val !== arr[i][j].value) return false
+            const val = row[j].value;
+            if (val !== arr[i][j].value) return false;
           }
         }
       }
-      return true
-    }
+      return true;
+    };
   }
 
   /** init game array*/
   initArr() {
-    this.GAME = new Array(this.MATRIX_SIZE)
+    this.GAME = new Array(this.MATRIX_SIZE);
     for (let i = 0; i < this.MATRIX_SIZE; i++) {
-      this.GAME[i] = new Array(this.MATRIX_SIZE)
+      this.GAME[i] = new Array(this.MATRIX_SIZE);
       for (let j = 0; j < this.MATRIX_SIZE; j++) {
         let number = {
           value: 0, // value after move
           added: false, // has added into this cube
           to: null, // move destination coordinate
-        }
-        this.GAME[i][j] = number
+        };
+        this.GAME[i][j] = number;
       }
     }
-    this.setEmptyNum() // create random number
-    this.showGame()
+    this.setEmptyNum(); // create random number
+    this.showGame();
   }
   /** create cube element */
   createCubeElement() {
-    if (!this.el) throw new Error('can not find the element:' + this.el)
-    let gameBg = document.createElement('div')
-    gameBg.classList.add('game-background')
-    this.el.append(gameBg) // add game background cube
+    if (!this.el) throw new Error('can not find the element:' + this.el);
+    let gameBg = document.createElement('div');
+    gameBg.classList.add('game-background');
+    this.el.append(gameBg); // add game background cube
 
     for (let i = 0; i < this.MATRIX_SIZE ** 2; i++) {
-      let bgCube = document.createElement('div')
-      gameBg.append(bgCube)
-      let cube = document.createElement('div')
-      cube.classList.add('num-cube')
-      this.el.append(cube)
-      this.cubeElements.push(cube)
+      let bgCube = document.createElement('div');
+      gameBg.append(bgCube);
+      let cube = document.createElement('div');
+      cube.classList.add('num-cube');
+      this.el.append(cube);
+      this.cubeElements.push(cube);
     }
-    this.moveUnit = parseFloat(getComputedStyle(this.cubeElements[0]).width) + 5
+    this.moveUnit = parseFloat(getComputedStyle(this.cubeElements[0]).width) + 5;
   }
 
   /**
@@ -100,63 +100,63 @@ export default class Core {
    * @param {String} direction ['up'|'down'|'left'|'right']
    */
   control(direction) {
-    if (this.showGameTimeout) return // last animation didnt end,cant move
-    let beforeArr = JSON.parse(JSON.stringify(this.GAME))
+    if (this.showGameTimeout) return; // last animation didnt end,cant move
+    let beforeArr = JSON.parse(JSON.stringify(this.GAME));
     switch (direction) {
       case 'up':
-        this.pushUp()
-        break
+        this.pushUp();
+        break;
       case 'down':
-        this.pushDown()
-        break
+        this.pushDown();
+        break;
       case 'left':
-        this.pushLeft()
-        break
+        this.pushLeft();
+        break;
       case 'right':
-        this.pushRight()
-        break
+        this.pushRight();
+        break;
     }
     // is array is equal to before array(is game moved)
     if (!this.GAME.equalTo(beforeArr)) {
-      this.setEmptyNum()
-      this.setMoveAnimation(direction) // playing moving animation
+      this.setEmptyNum();
+      this.setMoveAnimation(direction); // playing moving animation
       this.showGameTimeout = setTimeout(() => {
-        this.showGame() // after moving finished, show the final result
-        this.showGameTimeout = null
-      }, this.tranDuration * 1000)
+        this.showGame(); // after moving finished, show the final result
+        this.showGameTimeout = null;
+      }, this.tranDuration * 1000);
 
       if (this.isGameOver()) {
         setTimeout(() => {
-          alert('2048 End!Your Score:' + this.GAME_SCORE)
-        }, 500)
+          alert('2048 End!Your Score:' + this.GAME_SCORE);
+        }, 500);
       }
-      this.doCallback()
+      this.doCallback();
     }
   }
   pushLeft() {
-    let tempArr = JSON.parse(JSON.stringify(this.GAME)) // 保存矩阵用于先后比较是否相等
+    let tempArr = JSON.parse(JSON.stringify(this.GAME)); // 保存矩阵用于先后比较是否相等
     for (const row of this.GAME) {
       // 数字左移
-      this.arrLeft(row)
+      this.arrLeft(row);
     }
-    return this.GAME.equalTo(tempArr)
+    return this.GAME.equalTo(tempArr);
   }
   pushRight() {
     for (const row of this.GAME) {
-      row.reverse() // 反转
-      this.arrLeft(row)
-      row.reverse() // 再反转
+      row.reverse(); // 反转
+      this.arrLeft(row);
+      row.reverse(); // 再反转
     }
   }
   pushUp() {
-    this.switchXY() // 对角线翻折
-    this.pushLeft()
-    this.switchXY()
+    this.switchXY(); // 对角线翻折
+    this.pushLeft();
+    this.switchXY();
   }
   pushDown() {
-    this.switchXY()
-    this.pushRight()
-    this.switchXY()
+    this.switchXY();
+    this.pushRight();
+    this.switchXY();
   }
 
   /**
@@ -165,22 +165,22 @@ export default class Core {
    */
   arrLeft(arr) {
     for (let i = 0; i < arr.length; i++) {
-      const val = arr[i].value
-      if (i == arr.length - 1 && val == 0) break
-      let j = i
-      let tmpNum = 0
+      const val = arr[i].value;
+      if (i == arr.length - 1 && val == 0) break;
+      let j = i;
+      let tmpNum = 0;
       if (val == 0) {
         // 是0的话就让下一个非零值占用这个位置
         for (++j; j < this.MATRIX_SIZE; j++) {
           // find the next number not 0
-          if (arr[j].value > 0) break
-          else if (j == this.MATRIX_SIZE - 1) return // all 0
+          if (arr[j].value > 0) break;
+          else if (j == this.MATRIX_SIZE - 1) return; // all 0
         }
-        tmpNum = arr[j].value // store value
-        arr[j].value = 0
-        arr[j].to = i // where to move
+        tmpNum = arr[j].value; // store value
+        arr[j].value = 0;
+        arr[j].to = i; // where to move
       } else {
-        tmpNum = arr[i].value // store value
+        tmpNum = arr[i].value; // store value
       }
       // 与下个有数据的值相加
       for (++j; j < this.MATRIX_SIZE; j++) {
@@ -189,15 +189,15 @@ export default class Core {
           // not 0
           if (tmpNum == arr[j].value) {
             // same number merge
-            tmpNum *= 2
-            arr[j].value = 0
-            arr[j].to = i
-            arr[i].added = true
+            tmpNum *= 2;
+            arr[j].value = 0;
+            arr[j].to = i;
+            arr[i].added = true;
           }
-          break
+          break;
         }
       }
-      arr[i].value = tmpNum
+      arr[i].value = tmpNum;
     }
   }
   /**
@@ -207,9 +207,9 @@ export default class Core {
     for (let i = 0; i < this.MATRIX_SIZE; i++) {
       for (let j = i + 1; j < this.MATRIX_SIZE; j++) {
         // 遍历行每行的i和每列的i交换
-        let temp = this.GAME[j][i]
-        this.GAME[j][i] = this.GAME[i][j]
-        this.GAME[i][j] = temp
+        let temp = this.GAME[j][i];
+        this.GAME[j][i] = this.GAME[i][j];
+        this.GAME[i][j] = temp;
       }
     }
   }
@@ -218,29 +218,29 @@ export default class Core {
    * 空位随机生成数字
    */
   setEmptyNum() {
-    this.newNumPosition = [] // 新生成的数字坐标，用于加动画
-    let tempArr = [] // 矩阵空位的坐标
+    this.newNumPosition = []; // 新生成的数字坐标，用于加动画
+    let tempArr = []; // 矩阵空位的坐标
     for (let i = 0; i < this.MATRIX_SIZE; i++) {
       for (let j = 0; j < this.MATRIX_SIZE; j++) {
         if (!this.GAME[i][j].value) {
-          tempArr.push([i, j]) // 为0的坐标传入tempArr
+          tempArr.push([i, j]); // 为0的坐标传入tempArr
         }
       }
     }
     if (tempArr.length !== 0) {
       // 空位不为0
-      let rX = Math.floor(Math.random() * tempArr.length)
-      let [x, y] = tempArr[rX] // 随机的空位坐标
-      this.newNumPosition.push(x + '-' + y)
-      let newNum = this.rdNum[Math.floor(Math.random() * this.rdNum.length)] // 自动生成数字填入
-      this.GAME[x][y].value = newNum
-      this.GAME_SCORE += newNum
+      let rX = Math.floor(Math.random() * tempArr.length);
+      let [x, y] = tempArr[rX]; // 随机的空位坐标
+      this.newNumPosition.push(x + '-' + y);
+      let newNum = this.rdNum[Math.floor(Math.random() * this.rdNum.length)]; // 自动生成数字填入
+      this.GAME[x][y].value = newNum;
+      this.GAME_SCORE += newNum;
     }
   }
 
   /** 判断游戏是否结束 */
   isGameOver() {
-    let isOver = true // 游戏结束判断标识符，默认结束
+    let isOver = true; // 游戏结束判断标识符，默认结束
     // this.GAME_SCORE = 0;
     // 判断所有相邻位置没有相同的数
     G1: for (let i = 0; i < this.MATRIX_SIZE; i++) {
@@ -250,45 +250,45 @@ export default class Core {
           this.GAME[j][i].value == this.GAME[j + 1]?.[i].value ||
           this.GAME[i][j].value == 0
         ) {
-          isOver = false // 游戏还能继续，取消结束状态
-          break G1
+          isOver = false; // 游戏还能继续，取消结束状态
+          break G1;
         }
         // this.GAME_SCORE += this.GAME[i][j].value; // summary
       }
     }
-    return isOver
+    return isOver;
   }
   /** output array to html*/
   showGame() {
     for (let i = 0; i < this.MATRIX_SIZE; i++) {
       for (let j = 0; j < this.MATRIX_SIZE; j++) {
-        let cubeEle = this.cubeElements[this.MATRIX_SIZE * i + j]
-        let numObj = this.GAME[i][j]
-        let num = numObj.value
-        cubeEle.style.setProperty('--moveX', '0px')
-        cubeEle.style.setProperty('--moveY', '0px')
-        cubeEle.style.setProperty('--duration', '0s') // add translate time
+        let cubeEle = this.cubeElements[this.MATRIX_SIZE * i + j];
+        let numObj = this.GAME[i][j];
+        let num = numObj.value;
+        cubeEle.style.setProperty('--moveX', '0px');
+        cubeEle.style.setProperty('--moveY', '0px');
+        cubeEle.style.setProperty('--duration', '0s'); // add translate time
 
         // 调整字体大小
-        if (num >= 1000 && num < 10000) cubeEle.style.fontSize = '20px'
-        else if (num >= 10000 && num < 100000) cubeEle.style.fontSize = '16px'
-        else if (num >= 100000) cubeEle.style.fontSize = '14px'
+        if (num >= 1000 && num < 10000) cubeEle.style.fontSize = '20px';
+        else if (num >= 10000 && num < 100000) cubeEle.style.fontSize = '16px';
+        else if (num >= 100000) cubeEle.style.fontSize = '14px';
 
-        cubeEle.textContent = num || ''
-        cubeEle.style.backgroundColor = num > 0 ? NUM_COLOR_MAP[num] || '#aaa' : '' // different number different color
-        cubeEle.classList.remove('added', 'scale')
+        cubeEle.textContent = num || '';
+        cubeEle.style.backgroundColor = num > 0 ? NUM_COLOR_MAP[num] || '#aaa' : ''; // different number different color
+        cubeEle.classList.remove('added', 'scale');
         if (numObj.added) {
-          void cubeEle.offsetWidth // trigger reflow
-          cubeEle.classList.add('added')
+          void cubeEle.offsetWidth; // trigger reflow
+          cubeEle.classList.add('added');
         }
         if (this.newNumPosition.includes(i + '-' + j)) {
-          void cubeEle.offsetWidth // trigger reflow
-          cubeEle.classList.add('scale')
+          void cubeEle.offsetWidth; // trigger reflow
+          cubeEle.classList.add('scale');
         }
         // reset numObj
         {
-          numObj.to = null
-          numObj.added = false
+          numObj.to = null;
+          numObj.added = false;
         }
       }
     }
@@ -297,23 +297,23 @@ export default class Core {
   setMoveAnimation(direction) {
     for (let x = 0; x < this.MATRIX_SIZE; x++) {
       for (let y = 0; y < this.MATRIX_SIZE; y++) {
-        let numObj = this.GAME[x][y]
-        let cubeEle = this.cubeElements[this.MATRIX_SIZE * x + y]
-        cubeEle.style.setProperty('--duration', this.tranDuration + 's') // add translate time
+        let numObj = this.GAME[x][y];
+        let cubeEle = this.cubeElements[this.MATRIX_SIZE * x + y];
+        cubeEle.style.setProperty('--duration', this.tranDuration + 's'); // add translate time
         if (typeof numObj.to === 'number') {
           switch (direction) {
             case 'up':
-              cubeEle.style.setProperty('--moveY', (numObj.to - x) * this.moveUnit + 'px')
-              break
+              cubeEle.style.setProperty('--moveY', (numObj.to - x) * this.moveUnit + 'px');
+              break;
             case 'down':
-              cubeEle.style.setProperty('--moveY', (this.MATRIX_SIZE - 1 - numObj.to - x) * this.moveUnit + 'px')
-              break
+              cubeEle.style.setProperty('--moveY', (this.MATRIX_SIZE - 1 - numObj.to - x) * this.moveUnit + 'px');
+              break;
             case 'left':
-              cubeEle.style.setProperty('--moveX', (numObj.to - y) * this.moveUnit + 'px')
-              break
+              cubeEle.style.setProperty('--moveX', (numObj.to - y) * this.moveUnit + 'px');
+              break;
             case 'right':
-              cubeEle.style.setProperty('--moveX', (this.MATRIX_SIZE - 1 - numObj.to - y) * this.moveUnit + 'px')
-              break
+              cubeEle.style.setProperty('--moveX', (this.MATRIX_SIZE - 1 - numObj.to - y) * this.moveUnit + 'px');
+              break;
           }
         }
       }
@@ -322,60 +322,60 @@ export default class Core {
 
   /** reset game */
   reset() {
-    this.GAME_SCORE = 0
-    this.initArr()
-    this.doCallback()
+    this.GAME_SCORE = 0;
+    this.initArr();
+    this.doCallback();
     // TODO: maybe add reset animation
   }
   addCallback(func) {
     if (typeof func === 'function') {
-      this.stepCallback.push(func)
-      func(this.GAME_SCORE)
+      this.stepCallback.push(func);
+      func(this.GAME_SCORE);
     }
   }
   removeCallback(func) {
-    this.stepCallback = this.stepCallback.filter(it => it === func)
+    this.stepCallback = this.stepCallback.filter(it => it === func);
   }
   // run callback function
   doCallback() {
     this.stepCallback.forEach(cb => {
-      cb(this.GAME_SCORE)
-    })
+      cb(this.GAME_SCORE);
+    });
   }
 
   touchAction() {
-    let touchStart = {}
+    let touchStart = {};
     this.el.addEventListener('touchstart', e => {
       // console.log(e,'event');
-      e.preventDefault()
-      touchStart = e.changedTouches[0]
-    })
+      e.preventDefault();
+      touchStart = e.changedTouches[0];
+    });
     this.el.addEventListener('touchend', e => {
       // console.log(e,'touchend');
-      e.preventDefault()
-      let endX = e.changedTouches[0].screenX
-      let endY = e.changedTouches[0].screenY
-      let xOffset = endX - touchStart.screenX
-      let yOffset = endY - touchStart.screenY
+      e.preventDefault();
+      let endX = e.changedTouches[0].screenX;
+      let endY = e.changedTouches[0].screenY;
+      let xOffset = endX - touchStart.screenX;
+      let yOffset = endY - touchStart.screenY;
       if (Math.abs(xOffset) > Math.abs(yOffset)) {
         // 横向移动
         if (xOffset > 0) {
           // 右移
-          this.control('right')
+          this.control('right');
         } else {
           // 左移
-          this.control('left')
+          this.control('left');
         }
       } else {
         // 纵向移动
         if (yOffset > 0) {
           // 下移
-          this.control('down')
+          this.control('down');
         } else {
           // 上移
-          this.control('up')
+          this.control('up');
         }
       }
-    })
+    });
   }
 }

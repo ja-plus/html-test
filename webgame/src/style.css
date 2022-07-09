@@ -4,7 +4,7 @@
 }
 @font-face {
   font-family: Comic;
-  src: url(./Comic.ttf);
+  src: url(./assets/Comic.ttf);
 }
 
 * {
@@ -19,6 +19,10 @@ body{
   align-items: center;
   font-family: Comic,'Courier New', Courier, monospace;
 }
+.install-button {
+  display: none;
+}
+
 .your-score {
   font-size: 20px;
 }

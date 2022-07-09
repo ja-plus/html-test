@@ -1,0 +1,17 @@
+{
+    "name": "2048-PWA", // 允许单行注释
+    "short_name": "2048",
+    "description": "2048 游戏",
+    "start_url": ".", // 如果以相对URL的形式给出，则基本URL将是manifest的URL
+    "display": "standalone",
+    "background_color": "#999",
+    "theme_color": "#3eaf7c",
+    "icons": [
+      {
+        "src": "./assets/512x512.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
+    ],
+    "lang": "zh-CN"
+  }

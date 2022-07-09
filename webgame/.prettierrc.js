@@ -6,7 +6,7 @@ module.exports = {
   // 禁用tab缩进
   useTabs: false,
   // 删除尾行分号
-  semi: false,
+  // semi: false,
   // 使用单引号
   singleQuote: true,
   // 对象的key仅在必要时使用引号
