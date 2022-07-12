@@ -8,7 +8,7 @@ async fn main() {
     let mills = now.timestamp_millis().to_string(); // 1609761696945
     let str = "{\"bp\": \"-0.260\", \"closePrice\": \"99.99\", \"code\": \"T2209\", \"countDeal\": \"66243\", \"ctd\": \"压测数据rs".to_string();
     let str2 = String::from("\", \"irr\": \"-1.3844\", \"openInterest\": \"1699030\", \"price\": \"99.730\", \"priceBuy\": \"99.730\", \"priceSell\": \"99.735\", \"seq\": \"T2209\"}");
-    let bodyStr = format!("{}{}{}",str,mills,str2).to_string();
+    let body_str = format!("{}{}{}",str,mills,str2).to_string();
 
     let mut headers = HeaderMap::new();
     headers.insert("Content-Type", "application/json".parse().unwrap());
@@ -16,8 +16,7 @@ async fn main() {
 
     let res = client.post("http://testft.10jqka.com.cn/standardgwapi/api/bond_service_quote/test/comprehensive_stress_test")
     .headers(headers)
-    .body(bodyStr)
-    .send()
-    .await;
+    .body(body_str)
+    .send();
 }
 

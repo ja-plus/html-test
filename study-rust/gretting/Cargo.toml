@@ -12,3 +12,6 @@ rand = "0.5.5"
 # 发生恐慌，则操作系统回收内存
 [profile.release]
 panic = 'abort'
+reqwest = { version = "0.11", features = ["json"] }
+tokio = { version = "1", features = ["full"] }
+chrono = "0.4"
