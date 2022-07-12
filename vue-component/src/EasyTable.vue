@@ -360,6 +360,11 @@ export default {
     setSorter(dataIndex, order) {
       this.sortCol = dataIndex;
       this.sortOrderIndex = this.sortSwitchOrder.findIndex(it => it == order);
+      if (this.dataSourceCopy?.length) {
+        // 如果表格有数据，则进行排序
+        const column = this.columns.find(it => it.dataIndex === this.sortCol);
+        this.onColumnSort(column, false);
+      }
     },
     /** 重置排序 */
     resetSorter() {
