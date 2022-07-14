@@ -6,7 +6,10 @@
   font-family: Comic;
   src: url(./assets/Comic.ttf);
 }
-
+:root {
+  --main-color: #ff7d00;
+  --main-color-2: #FEA64C;
+}
 * {
   box-sizing: border-box;
 }
@@ -21,6 +24,20 @@ body{
 }
 .install-button {
   display: none;
+  position:fixed;
+  right: 10px;
+  top:10px;
+  padding: 5px 10px;
+  border: 2px solid var(--main-color);
+  border-radius: 10px;
+  background-color: #fff;
+  font-size:14px;
+  font-family: Comic;
+  cursor:pointer;
+  transition: box-shadow 0.5s ease;
+}
+.install-button:hover{
+  box-shadow: 0 0 10px 0 var(--main-color-2);
 }
 
 .your-score {
@@ -29,7 +46,7 @@ body{
 .your-score .score-num{
   font-size: 30px;
   font-weight: bolder;
-  color: #ff7d00;
+  color: var(--main-color);
 }
 
 .grid-container{
@@ -169,7 +186,7 @@ body{
   border-radius: 5%/50%;
   width: 200px;
   height: 50px;
-  background: repeating-linear-gradient(45deg, #ff7d00 0 10%, #FEA64C 0 20%);
+  background: repeating-linear-gradient(45deg, var(--main-color) 0 10%, var( --main-color-2) 0 20%);
   line-height: 50px;
   text-align: center;
   color: transparent;
@@ -178,7 +195,7 @@ body{
   font-size: 2.2em;
   font-weight: 900;
   vertical-align: center;
-  box-shadow: 0px 0px 10px 0px #ff7d00;
+  box-shadow: 0px 0px 10px 0px var(--main-color);
   transition: background-position ease .8s,
               transform ease .2s,
               font-size ease .2s,
@@ -191,8 +208,8 @@ body{
   -webkit-background-clip: border-box;
   background-position: 100px;
   transform: scale(1.05);
-  box-shadow: 0px 0px 10px 0px #ff7d00,0px 0px 20px 2px #ff7d00;
-  /* border: 4px dashed #ff7d00; */
+  box-shadow: 0px 0px 10px 0px var(--main-color),0px 0px 20px 2px var(--main-color);
+  /* border: 4px dashed var(--main-color); */
 }
 .reset:active{
   transform: scale(1);

@@ -1,5 +1,13 @@
-let cacheName = '2048-pwa';
-let cacheList = ['/'];
+const cacheName = '2048-pwa';
+/** 文件夹一定要用./开头 */
+const cacheList = [
+  '/webgame/src/index.html',
+  '/webgame/src/style.css',
+  '/webgame/src/js/2048.js',
+  '/webgame/src/js/gameCore.js',
+  '/webgame/src/js/pwa.js',
+  '/webgame/src/assets/512x512.png',
+];
 self.addEventListener('install', e => {
   console.log('service worker installed');
   // 需要缓存的资源
@@ -30,13 +38,15 @@ self.addEventListener('activate', function (e) {
 });
 
 // 拦截请求
-self.addEventListener('fetch', e => {
-  e.responseWith(
+self.addEventListener('fetch', function (e) {
+  // console.log('拦截fetch', e);
+  e.respondWith(
     // 匹配缓存
-    caches.match(e.request).then(r => {
+    caches.match(e.request).then(res => {
       console.log('[Service Worker] Fetching resource: ' + e.request.url);
-      if (r) return r;
-      // 请求数据
+      // 返回缓存中的数据
+      if (res) return res;
+      // 缓存中没有就 请求数据
       return fetch(e.request).then(response => {
         // 保存缓存
         return caches.open(cacheName).then(cache => {

@@ -1,7 +1,7 @@
 // 检测浏览器是否支持SW
 if (navigator.serviceWorker != null) {
   // 这里的路径是html相对的路径
-  navigator.serviceWorker.register('js/serviceWorker.js').then(function (registartion) {
+  navigator.serviceWorker.register('./serviceWorker.js').then(function (registartion) {
     console.log('支持sw:', registartion.scope);
   });
 }
@@ -9,7 +9,6 @@ if (navigator.serviceWorker != null) {
 const addBtn = document.querySelector('.install-button');
 let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', e => {
-  console.log('aaa');
   // Prevent Chrome 67 and earlier from automatically showing the prompt
   e.preventDefault();
   // 保存事件

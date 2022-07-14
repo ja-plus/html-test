@@ -33,56 +33,56 @@
       console.log('支持sw:', registartion.scope);
     });
   }
-  function fetchApi(no) {
-    fetch('http://localhost:3000/getTestData?a=' + no)
-      .then(res => res.json())
-      .then(json => {
-        console.log(json);
-      });
-  }
-  const button = document.getElementById('notifications');
-  button.addEventListener('click', () => {
-    Notification.requestPermission().then(result => {
-      console.log('Notification:', result);
-      if (result === 'granted') {
-        // randomNotification();
-        new Notification('通知', {
-          body: '通知的正文',
-          icon: 'images/icon_256x256.png',
-          image: '../../html/img/searah.jpg',
-          data: '123123',
-        }); // https://developer.mozilla.org/zh-CN/docs/Web/API/notification/Notification
-      }
-    });
-  });
+  // function fetchApi(no) {
+  //   fetch('http://localhost:3000/getTestData?a=' + no)
+  //     .then(res => res.json())
+  //     .then(json => {
+  //       console.log(json);
+  //     });
+  // }
+  // const button = document.getElementById('notifications');
+  // button.addEventListener('click', () => {
+  //   Notification.requestPermission().then(result => {
+  //     console.log('Notification:', result);
+  //     if (result === 'granted') {
+  //       // randomNotification();
+  //       new Notification('通知', {
+  //         body: '通知的正文',
+  //         icon: 'images/icon_256x256.png',
+  //         image: '../../html/img/searah.jpg',
+  //         data: '123123',
+  //       }); // https://developer.mozilla.org/zh-CN/docs/Web/API/notification/Notification
+  //     }
+  //   });
+  // });
 
-  let deferredPrompt;
-  const addBtn = document.querySelector('.add-button');
-  addBtn.style.display = 'none';
-  window.addEventListener('beforeinstallprompt', e => {
-    // Prevent Chrome 67 and earlier from automatically showing the prompt
-    e.preventDefault();
-    // 保存事件
-    deferredPrompt = e;
-    // 显示按钮
-    addBtn.style.display = 'block';
+  // let deferredPrompt;
+  // const addBtn = document.querySelector('.add-button');
+  // addBtn.style.display = 'none';
+  // window.addEventListener('beforeinstallprompt', e => {
+  //   // Prevent Chrome 67 and earlier from automatically showing the prompt
+  //   e.preventDefault();
+  //   // 保存事件
+  //   deferredPrompt = e;
+  //   // 显示按钮
+  //   addBtn.style.display = 'block';
 
-    addBtn.addEventListener('click', e => {
-      // 隐藏按钮
-      addBtn.style.display = 'none';
-      // 打开提示用户安装弹窗
-      deferredPrompt.prompt();
-      // 弹窗点击事件回调
-      deferredPrompt.userChoice.then(choiceResult => {
-        if (choiceResult.outcome === 'accepted') {
-          console.log('User accepted the A2HS prompt');
-        } else {
-          console.log('User dismissed the A2HS prompt');
-        }
-        deferredPrompt = null;
-      });
-    });
-  });
+  //   addBtn.addEventListener('click', e => {
+  //     // 隐藏按钮
+  //     addBtn.style.display = 'none';
+  //     // 打开提示用户安装弹窗
+  //     deferredPrompt.prompt();
+  //     // 弹窗点击事件回调
+  //     deferredPrompt.userChoice.then(choiceResult => {
+  //       if (choiceResult.outcome === 'accepted') {
+  //         console.log('User accepted the A2HS prompt');
+  //       } else {
+  //         console.log('User dismissed the A2HS prompt');
+  //       }
+  //       deferredPrompt = null;
+  //     });
+  //   });
+  // });
 </script>
 
 </html>

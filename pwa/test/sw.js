@@ -1,6 +1,7 @@
 var cacheName = 'minimal-pwa-2'; // 用来控制静态资源缓存
 
-var cacheList = ['/', 'index.html', 'main.css', 'favicon.ico', '../../html/img/searah.jpg', 'images/icon_256x256.png'];
+// 这个列表中只要有一个资源不能访问，进入不了fetch listener
+var cacheList = ['index.html', 'main.css', 'favicon.ico', '../../html/img/searah.jpg', 'images/icon_256x256.png'];
 
 self.addEventListener('install', e => {
   console.log('sw installed', e);
