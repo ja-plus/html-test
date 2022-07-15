@@ -1,9 +1,9 @@
 <template lang="pug">
 div height:
-  input(type="range" min="100" max="1000" @input="e => props.height = e.target.value + 'px'") 
+  input(type="range" min="100" max="1000" @input="e => props.height = e.target.value + 'px'")
   | {{props.height}}
 div width:
-  input(type="range" min="100" max="2000"  @input="e => tableWidth = e.target.value + 'px'") 
+  input(type="range" min="100" max="2000"  @input="e => tableWidth = e.target.value + 'px'" :value="parseInt(tableWidth)")
   | {{tableWidth}}
 div 
   button(@click="handleClearSorter") clearSorter
@@ -12,6 +12,8 @@ div(:style="{width: tableWidth}" style="padding:10px;")
   EasyTable(ref="easyTable" rowKey="name" noDataFull :style="{height:props.height}" :columns="columns" :dataSource="dataSource" @current-change="onCurrentChange" @row-dblclick="onRowDblclick")
     template(#table-header="{ column }") 
       span {{column.title}} (slot)
+  EasyTableC(ref="easyTable2" rowKey="name" noDataFull :style="{height:props.height}" :columns="columns" :dataSource="dataSource" @current-change="onCurrentChange" @row-dblclick="onRowDblclick")
+
 div columns:{{columns}} 
 //- div dataSource:{{dataSource}}
 hr
@@ -22,13 +24,14 @@ div tableProps:{{easyTable.tableProps}}
 <script>
 import { h } from 'vue';
 import EasyTable from '../src/EasyTable.vue';
+import EasyTableC from '../src/EasyTable_compatible.vue'; // 兼容版本 fixedLeft
 export default {
-  components: { EasyTable },
+  components: { EasyTable, EasyTableC },
   props: {},
   data() {
     return {
       easyTable: {},
-      tableWidth: '300px;',
+      tableWidth: '500px',
       props: {
         height: '200px',
         // minWidth: 'auto',
@@ -70,6 +73,9 @@ export default {
         },
         { title: 'Email', dataIndex: 'email' },
         { title: 'Address', dataIndex: 'address' },
+        { title: 'col1', dataIndex: 'address' },
+        { title: 'col2', dataIndex: 'address' },
+        { title: 'col3', dataIndex: 'address' },
       ],
       // dataSource: new Array(4).fill(0).map((it, i) => ({
       //   name: 'name' + i,
