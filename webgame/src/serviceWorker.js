@@ -1,12 +1,12 @@
 const cacheName = '2048-pwa';
 /** 文件夹一定要用./开头 */
 const cacheList = [
-  '/webgame/src/index.html',
-  '/webgame/src/style.css',
-  '/webgame/src/js/2048.js',
-  '/webgame/src/js/gameCore.js',
-  '/webgame/src/js/pwa.js',
-  '/webgame/src/assets/512x512.png',
+  './index.html',
+  './style.css',
+  './js/2048.js',
+  './js/gameCore.js',
+  './js/pwa.js',
+  './assets/512x512.png',
 ];
 self.addEventListener('install', e => {
   console.log('service worker installed');

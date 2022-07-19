@@ -53,7 +53,7 @@ body{
   display: grid;
   grid-template-columns: 30px auto 30px;
   grid-template-rows: 30px auto 30px;
-  gap: 4px;
+  gap: 5px;
   justify-items: center;
 }
 
@@ -198,8 +198,7 @@ body{
   box-shadow: 0px 0px 10px 0px var(--main-color);
   transition: background-position ease .8s,
               transform ease .2s,
-              font-size ease .2s,
-              background-clip ease .2s;
+              font-size ease .2s;
 }
 .reset:hover{
   font-size: 46px;
