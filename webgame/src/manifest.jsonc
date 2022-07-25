@@ -2,14 +2,14 @@
     "name": "2048-PWA", // 允许单行注释
     "short_name": "2048",
     "description": "2048 游戏",
-    "start_url": ".", // 启动应用的url,如果以相对URL的形式给出，则基本URL将是manifest的URL
+    "start_url": "http://127.0.0.1:5501/webgame/src/index.html", // 启动应用的url,如果以相对URL的形式给出，则基本URL将是manifest的URL
     "display": "standalone", // standalone | fullscreen
     "background_color": "#999",
     "theme_color": "#FEA64C",
     "icons": [
       {
         "src": "./assets/512x512.png",
-        "sizes": "512x512",// key 为"sizes"
+        "sizes": "512x512",// key 为"sizes" 最大512x512
         "type": "image/png"
       }
     ],

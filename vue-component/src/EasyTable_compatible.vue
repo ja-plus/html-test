@@ -313,28 +313,33 @@ export default {
     },
     /** 高亮一个单元格 */
     setHighlightDimCell(rowKeyValue, dataIndex) {
-      const cellEl = this.$el.querySelector(`[data-row-key="${rowKeyValue}"]>[data-index="${dataIndex}"]`);
-      if (!cellEl) return;
-      cellEl.classList.remove('highlight-cell');
-      void cellEl.offsetHeight;
-      cellEl.classList.add('highlight-cell');
+      const cellEls = this.$el.querySelectorAll(`[data-row-key="${rowKeyValue}"]>[data-index="${dataIndex}"]`);
+      if (!cellEls?.length) return;
+      cellEls.forEach(cellEl => {
+        cellEl.classList.remove('highlight-cell');
+        void cellEl.offsetHeight;
+        cellEl.classList.add('highlight-cell');
+      });
     },
     /** 高亮一行 */
     setHighlightDimRow(rowKeyValue) {
-      const rowEl = this.$el.querySelector(`[data-row-key="${rowKeyValue}"]`);
-      if (!rowEl) return;
-      rowEl.classList.remove('highlight-row');
-      void rowEl.offsetWidth;
-      rowEl.classList.add('highlight-row');
-      // 动画结束移除class
-      window.clearTimeout(this.highlightDimRowsTimeout.get(rowKeyValue));
-      this.highlightDimRowsTimeout.set(
-        rowKeyValue,
-        window.setTimeout(() => {
-          rowEl.classList.remove('highlight-row');
-          this.highlightDimRowsTimeout.delete(rowKeyValue); // 回收内存
-        }, 2000),
-      );
+      // 固定列的表格也要高亮
+      const rowEls = this.$el.querySelectorAll(`[data-row-key="${rowKeyValue}"]`);
+      if (!rowEls?.length) return;
+      rowEls.forEach(rowEl => {
+        rowEl.classList.remove('highlight-row');
+        void rowEl.offsetWidth;
+        rowEl.classList.add('highlight-row');
+        // 动画结束移除class
+        window.clearTimeout(this.highlightDimRowsTimeout.get(rowKeyValue));
+        this.highlightDimRowsTimeout.set(
+          rowKeyValue,
+          window.setTimeout(() => {
+            rowEl.classList.remove('highlight-row');
+            this.highlightDimRowsTimeout.delete(rowKeyValue); // 回收内存
+          }, 2000),
+        );
+      });
     },
     /**
      * 设置排序
@@ -367,6 +372,7 @@ export default {
   // --border: 1px #ececf7 solid;
   --td-bg-color: #fff;
   --th-bg-color: #f8f8f9;
+  --td-padding: 8px;
   --tr-active-bg-color: rgb(230, 247, 255);
   --bg-border-top: linear-gradient(180deg, var(--border-color) 1px, transparent 1px);
   --bg-border-right: linear-gradient(270deg, var(--border-color) 1px, transparent 1px);
@@ -387,7 +393,7 @@ export default {
       font-size: 14px;
       box-sizing: border-box;
       padding: 2px 5px;
-      padding: 0 8px;
+      padding: 0 var(--td-padding);
       background-image: var(--bg-border-right), var(--bg-border-bottom);
     }
     thead {
@@ -499,6 +505,12 @@ export default {
     position: absolute;
     left: 0;
     top: 0;
+    thead tr th:last-child {
+      padding-right: var(--td-padding);
+    }
+    tbody tr td:last-child {
+      padding-right: var(--td-padding);
+    }
   }
   .stk-table-no-data {
     line-height: var(--row-height);

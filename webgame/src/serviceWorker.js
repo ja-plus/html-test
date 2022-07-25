@@ -1,12 +1,14 @@
 const cacheName = '2048-pwa';
-/** 文件夹一定要用./开头 */
+/** 缓存用到的静态资源，在service worker第一次注册的时候就缓存*/
 const cacheList = [
   './index.html',
+  './manifest.json',
   './style.css',
-  './js/2048.js',
+  './js/2048.js', // type 为module的js 第一次进入后虽然被缓存，但是 caches.match的时候返回为undefined，为什么
   './js/gameCore.js',
   './js/pwa.js',
   './assets/512x512.png',
+  './assets/Comic.ttf',
 ];
 self.addEventListener('install', e => {
   console.log('service worker installed');
@@ -43,7 +45,7 @@ self.addEventListener('fetch', function (e) {
   e.respondWith(
     // 匹配缓存
     caches.match(e.request).then(res => {
-      console.log('[Service Worker] Fetching resource: ' + e.request.url);
+      console.log('[Service Worker] caches.match resource: ' + e.request.url, res);
       // 返回缓存中的数据
       if (res) return res;
       // 缓存中没有就 请求数据

@@ -12,7 +12,7 @@ div(:style="{width: tableWidth}" style="padding:10px;")
   EasyTable(ref="easyTable" rowKey="name" noDataFull :style="{height:props.height}" :columns="columns" :dataSource="dataSource" @current-change="onCurrentChange" @row-dblclick="onRowDblclick")
     template(#table-header="{ column }") 
       span {{column.title}} (slot)
-  EasyTableC(ref="easyTable2" rowKey="name" noDataFull :style="{height:props.height}" :columns="columns" :dataSource="dataSource" @current-change="onCurrentChange" @row-dblclick="onRowDblclick")
+  EasyTableC(ref="easyTableC" rowKey="name" noDataFull :style="{height:props.height}" :columns="columns" :dataSource="dataSource" @current-change="onCurrentChange" @row-dblclick="onRowDblclick")
 
 div columns:{{columns}} 
 //- div dataSource:{{dataSource}}
@@ -96,12 +96,15 @@ export default {
     // this.$refs.easyTable.setHighlightDimCell('add1', 'age');
     setInterval(() => {
       this.$refs.easyTable.setHighlightDimCell('add1', 'age');
+      this.$refs.easyTableC.setHighlightDimCell('add1', 'age');
     }, 1500);
     setInterval(() => {
       this.$refs.easyTable.setHighlightDimCell('add2', 'gender');
+      this.$refs.easyTableC.setHighlightDimCell('add2', 'gender');
     }, 2000);
     setInterval(() => {
       this.$refs.easyTable.setHighlightDimRow('add0');
+      this.$refs.easyTableC.setHighlightDimRow('add0');
     }, 1000);
   },
   methods: {
@@ -113,6 +116,7 @@ export default {
     },
     handleClearSorter() {
       this.$refs.easyTable.resetSorter();
+      this.$refs.easyTableC.resetSorter();
     },
     addRow() {
       this.dataSource.push({
@@ -127,6 +131,7 @@ export default {
       this.addIndex++;
       this.$nextTick(() => {
         this.$refs.easyTable.setHighlightDimRow('add' + addIndex);
+        this.$refs.easyTableC.setHighlightDimRow('add' + addIndex);
       });
     },
   },

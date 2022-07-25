@@ -26,20 +26,20 @@ function mouseAction(game) {
 function keyAction(game) {
   document.onkeydown = function (event) {
     var e = event || window.event || arguments.callee.caller.arguments[0];
-    if (e.keyCode == 37) {
+    if (e.code == 'ArrowLeft') {
       e.preventDefault();
       game.control('left');
       // document.querySelector('.left-btn').click();
     }
-    if (e.keyCode == 38) {
+    if (e.code == 'ArrowUp') {
       e.preventDefault();
       game.control('up');
     }
-    if (e.keyCode == 39) {
+    if (e.code == 'ArrowRight') {
       e.preventDefault();
       game.control('right');
     }
-    if (e.keyCode == 40) {
+    if (e.code == 'ArrowDown') {
       e.preventDefault();
       game.control('down');
     }
