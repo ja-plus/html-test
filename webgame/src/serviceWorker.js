@@ -43,8 +43,8 @@ self.addEventListener('activate', function (e) {
 self.addEventListener('fetch', function (e) {
   // console.log('拦截fetch', e);
   e.respondWith(
-    // 匹配缓存
-    caches.match(e.request).then(res => {
+    // 匹配缓存 caches.match(e.request) 会匹配不到一些资源
+    caches.match(e.request.url).then(res => {
       console.log('[Service Worker] caches.match resource: ' + e.request.url, res);
       // 返回缓存中的数据
       if (res) return res;
