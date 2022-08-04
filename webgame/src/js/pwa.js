@@ -1,7 +1,7 @@
 // 检测浏览器是否支持SW
 if (navigator.serviceWorker != null) {
   // 这里的路径是html相对的路径
-  navigator.serviceWorker.register('./serviceWorker.js').then(function (registartion) {
+  navigator.serviceWorker.register('./js/serviceWorker.js').then(function (registartion) {
     console.log('支持sw:', registartion.scope);
   });
 }

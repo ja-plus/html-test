@@ -1,18 +1,18 @@
 const cacheName = '2048-pwa';
-/** 缓存用到的静态资源，在service worker第一次注册的时候就缓存*/
+/** 缓存用到的静态资源，在service worker第一次注册的时候就缓存,这里的路径是相对于本文件的路径*/
 const cacheList = [
-  './index.html',
-  './manifest.json',
-  './style.css',
-  './js/2048.js', // type 为module的js 第一次进入后虽然被缓存，但是 caches.match的时候返回为undefined，为什么
-  './js/gameCore.js',
-  './js/pwa.js',
-  './assets/512x512.png',
-  './assets/Comic.ttf',
+  '../index.html',
+  '../manifest.json',
+  '../style.css',
+  '../js/2048.js', // type 为module的js 第一次进入后虽然被缓存，但是 caches.match的时候返回为undefined，为什么
+  '../js/gameCore.js',
+  '../js/pwa.js',
+  '../assets/512x512.png',
+  '../assets/Comic.ttf',
 ];
 self.addEventListener('install', e => {
   console.log('service worker installed');
-  // 需要缓存的资源
+  // 需要缓存的资源,waitUntil中的回调若出错则视为install事件失败
   e.waitUntil(
     caches
       .open(cacheName)
