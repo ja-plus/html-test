@@ -74,3 +74,14 @@ function arrIsSame(arr1, arr2) {
   }
   return true;
 }
+
+/**
+ * 无效数字排在最后的排序demo
+ * @returns {Number}
+ */
+function numberSorter(a, b) {
+  if (a === '--' && b !== '--') return 1;
+  if (a === '--' && b === '--') return 0;
+  if (a !== '--' && b === '--') return -1;
+  return Number(a) < Number(b) ? -1 : 1;
+}
