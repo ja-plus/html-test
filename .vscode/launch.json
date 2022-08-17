@@ -39,7 +39,7 @@
                 "<node_internals>/**"
             ],
             "outputCapture": "std",
-            "program": "${workspaceFolder}\\server\\koa\\src\\app.js"
+            "program": "${workspaceFolder}/server/koa/src/app.js"
         },
     ]
 }
