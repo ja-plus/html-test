@@ -1,7 +1,7 @@
 import jafetch from 'ja-fetch';
 /* test interceptor abortController*/
 import { commonCancelRequest } from 'ja-fetch/preset/interceptors';
-let ServiceAB = jafetch.create();
+let ServiceAB = jafetch.create({});
 ServiceAB.interceptors.use(commonCancelRequest());
 
 const fetchBtn = document.createElement('button');

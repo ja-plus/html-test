@@ -33,6 +33,10 @@ module.exports = smp.wrap({
         loader: 'babel-loader', // loader的名称（必须）
       },
       {
+        test: /\.ts$/,
+        loader:'ts-loader'
+      },
+      {
         test: /\.svelte$/,
         loader: 'svelte-loader',
       },
