@@ -1,6 +1,6 @@
 <template>
     <h3>Cascader</h3>
-    <a-cascader :options="options" :show-search="{ filter }" placeholder="Please select" @change="onChange" />
+    <a-cascader :options="options" :show-search="{ filter }" placeholder="Please select" @change="onChange" expandTrigger="hover"/>
 </template>
 <script>
 export default {
@@ -26,6 +26,10 @@ export default {
                                 },
                             ],
                         },
+                        {
+                            label:'jinhua',
+                            value:'1101010'
+                        }
                     ],
                 },
                 {
