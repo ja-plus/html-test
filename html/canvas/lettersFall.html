@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Letters Fall</title>
+</head>
+<style>
+    body {
+        margin: 0;
+        height: 100vh;
+        width: 100vw;
+        background-color: #000;
+        /* overflow:hidden; */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .bg {
+        z-index: -1;
+        position: absolute;
+        left: 0;
+        top: 0;
+    }
+</style>
+
+<body>
+    <canvas class="bg" id="bg"></canvas>
+    <button id="randomColor">随机颜色</button>
+    <div style="margin:10px 0;"><button id="pureColor">纯色</button><input id="colorPicker" type="color" value="#04d704"></div>
+    <button id="pauseStart">暂停/开始</button>
+</body>
+<script>
+    const randomColorBtn = document.querySelector('#randomColor');
+    const pureColorBtn = document.querySelector('#pureColor');
+    const colorPicker = document.querySelector('#colorPicker');
+    const pauseStartBtn = document.querySelector('#pauseStart');
+    const windowHeight = window.innerHeight;
+    const windowWidth = window.innerWidth;
+    /** @type {HTMLCanvasElement}*/
+    let canvas = document.querySelector('#bg');
+    canvas.height = windowHeight;
+    canvas.width = windowWidth;
+    const colWidth = 20;
+    const charHeight = 8;
+    const columnNum = Math.floor(windowWidth / colWidth);
+    const colIndex = new Array(columnNum).fill(0).map(() => {
+      return {
+        fontColor: getRandomColor(),
+        index: -parseInt(Math.random() * 100),
+      };
+    });
+    let ctx = canvas.getContext('2d');
+    function draw() {
+      ctx.font = '14px Arial';
+
+      ctx.fillStyle = 'rgba(0,0,0,0.2)'; // 如果不时纯黑或纯白，会盖不住
+      ctx.fillRect(0, 0, windowWidth, windowHeight);
+      for (let i = 0; i < columnNum; i++) {
+        const colObj = colIndex[i];
+        ctx.fillStyle = colObj.fontColor;
+        ctx.fillText(getRandomChart(), 0 + colWidth * i, colObj.index * charHeight + charHeight);
+        colObj.index++;
+        if (colObj.index++ > windowHeight / charHeight && Math.random() > 0.9) {
+          colObj.index = 0;
+          //   colObj.fontColor = getRandomColor();
+        }
+      }
+    }
+
+    function getRandomChart() {
+      // ascii 65 - 122
+      return String.fromCharCode(parseInt(Math.random() * 57 + 65));
+    }
+    function getRandomColor() {
+      return '#' + parseInt(Math.random() * 255).toString(16) + parseInt(Math.random() * 255).toString(16) + parseInt(Math.random() * 255).toString(16);
+    }
+    let animationInterval = null;
+    function startAnimation() {
+      //   requestAnimationFrame(() => {
+      //     draw();
+      //     startAnimation();
+      //   });
+      animationInterval = setInterval(() => {
+        draw();
+      }, 100);
+    }
+    startAnimation();
+
+    randomColorBtn.addEventListener('click', () => {
+      colIndex.forEach(obj => {
+        obj.fontColor = getRandomColor();
+      });
+    });
+    pureColorBtn.addEventListener('click', () => {
+      colIndex.forEach(obj => {
+        obj.fontColor = colorPicker.value;
+      });
+    });
+    pauseStartBtn.addEventListener('click', () => {
+      if (!animationInterval) {
+        startAnimation();
+      } else {
+        window.clearInterval(animationInterval);
+        animationInterval = null;
+      }
+    });
+</script>
+
+</html>
