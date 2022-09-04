@@ -57,3 +57,12 @@ export default function h(tag: string, attrs?: Attrs | string | number | HTMLEle
 
   return elem;
 }
+
+/**
+ * document.querySelector语法糖
+ * @param selector 选择器
+ * @returns {Element}
+ */
+export function qs(selector:string){
+  return document.querySelector(selector);
+}
