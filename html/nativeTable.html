@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>原生表格列宽行为</title>
+</head>
+<style>
+  article section{
+    display:flex;
+  }
+    .container {
+        width: 200px;
+        border:2px solid #aaa;
+        overflow:scroll;
+    }
+    table {
+      border-collapse: collapse;
+    }
+    table td,
+    table th{
+        border: 1px solid #aaa;
+    }
+</style>
+<body>
+    <article>
+      <label>默认</label>
+      <section>
+        <div class="container">
+          <table class="auto-table"> </table>
+        </div>
+        <fieldset>
+          <legend>结论</legend>
+          <ol>
+            <li>未设置表格table width 的情况下，列宽总和不超过父元素宽度。</li>
+          </ol>
+        </fieldset>
+      </section>
+    </article>
+</body>
+<script type="module">
+import h from '../js/utils/h.js';
+const autoTable = document.querySelector('.auto-table');
+const tHead = h('thead', [
+  h('tr', [
+    ...new Array(4).fill(0).map((it, i) => {
+      return h('th', {
+        textContent: String(i).repeat(3),
+        style: {
+          width: '450px',
+        },
+      });
+    }),
+  ]),
+]);
+const tBody = h('tbody', [
+  ...new Array(2).fill(0).map((it, i) => {
+    return h('tr', [
+      ...new Array(4).fill(0).map((it2, j) => {
+        return h('td', j);
+      }),
+    ]);
+  }),
+]);
+autoTable.append(tHead, tBody);
+</script>
+</html>
