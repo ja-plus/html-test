@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>border-radius</title>
+</head>
+<style>
+    body {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .container {
+        background-color: orange;
+        width: 200px;
+        height: 100px;
+        margin: 10px;
+    }
+
+    .br1 {
+        border-radius: 10px;
+    }
+    .br2 {
+        border-radius: 50%;
+    }
+    .br3 {
+        border-radius : 2px 5px 20px 40px;
+    }
+    .br4 {
+        border-radius: 5px 30px;
+    }
+    .br5 {
+        border-radius: 10px / 50px;
+    }
+    .br6 {
+        border-radius: 10px 100px / 120px;
+    }
+    .br7 {
+        border-radius: 10px 20px 40px 80px/ 80px 40px 20px 10px;
+    }
+</style>
+
+<body>
+    <p>border-radius 属性可以接收两组参数，参数之间使用斜杠/进行分隔，每组参数都允许设置 1~4 个参数值，其中第一组参数代表圆角水平方向上的半径或半轴，第二组参数代表圆角垂直方向上的半径或半轴，如果省略第二组参数的值，那么该组参数将直接沿用第一组参数的值。</p>
+    <p>一组两个参数时，表示 第一个参数表示左上右下，第二个参数表示右上左下。</p>
+    <div style="display:flex;">
+        <div class="container br1">border-radius: 10px;</div>
+        <div class="container br2">border-radius: 50%;</div>
+        <div class="container br3">border-radius: 2px 5px 20px 40px;</div>
+        <div class="container br4">border-radius: 5px 30px;</div>
+        <div class="container br5">border-radius: 10px / 50px; 水平方向/垂直方向</div>
+        <div class="container br6">border-radius: 10px 100px / 120px;</div>
+        <div class="container br7"> border-radius: 10px 20px 40px 80px/ 80px 40px 20px 10px;</div>
+    </div>
+</body>
+
+</html>
