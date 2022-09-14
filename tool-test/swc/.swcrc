@@ -5,5 +5,16 @@
     },
     "mode": "entry",
     "coreJs": "3.25"
+  },
+  "jsc":{
+    // "loose":true // babel/preset-env
+    "parser":{
+      "syntax": "ecmascript"// 'typescript'
+    },
+    "target": "es5"
+    // "minify":{
+    //   "compress": true,
+    //   "mangle": true // terser
+    // }
   }
 }
