@@ -1,7 +1,22 @@
 * `keyof` 将对象的Key作为联合类型
 * `typeof` 获得某一变量的类型
 
-
+### 遍历对象
+```ts
+function test (foo: object) {
+  for (let key in foo) {
+    console.log(foo[key]); // typescript错误提示 key的类型为string
+  }
+  // 解决办法
+  let key:keyof typeof foo; // typeof foo = object
+  for(key in foo){}
+}
+Object.keys(obj:object); // 返回的是string[]类型
+// 解决办法
+Object.keys(obj:object).forEach(key => {
+    obj[key as keyof typeof obj]
+});
+```
 ```typescript
 // 根据不同参数返回不同类型
 function getData<T extends 'a'|'b'>(type:T):T extends 'a' ? string : string[]{}
