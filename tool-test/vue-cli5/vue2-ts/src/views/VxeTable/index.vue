@@ -21,10 +21,11 @@
 import 'xe-utils';
 import VXETable from 'vxe-table';
 import 'vxe-table/lib/style.css';
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Vue, Ref } from 'vue-property-decorator';
 Vue.use(VXETable);
 @Component
 export default class extends Vue {
+  @Ref() xTable!: any;
   tableData = [
     { id: 10000, parentId: null, name: 'Test1', type: 'mp3', size: 1024, date: '2020-08-01' },
     { id: 10050, parentId: null, name: 'Test2', type: 'mp4', size: null, date: '2021-04-01' },
@@ -49,6 +50,12 @@ export default class extends Vue {
     for (let i = 0; i < 100; i++) {
       this.tableData.push({ id: 24578 + i, parentId: null, name: 'Test' + (18 + i), type: 'js', size: 1024, date: '2021-06-01' });
     }
+  }
+
+  mounted() {
+    setInterval(() => {
+      this.xTable.insert({ id: 0, parentId: null, name: 'Test' + 18, type: 'js', size: 1024, date: '2021-06-01' });
+    }, 2000);
   }
 
   cellClassName({ row, column }) {
