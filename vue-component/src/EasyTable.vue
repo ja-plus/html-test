@@ -1,10 +1,23 @@
 <template>
-  <div class="stk-table-wrapper dark" @scroll="onTableScroll">
+  <div
+    ref="tableContainer"
+    class="stk-table-wrapper dark"
+    :class="{ virtual: virtual }"
+    :style="virtual && { '--row-height': virtualScroll.rowHeight + 'px' }"
+    @scroll="onTableScroll"
+  >
     <!-- 横向滚动时固定列的阴影，TODO: 覆盖一层在整个表上，使用linear-gradient 绘制阴影-->
     <!-- <div
       :class="showFixedLeftShadow && 'stk-table-fixed-left-col-box-shadow'"
       :style="{ width: fixedLeftColWidth + 'px' }"
     ></div> -->
+    <!-- 这个元素用于虚拟滚动时，撑开父容器的高度 -->
+    <div
+      v-if="virtual"
+      class="virtual-table-height"
+      :style="{ height: dataSourceCopy.length * virtualScroll.rowHeight + 'px' }"
+    ></div>
+    <!-- 表格主体 -->
     <table class="stk-table" :style="{ minWidth: minWidth }">
       <!-- <colgroup>
           <col v-for="(col, i) in tableProps" :key="i" :style="{}" />
@@ -63,9 +76,13 @@
       </thead>
 
       <tbody>
+        <template v-if="virtual">
+          <!-- 用于表格内容定位 -->
+          <tr :style="{ height: virtualScroll.offsetTop + 'px' }"></tr>
+        </template>
         <template v-if="dataSourceCopy && dataSourceCopy.length">
           <tr
-            v-for="(item, i) in dataSourceCopy"
+            v-for="(item, i) in virtual ? virtual_dataSourcePart : dataSourceCopy"
             :key="rowKey ? item[rowKey] : i"
             :data-row-key="rowKey ? item[rowKey] : i"
             :class="{
@@ -124,6 +141,10 @@ export default {
       type: String,
       default: '100%',
     },
+    virtual: {
+      type: Boolean,
+      default: false,
+    },
     columns: {
       type: Array,
       default: () => [],
@@ -166,9 +187,26 @@ export default {
       // highlightDimCells: {},
       /** 高亮后渐暗的行定时器 */
       highlightDimRowsTimeout: new Map(),
+
+      virtualScroll: {
+        containerHeight: 0,
+        startIndex: 0, // 数组开始位置
+        rowHeight: 30,
+        offsetTop: 0,
+        scrollTop: 0,
+      },
     };
   },
   computed: {
+    virtual_pageSize() {
+      return Math.ceil(this.virtualScroll.containerHeight / this.virtualScroll.rowHeight);
+    },
+    virtual_dataSourcePart() {
+      return this.dataSourceCopy.slice(
+        this.virtualScroll.startIndex,
+        this.virtualScroll.startIndex + this.virtual_pageSize,
+      );
+    },
     // fixedLeftColWidth() {
     //   let fixedLeftColumns = this.tableProps.filter(it => it.fixed === 'left');
     //   let width = 0;
@@ -201,8 +239,14 @@ export default {
     this.dealColumns();
     this.dataSourceCopy = [...this.dataSource];
   },
-  mounted() {},
+  mounted() {
+    if (this.virtual) this.initVirtualScroll();
+  },
   methods: {
+    /** 初始化虚拟滚动参数 */
+    initVirtualScroll() {
+      this.virtualScroll.containerHeight = this.$refs.tableContainer.offsetHeight;
+    },
     fixedStyle(row, index, type) {
       row = row.filter(col => col.fixed === 'left');
       if (index >= row.length) return {};
@@ -218,7 +262,7 @@ export default {
         left: left + unit,
       };
       if (type === 'th') {
-        style.zIndex = 1;
+        style.zIndex = 2; // 保证固定列高于其他单元格
       }
       return style;
     },
@@ -311,7 +355,16 @@ export default {
     onRowDblclick(row) {
       this.$emit('row-dblclick', row);
     },
-    onTableScroll() {
+    /** 滚动条监听 */
+    onTableScroll(e) {
+      if (!e?.target) return;
+      if (this.virtual) {
+        let top = e.target.scrollTop;
+        let { rowHeight } = this.virtualScroll;
+        this.virtualScroll.startIndex = parseInt(top / rowHeight);
+        this.virtualScroll.offsetTop = parseInt(top / rowHeight) * rowHeight;
+        this.virtualScroll.scrollTop = top;
+      }
       // this.showFixedLeftShadow = e.target.scrollLeft > 0;
     },
     // ---- ref function-----
@@ -410,6 +463,7 @@ export default {
     table-layout: fixed;
     th,
     td {
+      z-index: 1;
       height: var(--row-height);
       font-size: 14px;
       box-sizing: border-box;
@@ -593,6 +647,29 @@ export default {
     tbody {
       tr:hover td {
         box-shadow: 0px -1px 0 #1b63d9 inset;
+      }
+    }
+  }
+  /**虚拟滚动模式 */
+  &.virtual {
+    .virtual-table-height {
+      width: 1px;
+      z-index: -2;
+      position: absolute;
+    }
+    .stk-table {
+      thead {
+        tr {
+          th {
+            // 为不影响布局，表头行高要定死
+            .table-header-cell-wrapper {
+              max-height: var(--row-height);
+            }
+          }
+        }
+      }
+      tbody {
+        position: relative;
       }
     }
   }

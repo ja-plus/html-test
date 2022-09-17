@@ -1,15 +1,23 @@
 <template lang="pug">
-div height:
-  input(type="range" min="100" max="1000" @input="e => props.height = e.target.value + 'px'")
-  | {{props.height}}
-div width:
-  input(type="range" min="100" max="2000"  @input="e => tableWidth = e.target.value + 'px'" :value="parseInt(tableWidth)")
-  | {{tableWidth}}
-div 
-  button(@click="handleClearSorter") clearSorter
-  button(@click="addRow") addRow
+div
+  div height:
+    input(type="range" min="100" max="1000" @input="e => props.height = e.target.value + 'px'")
+    | {{props.height}}
+  div width:
+    input(type="range" min="100" max="2000"  @input="e => tableWidth = e.target.value + 'px'" :value="parseInt(tableWidth)")
+    | {{tableWidth}}
+
+div(style="display:flex;")
+  div
+    button(@click="handleClearSorter") clearSorter
+    button(@click="addRow()") addRow
+    button(@click="addRow(100)") add100Row
+  div(style="margin-left:10px")
+    div virtualScroll: {{$refs.easyTable&& $refs.easyTable.virtualScroll}}
+    div virtual_pageSize: {{$refs.easyTable&& $refs.easyTable.virtual_pageSize}}
+
 div(:style="{width: tableWidth}" style="padding:10px;")
-  EasyTable(ref="easyTable" rowKey="name" noDataFull :style="{height:props.height}" :columns="columns" :dataSource="dataSource" @current-change="onCurrentChange" @row-dblclick="onRowDblclick")
+  EasyTable(ref="easyTable" rowKey="name" noDataFull :virtual="virtualScroll" :style="{height:props.height}" :columns="columns" :dataSource="dataSource" @current-change="onCurrentChange" @row-dblclick="onRowDblclick")
     template(#table-header="{ column }") 
       span {{column.title}} (slot)
   EasyTableC(ref="easyTableC" rowKey="name" noDataFull :style="{height:props.height}" :columns="columns" :dataSource="dataSource" @current-change="onCurrentChange" @row-dblclick="onRowDblclick")
@@ -94,18 +102,18 @@ export default {
     this.easyTable = this.$refs.easyTable;
     // this.$refs.easyTable.setCurrentRow('name0');
     // this.$refs.easyTable.setHighlightDimCell('add1', 'age');
-    setInterval(() => {
-      this.$refs.easyTable.setHighlightDimCell('add1', 'age');
-      this.$refs.easyTableC.setHighlightDimCell('add1', 'age');
-    }, 1500);
-    setInterval(() => {
-      this.$refs.easyTable.setHighlightDimCell('add2', 'gender');
-      this.$refs.easyTableC.setHighlightDimCell('add2', 'gender');
-    }, 2000);
-    setInterval(() => {
-      this.$refs.easyTable.setHighlightDimRow('add0');
-      this.$refs.easyTableC.setHighlightDimRow('add0');
-    }, 1000);
+    // setInterval(() => {
+    //   this.$refs.easyTable.setHighlightDimCell('add1', 'age');
+    //   this.$refs.easyTableC.setHighlightDimCell('add1', 'age');
+    // }, 1500);
+    // setInterval(() => {
+    //   this.$refs.easyTable.setHighlightDimCell('add2', 'gender');
+    //   this.$refs.easyTableC.setHighlightDimCell('add2', 'gender');
+    // }, 2000);
+    // setInterval(() => {
+    //   this.$refs.easyTable.setHighlightDimRow('add0');
+    //   this.$refs.easyTableC.setHighlightDimRow('add0');
+    // }, 1000);
   },
   methods: {
     onCurrentChange(row) {
@@ -118,20 +126,26 @@ export default {
       this.$refs.easyTable.resetSorter();
       this.$refs.easyTableC.resetSorter();
     },
-    addRow() {
-      this.dataSource.push({
-        name: 'add' + this.addIndex,
-        age: parseInt(Math.random() * 100),
-        email: 'add@sa.com',
-        gender: Number(Math.random() * 100 - 50).toFixed(2),
-        address: 'add',
-      });
+    addRow(num = 1) {
+      let tmpIndex = [];
+      for (let i = 0; i < num; i++) {
+        this.dataSource.push({
+          name: 'add' + this.addIndex,
+          age: parseInt(Math.random() * 100),
+          email: 'add@sa.com',
+          gender: Number(Math.random() * 100 - 50).toFixed(2),
+          address: 'add',
+        });
+        tmpIndex.push(this.addIndex);
+        this.addIndex++;
+      }
       this.dataSource = [...this.dataSource]; // 没有监听deep
-      const addIndex = this.addIndex;
-      this.addIndex++;
+
       this.$nextTick(() => {
-        this.$refs.easyTable.setHighlightDimRow('add' + addIndex);
-        this.$refs.easyTableC.setHighlightDimRow('add' + addIndex);
+        tmpIndex.forEach(addIndex => {
+          this.$refs.easyTable.setHighlightDimRow('add' + addIndex);
+          this.$refs.easyTableC.setHighlightDimRow('add' + addIndex);
+        });
       });
     },
   },
