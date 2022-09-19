@@ -10,14 +10,15 @@ div
 div(style="display:flex;")
   div
     button(@click="handleClearSorter") clearSorter
-    button(@click="addRow()") addRow
-    button(@click="addRow(100)") add100Row
+    button(@click="addRow()") pushRow
+    button(@click="addRow(100)") push100Row
+    button(@click="addRow(1,true)") unshiftRow
   div(style="margin-left:10px")
     div virtualScroll: {{$refs.easyTable&& $refs.easyTable.virtualScroll}}
     div virtual_pageSize: {{$refs.easyTable&& $refs.easyTable.virtual_pageSize}}
 
 div(:style="{width: tableWidth}" style="padding:10px;")
-  EasyTable(ref="easyTable" rowKey="name" noDataFull :virtual="virtualScroll" :style="{height:props.height}" :columns="columns" :dataSource="dataSource" @current-change="onCurrentChange" @row-dblclick="onRowDblclick")
+  EasyTable(ref="easyTable" rowKey="name" noDataFull virtual :style="{height:props.height}" :columns="columns" :dataSource="dataSource" @current-change="onCurrentChange" @row-dblclick="onRowDblclick")
     template(#table-header="{ column }") 
       span {{column.title}} (slot)
   EasyTableC(ref="easyTableC" rowKey="name" noDataFull :style="{height:props.height}" :columns="columns" :dataSource="dataSource" @current-change="onCurrentChange" @row-dblclick="onRowDblclick")
@@ -126,16 +127,21 @@ export default {
       this.$refs.easyTable.resetSorter();
       this.$refs.easyTableC.resetSorter();
     },
-    addRow(num = 1) {
+    addRow(num = 1, unshift) {
       let tmpIndex = [];
       for (let i = 0; i < num; i++) {
-        this.dataSource.push({
+        let data = {
           name: 'add' + this.addIndex,
           age: parseInt(Math.random() * 100),
           email: 'add@sa.com',
           gender: Number(Math.random() * 100 - 50).toFixed(2),
           address: 'add',
-        });
+        };
+        if (unshift) {
+          this.dataSource.unshift(data);
+        } else {
+          this.dataSource.push(data);
+        }
         tmpIndex.push(this.addIndex);
         this.addIndex++;
       }

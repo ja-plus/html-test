@@ -55,7 +55,6 @@
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16px" height="16px" viewBox="0 0 16 16">
                   <g id="sort-btn" fill-rule="nonzero">
-                    <rect id="rect" opacity="0" x="0" y="0" width="16" height="16"></rect>
                     <polygon
                       id="arrow-up"
                       fill="#757699"
@@ -77,7 +76,7 @@
 
       <tbody>
         <template v-if="virtual">
-          <!-- 用于表格内容定位 -->
+          <!-- 用于虚拟滚动表格内容定位 -->
           <tr :style="{ height: virtualScroll.offsetTop + 'px' }"></tr>
         </template>
         <template v-if="dataSourceCopy && dataSourceCopy.length">
