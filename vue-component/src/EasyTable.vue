@@ -23,7 +23,7 @@
           <col v-for="(col, i) in tableProps" :key="i" :style="{}" />
         </colgroup> -->
       <thead>
-        <tr v-for="(row, index) in tableHeaders" :key="index">
+        <tr v-for="(row, index) in tableHeaders" :key="index" @contextmenu="e => onHeaderMenu(e)">
           <th
             v-for="(col, i) in row"
             :key="i"
@@ -31,13 +31,19 @@
             :colspan="col.colSpan"
             :style="{
               textAlign: col.headerAlign,
-              width: col.width || 'auto',
+              width: col.width,
               minWidth: col.fixed ? col.width : col.minWidth,
               maxWidth: col.fixed ? col.width : col.maxWidth,
               ...fixedStyle(row, i, 'th'),
             }"
-            :class="{ sortable: col.sorter }"
-            @click="onColumnSort(col)"
+            :title="col.title"
+            :class="[col.sorter ? 'sortable' : '', col.headerClassName, showHeaderOverflow ? 'text-overflow' : '']"
+            @click="
+              e => {
+                onColumnSort(col);
+                onHeaderCellClick(e, col);
+              }
+            "
           >
             <div class="table-header-cell-wrapper">
               <component :is="col.customHeaderCell(col)" v-if="col.customHeaderCell" />
@@ -87,24 +93,26 @@
             :class="{
               active: rowKey ? item[rowKey] === (currentItem && currentItem[rowKey]) : item === currentItem,
             }"
-            @click="onRowClick(item)"
-            @dblclick="onRowDblclick(item)"
+            @click="e => onRowClick(e, item)"
+            @dblclick="e => onRowDblclick(e, item)"
+            @contextmenu="e => onRowMenu(e, item)"
           >
             <td
               v-for="(col, j) in tableProps"
               :key="col.dataIndex"
               :data-index="col.dataIndex"
+              :class="[col.className, showOverflow ? 'text-overflow' : '']"
               :style="{
                 textAlign: col.align,
+                minWidth: col.fixed ? col.width : col.minWidth,
                 maxWidth: col.fixed ? col.width : col.maxWidth,
-                textOverflow: col.textOverflow && 'ellipsis',
-                overflow: col.textOverflow && 'hidden',
                 ...fixedStyle(tableProps, j, 'td'),
               }"
-              :title="col.textOverflow === 'title' ? item[col.dataIndex] : undefined"
+              :title="item[col.dataIndex]"
+              @click="e => onCellClick(e, item, col)"
             >
               <component :is="col.customCell(col, item)" v-if="col.customCell" />
-              <span v-else> {{ item[col.dataIndex] ?? emptyCellText }} </span>
+              <div v-else class="table-cell-wrapper">{{ item[col.dataIndex] ?? emptyCellText }}</div>
             </td>
           </tr>
         </template>
@@ -122,6 +130,7 @@
 
 <script>
 /**
+ * @author JA+
  * 存在的问题：column.dataIndex 作为唯一键，不能重复
  */
 function _howDeepTheColumn(arr, level = 1) {
@@ -165,6 +174,21 @@ export default {
       type: Boolean,
       default: false,
     },
+    /** 是否服务端排序，true则不排序数据 */
+    sortRemote: {
+      type: Boolean,
+      default: false,
+    },
+    /** 表头是否溢出展示... */
+    showHeaderOverflow: {
+      type: Boolean,
+      default: false,
+    },
+    /** 表体溢出是否展示... */
+    showOverflow: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -186,11 +210,10 @@ export default {
       // highlightDimCells: {},
       /** 高亮后渐暗的行定时器 */
       highlightDimRowsTimeout: new Map(),
-
       virtualScroll: {
         containerHeight: 0,
         startIndex: 0, // 数组开始位置
-        rowHeight: 30,
+        rowHeight: 28,
         offsetTop: 0,
         scrollTop: 0,
       },
@@ -306,53 +329,79 @@ export default {
       }
       if (this.sortOrderIndex > 2) this.sortOrderIndex = 0;
       const order = this.sortSwitchOrder[this.sortOrderIndex];
-      if (typeof col.sorter === 'function') {
-        const customSorterData = col.sorter([...this.dataSource], { order, column: col });
-        if (customSorterData) this.dataSourceCopy = customSorterData;
-        else this.dataSourceCopy = [...this.dataSource]; // 还原数组
-      } else if (order) {
-        if (col.sortType === 'number') {
-          // 按数字类型排序
-          const nanArr = []; // 非数字
-          const numArr = []; // 数字
-          // 非数字不进入排序，一直排在最后
-          for (let i = 0; i < this.dataSourceCopy.length; i++) {
-            const row = this.dataSourceCopy[i];
-            if (
-              row[col.dataIndex] === null ||
-              row[col.dataIndex] === '' ||
-              typeof row[col.dataIndex] === 'boolean' ||
-              Number.isNaN(+row[col.dataIndex])
-            ) {
-              nanArr.push(row);
+
+      if (!this.sortRemote) {
+        if (typeof col.sorter === 'function') {
+          const customSorterData = col.sorter([...this.dataSource], { order, column: col });
+          if (customSorterData) this.dataSourceCopy = customSorterData;
+          else this.dataSourceCopy = [...this.dataSource]; // 还原数组
+        } else if (order) {
+          if (col.sortType === 'number') {
+            // 按数字类型排序
+            const nanArr = []; // 非数字
+            const numArr = []; // 数字
+            // 非数字不进入排序，一直排在最后
+            for (let i = 0; i < this.dataSourceCopy.length; i++) {
+              const row = this.dataSourceCopy[i];
+              if (
+                row[col.dataIndex] === null ||
+                row[col.dataIndex] === '' ||
+                typeof row[col.dataIndex] === 'boolean' ||
+                Number.isNaN(+row[col.dataIndex])
+              ) {
+                nanArr.push(row);
+              } else {
+                numArr.push(row);
+              }
+            }
+            if (order === 'asc') {
+              numArr.sort((a, b) => +a[col.dataIndex] - +b[col.dataIndex]);
             } else {
-              numArr.push(row);
+              numArr.sort((a, b) => +b[col.dataIndex] - +a[col.dataIndex]);
+            }
+            this.dataSourceCopy = [...numArr, ...nanArr];
+          } else {
+            // 按string 排序
+            if (order === 'asc') {
+              this.dataSourceCopy.sort((a, b) => (a[col.dataIndex] < b[col.dataIndex] ? -1 : 1));
+            } else {
+              this.dataSourceCopy.sort((a, b) => (a[col.dataIndex] > b[col.dataIndex] ? -1 : 1));
             }
           }
-          if (order === 'asc') {
-            numArr.sort((a, b) => +a[col.dataIndex] - +b[col.dataIndex]);
-          } else {
-            numArr.sort((a, b) => +b[col.dataIndex] - +a[col.dataIndex]);
-          }
-          this.dataSourceCopy = [...numArr, ...nanArr];
         } else {
-          // 按string 排序
-          if (order === 'asc') {
-            this.dataSourceCopy.sort((a, b) => (a[col.dataIndex] < b[col.dataIndex] ? -1 : 1));
-          } else {
-            this.dataSourceCopy.sort((a, b) => (a[col.dataIndex] > b[col.dataIndex] ? -1 : 1));
-          }
+          this.dataSourceCopy = [...this.dataSource];
         }
-      } else {
-        this.dataSourceCopy = [...this.dataSource];
+      }
+      // 只有点击才触发事件
+      if (click) {
+        this.$emit('sort-change', col, order);
       }
     },
-    onRowClick(row) {
+    onRowClick(e, row) {
+      this.$emit('row-click', e, row);
+      // 选中同一行不触发current-change 事件
+      if (this.currentItem === row) return;
       this.currentItem = row;
-      this.$emit('current-change', row);
+      this.$emit('current-change', e, row);
     },
-    onRowDblclick(row) {
-      this.$emit('row-dblclick', row);
+    onRowDblclick(e, row) {
+      this.$emit('row-dblclick', e, row);
+    },
+    /** 表头行右键 */
+    onHeaderMenu(e) {
+      this.$emit('header-row-menu', e);
+    },
+    /** 表体行右键 */
+    onRowMenu(e, row) {
+      this.$emit('row-menu', e, row);
+    },
+    /** 单元格单击 */
+    onCellClick(e, row, col) {
+      this.$emit('cell-click', e, row, col);
+    },
+    /** 表头单元格单击 */
+    onHeaderCellClick(e, col) {
+      this.$emit('header-cell-click', e, col);
     },
     /** 滚动条监听 */
     onTableScroll(e) {
@@ -364,6 +413,11 @@ export default {
         this.virtualScroll.offsetTop = parseInt(top / rowHeight) * rowHeight;
         this.virtualScroll.scrollTop = top;
       }
+      // const res = {
+      //   isTop: e.target.scrollTop <= 0,
+      //   isBottom: e.target.scrollHeight === e.target.scrollTop + e.target.clientHeight,
+      // };
+      // this.$emit('table-scroll', e, res); // 不需要暴露，因为事件在根元素上
       // this.showFixedLeftShadow = e.target.scrollLeft > 0;
     },
     // ---- ref function-----
@@ -430,17 +484,23 @@ export default {
 
 <style lang="less" scoped>
 .stk-table-wrapper {
-  --row-height: 30px;
+  --row-height: 28px;
   --border-color: #e8eaec;
   // --border: 1px #ececf7 solid;
   --td-bg-color: #fff;
   --th-bg-color: #f8f8f9;
   --tr-active-bg-color: rgb(230, 247, 255);
+  --tr-hover-bg-color: rgba(230, 247, 255, 0.7);
   --bg-border-top: linear-gradient(180deg, var(--border-color) 1px, transparent 1px);
   --bg-border-right: linear-gradient(270deg, var(--border-color) 1px, transparent 1px);
   --bg-border-bottom: linear-gradient(0deg, var(--border-color) 1px, transparent 1px);
   --bg-border-left: linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
   --highlight-color: rgba(113, 162, 253, 1);
+
+  --sort-arrow-color: #5d5f69;
+  --sort-arrow-hover-color: #8f90b5;
+  --sort-arrow-active-color: #1b63d9;
+  --sort-arrow-active-sub-color: #cbcbe1;
   // --highlight-color-to: rgba(113, 162, 253, 0);
   position: relative;
   overflow: auto;
@@ -491,42 +551,60 @@ export default {
             // border-left: 1px solid var(--border-color);
             background-image: var(--bg-border-top), var(--bg-border-right), var(--bg-border-bottom),
               var(--bg-border-left);
-            padding-left: 12px;
+            // padding-left: 12px;
           }
-          &:last-child {
-            padding-right: 12px;
+          // &:last-child {
+          //   padding-right: 12px;
+          // }
+          &.text-overflow {
+            .table-header-cell-wrapper {
+              white-space: nowrap;
+              overflow: hidden;
+              .table-header-title {
+                text-overflow: ellipsis;
+                overflow: hidden;
+              }
+            }
           }
           .table-header-cell-wrapper {
-            display: inline-flex;
-            align-items: center;
+            width: 100%;
+            display: flex;
+            // align-items: center;
+
             .table-header-title {
+              // align-self: flex-start;
             }
             .table-header-sorter {
+              flex-shrink: 0;
               margin-left: 4px;
               width: 16px;
               height: 16px;
+              #arrow-up,
+              #arrow-down {
+                fill: var(--sort-arrow-color);
+              }
               &:not(.sorter-desc):not(.sorter-asc):hover {
                 #arrow-up {
-                  fill: #8f90b5;
+                  fill: var(--sort-arrow-hover-color);
                 }
                 #arrow-down {
-                  fill: #8f90b5;
+                  fill: var(--sort-arrow-hover-color);
                 }
               }
               &.sorter-desc {
                 #arrow-up {
-                  fill: #cbcbe1;
+                  fill: var(--sort-arrow-active-sub-color);
                 }
                 #arrow-down {
-                  fill: #1b63d9;
+                  fill: var(--sort-arrow-active-color);
                 }
               }
               &.sorter-asc {
                 #arrow-up {
-                  fill: #1b63d9;
+                  fill: var(--sort-arrow-active-color);
                 }
                 #arrow-down {
-                  fill: #cbcbe1;
+                  fill: var(--sort-arrow-active-sub-color);
                 }
               }
             }
@@ -550,19 +628,31 @@ export default {
             background-color: var(--tr-active-bg-color);
           }
         }
+        &:hover {
+          td {
+            background-color: var(--tr-hover-bg-color);
+          }
+        }
         td {
           background-color: var(--td-bg-color);
           &:first-child {
             // border-left: 1px solid var(--border-color);
             background-image: var(--bg-border-right), var(--bg-border-bottom), var(--bg-border-left);
-            padding-left: 12px;
+            // padding-left: 12px;
           }
-          &:last-child {
-            padding-right: 12px;
-          }
+          // &:last-child {
+          //   padding-right: 12px;
+          // }
 
           &.highlight-cell {
             animation: dim 2s linear;
+          }
+          &.text-overflow {
+            .table-cell-wrapper {
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
           }
         }
       }
@@ -598,56 +688,19 @@ export default {
     --th-bg-color: #181c21;
     --td-bg-color: #181c21;
     --border-color: #2e2e33;
-    --tr-active-bg-color: #1a2b46;
-    --highlight-color: rgba(19, 55, 125, 1);
+    --tr-active-bg-color: #283f63;
+    --tr-hover-bg-color: #1a2b46;
+    --highlight-color: rgba(34, 103, 218, 0.65);
     // --highlight-color-to: rgba(19, 55, 125, 0);
+    --sort-arrow-color: #5d6064;
+    --sort-arrow-hover-color: #727782;
+    --sort-arrow-active-color: #d0d1d2;
+    --sort-arrow-active-sub-color: #5d6064;
+
     background-color: var(--th-bg-color);
     color: #d0d1d2;
-    .stk-table {
-      thead {
-        tr {
-          th {
-            .table-header-cell-wrapper {
-              .table-header-sorter {
-                #arrow-up,
-                #arrow-down {
-                  fill: #5d5f69;
-                }
-                &:not(.sorter-desc):not(.sorter-asc):hover {
-                  #arrow-up {
-                    fill: #727782;
-                  }
-                  #arrow-down {
-                    fill: #727782;
-                  }
-                }
-                &.sorter-desc {
-                  #arrow-up {
-                    fill: #5d5f69;
-                  }
-                  #arrow-down {
-                    fill: #4f8df4;
-                  }
-                }
-                &.sorter-asc {
-                  #arrow-up {
-                    fill: #4f8df4;
-                  }
-                  #arrow-down {
-                    fill: #5d5f69;
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    tbody {
-      tr:hover td {
-        box-shadow: 0px -1px 0 #1b63d9 inset;
-      }
-    }
+    // .stk-table {
+    // }
   }
   /**虚拟滚动模式 */
   &.virtual {
@@ -662,6 +715,7 @@ export default {
           th {
             // 为不影响布局，表头行高要定死
             .table-header-cell-wrapper {
+              overflow: hidden;
               max-height: var(--row-height);
             }
           }
@@ -669,6 +723,15 @@ export default {
       }
       tbody {
         position: relative;
+        tr {
+          td {
+            .table-cell-wrapper {
+              overflow: hidden;
+              height: var(--row-height);
+              line-height: var(--row-height);
+            }
+          }
+        }
       }
     }
   }

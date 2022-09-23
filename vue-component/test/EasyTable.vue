@@ -13,15 +13,51 @@ div(style="display:flex;")
     button(@click="addRow()") pushRow
     button(@click="addRow(100)") push100Row
     button(@click="addRow(1,true)") unshiftRow
+    button(@click="props.showOverflow=!props.showOverflow") showOverflow:{{props.showOverflow}}
+    button(@click="props.showHeaderOverflow=!props.showHeaderOverflow") showHeaderOverflow:{{props.showHeaderOverflow}}
   div(style="margin-left:10px")
     div virtualScroll: {{$refs.easyTable&& $refs.easyTable.virtualScroll}}
     div virtual_pageSize: {{$refs.easyTable&& $refs.easyTable.virtual_pageSize}}
 
 div(:style="{width: tableWidth}" style="padding:10px;")
-  EasyTable(ref="easyTable" rowKey="name" noDataFull virtual :style="{height:props.height}" :columns="columns" :dataSource="dataSource" @current-change="onCurrentChange" @row-dblclick="onRowDblclick")
-    template(#table-header="{ column }") 
-      span {{column.title}} (slot)
-  EasyTableC(ref="easyTableC" rowKey="name" noDataFull :style="{height:props.height}" :columns="columns" :dataSource="dataSource" @current-change="onCurrentChange" @row-dblclick="onRowDblclick")
+  EasyTable(
+    ref="easyTable" 
+    rowKey="name" 
+    noDataFull 
+    virtual 
+    sortRemote 
+    :style="{height:props.height}" 
+    v-bind="props"
+    :columns="columns" 
+    :dataSource="dataSource" 
+    @current-change="onCurrentChange" 
+    @row-menu="onRowMenu"
+    @header-row-menu="onHeaderRowMenu"
+    @row-click="onRowClick"
+    @row-dblclick="onRowDblclick" 
+    @sort-change="handleSortChange"
+    @cell-click="onCellClick"
+    @header-cell-click="onHeaderCellClick"
+    @scroll="onTableScroll"
+  )
+    //- template(#table-header="{ column }")
+    //-   span {{column.title}} (slot)
+  //- EasyTableC(
+  //-   ref="easyTableC" 
+  //-   rowKey="name" 
+  //-   noDataFull 
+  //-   :style="{height:props.height}" 
+  //-   :columns="columns" 
+  //-   :dataSource="dataSource" 
+  //-   @current-change="onCurrentChange" 
+  //-   @row-dblclick="onRowDblclick"
+  //- )
+div(style="width:max-content")
+  | 文档
+  EasyTable(
+    :columns="docTableColumns" 
+    :dataSource="docTableData" 
+  )
 
 div columns:{{columns}} 
 //- div dataSource:{{dataSource}}
@@ -40,9 +76,11 @@ export default {
   data() {
     return {
       easyTable: {},
-      tableWidth: '500px',
+      tableWidth: '800px',
       props: {
         height: '200px',
+        showOverflow: false,
+        showHeaderOverflow: false,
         // minWidth: 'auto',
       },
       columns: [
@@ -51,10 +89,16 @@ export default {
           dataIndex: 'name',
           fixed: 'left',
           width: '200px',
+          headerClassName: 'my-th',
+          className: 'my-td',
           // minWidth: '200px', // 组件处理固定列的minWidth = width
           sorter: true,
           customHeaderCell(column) {
-            return h('span', column.title + '(render)');
+            return h(
+              'span',
+              { style: 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap' },
+              column.title + '(render) text-overflow,',
+            );
           },
         },
         {
@@ -75,16 +119,17 @@ export default {
           dataIndex: 'gender',
           // fixed: 'left',
           width: '150px',
-          minWidth: '150px',
-          textOverflow: 'title',
+          // minWidth: '150px',
           sorter: true,
           sortType: 'number', // 指定为数字排序
         },
-        { title: 'Email', dataIndex: 'email' },
-        { title: 'Address', dataIndex: 'address' },
-        { title: 'col1', dataIndex: 'address' },
+        { title: 'Email', dataIndex: 'email', minWidth: '100px', maxWidth: '100px' },
+        /** overflow 必须设置maxWidth */
+        { title: 'Address', dataIndex: 'address', minWidth: '100px', maxWidth: '100px' },
+        { title: 'Long Title Long Title LongTitle', dataIndex: 'address', minWidth: '100px', maxWidth: '200px' },
         { title: 'col2', dataIndex: 'address' },
-        { title: 'col3', dataIndex: 'address' },
+        // { title: 'col3', dataIndex: 'address' },
+        // ...new Array(20).fill(0).map(() => ({ title: 'col3', dataIndex: 'address' })),
       ],
       // dataSource: new Array(4).fill(0).map((it, i) => ({
       //   name: 'name' + i,
@@ -95,6 +140,50 @@ export default {
       // })),
       addIndex: 0,
       dataSource: [],
+      docTableColumns: [
+        {
+          title: '字段',
+          dataIndex: 'key',
+        },
+        {
+          title: '描述',
+          dataIndex: 'desc',
+        },
+        {
+          title: '取值',
+          dataIndex: 'value',
+        },
+      ],
+      docTableData: [
+        { key: 'columnOption:', desc: '', value: '' },
+        { key: 'title:', desc: '名称' },
+        { key: 'dataIndex:', desc: '数据key，需要唯一' },
+        { key: 'fixed:', desc: '固定列', value: 'left' },
+        { key: 'headerClassName:', desc: '一列的表头class' },
+        { key: 'className:', desc: '一列的单元格class' },
+        { key: 'width:', desc: '这列th/td 的宽度' },
+        { key: 'minWidth:', desc: '这列th/td 的最小宽度。在总列宽不够table宽时，列宽被压缩的最小值' },
+        { key: 'maxWidth:', desc: '这列th/td 的最大宽度。可被内容文字撑开的最大宽度。' },
+        { key: 'sorter:', desc: '是否开启排序。可传方法' },
+        { key: 'align:', desc: '表列对齐', value: '"left"|"center"|"right"' },
+        { key: 'headerAlign:', desc: '表头对齐' },
+        { key: 'customHeaderCell:', desc: '自定义表头渲染内容。同customCell' },
+        {
+          key: 'customCell:',
+          desc: '自定义列td的渲染。接收一个方法，vue2需该方法return一个vue组件，也可返回jsx 如{render(h){return jsx},methods:... }',
+        },
+        { key: '------------', desc: '---------' },
+        { key: 'TableEvents', desc: '', value: '' },
+        { key: 'current-change', desc: '当前行改变', value: '(e:MouseEvent,row):void' },
+        { key: 'row-menu', desc: '行右键菜单', value: '(e:MouseEvent,row):void' },
+        { key: 'header-row-menu', desc: '表头行右键菜单', value: '(e:MouseEvent,row):void' },
+        { key: 'row-click', desc: '行单击', value: '(e:MouseEvent,row):void' },
+        { key: 'row-dblclick', desc: '行双击', value: '(e:MouseEvent,row):void' },
+        { key: 'sort-change', desc: '筛选改变', value: '(e:MouseEvent,row,col):void' },
+        { key: 'cell-click', desc: '单元格单击', value: '(e:MouseEvent,row,col):void' },
+        { key: 'header-cell-click', desc: '表头单元格单击', value: '(e:MouseEvent,row,col):void' },
+        { key: 'scroll', desc: '滚动', value: '(e:MouseEvent):void' },
+      ],
     };
   },
   computed: {},
@@ -117,15 +206,37 @@ export default {
     // }, 1000);
   },
   methods: {
-    onCurrentChange(row) {
-      console.log('current', row);
+    onCurrentChange(e, row) {
+      console.log('current-changev', e, row);
     },
-    onRowDblclick(row) {
-      console.log('row-dblclick', row);
+    onRowMenu(e, row) {
+      console.log('row-menu:', e, row);
+    },
+    onHeaderRowMenu(e, row) {
+      console.log('header-row-menu:', e, row);
+    },
+    onRowClick(e, row) {
+      console.log('row-click:', e, row);
+    },
+    onRowDblclick(e, row) {
+      console.log('row-dblclick:', e, row);
+    },
+    onCellClick(e, row, col) {
+      e.stopPropagation();
+      console.log('cell-click:', e, row, col);
+    },
+    onHeaderCellClick(e, row) {
+      console.log('header-cell-click:', e, row);
+    },
+    onTableScroll(e) {
+      console.log('scroll:', e);
     },
     handleClearSorter() {
       this.$refs.easyTable.resetSorter();
       this.$refs.easyTableC.resetSorter();
+    },
+    handleSortChange(col, order) {
+      console.log('排序改变事件触发：', col, order);
     },
     addRow(num = 1, unshift) {
       let tmpIndex = [];
@@ -135,7 +246,7 @@ export default {
           age: parseInt(Math.random() * 100),
           email: 'add@sa.com',
           gender: Number(Math.random() * 100 - 50).toFixed(2),
-          address: 'add',
+          address: '电力、热力、燃气',
         };
         if (unshift) {
           this.dataSource.unshift(data);
@@ -150,7 +261,7 @@ export default {
       this.$nextTick(() => {
         tmpIndex.forEach(addIndex => {
           this.$refs.easyTable.setHighlightDimRow('add' + addIndex);
-          this.$refs.easyTableC.setHighlightDimRow('add' + addIndex);
+          // this.$refs.easyTableC.setHighlightDimRow('add' + addIndex);
         });
       });
     },
