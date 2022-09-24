@@ -15,9 +15,10 @@ div(style="display:flex;")
     button(@click="addRow(1,true)") unshiftRow
     button(@click="props.showOverflow=!props.showOverflow") showOverflow:{{props.showOverflow}}
     button(@click="props.showHeaderOverflow=!props.showHeaderOverflow") showHeaderOverflow:{{props.showHeaderOverflow}}
-  div(style="margin-left:10px")
-    div virtualScroll: {{$refs.easyTable&& $refs.easyTable.virtualScroll}}
-    div virtual_pageSize: {{$refs.easyTable&& $refs.easyTable.virtual_pageSize}}
+    button(@click="props.sortRemote=!props.sortRemote") sortRemote:{{props.sortRemote}}
+div(style="margin-left:10px")
+  div virtualScroll: {{$refs.easyTable&& $refs.easyTable.virtualScroll}}
+  div virtual_pageSize: {{$refs.easyTable&& $refs.easyTable.virtual_pageSize}}
 
 div(:style="{width: tableWidth}" style="padding:10px;")
   EasyTable(
@@ -25,7 +26,7 @@ div(:style="{width: tableWidth}" style="padding:10px;")
     rowKey="name" 
     noDataFull 
     virtual 
-    sortRemote 
+    :sortRemote="props.sortRemote" 
     :style="{height:props.height}" 
     v-bind="props"
     :columns="columns" 
@@ -81,6 +82,7 @@ export default {
         height: '200px',
         showOverflow: false,
         showHeaderOverflow: false,
+        sortRemote: true,
         // minWidth: 'auto',
       },
       columns: [
