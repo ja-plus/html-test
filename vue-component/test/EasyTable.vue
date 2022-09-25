@@ -43,16 +43,17 @@ div(:style="{width: tableWidth}" style="padding:10px;")
   )
     //- template(#table-header="{ column }")
     //-   span {{column.title}} (slot)
-  //- EasyTableC(
-  //-   ref="easyTableC" 
-  //-   rowKey="name" 
-  //-   noDataFull 
-  //-   :style="{height:props.height}" 
-  //-   :columns="columns" 
-  //-   :dataSource="dataSource" 
-  //-   @current-change="onCurrentChange" 
-  //-   @row-dblclick="onRowDblclick"
-  //- )
+  EasyTableC(
+    ref="easyTableC" 
+    rowKey="name" 
+    noDataFull 
+    virtual
+    :style="{height:props.height}" 
+    :columns="columns" 
+    :dataSource="dataSource" 
+    @current-change="onCurrentChange" 
+    @row-dblclick="onRowDblclick"
+  )
 div(style="width:max-content")
   | 文档
   EasyTable(
@@ -70,14 +71,14 @@ div tableProps:{{easyTable.tableProps}}
 <script>
 import { h } from 'vue';
 import EasyTable from '../src/EasyTable.vue';
-import EasyTableC from '../src/EasyTable_compatible.vue'; // 兼容版本 fixedLeft
+import EasyTableC from '../src/EasyTableC.vue'; // 兼容版本 fixedLeft
 export default {
   components: { EasyTable, EasyTableC },
   props: {},
   data() {
     return {
       easyTable: {},
-      tableWidth: '800px',
+      tableWidth: '500px',
       props: {
         height: '200px',
         showOverflow: false,
