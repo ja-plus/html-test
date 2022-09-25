@@ -265,9 +265,12 @@ export default {
     if (this.virtual) this.initVirtualScroll();
   },
   methods: {
-    /** 初始化虚拟滚动参数 */
-    initVirtualScroll() {
-      this.virtualScroll.containerHeight = this.$refs.tableContainer.offsetHeight;
+    /**
+     * 初始化虚拟滚动参数
+     * @param {number} containerHeight 虚拟滚动的高度
+     */
+    initVirtualScroll(containerHeight) {
+      this.virtualScroll.containerHeight = containerHeight || this.$refs.tableContainer.offsetHeight;
     },
     fixedStyle(row, index, type) {
       row = row.filter(col => col.fixed === 'left');

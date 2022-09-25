@@ -51,9 +51,7 @@ export default {
   },
   mounted() {
     this.fixedTableHeight = this.$refs.stkTableMain.$el.clientHeight - 1; // -1px border
-    this.$nextTick(() => {
-      this.$refs.stkTableFixedLeft.initVirtualScroll();
-    });
+    this.$refs.stkTableFixedLeft.initVirtualScroll(this.fixedTableHeight);
   },
 };
 </script>
