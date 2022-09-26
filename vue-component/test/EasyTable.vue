@@ -15,9 +15,10 @@ div(style="display:flex;")
     button(@click="addRow(1,true)") unshiftRow
     button(@click="props.showOverflow=!props.showOverflow") showOverflow:{{props.showOverflow}}
     button(@click="props.showHeaderOverflow=!props.showHeaderOverflow") showHeaderOverflow:{{props.showHeaderOverflow}}
-  div(style="margin-left:10px")
-    div virtualScroll: {{$refs.easyTable&& $refs.easyTable.virtualScroll}}
-    div virtual_pageSize: {{$refs.easyTable&& $refs.easyTable.virtual_pageSize}}
+    button(@click="props.sortRemote=!props.sortRemote") sortRemote:{{props.sortRemote}}
+div(style="margin-left:10px")
+  div virtualScroll: {{$refs.easyTable&& $refs.easyTable.virtualScroll}}
+  div virtual_pageSize: {{$refs.easyTable&& $refs.easyTable.virtual_pageSize}}
 
 div(:style="{width: tableWidth}" style="padding:10px;")
   EasyTable(
@@ -25,7 +26,7 @@ div(:style="{width: tableWidth}" style="padding:10px;")
     rowKey="name" 
     noDataFull 
     virtual 
-    sortRemote 
+    :sortRemote="props.sortRemote" 
     :style="{height:props.height}" 
     v-bind="props"
     :columns="columns" 
@@ -42,16 +43,17 @@ div(:style="{width: tableWidth}" style="padding:10px;")
   )
     //- template(#table-header="{ column }")
     //-   span {{column.title}} (slot)
-  //- EasyTableC(
-  //-   ref="easyTableC" 
-  //-   rowKey="name" 
-  //-   noDataFull 
-  //-   :style="{height:props.height}" 
-  //-   :columns="columns" 
-  //-   :dataSource="dataSource" 
-  //-   @current-change="onCurrentChange" 
-  //-   @row-dblclick="onRowDblclick"
-  //- )
+  EasyTableC(
+    ref="easyTableC" 
+    rowKey="name" 
+    noDataFull 
+    virtual
+    :style="{height:props.height}" 
+    :columns="columns" 
+    :dataSource="dataSource" 
+    @current-change="onCurrentChange" 
+    @row-dblclick="onRowDblclick"
+  )
 div(style="width:max-content")
   | 文档
   EasyTable(
@@ -69,18 +71,19 @@ div tableProps:{{easyTable.tableProps}}
 <script>
 import { h } from 'vue';
 import EasyTable from '../src/EasyTable.vue';
-import EasyTableC from '../src/EasyTable_compatible.vue'; // 兼容版本 fixedLeft
+import EasyTableC from '../src/EasyTableC.vue'; // 兼容版本 fixedLeft
 export default {
   components: { EasyTable, EasyTableC },
   props: {},
   data() {
     return {
       easyTable: {},
-      tableWidth: '800px',
+      tableWidth: '500px',
       props: {
         height: '200px',
         showOverflow: false,
         showHeaderOverflow: false,
+        sortRemote: true,
         // minWidth: 'auto',
       },
       columns: [

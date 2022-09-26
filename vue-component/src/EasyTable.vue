@@ -18,7 +18,7 @@
       :style="{ height: dataSourceCopy.length * virtualScroll.rowHeight + 'px' }"
     ></div>
     <!-- 表格主体 -->
-    <table class="stk-table" :style="{ minWidth: minWidth }">
+    <table class="stk-table-main" :style="{ minWidth: minWidth }">
       <!-- <colgroup>
           <col v-for="(col, i) in tableProps" :key="i" :style="{}" />
         </colgroup> -->
@@ -265,9 +265,12 @@ export default {
     if (this.virtual) this.initVirtualScroll();
   },
   methods: {
-    /** 初始化虚拟滚动参数 */
-    initVirtualScroll() {
-      this.virtualScroll.containerHeight = this.$refs.tableContainer.offsetHeight;
+    /**
+     * 初始化虚拟滚动参数
+     * @param {number} containerHeight 虚拟滚动的高度
+     */
+    initVirtualScroll(containerHeight) {
+      this.virtualScroll.containerHeight = containerHeight || this.$refs.tableContainer.offsetHeight;
     },
     fixedStyle(row, index, type) {
       row = row.filter(col => col.fixed === 'left');
@@ -517,7 +520,7 @@ export default {
   //   z-index: 1;
   //   pointer-events: none;
   // }
-  .stk-table {
+  .stk-table-main {
     // position: absolute;
     // top: 0;
     border-spacing: 0;
@@ -701,7 +704,7 @@ export default {
 
     background-color: var(--th-bg-color);
     color: #d0d1d2;
-    // .stk-table {
+    // .stk-table-main {
     // }
   }
   /**虚拟滚动模式 */
@@ -711,7 +714,7 @@ export default {
       z-index: -2;
       position: absolute;
     }
-    .stk-table {
+    .stk-table-main {
       thead {
         tr {
           th {
