@@ -341,6 +341,8 @@ export default {
           if (customSorterData) this.dataSourceCopy = customSorterData;
           else this.dataSourceCopy = [...this.dataSource]; // 还原数组
         } else if (order) {
+          let sortField = col.dataIndex;
+          if (col.sortBy) sortField = col.sortBy;
           if (col.sortType === 'number') {
             // 按数字类型排序
             const nanArr = []; // 非数字
@@ -349,10 +351,10 @@ export default {
             for (let i = 0; i < this.dataSourceCopy.length; i++) {
               const row = this.dataSourceCopy[i];
               if (
-                row[col.dataIndex] === null ||
-                row[col.dataIndex] === '' ||
-                typeof row[col.dataIndex] === 'boolean' ||
-                Number.isNaN(+row[col.dataIndex])
+                row[sortField] === null ||
+                row[sortField] === '' ||
+                typeof row[sortField] === 'boolean' ||
+                Number.isNaN(+row[sortField])
               ) {
                 nanArr.push(row);
               } else {
@@ -360,17 +362,17 @@ export default {
               }
             }
             if (order === 'asc') {
-              numArr.sort((a, b) => +a[col.dataIndex] - +b[col.dataIndex]);
+              numArr.sort((a, b) => +a[sortField] - +b[sortField]);
             } else {
-              numArr.sort((a, b) => +b[col.dataIndex] - +a[col.dataIndex]);
+              numArr.sort((a, b) => +b[sortField] - +a[sortField]);
             }
             this.dataSourceCopy = [...numArr, ...nanArr];
           } else {
             // 按string 排序
             if (order === 'asc') {
-              this.dataSourceCopy.sort((a, b) => (a[col.dataIndex] < b[col.dataIndex] ? -1 : 1));
+              this.dataSourceCopy.sort((a, b) => String(a[sortField]).localeCompare(b[sortField]));
             } else {
-              this.dataSourceCopy.sort((a, b) => (a[col.dataIndex] > b[col.dataIndex] ? -1 : 1));
+              this.dataSourceCopy.sort((a, b) => String(a[sortField]).localeCompare(b[sortField]) * -1);
             }
           }
         } else {
@@ -572,11 +574,12 @@ export default {
             }
           }
           .table-header-cell-wrapper {
-            // width: 100%;
+            max-width: 100%; //最大宽度不超过列宽
             display: inline-flex;
             align-items: center;
 
             .table-header-title {
+              overflow: hidden;
               align-self: flex-start;
             }
             .table-header-sorter {
