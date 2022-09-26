@@ -26,7 +26,7 @@
         <tr v-for="(row, index) in tableHeaders" :key="index" @contextmenu="e => onHeaderMenu(e)">
           <th
             v-for="(col, i) in row"
-            :key="i"
+            :key="col.dataIndex"
             :rowspan="col.rowSpan"
             :colspan="col.colSpan"
             :style="{
@@ -303,6 +303,8 @@ export default {
         arr.forEach(col => {
           col.rowSpan = col.children ? false : deep - level;
           col.colSpan = col.children?.length;
+          if (col.rowSpan === 1) delete col.rowSpan;
+          if (col.colSpan === 1) delete col.colSpan;
           colArr.push(col);
           if (col.children) {
             childrenArr.push(...col.children);
@@ -567,12 +569,12 @@ export default {
             }
           }
           .table-header-cell-wrapper {
-            width: 100%;
-            display: flex;
-            // align-items: center;
+            // width: 100%;
+            display: inline-flex;
+            align-items: center;
 
             .table-header-title {
-              // align-self: flex-start;
+              align-self: flex-start;
             }
             .table-header-sorter {
               flex-shrink: 0;
