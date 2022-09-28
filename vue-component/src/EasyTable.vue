@@ -37,7 +37,12 @@
               ...fixedStyle(row, i, 'th'),
             }"
             :title="col.title"
-            :class="[col.sorter ? 'sortable' : '', col.headerClassName, showHeaderOverflow ? 'text-overflow' : '']"
+            :class="[
+              col.sorter ? 'sortable' : '',
+              col.dataIndex === sortCol && sortOrderIndex !== 0 && 'sorter-' + sortSwitchOrder[sortOrderIndex],
+              showHeaderOverflow ? 'text-overflow' : '',
+              col.headerClassName,
+            ]"
             @click="
               e => {
                 onColumnSort(col);
@@ -54,11 +59,7 @@
               </template>
 
               <!-- 排序图图标 -->
-              <span
-                v-if="col.sorter"
-                class="table-header-sorter"
-                :class="col.dataIndex === sortCol && 'sorter-' + sortSwitchOrder[sortOrderIndex]"
-              >
+              <span v-if="col.sorter" class="table-header-sorter">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16px" height="16px" viewBox="0 0 16 16">
                   <g id="sort-btn" fill-rule="nonzero">
                     <polygon
@@ -582,6 +583,31 @@ export default {
               }
             }
           }
+          &:not(.sorter-desc):not(.sorter-asc):hover .table-header-cell-wrapper .table-header-sorter {
+            #arrow-up {
+              fill: var(--sort-arrow-hover-color);
+            }
+            #arrow-down {
+              fill: var(--sort-arrow-hover-color);
+            }
+          }
+          &.sorter-desc .table-header-cell-wrapper .table-header-sorter {
+            #arrow-up {
+              fill: var(--sort-arrow-active-sub-color);
+            }
+            #arrow-down {
+              fill: var(--sort-arrow-active-color);
+            }
+          }
+          &.sorter-asc .table-header-cell-wrapper .table-header-sorter {
+            #arrow-up {
+              fill: var(--sort-arrow-active-color);
+            }
+            #arrow-down {
+              fill: var(--sort-arrow-active-sub-color);
+            }
+          }
+
           .table-header-cell-wrapper {
             max-width: 100%; //最大宽度不超过列宽
             display: inline-flex;
@@ -599,30 +625,6 @@ export default {
               #arrow-up,
               #arrow-down {
                 fill: var(--sort-arrow-color);
-              }
-              &:not(.sorter-desc):not(.sorter-asc):hover {
-                #arrow-up {
-                  fill: var(--sort-arrow-hover-color);
-                }
-                #arrow-down {
-                  fill: var(--sort-arrow-hover-color);
-                }
-              }
-              &.sorter-desc {
-                #arrow-up {
-                  fill: var(--sort-arrow-active-sub-color);
-                }
-                #arrow-down {
-                  fill: var(--sort-arrow-active-color);
-                }
-              }
-              &.sorter-asc {
-                #arrow-up {
-                  fill: var(--sort-arrow-active-color);
-                }
-                #arrow-down {
-                  fill: var(--sort-arrow-active-sub-color);
-                }
               }
             }
           }
