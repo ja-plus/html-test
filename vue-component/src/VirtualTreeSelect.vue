@@ -103,7 +103,7 @@ export default {
   },
   computed: {
     treeDataClone() {
-      return cloneDeep(this.treeData);
+      return [...this.treeData];
     },
     /** 合并传入的fields */
     assignedFields() {

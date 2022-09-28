@@ -88,10 +88,10 @@
         <template v-if="dataSourceCopy && dataSourceCopy.length">
           <tr
             v-for="(item, i) in virtual ? virtual_dataSourcePart : dataSourceCopy"
-            :key="rowKey ? item[rowKey] : i"
-            :data-row-key="rowKey ? item[rowKey] : i"
+            :key="rowKey ? rowKeyGen(item) : i"
+            :data-row-key="rowKey ? rowKeyGen(item) : i"
             :class="{
-              active: rowKey ? item[rowKey] === (currentItem && currentItem[rowKey]) : item === currentItem,
+              active: rowKey ? rowKeyGen(item) === (currentItem && rowKeyGen(currentItem)) : item === currentItem,
             }"
             @click="e => onRowClick(e, item)"
             @dblclick="e => onRowDblclick(e, item)"
@@ -162,7 +162,7 @@ export default {
       default: () => [],
     },
     rowKey: {
-      type: String,
+      type: [String, Function],
       default: '',
     },
     emptyCellText: {
@@ -270,7 +270,8 @@ export default {
      * @param {number} containerHeight 虚拟滚动的高度
      */
     initVirtualScroll(containerHeight) {
-      this.virtualScroll.containerHeight = containerHeight || this.$refs.tableContainer.offsetHeight;
+      this.virtualScroll.containerHeight =
+        typeof containerHeight === 'number' ? containerHeight : this.$refs.tableContainer.offsetHeight;
     },
     fixedStyle(row, index, type) {
       row = row.filter(col => col.fixed === 'left');
@@ -484,6 +485,14 @@ export default {
       this.sortCol = null;
       this.sortOrderIndex = 0;
       this.dataSourceCopy = [...this.dataSource];
+    },
+    /** 行唯一值生成 */
+    rowKeyGen(row) {
+      if (typeof this.rowKey === 'function') {
+        return this.rowKey(row);
+      } else {
+        return row[this.rowKey];
+      }
     },
   },
 };
