@@ -1,10 +1,10 @@
 <template lang="pug">
 div
   div height:
-    input(type="range" min="100" max="1000" @input="e => props.height = e.target.value + 'px'")
+    input(type="range" min="100" max="1000" @input="handleHeightInput")
     | {{props.height}}
   div width:
-    input(type="range" min="100" max="2000"  @input="e => tableWidth = e.target.value + 'px'" :value="parseInt(tableWidth)")
+    input(type="range" min="100" max="2000"  @input="handleWidthInput")
     | {{tableWidth}}
 
 div(style="display:flex;")
@@ -26,7 +26,6 @@ div(:style="{width: tableWidth}" style="padding:10px;")
     rowKey="name" 
     noDataFull 
     virtual 
-    :sortRemote="props.sortRemote" 
     :style="{height:props.height}" 
     v-bind="props"
     :columns="columns" 
@@ -96,12 +95,14 @@ export default {
           className: 'my-td',
           // minWidth: '200px', // 组件处理固定列的minWidth = width
           sorter: true,
-          customHeaderCell(column) {
+          customHeaderCell: column => {
+            // render(h) {
             return h(
               'span',
               { style: 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap' },
               column.title + '(render) text-overflow,',
             );
+            // },
           },
         },
         {
@@ -214,6 +215,15 @@ export default {
     // }, 1000);
   },
   methods: {
+    handleHeightInput(e) {
+      this.props.height = e.target.value + 'px';
+      this.$nextTick(() => {
+        this.$refs.easyTable.initVirtualScroll();
+      });
+    },
+    handleWidthInput(e) {
+      this.tableWidth = e.target.value + 'px';
+    },
     onCurrentChange(e, row) {
       console.log('current-changev', e, row);
     },
@@ -237,7 +247,7 @@ export default {
       console.log('header-cell-click:', e, row);
     },
     onTableScroll(e) {
-      console.log('scroll:', e);
+      console.log('scroll:', e.target.scrollHeight, e.target.clientHeight, e.target.scrollTop);
     },
     handleClearSorter() {
       this.$refs.easyTable.resetSorter();
@@ -247,9 +257,9 @@ export default {
       console.log('排序改变事件触发：', col, order);
     },
     addRow(num = 1, unshift) {
-      let tmpIndex = [];
+      const tmpIndex = [];
       for (let i = 0; i < num; i++) {
-        let data = {
+        const data = {
           name: 'add' + this.addIndex,
           age: parseInt(Math.random() * 100),
           email: 'add@sa.com',

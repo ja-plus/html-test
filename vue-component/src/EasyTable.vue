@@ -135,7 +135,7 @@
  * 存在的问题：column.dataIndex 作为唯一键，不能重复
  */
 function _howDeepTheColumn(arr, level = 1) {
-  let levels = [level];
+  const levels = [level];
   arr.forEach(item => {
     if (item.children?.length) {
       levels.push(_howDeepTheColumn(item.children, level + 1));
@@ -284,7 +284,7 @@ export default {
       }
       const unit = row[0].width.replace(/\d+/, '');
 
-      let style = {
+      const style = {
         position: 'sticky',
         left: left + unit,
       };
@@ -297,14 +297,14 @@ export default {
       // reset
       this.tableHeaders = [];
       this.tableProps = [];
-      let copyColumn = this.columns;
-      let deep = _howDeepTheColumn(copyColumn);
+      const copyColumn = this.columns;
+      const deep = _howDeepTheColumn(copyColumn);
       const tmpHeader = [];
       const tmpProps = [];
       // 展开columns
       (function flat(arr, level = 0) {
-        let colArr = [];
-        let childrenArr = [];
+        const colArr = [];
+        const childrenArr = [];
         arr.forEach(col => {
           col.rowSpan = col.children ? false : deep - level;
           col.colSpan = col.children?.length;
@@ -386,6 +386,10 @@ export default {
         this.$emit('sort-change', col, order);
       }
     },
+    /** 插入一行 */
+    insertData() {
+      // TODO: 根据排序情况插入数据
+    },
     onRowClick(e, row) {
       this.$emit('row-click', e, row);
       // 选中同一行不触发current-change 事件
@@ -416,11 +420,13 @@ export default {
     onTableScroll(e) {
       if (!e?.target) return;
       if (this.virtual) {
-        let top = e.target.scrollTop;
-        let { rowHeight } = this.virtualScroll;
+        const top = e.target.scrollTop;
+        const { rowHeight } = this.virtualScroll;
         this.virtualScroll.startIndex = parseInt(top / rowHeight);
-        this.virtualScroll.offsetTop = parseInt(top / rowHeight) * rowHeight;
-        this.virtualScroll.scrollTop = top;
+        // 这里由于边界情况 - 1，用于保证表格总高度不要高出实际行*行高, || 1 用来保证 startIndex - 1 不为负数
+        // if(this.virtualScroll.startIndex > this.dataSourceCopy.length - this.virtual_pageSize)
+        this.virtualScroll.offsetTop = ((this.virtualScroll.startIndex || 1) - 1) * rowHeight;
+        // this.virtualScroll.scrollTop = top;
       }
       // const res = {
       //   isTop: e.target.scrollTop <= 0,
