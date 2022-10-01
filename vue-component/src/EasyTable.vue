@@ -93,10 +93,12 @@
             :data-row-key="rowKey ? rowKeyGen(item) : i"
             :class="{
               active: rowKey ? rowKeyGen(item) === (currentItem && rowKeyGen(currentItem)) : item === currentItem,
+              hover: rowKey ? rowKeyGen(item) === currentHover.value : item === currentHover.value,
             }"
             @click="e => onRowClick(e, item)"
             @dblclick="e => onRowDblclick(e, item)"
             @contextmenu="e => onRowMenu(e, item)"
+            @mouseover="e => onTrMouseOver(e, item)"
           >
             <td
               v-for="(col, j) in tableProps"
@@ -190,6 +192,11 @@ export default {
       type: Boolean,
       default: false,
     },
+    /** 是否增加行hoverclass */
+    showTrHoverClass: {
+      type: Boolean,
+      defualt: false,
+    },
   },
   data() {
     return {
@@ -198,6 +205,8 @@ export default {
 
       /** 当前选中的一行*/
       currentItem: {},
+      /** 当前hover的行 */
+      currentHover: { value: null },
       /** 排序的列*/
       sortCol: null,
       sortOrderIndex: 0,
@@ -435,6 +444,12 @@ export default {
       // this.$emit('table-scroll', e, res); // 不需要暴露，因为事件在根元素上
       // this.showFixedLeftShadow = e.target.scrollLeft > 0;
     },
+    /** tr hover事件 */
+    onTrMouseOver(e, item) {
+      if (this.showTrHoverClass) {
+        this.currentHover.value = this.rowKeyGen(item);
+      }
+    },
     // ---- ref function-----
     /**
      * 选中一行，
@@ -443,7 +458,7 @@ export default {
      */
     setCurrentRow(rowKey, option = { silent: false }) {
       if (!this.dataSourceCopy.length) return;
-      this.currentItem = this.dataSourceCopy.find(it => it[this.rowKey] === rowKey);
+      this.currentItem = this.dataSourceCopy.find(it => this.rowKeyGen(it) === rowKey);
       if (!option.silent) {
         this.$emit('current-change', this.currentItem);
       }
@@ -653,6 +668,7 @@ export default {
             background-color: var(--tr-active-bg-color);
           }
         }
+        &.hover,
         &:hover {
           td {
             background-color: var(--tr-hover-bg-color);

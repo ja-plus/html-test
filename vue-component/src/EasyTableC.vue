@@ -4,6 +4,7 @@
       ref="stkTableFixedLeft"
       class="stk-table-fixed-left"
       v-bind="$attrs"
+      show-tr-hover-class
       :data-source="dataSourceCopy"
       :columns="fixedLeftColumns"
       :style="{ height: fixedTableHeight + 'px' }"
@@ -12,6 +13,7 @@
     <EasyTable
       ref="stkTableMain"
       v-bind="$attrs"
+      show-tr-hover-class
       :data-source="dataSourceCopy"
       :columns="mainTableColumns"
       @sort-change="(col, order) => handleSorterChange(col, order, 'main')"
@@ -21,6 +23,7 @@
 </template>
 <script>
 import EasyTable from './EasyTable.vue';
+import store from './EasyTableCStore';
 export default {
   components: { EasyTable },
   props: {
@@ -71,6 +74,8 @@ export default {
     },
   },
   mounted() {
+    this.$refs.stkTableFixedLeft.currentHover = store.state.currentHover;
+    this.$refs.stkTableMain.currentHover = store.state.currentHover;
     this.fixedTableHeight = this.$refs.stkTableMain.$el.clientHeight - 1; // -1px border
     this.$refs.stkTableFixedLeft.initVirtualScroll(this.fixedTableHeight);
   },
