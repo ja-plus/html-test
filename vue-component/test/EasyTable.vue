@@ -70,7 +70,7 @@ div tableProps:{{easyTable.tableProps}}
 <script>
 import { h } from 'vue';
 import EasyTable from '../src/EasyTable.vue';
-import EasyTableC from '../src/EasyTableC.vue'; // 兼容版本 fixedLeft
+import EasyTableC from '../src/EasyTableC/index.vue'; // 兼容版本 fixedLeft
 export default {
   components: { EasyTable, EasyTableC },
   props: {},
@@ -296,7 +296,7 @@ export default {
       this.$nextTick(() => {
         tmpIndex.forEach(addIndex => {
           this.$refs.easyTable.setHighlightDimRow('add' + addIndex);
-          // this.$refs.easyTableC.setHighlightDimRow('add' + addIndex);
+          this.$refs.easyTableC.setHighlightDimRow('add' + addIndex);
         });
       });
     },

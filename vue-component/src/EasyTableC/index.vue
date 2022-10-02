@@ -1,6 +1,7 @@
 <template>
   <div ref="stkTableC" class="stk-table-compatible">
     <EasyTable
+      v-if="fixedLeftColumns.length"
       ref="stkTableFixedLeft"
       class="stk-table-fixed-left"
       v-bind="$attrs"
@@ -24,8 +25,8 @@
   </div>
 </template>
 <script>
-import EasyTable from './EasyTable.vue';
-import store from './EasyTableCStore';
+import EasyTable from '../EasyTable.vue';
+import store from './store';
 export default {
   components: { EasyTable },
   props: {
@@ -78,29 +79,37 @@ export default {
   mounted() {
     this.initEasyTableData();
     this.fixedTableHeight = this.$refs.stkTableMain.$el.clientHeight - 1; // -1px border
-    this.$refs.stkTableFixedLeft.initVirtualScroll(this.fixedTableHeight);
+    this.$refs.stkTableFixedLeft?.initVirtualScroll(this.fixedTableHeight);
   },
   methods: {
     /** 初始化表格共享data */
     initEasyTableData() {
-      this.$refs.stkTableFixedLeft.currentHover = store.state.currentHover;
-      this.$refs.stkTableFixedLeft.currentItem = store.state.currentItem;
+      if (this.fixedLeftColumns.length) {
+        this.$refs.stkTableFixedLeft.currentHover = store.state.currentHover;
+        this.$refs.stkTableFixedLeft.currentItem = store.state.currentItem;
+      }
       this.$refs.stkTableMain.currentHover = store.state.currentHover;
       this.$refs.stkTableMain.currentItem = store.state.currentItem;
     },
     handleMainTableScroll(e) {
       // console.log(e.target.scrollTop);
-      this.$refs.stkTableFixedLeft.$el.scrollTop = e.target.scrollTop;
+      if (this.fixedLeftColumns.length) {
+        this.$refs.stkTableFixedLeft.$el.scrollTop = e.target.scrollTop;
+      }
     },
     handleSorterChange(col, order, type) {
       if (type === 'left') {
         this.$refs.stkTableMain.resetSorter();
-        this.dataSourceCopy = this.$refs.stkTableFixedLeft.dataSourceCopy;
+        this.dataSourceCopy = this.$refs.stkTableFixedLeft?.dataSourceCopy;
       } else if (type === 'main') {
-        this.$refs.stkTableFixedLeft.resetSorter();
+        this.$refs.stkTableFixedLeft?.resetSorter();
         this.dataSourceCopy = this.$refs.stkTableMain.dataSourceCopy;
       }
       this.$emit('sort-change', col, order);
+    },
+    setHighlightDimRow(key) {
+      this.$refs.stkTableFixedLeft?.setHighlightDimRow(key);
+      this.$refs.stkTableMain.setHighlightDimRow(key);
     },
   },
 };
