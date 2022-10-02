@@ -443,7 +443,7 @@ export default {
       //   isTop: e.target.scrollTop <= 0,
       //   isBottom: e.target.scrollHeight === e.target.scrollTop + e.target.clientHeight,
       // };
-      // this.$emit('table-scroll', e, res); // 不需要暴露，因为事件在根元素上
+      // this.$emit('scroll', e); // vue3 不需要暴露，因为事件在根元素上
       // this.showFixedLeftShadow = e.target.scrollLeft > 0;
     },
     /** tr hover事件 */

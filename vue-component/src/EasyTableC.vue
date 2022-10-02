@@ -89,6 +89,7 @@ export default {
       this.$refs.stkTableMain.currentItem = store.state.currentItem;
     },
     handleMainTableScroll(e) {
+      // console.log(e.target.scrollTop);
       this.$refs.stkTableFixedLeft.$el.scrollTop = e.target.scrollTop;
     },
     handleSorterChange(col, order, type) {
