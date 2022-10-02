@@ -225,7 +225,7 @@ export default {
       this.tableWidth = e.target.value + 'px';
     },
     onCurrentChange(e, row) {
-      console.log('current-changev', e, row);
+      console.log('current-change', e, row);
     },
     onRowMenu(e, row) {
       console.log('row-menu:', e, row);

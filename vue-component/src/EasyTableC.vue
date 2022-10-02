@@ -9,6 +9,7 @@
       :columns="fixedLeftColumns"
       :style="{ height: fixedTableHeight + 'px' }"
       @sort-change="(col, order) => handleSorterChange(col, order, 'left')"
+      v-on="$listner"
     ></EasyTable>
     <EasyTable
       ref="stkTableMain"
@@ -18,6 +19,7 @@
       :columns="mainTableColumns"
       @sort-change="(col, order) => handleSorterChange(col, order, 'main')"
       @scroll="handleMainTableScroll"
+      v-on="$listner"
     ></EasyTable>
   </div>
 </template>
@@ -74,12 +76,18 @@ export default {
     },
   },
   mounted() {
-    this.$refs.stkTableFixedLeft.currentHover = store.state.currentHover;
-    this.$refs.stkTableMain.currentHover = store.state.currentHover;
+    this.initEasyTableData();
     this.fixedTableHeight = this.$refs.stkTableMain.$el.clientHeight - 1; // -1px border
     this.$refs.stkTableFixedLeft.initVirtualScroll(this.fixedTableHeight);
   },
   methods: {
+    /** 初始化表格共享data */
+    initEasyTableData() {
+      this.$refs.stkTableFixedLeft.currentHover = store.state.currentHover;
+      this.$refs.stkTableFixedLeft.currentItem = store.state.currentItem;
+      this.$refs.stkTableMain.currentHover = store.state.currentHover;
+      this.$refs.stkTableMain.currentItem = store.state.currentItem;
+    },
     handleMainTableScroll(e) {
       this.$refs.stkTableFixedLeft.$el.scrollTop = e.target.scrollTop;
     },

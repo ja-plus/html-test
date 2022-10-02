@@ -92,7 +92,9 @@
             :key="rowKey ? rowKeyGen(item) : i"
             :data-row-key="rowKey ? rowKeyGen(item) : i"
             :class="{
-              active: rowKey ? rowKeyGen(item) === (currentItem && rowKeyGen(currentItem)) : item === currentItem,
+              active: rowKey
+                ? rowKeyGen(item) === (currentItem.value && rowKeyGen(currentItem.value))
+                : item === currentItem.value,
               hover: rowKey ? rowKeyGen(item) === currentHover.value : item === currentHover.value,
             }"
             @click="e => onRowClick(e, item)"
@@ -204,7 +206,7 @@ export default {
       showFixedLeftShadow: false,
 
       /** 当前选中的一行*/
-      currentItem: {},
+      currentItem: { value: null },
       /** 当前hover的行 */
       currentHover: { value: null },
       /** 排序的列*/
@@ -402,8 +404,8 @@ export default {
     onRowClick(e, row) {
       this.$emit('row-click', e, row);
       // 选中同一行不触发current-change 事件
-      if (this.currentItem === row) return;
-      this.currentItem = row;
+      if (this.currentItem.value === row) return;
+      this.currentItem.value = row;
       this.$emit('current-change', e, row);
     },
     onRowDblclick(e, row) {
@@ -458,7 +460,7 @@ export default {
      */
     setCurrentRow(rowKey, option = { silent: false }) {
       if (!this.dataSourceCopy.length) return;
-      this.currentItem = this.dataSourceCopy.find(it => this.rowKeyGen(it) === rowKey);
+      this.currentItem.value = this.dataSourceCopy.find(it => this.rowKeyGen(it) === rowKey);
       if (!option.silent) {
         this.$emit('current-change', this.currentItem);
       }
