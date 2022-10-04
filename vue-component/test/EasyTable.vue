@@ -121,7 +121,7 @@ export default {
         {
           title: 'Gender',
           dataIndex: 'gender',
-          // fixed: 'left',
+          // fixed: 'right',
           width: '150px',
           // minWidth: '150px',
           sorter: true,
@@ -138,7 +138,7 @@ export default {
         /** overflow 必须设置maxWidth */
         { title: 'Address', dataIndex: 'address', minWidth: '100px', maxWidth: '100px' },
         { title: 'Long Title Long Title LongTitle', dataIndex: 'address', minWidth: '100px', maxWidth: '200px' },
-        { title: 'col2', dataIndex: 'address' },
+        { title: 'col2', dataIndex: 'address', fixed: 'right' },
         // { title: 'col3', dataIndex: 'address' },
         // ...new Array(20).fill(0).map(() => ({ title: 'col3', dataIndex: 'address' })),
       ],
@@ -177,12 +177,16 @@ export default {
         { key: 'columnOption', desc: '', value: '' },
         { key: 'title', desc: '名称' },
         { key: 'dataIndex', desc: '数据key，需要唯一' },
-        { key: 'fixed', desc: '固定列', value: 'left' },
+        {
+          key: 'fixed',
+          desc: '固定列，暂不支持多级表头固定列。left列需要放在columns最前，right列需要放在columns最后。',
+          value: '"left"|"right"',
+        },
         { key: 'headerClassName', desc: '一列的表头class' },
         { key: 'className', desc: '一列的单元格class' },
-        { key: 'width', desc: '这列th/td 的宽度' },
-        { key: 'minWidth', desc: '这列th/td 的最小宽度。在总列宽不够table宽时，列宽被压缩的最小值' },
-        { key: 'maxWidth', desc: '这列th/td 的最大宽度。可被内容文字撑开的最大宽度。' },
+        { key: 'width', desc: '这列th/td 的宽度', value: 'xxpx' },
+        { key: 'minWidth', desc: '这列th/td 的最小宽度。在总列宽不够table宽时，列宽被压缩的最小值', value: 'xxpx' },
+        { key: 'maxWidth', desc: '这列th/td 的最大宽度。可被内容文字撑开的最大宽度。', value: 'xxpx' },
         {
           key: 'sorter',
           desc: '是否开启排序。可传方法。且sortBy、sortType不会生效',

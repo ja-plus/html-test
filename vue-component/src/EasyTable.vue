@@ -25,7 +25,7 @@
       <thead>
         <tr v-for="(row, index) in tableHeaders" :key="index" @contextmenu="e => onHeaderMenu(e)">
           <th
-            v-for="(col, i) in row"
+            v-for="col in row"
             :key="col.dataIndex"
             :rowspan="col.rowSpan"
             :colspan="col.colSpan"
@@ -34,7 +34,7 @@
               width: col.width,
               minWidth: col.fixed ? col.width : col.minWidth,
               maxWidth: col.fixed ? col.width : col.maxWidth,
-              ...fixedStyle(row, i, 'th'),
+              ...fixedStyle('th', col),
             }"
             :title="col.title"
             :class="[
@@ -103,7 +103,7 @@
             @mouseover="e => onTrMouseOver(e, item)"
           >
             <td
-              v-for="(col, j) in tableProps"
+              v-for="col in tableProps"
               :key="col.dataIndex"
               :data-index="col.dataIndex"
               :class="[col.className, showOverflow ? 'text-overflow' : '']"
@@ -111,7 +111,7 @@
                 textAlign: col.align,
                 minWidth: col.fixed ? col.width : col.minWidth,
                 maxWidth: col.fixed ? col.width : col.maxWidth,
-                ...fixedStyle(tableProps, j, 'td'),
+                ...fixedStyle('td', col),
               }"
               :title="item[col.dataIndex]"
               @click="e => onCellClick(e, item, col)"
@@ -285,25 +285,41 @@ export default {
       this.virtualScroll.containerHeight =
         typeof containerHeight === 'number' ? containerHeight : this.$refs.tableContainer.offsetHeight;
     },
-    fixedStyle(row, index, type) {
-      row = row.filter(col => col.fixed === 'left');
-      if (index >= row.length) return {};
-      let left = 0;
-      for (let i = 0; i < index; i++) {
-        const col = row[i];
-        left += parseInt(col.width);
+    /** 固定列的style */
+    fixedStyle(tagType, col) {
+      let cols = [...this.tableProps]; // tbody col
+      if (tagType === 'th') {
+        cols = [...this.tableHeaders.flat()]; // thead col
       }
-      const unit = row[0].width.replace(/\d+/, '');
+      const style = {};
+      if (['left', 'right'].includes(col.fixed)) {
+        if (col.fixed === 'right') cols.reverse(); // 右边固定列要反转
+        let position = 0; // left | right 的距离
+        const fixedCols = [];
+        for (let i = 0; i < cols.length; i++) {
+          const item = cols[i];
+          if (item.fixed === col.fixed) fixedCols.push(item);
+          if (item.dataIndex === col.dataIndex) break; // 遇到本列就结束循环，不再添加
+        }
+        // const unit = fixedRows[0].width.replace(/\d+/, '');
+        // -1: 不计算本列的宽度
+        for (let i = 0; i < fixedCols.length - 1; i++) {
+          position += parseInt(fixedCols[i].width);
+        }
+        style.position = 'sticky';
+        if (col.fixed === 'left') {
+          style.left = position + 'px';
+        } else {
+          style.right = position + 'px';
+        }
+        if (tagType === 'th') {
+          style.zIndex = 2; // 保证固定列高于其他单元格
+        }
+      }
 
-      const style = {
-        position: 'sticky',
-        left: left + unit,
-      };
-      if (type === 'th') {
-        style.zIndex = 2; // 保证固定列高于其他单元格
-      }
       return style;
     },
+    /** 处理多级表头 */
     dealColumns() {
       // reset
       this.tableHeaders = [];
@@ -325,7 +341,7 @@ export default {
           if (col.children) {
             childrenArr.push(...col.children);
           } else {
-            tmpProps.push(col); // 没有children的组合作为colgroup
+            tmpProps.push(col); // 没有children的列作为colgroup
           }
         });
         tmpHeader.push(colArr);
@@ -397,10 +413,13 @@ export default {
         this.$emit('sort-change', col, order);
       }
     },
-    /** 插入一行 */
-    insertData() {
+    /** 插入一行 
+    insertData(data) {
       // TODO: 根据排序情况插入数据
-    },
+      if(!this.sortCol) return;
+      const col = this.columns.find(it => it.dataIndex === this.sortCol);
+      const sorter = col.sorter;
+    },*/
     onRowClick(e, row) {
       this.$emit('row-click', e, row);
       // 选中同一行不触发current-change 事件
