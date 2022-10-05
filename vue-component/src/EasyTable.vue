@@ -11,12 +11,13 @@
       :class="showFixedLeftShadow && 'stk-table-fixed-left-col-box-shadow'"
       :style="{ width: fixedLeftColWidth + 'px' }"
     ></div> -->
-    <!-- 这个元素用于虚拟滚动时，撑开父容器的高度 -->
-    <div
-      v-if="virtual"
-      class="virtual-table-height"
-      :style="{ height: dataSourceCopy.length * virtualScroll.rowHeight + 'px' }"
-    ></div>
+    <!-- 这个元素用于虚拟滚动时，撑开父容器的高度 （已弃用，因为滚动条拖动过快，下方tr为加载出来时，会导致表头sticky闪动）
+      <div
+        v-if="virtual"
+        class="virtual-table-height"
+        :style="{ height: dataSourceCopy.length * virtualScroll.rowHeight + 'px' }"
+      ></div>
+    -->
     <!-- 表格主体 -->
     <table class="stk-table-main" :style="{ minWidth: minWidth }">
       <!-- <colgroup>
@@ -120,6 +121,10 @@
               <div v-else class="table-cell-wrapper">{{ item[col.dataIndex] ?? emptyCellText }}</div>
             </td>
           </tr>
+        </template>
+        <template v-if="virtual">
+          <!-- 用于虚拟滚动表格内容定位 -->
+          <tr :style="{ height: virtual_offsetBottom + 'px' }"></tr>
         </template>
       </tbody>
     </table>
@@ -231,19 +236,28 @@ export default {
         containerHeight: 0,
         startIndex: 0, // 数组开始位置
         rowHeight: 28,
-        offsetTop: 0,
+        offsetTop: 0, // 表格定位上边距
         scrollTop: 0,
       },
     };
   },
   computed: {
+    /** 虚拟滚动展示的行数 */
     virtual_pageSize() {
       return Math.ceil(this.virtualScroll.containerHeight / this.virtualScroll.rowHeight);
     },
+    /** 虚拟滚动展示的行 */
     virtual_dataSourcePart() {
       return this.dataSourceCopy.slice(
         this.virtualScroll.startIndex,
         this.virtualScroll.startIndex + this.virtual_pageSize,
+      );
+    },
+    /** 虚拟表格定位下边距*/
+    virtual_offsetBottom() {
+      return (
+        (this.dataSourceCopy.length - (this.virtualScroll.startIndex || 1) - this.virtual_dataSourcePart.length) *
+        this.virtualScroll.rowHeight
       );
     },
     // fixedLeftColWidth() {
