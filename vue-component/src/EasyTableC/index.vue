@@ -6,11 +6,12 @@
       class="stk-table-fixed-left"
       v-bind="$attrs"
       show-tr-hover-class
+      :show-no-data="false"
       :data-source="dataSourceCopy"
       :columns="fixedLeftColumns"
-      :style="{ height: fixedTableHeight + 'px' }"
+      :style="{ height: dataSourceCopy.length ? fixedTableHeight + 'px' : 'auto' }"
       @sort-change="(col, order) => handleSorterChange(col, order, 'left')"
-      v-on="$listner"
+      v-on="$listener"
     ></EasyTable>
     <EasyTable
       ref="stkTableMain"
@@ -20,7 +21,7 @@
       :columns="mainTableColumns"
       @sort-change="(col, order) => handleSorterChange(col, order, 'main')"
       @scroll="handleMainTableScroll"
-      v-on="$listner"
+      v-on="$listener"
     ></EasyTable>
   </div>
 </template>

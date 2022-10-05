@@ -124,7 +124,7 @@
       </tbody>
     </table>
     <div
-      v-if="!dataSourceCopy || !dataSourceCopy.length"
+      v-if="(!dataSourceCopy || !dataSourceCopy.length) && showNoData"
       class="stk-table-no-data"
       :class="{ 'no-data-full': noDataFull }"
     >
@@ -178,6 +178,11 @@ export default {
     noDataFull: {
       type: Boolean,
       default: false,
+    },
+    /** 是否展示暂无数据 */
+    showNoData: {
+      type: Boolean,
+      default: true,
     },
     /** 是否服务端排序，true则不排序数据 */
     sortRemote: {

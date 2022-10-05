@@ -54,7 +54,7 @@ div(:style="{width: tableWidth}" style="padding:10px;")
     @row-dblclick="onRowDblclick"
   )
 div(style="width:max-content")
-  | 文档
+  h2 API
   EasyTable(
     :columns="docTableColumns" 
     :dataSource="docTableData" 
@@ -161,6 +161,7 @@ export default {
         { key: 'tableProps', desc: '', value: '' },
         { key: 'rowKey', desc: '一行的唯一键', value: 'string | (row) => string' },
         { key: 'height', desc: '高度' },
+        { key: 'minWidth', desc: '最小宽度', value: 'string', defaultValue: '100%' },
         { key: 'showOverflow', desc: 'td文本溢出展示...', value: 'boolean', defaultValue: 'false' },
         { key: 'showHeaderOverflow', desc: 'th文本溢出展示...', value: 'boolean', defaultValue: 'false' },
         {
@@ -170,6 +171,9 @@ export default {
           defaultValue: 'false',
         },
         { key: 'noDataFull', desc: '暂无数据占满表格', value: 'boolean', defaultValue: 'false' },
+        { key: 'showNoData', desc: '是否展示暂无数据', value: 'boolean', defaultValue: 'true' },
+        { key: 'emptyCellText', desc: '空单元格的占位文字', value: 'string', defaultValue: '--' },
+        { key: 'showTrHoverClass', desc: '是否增加行hoverclass', value: 'boolean', defaultValue: 'false' },
         { key: 'virtual', desc: '是否开启虚拟滚动', defaultValue: 'false' },
         { key: 'columns', desc: '列配置', value: 'columnOption[]' },
         { key: 'dataSource', desc: '数据源', value: 'object[]' },
@@ -196,10 +200,10 @@ export default {
         { key: 'sortBy', desc: '使用其他字段排序', value: 'string' },
         { key: 'sortType', desc: '排序字段类型', value: 'string | number', defaultValue: 'string' },
         { key: 'align', desc: '表列对齐', value: '"left"|"center"' },
-        { key: 'headerAlign:', desc: '表头对齐' },
+        { key: 'headerAlign', desc: '表头对齐' },
         { key: 'customHeaderCell', desc: '自定义表头渲染内容。同customCell' },
         {
-          key: 'customCell:',
+          key: 'customCell',
           desc: '自定义列td的渲染。接收一个方法，vue2需该方法return一个vue组件，也可返回jsx 如return {render(h){return jsx}}',
         },
         { key: '------------', desc: '---------' },
