@@ -39,6 +39,7 @@ div(:style="{width: tableWidth}" style="padding:10px;")
     @cell-click="onCellClick"
     @header-cell-click="onHeaderCellClick"
     @scroll="onTableScroll"
+    @col-order-change="onColOrderChange"
   )
     //- template(#table-header="{ column }")
     //-   span {{column.title}} (slot)
@@ -217,6 +218,11 @@ export default {
         { key: 'cell-click', desc: '单元格单击', value: '(e:MouseEvent,row,col):void' },
         { key: 'header-cell-click', desc: '表头单元格单击', value: '(e:MouseEvent,row,col):void' },
         { key: 'scroll', desc: '滚动', value: '(e:MouseEvent):void' },
+        {
+          key: 'col-order-change',
+          desc: '表头拖动改变列顺序时',
+          value: '(sourceIndex:number,targetIndex:number):void',
+        },
       ],
     };
   },
@@ -280,6 +286,14 @@ export default {
     },
     handleSortChange(col, order) {
       console.log('排序改变事件触发：', col, order);
+    },
+    onColOrderChange(sourceIndex, targetIndex) {
+      console.log(sourceIndex, targetIndex, 'sdf');
+      // delete
+      const deleteEle = this.columns.splice(sourceIndex, 1)[0];
+      // insert
+      this.columns.splice(targetIndex, 0, deleteEle);
+      console.log(this.columns);
     },
     addRow(num = 1, unshift) {
       const tmpIndex = [];

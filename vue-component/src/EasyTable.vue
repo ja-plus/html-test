@@ -28,6 +28,7 @@
           <th
             v-for="col in row"
             :key="col.dataIndex"
+            draggable="true"
             :rowspan="col.rowSpan"
             :colspan="col.colSpan"
             :style="{
@@ -50,6 +51,9 @@
                 onHeaderCellClick(e, col);
               }
             "
+            @dragstart="onThDragStart"
+            @drop="onThDrop"
+            @dragover="onThDragOver"
           >
             <div class="table-header-cell-wrapper">
               <component :is="col.customHeaderCell(col)" v-if="col.customHeaderCell" />
@@ -239,6 +243,9 @@ export default {
         offsetTop: 0, // 表格定位上边距
         scrollTop: 0,
       },
+      thDrag: {
+        dragIndex: null,
+      },
     };
   },
   computed: {
@@ -369,6 +376,15 @@ export default {
       this.tableHeaders = tmpHeader;
       this.tableProps = tmpProps;
     },
+    /** 行唯一值生成 */
+    rowKeyGen(row) {
+      if (typeof this.rowKey === 'function') {
+        return this.rowKey(row);
+      } else {
+        return row[this.rowKey];
+      }
+    },
+    // ------event handler-------------
     /** 表头点击排序 */
     onColumnSort(col, click = true) {
       if (!col.sorter) return;
@@ -490,6 +506,28 @@ export default {
         this.currentHover.value = this.rowKeyGen(item);
       }
     },
+    /** th拖动释放时 */
+    onThDrop(e) {
+      let th = e.target;
+      // 找到th元素
+      while (th) {
+        if (th.tagName === 'TH') break;
+        th = th.parentNode;
+      }
+      const i = Array.prototype.indexOf.call(th.parentNode.children, th); // 得到是第几个子元素
+      if (this.thDrag.dragIndex !== i) {
+        this.$emit('col-order-change', this.thDrag.dragIndex, i);
+      }
+    },
+    /** 开始拖动记录th位置 */
+    onThDragStart(e) {
+      const i = Array.prototype.indexOf.call(e.target.parentNode.children, e.target); // 得到是第几个子元素
+      this.thDrag.dragIndex = i;
+    },
+    onThDragOver(e) {
+      e.preventDefault();
+    },
+
     // ---- ref function-----
     /**
      * 选中一行，
@@ -547,14 +585,6 @@ export default {
       this.sortCol = null;
       this.sortOrderIndex = 0;
       this.dataSourceCopy = [...this.dataSource];
-    },
-    /** 行唯一值生成 */
-    rowKeyGen(row) {
-      if (typeof this.rowKey === 'function') {
-        return this.rowKey(row);
-      } else {
-        return row[this.rowKey];
-      }
     },
   },
 };
