@@ -53,6 +53,7 @@ div(:style="{width: tableWidth}" style="padding:10px;")
     :dataSource="dataSource" 
     @current-change="onCurrentChange" 
     @row-dblclick="onRowDblclick"
+    @col-order-change="onColOrderChange2"
   )
 div(style="width:max-content")
   h2 API
@@ -288,12 +289,33 @@ export default {
       console.log('排序改变事件触发：', col, order);
     },
     onColOrderChange(sourceIndex, targetIndex) {
-      console.log(sourceIndex, targetIndex, 'sdf');
+      // console.log(sourceIndex, targetIndex, 'sdf');
       // delete
       const deleteEle = this.columns.splice(sourceIndex, 1)[0];
       // insert
       this.columns.splice(targetIndex, 0, deleteEle);
-      console.log(this.columns);
+    },
+    /** easyTableC列顺序变化 */
+    onColOrderChange2(sourceIndex, targetIndex) {
+      console.log(sourceIndex, targetIndex, 'sdf');
+      const targetCol = this.columns[targetIndex];
+      const sourceCol = this.columns.splice(sourceIndex, 1)[0];
+      // 非固定列移动到固定列
+      if (targetCol.fixed === 'left' && !sourceCol.fixed) {
+        sourceCol.fixed = 'left';
+        const nextNotFixedIndex = this.columns.findIndex(it => it.fixed === undefined);
+        delete this.columns[nextNotFixedIndex - 1].fixed;
+      } else if (sourceCol.fixed === 'left' && !targetCol.fixed) {
+        // 固定列移动到非固定列
+        delete sourceCol.fixed;
+        // 下一个固定列变为固定列
+        const nextNotFixedCol = this.columns.find(it => it.fixed === undefined);
+        nextNotFixedCol.fixed = 'left';
+      }
+      // insert
+      this.columns.splice(targetIndex, 0, sourceCol);
+      console.log(this.columns, 'sd');
+      // this.columns = [...this.columns];
     },
     addRow(num = 1, unshift) {
       const tmpIndex = [];

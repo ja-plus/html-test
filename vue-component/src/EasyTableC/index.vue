@@ -10,8 +10,9 @@
       :data-source="dataSourceCopy"
       :columns="fixedLeftColumns"
       :style="{ height: dataSourceCopy.length ? fixedTableHeight + 'px' : 'auto' }"
-      @sort-change="(col, order) => handleSorterChange(col, order, 'left')"
-      v-on="$listener"
+      @sort-change="(col, order) => handleSorterChange(col, order, 'l')"
+      @th-drag-start="i => onThDragStart('l', i)"
+      @th-drop="i => onThDrop('l', i)"
     ></EasyTable>
     <EasyTable
       ref="stkTableMain"
@@ -19,9 +20,10 @@
       show-tr-hover-class
       :data-source="dataSourceCopy"
       :columns="mainTableColumns"
-      @sort-change="(col, order) => handleSorterChange(col, order, 'main')"
+      @sort-change="(col, order) => handleSorterChange(col, order, 'm')"
       @scroll="handleMainTableScroll"
-      v-on="$listener"
+      @th-drag-start="i => onThDragStart('m', i)"
+      @th-drop="i => onThDrop('m', i)"
     ></EasyTable>
   </div>
 </template>
@@ -40,10 +42,12 @@ export default {
       default: () => [],
     },
   },
+  emits: ['col-order-change', 'th-drag-start', 'th-drop', 'sort-change'],
   data() {
     return {
       fixedTableHeight: 0,
       dataSourceCopy: [],
+      dragStartIndex: null,
     };
   },
   computed: {
@@ -99,10 +103,10 @@ export default {
       }
     },
     handleSorterChange(col, order, type) {
-      if (type === 'left') {
+      if (type === 'l') {
         this.$refs.stkTableMain.resetSorter();
         this.dataSourceCopy = this.$refs.stkTableFixedLeft?.dataSourceCopy;
-      } else if (type === 'main') {
+      } else if (type === 'm') {
         this.$refs.stkTableFixedLeft?.resetSorter();
         this.dataSourceCopy = this.$refs.stkTableMain.dataSourceCopy;
       }
@@ -111,6 +115,19 @@ export default {
     setHighlightDimRow(key) {
       this.$refs.stkTableFixedLeft?.setHighlightDimRow(key);
       this.$refs.stkTableMain.setHighlightDimRow(key);
+    },
+    // onColOrderChange(type, sourceIndex, targetIndex) {
+    //   console.log(type, sourceIndex, targetIndex, 'sdfsdf');
+    // },
+    onThDragStart(type, startIndex) {
+      this.dragStartIndex = startIndex;
+      this.$emit('th-drag-start', startIndex);
+    },
+    onThDrop(type, endIndex) {
+      if (this.dragStartIndex !== endIndex) {
+        this.$emit('col-order-change', this.dragStartIndex, endIndex);
+      }
+      this.$emit('th-drop', endIndex);
     },
   },
 };

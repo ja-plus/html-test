@@ -518,11 +518,13 @@ export default {
       if (this.thDrag.dragIndex !== i) {
         this.$emit('col-order-change', this.thDrag.dragIndex, i);
       }
+      this.$emit('th-drop', i);
     },
     /** 开始拖动记录th位置 */
     onThDragStart(e) {
       const i = Array.prototype.indexOf.call(e.target.parentNode.children, e.target); // 得到是第几个子元素
       this.thDrag.dragIndex = i;
+      this.$emit('th-drag-start', i);
     },
     onThDragOver(e) {
       e.preventDefault();
