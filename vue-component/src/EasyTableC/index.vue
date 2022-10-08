@@ -1,5 +1,5 @@
 <template>
-  <div ref="stkTableC" class="stk-table-compatible">
+  <div ref="stkTableC" class="stk-table-compatible" @mouseleave="clearHover">
     <EasyTable
       v-if="fixedLeftColumns.length"
       ref="stkTableFixedLeft"
@@ -35,16 +35,17 @@ export default {
   props: {
     columns: {
       type: Array,
-      defualt: () => [],
+      default: () => [],
     },
     dataSource: {
       type: Array,
       default: () => [],
     },
   },
-  emits: ['col-order-change', 'th-drag-start', 'th-drop', 'sort-change'],
+  emits: ['col-order-change', 'th-drag-start', 'th-drop', 'sort-change', 'current-change'],
   data() {
     return {
+      sharedState: store.state,
       fixedTableHeight: 0,
       dataSourceCopy: [],
       dragStartIndex: null,
@@ -128,6 +129,28 @@ export default {
         this.$emit('col-order-change', this.dragStartIndex, endIndex);
       }
       this.$emit('th-drop', endIndex);
+    },
+    clearHover() {
+      this.sharedState.currentHover.value = null;
+      // store.state.currentHover.value = null; // 不生效
+    },
+    // ref
+    initVirtualScroll() {
+      this.$nextTick(() => {
+        this.$refs.stkTableFixedLeft?.initVirtualScroll();
+        this.$refs.stkTableMain?.initVirtualScroll();
+      });
+    },
+    scrollTo(top = 0) {
+      this.$refs.stkTableFixedLeft?.scrollTo(top);
+      this.$refs.stkTableMain.scrollTo(top);
+    },
+    setCurrentRow(rowKey, option = { silent: false }) {
+      if (!this.dataSourceCopy.length) return;
+      store.state.currentItem.value = this.dataSourceCopy.find(it => this.$refs.stkTableMain.rowKeyGen(it) === rowKey);
+      if (!option.silent) {
+        this.$emit('current-change', store.state.currentItem);
+      }
     },
   },
 };

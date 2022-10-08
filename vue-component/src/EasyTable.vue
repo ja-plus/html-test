@@ -86,6 +86,7 @@
         </tr>
       </thead>
 
+      <!-- <tbody :style="{transform: `translateY(${virtualScroll.offsetTop}px)`}"> -->
       <tbody>
         <template v-if="virtual">
           <!-- 用于虚拟滚动表格内容定位 -->
@@ -587,6 +588,10 @@ export default {
       this.sortCol = null;
       this.sortOrderIndex = 0;
       this.dataSourceCopy = [...this.dataSource];
+    },
+    /** 滚动 */
+    scrollTo(top = 0) {
+      this.$refs.tableContainer.scrollTop = top;
     },
   },
 };
