@@ -119,11 +119,12 @@
                 maxWidth: col.fixed ? col.width : col.maxWidth,
                 ...fixedStyle('td', col),
               }"
-              :title="item[col.dataIndex]"
               @click="e => onCellClick(e, item, col)"
             >
               <component :is="col.customCell(col, item)" v-if="col.customCell" />
-              <div v-else class="table-cell-wrapper">{{ item[col.dataIndex] ?? emptyCellText }}</div>
+              <div v-else class="table-cell-wrapper" :title="item[col.dataIndex]">
+                {{ item[col.dataIndex] ?? emptyCellText }}
+              </div>
             </td>
           </tr>
         </template>
@@ -805,7 +806,7 @@ export default {
     // --th-bg-color: #26272c;
     --th-bg-color: #181c21;
     --td-bg-color: #181c21;
-    --border-color: #2e2e33;
+    --border-color: #26292e;
     --tr-active-bg-color: #283f63;
     --tr-hover-bg-color: #1a2b46;
     --highlight-color: rgba(34, 103, 218, 0.65);
