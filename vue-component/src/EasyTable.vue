@@ -251,12 +251,17 @@ export default {
     };
   },
   computed: {
+    /** 数据量大于一页才开始虚拟滚动*/
+    virtual_on() {
+      return this.dataSourceCopy.length > this.virtual_pageSize;
+    },
     /** 虚拟滚动展示的行数 */
     virtual_pageSize() {
       return Math.ceil(this.virtualScroll.containerHeight / this.virtualScroll.rowHeight);
     },
     /** 虚拟滚动展示的行 */
     virtual_dataSourcePart() {
+      if (!this.virtual_on) return this.dataSourceCopy;
       return this.dataSourceCopy.slice(
         this.virtualScroll.startIndex,
         this.virtualScroll.startIndex + this.virtual_pageSize,
@@ -264,8 +269,9 @@ export default {
     },
     /** 虚拟表格定位下边距*/
     virtual_offsetBottom() {
+      if (!this.virtual_on) return 0; // 小于一页则不用虚拟滚动
       return (
-        (this.dataSourceCopy.length - (this.virtualScroll.startIndex || 1) - this.virtual_dataSourcePart.length) *
+        (this.dataSourceCopy.length - this.virtualScroll.startIndex - this.virtual_dataSourcePart.length) *
         this.virtualScroll.rowHeight
       );
     },
@@ -388,7 +394,7 @@ export default {
     },
     // ------event handler-------------
     /** 表头点击排序 */
-    onColumnSort(col, click = true) {
+    onColumnSort(col, click = true, force) {
       if (!col.sorter) return;
       if (this.sortCol !== col.dataIndex) {
         // 改变排序的列时，重置排序
@@ -401,7 +407,7 @@ export default {
       if (this.sortOrderIndex > 2) this.sortOrderIndex = 0;
       const order = this.sortSwitchOrder[this.sortOrderIndex];
 
-      if (!this.sortRemote) {
+      if (!this.sortRemote || force) {
         if (typeof col.sorter === 'function') {
           const customSorterData = col.sorter([...this.dataSource], { order, column: col });
           if (customSorterData) this.dataSourceCopy = customSorterData;
@@ -486,13 +492,15 @@ export default {
     /** 滚动条监听 */
     onTableScroll(e) {
       if (!e?.target) return;
-      if (this.virtual) {
-        const top = e.target.scrollTop;
+      if (this.virtual && this.virtual_on) {
+        const sTop = e.target.scrollTop;
         const { rowHeight } = this.virtualScroll;
-        this.virtualScroll.startIndex = parseInt(top / rowHeight);
-        // 这里由于边界情况 - 1，用于保证表格总高度不要高出实际行*行高, || 1 用来保证 startIndex - 1 不为负数
+        this.virtualScroll.startIndex = parseInt(sTop / rowHeight);
+        // 这里边界情况 - 1
         // if(this.virtualScroll.startIndex > this.dataSourceCopy.length - this.virtual_pageSize)
-        this.virtualScroll.offsetTop = ((this.virtualScroll.startIndex || 1) - 1) * rowHeight;
+        let oTop = (this.virtualScroll.startIndex - 1) * rowHeight;
+        if (oTop < 0) oTop = 0;
+        this.virtualScroll.offsetTop = oTop;
         // this.virtualScroll.scrollTop = top;
       }
       // const res = {
@@ -581,7 +589,7 @@ export default {
       if (this.dataSourceCopy?.length) {
         // 如果表格有数据，则进行排序
         const column = this.columns.find(it => it.dataIndex === this.sortCol);
-        this.onColumnSort(column, false);
+        this.onColumnSort(column, false, true);
       }
     },
     /** 重置排序 */
