@@ -216,6 +216,19 @@ export default {
       defualt: false,
     },
   },
+  emits: [
+    'row-click',
+    'sort-change',
+    'current-change',
+    'row-dblclick',
+    'header-row-menu',
+    'row-menu',
+    'cell-click',
+    'header-cell-click',
+    'col-order-change',
+    'th-drop',
+    'th-drag-start',
+  ],
   data() {
     return {
       /** 是否展示横向滚动固定列的阴影 */
@@ -393,9 +406,14 @@ export default {
       }
     },
     // ------event handler-------------
-    /** 表头点击排序 */
-    onColumnSort(col, click = true, force) {
+    /**
+     * 表头点击排序
+     * @param {boolean} options.force sort-remote 开启后是否强制排序
+     * @param {boolean} options.emit 是否触发回调
+     */
+    onColumnSort(col, click = true, options = {}) {
       if (!col.sorter) return;
+      options = { force: false, emit: false, ...options };
       if (this.sortCol !== col.dataIndex) {
         // 改变排序的列时，重置排序
         this.sortCol = col.dataIndex;
@@ -407,19 +425,19 @@ export default {
       if (this.sortOrderIndex > 2) this.sortOrderIndex = 0;
       const order = this.sortSwitchOrder[this.sortOrderIndex];
 
-      if (!this.sortRemote || force) {
+      if (!this.sortRemote || options.force) {
         if (typeof col.sorter === 'function') {
           const customSorterData = col.sorter([...this.dataSource], { order, column: col });
           if (customSorterData) this.dataSourceCopy = customSorterData;
           else this.dataSourceCopy = [...this.dataSource]; // 还原数组
         } else if (order) {
           let sortField = col.dataIndex;
-          if (col.sortBy) sortField = col.sortBy;
+          if (col.sortField) sortField = col.sortField;
           if (col.sortType === 'number') {
             // 按数字类型排序
             const nanArr = []; // 非数字
             const numArr = []; // 数字
-            // 非数字不进入排序，一直排在最后
+
             for (let i = 0; i < this.dataSourceCopy.length; i++) {
               const row = this.dataSourceCopy[i];
               if (
@@ -433,12 +451,15 @@ export default {
                 numArr.push(row);
               }
             }
+            // 非数字当作最小值处理
             if (order === 'asc') {
               numArr.sort((a, b) => +a[sortField] - +b[sortField]);
+              this.dataSourceCopy = [...nanArr, ...numArr];
             } else {
               numArr.sort((a, b) => +b[sortField] - +a[sortField]);
+              this.dataSourceCopy = [...numArr, ...nanArr];
             }
-            this.dataSourceCopy = [...numArr, ...nanArr];
+            // this.dataSourceCopy = [...numArr, ...nanArr]; // 非数字不进入排序，一直排在最后
           } else {
             // 按string 排序
             if (order === 'asc') {
@@ -452,8 +473,8 @@ export default {
         }
       }
       // 只有点击才触发事件
-      if (click) {
-        this.$emit('sort-change', col, order);
+      if (click || options.emit) {
+        this.$emit('sort-change', col, order, [...this.dataSourceCopy]);
       }
     },
     /** 插入一行 
@@ -582,15 +603,17 @@ export default {
      * 设置排序
      * @param {string} dataIndex
      * @param {'asc'|'desc'|null} order
+     * @param {boolean} option.silent 是否触发回调
      */
-    setSorter(dataIndex, order) {
+    setSorter(dataIndex, order, option = { silent: true }) {
       this.sortCol = dataIndex;
       this.sortOrderIndex = this.sortSwitchOrder.findIndex(it => it == order);
       if (this.dataSourceCopy?.length) {
         // 如果表格有数据，则进行排序
         const column = this.columns.find(it => it.dataIndex === this.sortCol);
-        this.onColumnSort(column, false, true);
+        this.onColumnSort(column, false, { force: true, emit: !option.silent });
       }
+      return this.dataSourceCopy;
     },
     /** 重置排序 */
     resetSorter() {
@@ -749,15 +772,16 @@ export default {
         &.highlight-row td:not(.highlight-cell) {
           animation: dim 2s linear;
         }
-        &.active {
-          td {
-            background-color: var(--tr-active-bg-color);
-          }
-        }
+
         &.hover,
         &:hover {
           td {
             background-color: var(--tr-hover-bg-color);
+          }
+        }
+        &.active {
+          td {
+            background-color: var(--tr-active-bg-color);
           }
         }
         td {
