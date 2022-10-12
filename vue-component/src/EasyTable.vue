@@ -412,7 +412,7 @@ export default {
      * @param {boolean} options.emit 是否触发回调
      */
     onColumnSort(col, click = true, options = {}) {
-      if (!col.sorter) return;
+      if (!col?.sorter) return;
       options = { force: false, emit: false, ...options };
       if (this.sortCol !== col.dataIndex) {
         // 改变排序的列时，重置排序
@@ -605,13 +605,15 @@ export default {
      * @param {'asc'|'desc'|null} order
      * @param {boolean} option.silent 是否触发回调
      */
-    setSorter(dataIndex, order, option = { silent: true }) {
+    setSorter(dataIndex, order, option = {}) {
+      option = { silent: true, sortOption: null, ...option };
       this.sortCol = dataIndex;
       this.sortOrderIndex = this.sortSwitchOrder.findIndex(it => it == order);
       if (this.dataSourceCopy?.length) {
         // 如果表格有数据，则进行排序
-        const column = this.columns.find(it => it.dataIndex === this.sortCol);
-        this.onColumnSort(column, false, { force: true, emit: !option.silent });
+        const column = option.sortOption || this.columns.find(it => it.dataIndex === this.sortCol);
+        if (column) this.onColumnSort(column, false, { force: true, emit: !option.silent });
+        else console.warn('Can not find column by dataIndex:', this.sortCol);
       }
       return this.dataSourceCopy;
     },
