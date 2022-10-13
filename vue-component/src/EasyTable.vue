@@ -158,7 +158,58 @@ function _howDeepTheColumn(arr, level = 1) {
   });
   return Math.max(...levels);
 }
+/**
+ * 表格排序抽离
+ * @param {object} sortOption 列配置
+ * @param {any} dataSource 排序的数组
+ * @param {string|null} order 排序方式
+ */
+export function tableSort(sortOption, dataSource, order) {
+  let targetDataSource = [...dataSource];
+  if (typeof sortOption.sorter === 'function') {
+    const customSorterData = sortOption.sorter(targetDataSource, { order, column: sortOption });
+    if (customSorterData) targetDataSource = customSorterData;
+  } else if (order) {
+    let sortField = sortOption.dataIndex;
+    if (sortOption.sortField) sortField = sortOption.sortField;
+    if (sortOption.sortType === 'number') {
+      // 按数字类型排序
+      const nanArr = []; // 非数字
+      const numArr = []; // 数字
 
+      for (let i = 0; i < targetDataSource.length; i++) {
+        const row = targetDataSource[i];
+        if (
+          row[sortField] === null ||
+          row[sortField] === '' ||
+          typeof row[sortField] === 'boolean' ||
+          Number.isNaN(+row[sortField])
+        ) {
+          nanArr.push(row);
+        } else {
+          numArr.push(row);
+        }
+      }
+      // 非数字当作最小值处理
+      if (order === 'asc') {
+        numArr.sort((a, b) => +a[sortField] - +b[sortField]);
+        targetDataSource = [...nanArr, ...numArr];
+      } else {
+        numArr.sort((a, b) => +b[sortField] - +a[sortField]);
+        targetDataSource = [...numArr, ...nanArr];
+      }
+      // targetDataSource = [...numArr, ...nanArr]; // 非数字不进入排序，一直排在最后
+    } else {
+      // 按string 排序
+      if (order === 'asc') {
+        targetDataSource.sort((a, b) => String(a[sortField]).localeCompare(b[sortField]));
+      } else {
+        targetDataSource.sort((a, b) => String(a[sortField]).localeCompare(b[sortField]) * -1);
+      }
+    }
+  }
+  return targetDataSource;
+}
 export default {
   props: {
     minWidth: {
@@ -256,7 +307,7 @@ export default {
         startIndex: 0, // 数组开始位置
         rowHeight: 28,
         offsetTop: 0, // 表格定位上边距
-        scrollTop: 0,
+        // scrollTop: 0,
       },
       thDrag: {
         dragIndex: null,
@@ -309,6 +360,7 @@ export default {
     dataSource(val) {
       // this.dealColumns(val);
       this.dataSourceCopy = [...val];
+      this.initVirtualScroll();
       if (this.sortCol) {
         // 排序
         const column = this.columns.find(it => it.dataIndex === this.sortCol);
@@ -321,16 +373,39 @@ export default {
     this.dataSourceCopy = [...this.dataSource];
   },
   mounted() {
-    if (this.virtual) this.initVirtualScroll();
+    this.initVirtualScroll();
   },
   methods: {
     /**
      * 初始化虚拟滚动参数
-     * @param {number} containerHeight 虚拟滚动的高度
+     * @param {number} height 虚拟滚动的高度
      */
-    initVirtualScroll(containerHeight) {
-      this.virtualScroll.containerHeight =
-        typeof containerHeight === 'number' ? containerHeight : this.$refs.tableContainer.offsetHeight;
+    initVirtualScroll(height) {
+      if (this.virtual) {
+        this.virtualScroll.containerHeight =
+          typeof height === 'number' ? height : this.$refs.tableContainer.offsetHeight;
+        this.updateVirtualScroll(this.$refs.tableContainer?.scrollTop);
+        // const { offsetTop, containerHeight, rowHeight } = this.virtualScroll;
+        // const tableAllHeight = this.dataSourceCopy.length * rowHeight;
+        // const overflowHeight = tableAllHeight - containerHeight;
+        // if (overflowHeight < offsetTop && overflowHeight > 0) {
+        //   this.virtualScroll.offsetTop = overflowHeight;
+        //   this.virtualScroll.startIndex = Math.ceil(overflowHeight / rowHeight);
+        // } else if (overflowHeight <= 0) {
+        //   this.virtualScroll.offsetTop = 0;
+        //   this.virtualScroll.startIndex = 0;
+        // }
+      }
+    },
+    /** 通过滚动条位置，计算虚拟滚动的参数 */
+    updateVirtualScroll(sTop = 0) {
+      const { rowHeight } = this.virtualScroll;
+      const startIndex = parseInt(sTop / rowHeight);
+      // 这里边界情况 - 1
+      let oTop = (startIndex - 1) * rowHeight;
+      if (oTop < 0) oTop = 0;
+      this.virtualScroll.startIndex = startIndex;
+      this.virtualScroll.offsetTop = oTop;
     },
     /** 固定列的style */
     fixedStyle(tagType, col) {
@@ -419,58 +494,13 @@ export default {
         this.sortCol = col.dataIndex;
         this.sortOrderIndex = 0;
       }
-      if (click) {
-        this.sortOrderIndex++;
-      }
+      if (click) this.sortOrderIndex++;
+
       if (this.sortOrderIndex > 2) this.sortOrderIndex = 0;
       const order = this.sortSwitchOrder[this.sortOrderIndex];
 
       if (!this.sortRemote || options.force) {
-        if (typeof col.sorter === 'function') {
-          const customSorterData = col.sorter([...this.dataSource], { order, column: col });
-          if (customSorterData) this.dataSourceCopy = customSorterData;
-          else this.dataSourceCopy = [...this.dataSource]; // 还原数组
-        } else if (order) {
-          let sortField = col.dataIndex;
-          if (col.sortField) sortField = col.sortField;
-          if (col.sortType === 'number') {
-            // 按数字类型排序
-            const nanArr = []; // 非数字
-            const numArr = []; // 数字
-
-            for (let i = 0; i < this.dataSourceCopy.length; i++) {
-              const row = this.dataSourceCopy[i];
-              if (
-                row[sortField] === null ||
-                row[sortField] === '' ||
-                typeof row[sortField] === 'boolean' ||
-                Number.isNaN(+row[sortField])
-              ) {
-                nanArr.push(row);
-              } else {
-                numArr.push(row);
-              }
-            }
-            // 非数字当作最小值处理
-            if (order === 'asc') {
-              numArr.sort((a, b) => +a[sortField] - +b[sortField]);
-              this.dataSourceCopy = [...nanArr, ...numArr];
-            } else {
-              numArr.sort((a, b) => +b[sortField] - +a[sortField]);
-              this.dataSourceCopy = [...numArr, ...nanArr];
-            }
-            // this.dataSourceCopy = [...numArr, ...nanArr]; // 非数字不进入排序，一直排在最后
-          } else {
-            // 按string 排序
-            if (order === 'asc') {
-              this.dataSourceCopy.sort((a, b) => String(a[sortField]).localeCompare(b[sortField]));
-            } else {
-              this.dataSourceCopy.sort((a, b) => String(a[sortField]).localeCompare(b[sortField]) * -1);
-            }
-          }
-        } else {
-          this.dataSourceCopy = [...this.dataSource];
-        }
+        this.dataSourceCopy = tableSort(col, this.dataSource, order);
       }
       // 只有点击才触发事件
       if (click || options.emit) {
@@ -514,14 +544,7 @@ export default {
     onTableScroll(e) {
       if (!e?.target) return;
       if (this.virtual && this.virtual_on) {
-        const sTop = e.target.scrollTop;
-        const { rowHeight } = this.virtualScroll;
-        this.virtualScroll.startIndex = parseInt(sTop / rowHeight);
-        // 这里边界情况 - 1
-        // if(this.virtualScroll.startIndex > this.dataSourceCopy.length - this.virtual_pageSize)
-        let oTop = (this.virtualScroll.startIndex - 1) * rowHeight;
-        if (oTop < 0) oTop = 0;
-        this.virtualScroll.offsetTop = oTop;
+        this.updateVirtualScroll(e.target.scrollTop);
         // this.virtualScroll.scrollTop = top;
       }
       // const res = {
@@ -578,16 +601,20 @@ export default {
     setHighlightDimCell(rowKeyValue, dataIndex) {
       const cellEl = this.$el.querySelector(`[data-row-key="${rowKeyValue}"]>[data-index="${dataIndex}"]`);
       if (!cellEl) return;
-      cellEl.classList.remove('highlight-cell');
-      void cellEl.offsetHeight;
+      if (cellEl.classList.contains('highlight-cell')) {
+        cellEl.classList.remove('highlight-cell');
+        void cellEl.offsetHeight;
+      }
       cellEl.classList.add('highlight-cell');
     },
     /** 高亮一行 */
     setHighlightDimRow(rowKeyValue) {
       const rowEl = this.$el.querySelector(`[data-row-key="${rowKeyValue}"]`);
       if (!rowEl) return;
-      rowEl.classList.remove('highlight-row');
-      void rowEl.offsetWidth;
+      if (rowEl.classList.contains('highlight-row')) {
+        rowEl.classList.remove('highlight-row');
+        void rowEl.offsetWidth;
+      }
       rowEl.classList.add('highlight-row');
       // 动画结束移除class
       window.clearTimeout(this.highlightDimRowsTimeout.get(rowKeyValue));
@@ -600,16 +627,18 @@ export default {
       );
     },
     /**
-     * 设置排序
-     * @param {string} dataIndex
+     * 设置表头排序状态
+     * @param {string} dataIndex 列字段
      * @param {'asc'|'desc'|null} order
+     * @param {object} option.sortOption 指定排序参数
      * @param {boolean} option.silent 是否触发回调
+     * @param {boolean} option.sort 是否排序
      */
     setSorter(dataIndex, order, option = {}) {
-      option = { silent: true, sortOption: null, ...option };
+      option = { silent: true, sortOption: null, sort: true, ...option };
       this.sortCol = dataIndex;
       this.sortOrderIndex = this.sortSwitchOrder.findIndex(it => it == order);
-      if (this.dataSourceCopy?.length) {
+      if (option.sort && this.dataSourceCopy?.length) {
         // 如果表格有数据，则进行排序
         const column = option.sortOption || this.columns.find(it => it.dataIndex === this.sortCol);
         if (column) this.onColumnSort(column, false, { force: true, emit: !option.silent });
