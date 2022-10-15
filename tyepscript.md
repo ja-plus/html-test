@@ -3,7 +3,13 @@
 ## 笔记
 * `keyof` 将对象的Key作为联合类型
 * `typeof` 获得某一变量的类型
-* `infer` 推导类型。必须跟在 `extends` 后。 eg: type getIntersection<T> = T extends (a: infer P,b: infer P) => void ? P : never;
+* `infer` 推导类型。必须跟在 `extends` 后,且一定在三元运算中。 eg: type getIntersection<T> = T extends (a: infer P,b: infer P) => void ? P : never;
+## 内置类型
+* Parameter 获取函数参数类型
+* ReturnType 获取函数的返回值类型
+* Omit 取出个别字段
+* Exclude 去除个别字段
+* Partial 字段全部转换为可选 k?:v
 
 ### d.ts 中import from其他类型会导致该全局声明文件失效
 ### 遍历/获取对象

@@ -5,11 +5,10 @@ const { ESBuildPlugin } = require('esbuild-loader');
 const SpeedMeasurePlugin = require('speed-measure-webpack-plugin');
 const smp = new SpeedMeasurePlugin();
 module.exports = smp.wrap({
+  stats: 'minimal',
   entry: {
     app: './src/app.js',
-    federation: './src/federation.js',
-    // reactApp: './src/reactApp.jsx',
-    // svelteApp: './src/svelteApp.js',
+    // federation: './src/federation.js',//webpack5联邦模块
   },
   devServer: {
     static: {
@@ -20,7 +19,7 @@ module.exports = smp.wrap({
     open: true,
   },
   resolve: {
-    extensions: ['.js', '.json'], // 解析扩展。（当我们通过路导入文件，找不到改文件时，会尝试加入这些后缀继续寻找文件）
+    extensions: ['.js', '.ts', '.json'], // 解析扩展。（当我们通过路导入文件，找不到改文件时，会尝试加入这些后缀继续寻找文件）
     alias: {
       '@': path.join(__dirname, '..', 'src'), // 在项目中使用@符号代替src路径，导入文件路径更方便
     },
@@ -34,7 +33,7 @@ module.exports = smp.wrap({
       },
       {
         test: /\.ts$/,
-        loader:'ts-loader'
+        loader: 'ts-loader',
       },
       {
         test: /\.svelte$/,
