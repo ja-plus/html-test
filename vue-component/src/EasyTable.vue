@@ -19,14 +19,21 @@
       ></div>
     -->
     <!-- 表格主体 -->
-    <table class="stk-table-main" :style="{ minWidth: minWidth }">
+    <table
+      class="stk-table-main"
+      :style="{
+        minWidth: minWidth,
+        marginLeft: virtualX && virtualScrollX.offsetLeft + 'px',
+        marginRight: virtualX && virtualX_offsetRight + 'px',
+      }"
+    >
       <!-- <colgroup>
           <col v-for="(col, i) in tableProps" :key="i" :style="{}" />
         </colgroup> -->
       <thead>
         <tr v-for="(row, index) in tableHeaders" :key="index" @contextmenu="e => onHeaderMenu(e)">
           <th
-            v-for="col in row"
+            v-for="col in virtualX ? virutalX_columnPart : row"
             :key="col.dataIndex"
             draggable="true"
             :rowspan="col.rowSpan"
@@ -109,7 +116,7 @@
             @mouseover="e => onTrMouseOver(e, item)"
           >
             <td
-              v-for="col in tableProps"
+              v-for="col in virtualX ? virutalX_columnPart : tableProps"
               :key="col.dataIndex"
               :data-index="col.dataIndex"
               :class="[col.className, showOverflow ? 'text-overflow' : '']"
@@ -216,7 +223,13 @@ export default {
       type: String,
       default: '100%',
     },
+    /** 虚拟滚动 */
     virtual: {
+      type: Boolean,
+      default: false,
+    },
+    /** x轴虚拟滚动 */
+    virtualX: {
       type: Boolean,
       default: false,
     },
@@ -307,7 +320,14 @@ export default {
         startIndex: 0, // 数组开始位置
         rowHeight: 28,
         offsetTop: 0, // 表格定位上边距
-        // scrollTop: 0,
+        scrollTop: 0, // 纵向滚动条位置，用于判断是横向滚动还是纵向
+      },
+      virtualScrollX: {
+        containerWidth: 0,
+        startIndex: 0,
+        endIndex: 0,
+        offsetLeft: 0,
+        scrollLeft: 0, // 横向滚动位置，用于判断是横向滚动还是纵向
       },
       thDrag: {
         dragIndex: null,
@@ -339,6 +359,20 @@ export default {
         this.virtualScroll.rowHeight
       );
     },
+    /** 横向虚拟滚动展示的列 */
+    virutalX_columnPart() {
+      return this.columns.slice(this.virtualScrollX.startIndex, this.virtualScrollX.endIndex);
+    },
+    /** 横向虚拟滚动，右边距 */
+    virtualX_offsetRight() {
+      let width = 0;
+      for (let i = this.virtualScrollX.endIndex + 1; i < this.columns.length; i++) {
+        const col = this.columns[i];
+        width += parseInt(col.width || col.maxWidth || col.minWidth);
+      }
+      return width;
+    },
+
     // fixedLeftColWidth() {
     //   let fixedLeftColumns = this.tableProps.filter(it => it.fixed === 'left');
     //   let width = 0;
@@ -353,6 +387,7 @@ export default {
     columns: {
       handler(val) {
         this.dealColumns(val);
+        // this.initVirtualScroll(); // TODO:
       },
       deep: true,
     },
@@ -396,6 +431,10 @@ export default {
         //   this.virtualScroll.startIndex = 0;
         // }
       }
+      if (this.virtualX) {
+        this.virtualScrollX.containerWidth = this.$refs.tableContainer.offsetWidth;
+        this.updateVirtualScrollX(this.$refs.tableContainer?.scrollLeft);
+      }
     },
     /** 通过滚动条位置，计算虚拟滚动的参数 */
     updateVirtualScroll(sTop = 0) {
@@ -406,6 +445,39 @@ export default {
       if (oTop < 0) oTop = 0;
       this.virtualScroll.startIndex = startIndex;
       this.virtualScroll.offsetTop = oTop;
+    },
+    /** 通过横向滚动条位置，计算横向虚拟滚动的参数 */
+    updateVirtualScrollX(sLeft = 0) {
+      if (!this.columns?.length) return;
+      let colWidthSum = 0;
+      let startIndex = 0;
+      let offsetLeft = 0;
+
+      for (let colIndex = 0; colIndex < this.columns.length; colIndex++) {
+        const col = this.columns[colIndex];
+        colWidthSum += parseInt(col.width || col.maxWidth || col.minWidth);
+        // 列宽大于容器宽度则停止
+        if (colWidthSum >= sLeft) {
+          offsetLeft = colWidthSum - parseInt(col.width || col.maxWidth || col.minWidth);
+          startIndex = colIndex;
+          break;
+        }
+      }
+      // -----
+      colWidthSum = 0;
+      let endIndex = this.columns.length;
+      for (let colIndex = startIndex; colIndex < this.columns.length - 1; colIndex++) {
+        const col = this.columns[colIndex];
+        colWidthSum += parseInt(col.width || col.maxWidth || col.minWidth);
+        // 列宽大于容器宽度则停止
+        if (colWidthSum >= this.virtualScrollX.containerWidth) {
+          endIndex = colIndex + 2; // TODO:预渲染的列数
+          break;
+        }
+      }
+      this.virtualScrollX.startIndex = startIndex;
+      this.virtualScrollX.endIndex = endIndex;
+      this.virtualScrollX.offsetLeft = offsetLeft;
     },
     /** 固定列的style */
     fixedStyle(tagType, col) {
@@ -544,8 +616,16 @@ export default {
     onTableScroll(e) {
       if (!e?.target) return;
       if (this.virtual && this.virtual_on) {
-        this.updateVirtualScroll(e.target.scrollTop);
-        // this.virtualScroll.scrollTop = top;
+        const scrollTop = e.target.scrollTop;
+        this.updateVirtualScroll(scrollTop);
+        // 纵向滚动有变化
+        if (scrollTop !== this.virtualScroll.scrollTop) this.virtualScroll.scrollTop = scrollTop;
+      }
+      if (this.virtualX) {
+        const scrollLeft = e.target.scrollLeft;
+        this.updateVirtualScrollX(scrollLeft);
+        // 横向滚动有变化
+        if (scrollLeft !== this.virtualScrollX.scrollLeft) this.virtualScrollX.scrollLeft = e.target.scrollLeft;
       }
       // const res = {
       //   isTop: e.target.scrollTop <= 0,

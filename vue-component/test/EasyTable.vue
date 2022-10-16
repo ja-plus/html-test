@@ -19,8 +19,12 @@ div(style="display:flex;")
 div(style="margin-left:10px")
   div virtualScroll: {{$refs.easyTable&& $refs.easyTable.virtualScroll}}
   div virtual_pageSize: {{$refs.easyTable&& $refs.easyTable.virtual_pageSize}}
+  div virtualScrollX: {{$refs.easyTable&& $refs.easyTable.virtualScrollX}}
+  div virtualX_offsetRight: {{$refs.easyTable&& $refs.easyTable.virtualX_offsetRight}}
+  //- div virtual_start/end:{{$refs.easyTable && $refs.easyTable.virtualX_startIndex}}/{{$refs.easyTable && $refs.easyTable.virtualX_endIndex}}
 
 div(:style="{width: tableWidth}" style="padding:10px;")
+  //- virtualX
   EasyTable(
     ref="easyTable" 
     rowKey="name" 
@@ -91,8 +95,9 @@ export default {
         {
           title: 'Name',
           dataIndex: 'name',
-          fixed: 'left',
+          // fixed: 'left',
           width: '200px',
+          maxWidth: '200px',
           headerClassName: 'my-th',
           className: 'my-td',
           // minWidth: '200px', // 组件处理固定列的minWidth = width
@@ -110,8 +115,9 @@ export default {
         {
           title: 'Age',
           dataIndex: 'age',
-          fixed: 'left',
+          // fixed: 'left',
           width: '100px',
+          minWidth: '100px', // 为确保横向滚动准确，列宽一定要固定，minWidth,maxWidth要相等
           sorter(data, { order, column }) {
             // console.log(data, order, column);
             if (order === 'desc') return data.sort((a, b) => b.age - a.age);
@@ -125,7 +131,7 @@ export default {
           dataIndex: 'gender',
           // fixed: 'right',
           width: '150px',
-          // minWidth: '150px',
+          minWidth: '150px',
           sorter: true,
           sortType: 'number', // 指定为数字排序
         },
@@ -139,10 +145,12 @@ export default {
         },
         /** overflow 必须设置maxWidth */
         { title: 'Address', dataIndex: 'address', minWidth: '100px', maxWidth: '100px' },
-        { title: 'Long Title Long Title LongTitle', dataIndex: 'address', minWidth: '100px', maxWidth: '200px' },
-        { title: 'col2', dataIndex: 'address', fixed: 'right' },
+        { title: 'Long Title Long Title LongTitle', dataIndex: 'address2', minWidth: '200px', maxWidth: '200px' },
+        { title: 'col2', dataIndex: 'address3' /* , fixed: 'right' */, minWidth: '150px', maxWidth: '150px' },
         // { title: 'col3', dataIndex: 'address' },
-        // ...new Array(20).fill(0).map(() => ({ title: 'col3', dataIndex: 'address' })),
+        ...new Array(40)
+          .fill(0)
+          .map((it, i) => ({ title: 'col3', dataIndex: 'addCol' + i, width: '100px', minWidth: '100px' })),
       ],
       // dataSource: new Array(4).fill(0).map((it, i) => ({
       //   name: 'name' + i,
@@ -182,7 +190,7 @@ export default {
         { key: '------------', desc: '---------' },
         { key: 'columnOption', desc: '', value: '' },
         { key: 'title', desc: '名称' },
-        { key: 'dataIndex', desc: '数据key，需要唯一' },
+        { key: 'dataIndex', desc: '数据key，必需要唯一' },
         {
           key: 'fixed',
           desc: '固定列，暂不支持多级表头固定列。left列需要放在columns最前，right列需要放在columns最后。',
@@ -279,7 +287,15 @@ export default {
       console.log('header-cell-click:', e, row);
     },
     onTableScroll(e) {
-      console.log('scroll:', e.target.scrollHeight, e.target.clientHeight, e.target.scrollTop);
+      console.log(
+        'scroll:',
+        e.target.scrollHeight,
+        e.target.clientHeight,
+        'top:',
+        e.target.scrollTop,
+        'left:',
+        e.target.scrollLeft,
+      );
     },
     handleClearSorter() {
       this.$refs.easyTable.resetSorter();
