@@ -23,8 +23,7 @@
       class="stk-table-main"
       :style="{
         minWidth: minWidth,
-        marginLeft: virtualX && virtualScrollX.offsetLeft + 'px',
-        marginRight: virtualX && virtualX_offsetRight + 'px',
+        transform: virtualX && `translateX(${virtualScrollX.offsetLeft}px)`,
       }"
     >
       <!-- <colgroup>
@@ -33,7 +32,7 @@
       <thead>
         <tr v-for="(row, index) in tableHeaders" :key="index" @contextmenu="e => onHeaderMenu(e)">
           <th
-            v-for="col in virtualX ? virutalX_columnPart : row"
+            v-for="col in virtualX ? virtualX_columnPart : row"
             :key="col.dataIndex"
             draggable="true"
             :rowspan="col.rowSpan"
@@ -90,6 +89,7 @@
               </span>
             </div>
           </th>
+          <th v-if="virtualX" style="padding: 0" :style="{ minWidth: virtualX_offsetRight + 'px' }"></th>
         </tr>
       </thead>
 
@@ -116,7 +116,7 @@
             @mouseover="e => onTrMouseOver(e, item)"
           >
             <td
-              v-for="col in virtualX ? virutalX_columnPart : tableProps"
+              v-for="col in virtualX ? virtualX_columnPart : tableProps"
               :key="col.dataIndex"
               :data-index="col.dataIndex"
               :class="[col.className, showOverflow ? 'text-overflow' : '']"
@@ -274,7 +274,7 @@ export default {
       type: Boolean,
       default: false,
     },
-    /** 是否增加行hoverclass */
+    /** 是否增加行hover class */
     showTrHoverClass: {
       type: Boolean,
       defualt: false,
@@ -360,7 +360,7 @@ export default {
       );
     },
     /** 横向虚拟滚动展示的列 */
-    virutalX_columnPart() {
+    virtualX_columnPart() {
       return this.columns.slice(this.virtualScrollX.startIndex, this.virtualScrollX.endIndex);
     },
     /** 横向虚拟滚动，右边距 */

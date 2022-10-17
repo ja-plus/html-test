@@ -29,7 +29,8 @@ div(:style="{width: tableWidth}" style="padding:10px;")
     ref="easyTable" 
     rowKey="name" 
     noDataFull 
-    virtual 
+    virtual
+    virtualX
     :style="{height:props.height}" 
     v-bind="props"
     :columns="columns" 
