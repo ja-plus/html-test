@@ -89,6 +89,7 @@
               </span>
             </div>
           </th>
+          <!-- 这个th用于横向虚拟滚动表格右边距 -->
           <th v-if="virtualX" style="padding: 0" :style="{ minWidth: virtualX_offsetRight + 'px' }"></th>
         </tr>
       </thead>
@@ -455,10 +456,11 @@ export default {
 
       for (let colIndex = 0; colIndex < this.columns.length; colIndex++) {
         const col = this.columns[colIndex];
-        colWidthSum += parseInt(col.width || col.maxWidth || col.minWidth);
-        // 列宽大于容器宽度则停止
+        const colWidth = parseInt(col.width || col.maxWidth || col.minWidth);
+        colWidthSum += colWidth;
+        // 列宽总和大于scrollLeft时停止
         if (colWidthSum >= sLeft) {
-          offsetLeft = colWidthSum - parseInt(col.width || col.maxWidth || col.minWidth);
+          offsetLeft = colWidthSum - colWidth;
           startIndex = colIndex;
           break;
         }
@@ -625,7 +627,7 @@ export default {
         const scrollLeft = e.target.scrollLeft;
         this.updateVirtualScrollX(scrollLeft);
         // 横向滚动有变化
-        if (scrollLeft !== this.virtualScrollX.scrollLeft) this.virtualScrollX.scrollLeft = e.target.scrollLeft;
+        if (scrollLeft !== this.virtualScrollX.scrollLeft) this.virtualScrollX.scrollLeft = scrollLeft;
       }
       // const res = {
       //   isTop: e.target.scrollTop <= 0,
