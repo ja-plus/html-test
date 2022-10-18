@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Input Composition</title>
+</head>
+
+<body>
+  <input type="text" id="input">
+  用微软输入法这种会在文本框中预先输入字符的输入法触发。
+</body>
+<script>
+  let input = document.querySelector('#input');
+  let isComposite = false;
+  input.addEventListener('input', e => {
+    if (!isComposite) {
+      console.log('input:', e.target.value);
+    }
+  })
+  input.addEventListener('compositionstart', () => {
+    isComposite = true;
+    console.log('start');
+  })
+  input.addEventListener('compositionend', e => {
+    isComposite = false;
+    console.log('end');
+    console.log(e.data);
+  })
+</script>
+
+</html>
