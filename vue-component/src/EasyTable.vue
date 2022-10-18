@@ -360,6 +360,13 @@ export default {
         this.virtualScroll.rowHeight
       );
     },
+    /* 是否开启横向虚拟滚动 */
+    virtualX_on() {
+      return (
+        this.columns.reduce((sum, col) => (sum += parseInt(col.minWidth || col.width)), 0) >
+        this.virtualScrollX.containerWidth * 1.2
+      );
+    },
     /** 横向虚拟滚动展示的列 */
     virtualX_columnPart() {
       return this.columns.slice(this.virtualScrollX.startIndex, this.virtualScrollX.endIndex);
@@ -367,7 +374,7 @@ export default {
     /** 横向虚拟滚动，右边距 */
     virtualX_offsetRight() {
       let width = 0;
-      for (let i = this.virtualScrollX.endIndex + 1; i < this.columns.length; i++) {
+      for (let i = this.virtualScrollX.endIndex; i < this.columns.length; i++) {
         const col = this.columns[i];
         width += parseInt(col.width || col.maxWidth || col.minWidth);
       }
@@ -388,7 +395,7 @@ export default {
     columns: {
       handler(val) {
         this.dealColumns(val);
-        // this.initVirtualScroll(); // TODO:
+        this.initVirtualScrollX();
       },
       deep: true,
     },
@@ -396,7 +403,7 @@ export default {
     dataSource(val) {
       // this.dealColumns(val);
       this.dataSourceCopy = [...val];
-      this.initVirtualScroll();
+      this.initVirtualScrollY();
       if (this.sortCol) {
         // 排序
         const column = this.columns.find(it => it.dataIndex === this.sortCol);
@@ -417,10 +424,14 @@ export default {
      * @param {number} height 虚拟滚动的高度
      */
     initVirtualScroll(height) {
+      this.initVirtualScrollY(height);
+      this.initVirtualScrollX();
+    },
+    initVirtualScrollY(height) {
       if (this.virtual) {
         this.virtualScroll.containerHeight =
           typeof height === 'number' ? height : this.$refs.tableContainer.offsetHeight;
-        this.updateVirtualScroll(this.$refs.tableContainer?.scrollTop);
+        this.updateVirtualScrollY(this.$refs.tableContainer?.scrollTop);
         // const { offsetTop, containerHeight, rowHeight } = this.virtualScroll;
         // const tableAllHeight = this.dataSourceCopy.length * rowHeight;
         // const overflowHeight = tableAllHeight - containerHeight;
@@ -432,13 +443,15 @@ export default {
         //   this.virtualScroll.startIndex = 0;
         // }
       }
+    },
+    initVirtualScrollX() {
       if (this.virtualX) {
         this.virtualScrollX.containerWidth = this.$refs.tableContainer.offsetWidth;
         this.updateVirtualScrollX(this.$refs.tableContainer?.scrollLeft);
       }
     },
     /** 通过滚动条位置，计算虚拟滚动的参数 */
-    updateVirtualScroll(sTop = 0) {
+    updateVirtualScrollY(sTop = 0) {
       const { rowHeight } = this.virtualScroll;
       const startIndex = parseInt(sTop / rowHeight);
       // 这里边界情况 - 1
@@ -619,7 +632,7 @@ export default {
       if (!e?.target) return;
       if (this.virtual && this.virtual_on) {
         const scrollTop = e.target.scrollTop;
-        this.updateVirtualScroll(scrollTop);
+        this.updateVirtualScrollY(scrollTop);
         // 纵向滚动有变化
         if (scrollTop !== this.virtualScroll.scrollTop) this.virtualScroll.scrollTop = scrollTop;
       }
