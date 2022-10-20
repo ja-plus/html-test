@@ -23,7 +23,7 @@
       class="stk-table-main"
       :style="{
         minWidth: minWidth,
-        transform: virtualX && `translateX(${virtualScrollX.offsetLeft}px)`,
+        transform: virtualX_on ? `translateX(${virtualScrollX.offsetLeft}px)` : null,
       }"
     >
       <!-- <colgroup>
@@ -32,7 +32,7 @@
       <thead>
         <tr v-for="(row, index) in tableHeaders" :key="index" @contextmenu="e => onHeaderMenu(e)">
           <th
-            v-for="col in virtualX ? virtualX_columnPart : row"
+            v-for="col in virtualX_on ? virtualX_columnPart : row"
             :key="col.dataIndex"
             draggable="true"
             :rowspan="col.rowSpan"
@@ -90,7 +90,7 @@
             </div>
           </th>
           <!-- 这个th用于横向虚拟滚动表格右边距 -->
-          <th v-if="virtualX" style="padding: 0" :style="{ minWidth: virtualX_offsetRight + 'px' }"></th>
+          <th v-if="virtualX_on" style="padding: 0" :style="{ minWidth: virtualX_offsetRight + 'px' }"></th>
         </tr>
       </thead>
 
@@ -117,7 +117,7 @@
             @mouseover="e => onTrMouseOver(e, item)"
           >
             <td
-              v-for="col in virtualX ? virtualX_columnPart : tableProps"
+              v-for="col in virtualX_on ? virtualX_columnPart : tableProps"
               :key="col.dataIndex"
               :data-index="col.dataIndex"
               :class="[col.className, showOverflow ? 'text-overflow' : '']"
@@ -278,7 +278,7 @@ export default {
     /** 是否增加行hover class */
     showTrHoverClass: {
       type: Boolean,
-      defualt: false,
+      default: false,
     },
   },
   emits: [
@@ -336,9 +336,9 @@ export default {
     };
   },
   computed: {
-    /** 数据量大于一页才开始虚拟滚动*/
+    /** 数据量大于2页才开始虚拟滚动*/
     virtual_on() {
-      return this.dataSourceCopy.length > this.virtual_pageSize;
+      return this.dataSourceCopy.length > this.virtual_pageSize * 2;
     },
     /** 虚拟滚动展示的行数 */
     virtual_pageSize() {
@@ -363,16 +363,20 @@ export default {
     /* 是否开启横向虚拟滚动 */
     virtualX_on() {
       return (
+        this.virtualX &&
         this.columns.reduce((sum, col) => (sum += parseInt(col.minWidth || col.width)), 0) >
-        this.virtualScrollX.containerWidth * 1.2
+          this.virtualScrollX.containerWidth * 1.5
       );
     },
     /** 横向虚拟滚动展示的列 */
     virtualX_columnPart() {
-      return this.columns.slice(this.virtualScrollX.startIndex, this.virtualScrollX.endIndex);
+      return this.virtualX_on
+        ? this.columns.slice(this.virtualScrollX.startIndex, this.virtualScrollX.endIndex)
+        : this.columns;
     },
     /** 横向虚拟滚动，右边距 */
     virtualX_offsetRight() {
+      if (!this.virtualX_on) return 0;
       let width = 0;
       for (let i = this.virtualScrollX.endIndex; i < this.columns.length; i++) {
         const col = this.columns[i];
@@ -397,7 +401,7 @@ export default {
         this.dealColumns(val);
         this.initVirtualScrollX();
       },
-      deep: true,
+      // deep: true, // 不能加，因为this.dealColumns 中操作了this.columns
     },
     /** 监听表格数据变化 */
     dataSource(val) {
@@ -430,7 +434,7 @@ export default {
     initVirtualScrollY(height) {
       if (this.virtual) {
         this.virtualScroll.containerHeight =
-          typeof height === 'number' ? height : this.$refs.tableContainer.offsetHeight;
+          typeof height === 'number' ? height : this.$refs.tableContainer?.offsetHeight;
         this.updateVirtualScrollY(this.$refs.tableContainer?.scrollTop);
         // const { offsetTop, containerHeight, rowHeight } = this.virtualScroll;
         // const tableAllHeight = this.dataSourceCopy.length * rowHeight;
@@ -446,19 +450,16 @@ export default {
     },
     initVirtualScrollX() {
       if (this.virtualX) {
-        this.virtualScrollX.containerWidth = this.$refs.tableContainer.offsetWidth;
+        this.virtualScrollX.containerWidth = this.$refs.tableContainer?.offsetWidth;
         this.updateVirtualScrollX(this.$refs.tableContainer?.scrollLeft);
       }
     },
     /** 通过滚动条位置，计算虚拟滚动的参数 */
     updateVirtualScrollY(sTop = 0) {
       const { rowHeight } = this.virtualScroll;
-      const startIndex = parseInt(sTop / rowHeight);
-      // 这里边界情况 - 1
-      let oTop = (startIndex - 1) * rowHeight;
-      if (oTop < 0) oTop = 0;
+      const startIndex = Math.floor(sTop / rowHeight);
       this.virtualScroll.startIndex = startIndex;
-      this.virtualScroll.offsetTop = oTop;
+      this.virtualScroll.offsetTop = startIndex * rowHeight; // startIndex之前的高度
     },
     /** 通过横向滚动条位置，计算横向虚拟滚动的参数 */
     updateVirtualScrollX(sLeft = 0) {
@@ -561,11 +562,7 @@ export default {
     },
     /** 行唯一值生成 */
     rowKeyGen(row) {
-      if (typeof this.rowKey === 'function') {
-        return this.rowKey(row);
-      } else {
-        return row[this.rowKey];
-      }
+      return typeof this.rowKey === 'function' ? this.rowKey(row) : row[this.rowKey];
     },
     // ------event handler-------------
     /**
@@ -636,7 +633,7 @@ export default {
         // 纵向滚动有变化
         if (scrollTop !== this.virtualScroll.scrollTop) this.virtualScroll.scrollTop = scrollTop;
       }
-      if (this.virtualX) {
+      if (this.virtualX_on) {
         const scrollLeft = e.target.scrollLeft;
         this.updateVirtualScrollX(scrollLeft);
         // 横向滚动有变化

@@ -13,6 +13,8 @@ div(style="display:flex;")
     button(@click="addRow()") pushRow
     button(@click="addRow(100)") push100Row
     button(@click="addRow(1,true)") unshiftRow
+    button(@click="addColumn()") addColumn
+    button(@click="deleteColumn()") deleteColumn
     button(@click="props.showOverflow=!props.showOverflow") showOverflow:{{props.showOverflow}}
     button(@click="props.showHeaderOverflow=!props.showHeaderOverflow") showHeaderOverflow:{{props.showHeaderOverflow}}
     button(@click="props.sortRemote=!props.sortRemote") sortRemote:{{props.sortRemote}}
@@ -21,10 +23,9 @@ div(style="margin-left:10px")
   div virtual_pageSize: {{$refs.easyTable&& $refs.easyTable.virtual_pageSize}}
   div virtualScrollX: {{$refs.easyTable&& $refs.easyTable.virtualScrollX}}
   div virtualX_offsetRight: {{$refs.easyTable&& $refs.easyTable.virtualX_offsetRight}}
-  //- div virtual_start/end:{{$refs.easyTable && $refs.easyTable.virtualX_startIndex}}/{{$refs.easyTable && $refs.easyTable.virtualX_endIndex}}
+  div virtualX_start/end:{{$refs.easyTable && $refs.easyTable.virtualX_startIndex}}/{{$refs.easyTable && $refs.easyTable.virtualX_endIndex}}
 
 div(:style="{width: tableWidth}" style="padding:10px;")
-  //- virtualX
   EasyTable(
     ref="easyTable" 
     rowKey="name" 
@@ -67,11 +68,11 @@ div(style="width:max-content")
     :dataSource="docTableData" 
   )
 
-div columns:{{columns}} 
+//- div columns:{{columns}} 
 //- div dataSource:{{dataSource}}
 hr
-div tableHeaders:{{easyTable.tableHeaders}}
-div tableProps:{{easyTable.tableProps}}
+//- div tableHeaders:{{easyTable.tableHeaders}}
+//- div tableProps:{{easyTable.tableProps}}
 </template>
 
 <script>
@@ -79,6 +80,7 @@ import { h } from 'vue';
 import EasyTable from '../src/EasyTable.vue';
 import EasyTableC from '../src/EasyTableC/index.vue'; // 兼容版本 fixedLeft
 export default {
+  name: 'EasyTableTest',
   components: { EasyTable, EasyTableC },
   props: {},
   data() {
@@ -146,12 +148,12 @@ export default {
         },
         /** overflow 必须设置maxWidth */
         { title: 'Address', dataIndex: 'address', minWidth: '100px', maxWidth: '100px' },
-        { title: 'Long Title Long Title LongTitle', dataIndex: 'address2', minWidth: '200px', maxWidth: '200px' },
-        { title: 'col2', dataIndex: 'address3' /* , fixed: 'right' */, minWidth: '150px', maxWidth: '150px' },
+        // { title: 'Long Title Long Title LongTitle', dataIndex: 'address2', minWidth: '200px', maxWidth: '200px' },
+        // { title: 'col2', dataIndex: 'address3' /* , fixed: 'right' */, minWidth: '150px', maxWidth: '150px' },
         // { title: 'col3', dataIndex: 'address' },
-        ...new Array(40)
-          .fill(0)
-          .map((it, i) => ({ title: 'col3', dataIndex: 'addCol' + i, width: '100px', minWidth: '100px' })),
+        // ...new Array(40)
+        //   .fill(0)
+        //   .map((it, i) => ({ title: 'col3', dataIndex: 'addCol' + i, width: '100px', minWidth: '100px' })),
       ],
       // dataSource: new Array(4).fill(0).map((it, i) => ({
       //   name: 'name' + i,
@@ -360,6 +362,21 @@ export default {
           this.$refs.easyTableC.setHighlightDimRow('add' + addIndex);
         });
       });
+    },
+    addColumn(num = 1) {
+      const temp = [];
+      for (let i = 0; i < num; i++) {
+        temp.push({
+          title: 'addCol',
+          dataIndex: 'addColumn' + (i + this.columns.length),
+          width: '100px',
+          minWidth: '100px',
+        });
+      }
+      this.columns = this.columns.concat(temp);
+    },
+    deleteColumn(num = 1) {
+      this.columns = this.columns.slice(0, -1 * num);
     },
   },
 };
