@@ -96,13 +96,13 @@
 
       <!-- <tbody :style="{transform: `translateY(${virtualScroll.offsetTop}px)`}"> -->
       <tbody>
-        <template v-if="virtual">
+        <template v-if="virtual_on">
           <!-- 用于虚拟滚动表格内容定位 -->
           <tr :style="{ height: virtualScroll.offsetTop + 'px' }"></tr>
         </template>
         <template v-if="dataSourceCopy && dataSourceCopy.length">
           <tr
-            v-for="(item, i) in virtual ? virtual_dataSourcePart : dataSourceCopy"
+            v-for="(item, i) in virtual_dataSourcePart"
             :key="rowKey ? rowKeyGen(item) : i"
             :data-row-key="rowKey ? rowKeyGen(item) : i"
             :class="{
@@ -136,7 +136,7 @@
             </td>
           </tr>
         </template>
-        <template v-if="virtual">
+        <template v-if="virtual_on">
           <!-- 用于虚拟滚动表格内容定位 -->
           <tr :style="{ height: virtual_offsetBottom + 'px' }"></tr>
         </template>
@@ -293,6 +293,7 @@ export default {
     'col-order-change',
     'th-drop',
     'th-drag-start',
+    'scroll',
   ],
   data() {
     return {
@@ -338,7 +339,7 @@ export default {
   computed: {
     /** 数据量大于2页才开始虚拟滚动*/
     virtual_on() {
-      return this.dataSourceCopy.length > this.virtual_pageSize * 2;
+      return this.virtual && this.dataSourceCopy.length > this.virtual_pageSize * 2;
     },
     /** 虚拟滚动展示的行数 */
     virtual_pageSize() {
@@ -407,6 +408,7 @@ export default {
     dataSource(val) {
       // this.dealColumns(val);
       this.dataSourceCopy = [...val];
+      // TODO: 数据长度没变则不计算虚拟滚动
       this.initVirtualScrollY();
       if (this.sortCol) {
         // 排序
@@ -432,7 +434,7 @@ export default {
       this.initVirtualScrollX();
     },
     initVirtualScrollY(height) {
-      if (this.virtual) {
+      if (this.virtual_on) {
         this.virtualScroll.containerHeight =
           typeof height === 'number' ? height : this.$refs.tableContainer?.offsetHeight;
         this.updateVirtualScrollY(this.$refs.tableContainer?.scrollTop);
@@ -627,7 +629,7 @@ export default {
     /** 滚动条监听 */
     onTableScroll(e) {
       if (!e?.target) return;
-      if (this.virtual && this.virtual_on) {
+      if (this.virtual_on) {
         const scrollTop = e.target.scrollTop;
         this.updateVirtualScrollY(scrollTop);
         // 纵向滚动有变化
@@ -643,7 +645,7 @@ export default {
       //   isTop: e.target.scrollTop <= 0,
       //   isBottom: e.target.scrollHeight === e.target.scrollTop + e.target.clientHeight,
       // };
-      // this.$emit('scroll', e); // vue3 不需要暴露，因为事件在根元素上
+      this.$emit('scroll', e); // vue3 不需要暴露，因为事件在根元素上
       // this.showFixedLeftShadow = e.target.scrollLeft > 0;
     },
     /** tr hover事件 */
