@@ -98,7 +98,7 @@ export default {
         {
           title: 'Name',
           dataIndex: 'name',
-          // fixed: 'left',
+          fixed: 'left',
           width: '200px',
           maxWidth: '200px',
           headerClassName: 'my-th',
@@ -118,7 +118,7 @@ export default {
         {
           title: 'Age',
           dataIndex: 'age',
-          // fixed: 'left',
+          fixed: 'left',
           width: '100px',
           minWidth: '100px', // 为确保横向滚动准确，列宽一定要固定，minWidth,maxWidth要相等
           sorter(data, { order, column }) {

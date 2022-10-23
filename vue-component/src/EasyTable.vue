@@ -23,14 +23,13 @@
       class="stk-table-main"
       :style="{
         minWidth: minWidth,
-        transform: virtualX_on ? `translateX(${virtualScrollX.offsetLeft}px)` : null,
       }"
     >
-      <!-- <colgroup>
-          <col v-for="(col, i) in tableProps" :key="i" :style="{}" />
-        </colgroup> -->
+      <!-- transform: virtualX_on ? `translateX(${virtualScrollX.offsetLeft}px)` : null, 用transform控制虚拟滚动左边距，sticky会有问题 -->
       <thead>
         <tr v-for="(row, index) in tableHeaders" :key="index" @contextmenu="e => onHeaderMenu(e)">
+          <!-- 这个th用于横向虚拟滚动表格左边距 -->
+          <th v-if="virtualX_on" :style="{ minWidth: virtualScrollX.offsetLeft + 'px', padding: 0 }"></th>
           <th
             v-for="col in virtualX_on ? virtualX_columnPart : row"
             :key="col.dataIndex"
@@ -371,9 +370,21 @@ export default {
     },
     /** 横向虚拟滚动展示的列 */
     virtualX_columnPart() {
-      return this.virtualX_on
-        ? this.columns.slice(this.virtualScrollX.startIndex, this.virtualScrollX.endIndex)
-        : this.columns;
+      if (this.virtualX_on) {
+        const fixedLeftColumns = [];
+        // 左侧固定列要一直在
+        for (let i = 0; i < this.virtualScrollX.startIndex; i++) {
+          const col = this.columns[i];
+          if (col.fixed === 'left') fixedLeftColumns.push(col);
+        }
+        return fixedLeftColumns.concat(
+          this.columns.slice(this.virtualScrollX.startIndex, this.virtualScrollX.endIndex),
+        );
+      }
+      return this.columns;
+      // return this.virtualX_on
+      //   ? this.columns.slice(this.virtualScrollX.startIndex, this.virtualScrollX.endIndex)
+      //   : this.columns;
     },
     /** 横向虚拟滚动，右边距 */
     virtualX_offsetRight() {
@@ -466,18 +477,21 @@ export default {
     /** 通过横向滚动条位置，计算横向虚拟滚动的参数 */
     updateVirtualScrollX(sLeft = 0) {
       if (!this.columns?.length) return;
-      let colWidthSum = 0;
       let startIndex = 0;
       let offsetLeft = 0;
 
+      let colWidthSum = 0;
       for (let colIndex = 0; colIndex < this.columns.length; colIndex++) {
+        startIndex++;
         const col = this.columns[colIndex];
+        if (col.fixed === 'left') continue; // fixed left 不进入计算列宽
         const colWidth = parseInt(col.width || col.maxWidth || col.minWidth);
         colWidthSum += colWidth;
-        // 列宽总和大于scrollLeft时停止
+        // 列宽（非固定列）加到超过scrollLeft的时候，表示startIndex从上一个开始下标
         if (colWidthSum >= sLeft) {
           offsetLeft = colWidthSum - colWidth;
-          startIndex = colIndex;
+          // startIndex = colIndex;
+          startIndex--;
           break;
         }
       }
