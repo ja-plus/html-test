@@ -10,7 +10,15 @@
 * Omit 取出个别字段
 * Exclude 去除个别字段
 * Partial 字段全部转换为可选 k?:v
-
+### 指定方法的this类型
+```ts
+type Person = {name:string,age:number}
+function a(this:Person,val:string){
+  this // type
+}
+a('string') // error
+a.call({name:'a',age:1},'string') // ✔
+```
 ### d.ts 中import from其他类型会导致该全局声明文件失效
 ### 遍历/获取对象
 ```ts

@@ -61,6 +61,11 @@ div(:style="{width: tableWidth}" style="padding:10px;")
     @row-dblclick="onRowDblclick"
     @col-order-change="onColOrderChange2"
   )
+div columns:{{columns}} 
+//- div dataSource:{{dataSource}}
+hr
+//- div tableHeaders:{{easyTable.tableHeaders}}
+//- div tableProps:{{easyTable.tableProps}}
 div(style="width:max-content")
   h2 API
   EasyTable(
@@ -68,11 +73,6 @@ div(style="width:max-content")
     :dataSource="docTableData" 
   )
 
-//- div columns:{{columns}} 
-//- div dataSource:{{dataSource}}
-hr
-//- div tableHeaders:{{easyTable.tableHeaders}}
-//- div tableProps:{{easyTable.tableProps}}
 </template>
 
 <script>
@@ -186,8 +186,9 @@ export default {
         { key: 'noDataFull', desc: '暂无数据占满表格', value: 'boolean', defaultValue: 'false' },
         { key: 'showNoData', desc: '是否展示暂无数据', value: 'boolean', defaultValue: 'true' },
         { key: 'emptyCellText', desc: '空单元格的占位文字', value: 'string', defaultValue: '--' },
-        { key: 'showTrHoverClass', desc: '是否增加行hoverclass', value: 'boolean', defaultValue: 'false' },
+        { key: 'showTrHoverClass', desc: '是否增加行hover class', value: 'boolean', defaultValue: 'false' },
         { key: 'virtual', desc: '是否开启虚拟滚动', defaultValue: 'false' },
+        { key: 'virtualX', desc: '是否开启横向虚拟滚动。一定要设置列宽。', defaultValue: 'false' },
         { key: 'columns', desc: '列配置', value: 'columnOption[]' },
         { key: 'dataSource', desc: '数据源', value: 'object[]' },
         { key: '------------', desc: '---------' },
@@ -201,8 +202,8 @@ export default {
         },
         { key: 'headerClassName', desc: '一列的表头class' },
         { key: 'className', desc: '一列的单元格class' },
-        { key: 'width', desc: '这列th/td 的宽度', value: 'xxpx' },
-        { key: 'minWidth', desc: '这列th/td 的最小宽度。在总列宽不够table宽时，列宽被压缩的最小值', value: 'xxpx' },
+        { key: 'width', desc: '这列th/td 的宽度。设置该属性，自动设置minWidth = maxWidth = width', value: 'xxpx' },
+        { key: 'minWidth', desc: '这列th/td 的最小宽度。在总列宽不够table宽时，列宽被压缩的最小值。', value: 'xxpx' },
         { key: 'maxWidth', desc: '这列th/td 的最大宽度。可被内容文字撑开的最大宽度。', value: 'xxpx' },
         {
           key: 'sorter',
@@ -233,7 +234,7 @@ export default {
         {
           key: 'col-order-change',
           desc: '表头拖动改变列顺序时',
-          value: '(sourceIndex:number,targetIndex:number):void',
+          value: '(sourceDataIndex:string,targetDataIndex:string):void',
         },
       ],
     };
@@ -307,12 +308,15 @@ export default {
     handleSortChange(col, order) {
       console.log('排序改变事件触发：', col, order);
     },
-    onColOrderChange(sourceIndex, targetIndex) {
-      // console.log(sourceIndex, targetIndex, 'sdf');
+    onColOrderChange(sourceKey, targetKey) {
+      console.log(sourceKey, targetKey);
+      const sourceIndex = this.columns.findIndex(it => it.dataIndex === sourceKey);
+      const targetIndex = this.columns.findIndex(it => it.dataIndex === targetKey);
       // delete
-      const deleteEle = this.columns.splice(sourceIndex, 1)[0];
+      const deleteEle = this.columns.splice(sourceIndex, 1);
       // insert
-      this.columns.splice(targetIndex, 0, deleteEle);
+      this.columns.splice(targetIndex, 0, deleteEle[0]);
+      this.columns = [...this.columns];
     },
     /** easyTableC列顺序变化 */
     onColOrderChange2(sourceIndex, targetIndex) {

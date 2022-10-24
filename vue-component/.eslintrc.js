@@ -21,7 +21,7 @@ module.exports = {
     'prefer-const': 1, // 未重新赋值的变量自动转换成const
     'spaced-comment': 1, // 注释斜杠后空格
     'new-cap': 1, // 构造函数首字母大写
-    'no-unused-vars': [0, { argsIgnorePattern: 'h' }], // 用于取消jsx 渲染函数render(h) 中提示形参h未使用的问题
+    'no-unused-vars': [1, { argsIgnorePattern: 'h' }], // 用于取消jsx 渲染函数render(h) 中提示形参h未使用的问题
     eqeqeq: 1, // 使用 ===
     'dot-notation': 1, // 强制使用.不用[]
     // 'no-debugger': 0,

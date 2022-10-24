@@ -33,14 +33,15 @@
           <th
             v-for="col in virtualX_on ? virtualX_columnPart : row"
             :key="col.dataIndex"
+            :data-col-key="col.dataIndex"
             draggable="true"
             :rowspan="col.rowSpan"
             :colspan="col.colSpan"
             :style="{
               textAlign: col.headerAlign,
               width: col.width,
-              minWidth: col.fixed ? col.width : col.minWidth,
-              maxWidth: col.fixed ? col.width : col.maxWidth,
+              minWidth: col.minWidth || col.width,
+              maxWidth: col.maxWidth || col.width,
               ...fixedStyle('th', col),
             }"
             :title="col.title"
@@ -115,6 +116,8 @@
             @contextmenu="e => onRowMenu(e, item)"
             @mouseover="e => onTrMouseOver(e, item)"
           >
+            <!--这个td用于配合虚拟滚动的th对应，防止列错位-->
+            <td v-if="virtualX_on" style="padding: 0"></td>
             <td
               v-for="col in virtualX_on ? virtualX_columnPart : tableProps"
               :key="col.dataIndex"
@@ -122,8 +125,8 @@
               :class="[col.className, showOverflow ? 'text-overflow' : '']"
               :style="{
                 textAlign: col.align,
-                minWidth: col.fixed ? col.width : col.minWidth,
-                maxWidth: col.fixed ? col.width : col.maxWidth,
+                minWidth: col.minWidth || col.width,
+                maxWidth: col.maxWidth || col.width,
                 ...fixedStyle('td', col),
               }"
               @click="e => onCellClick(e, item, col)"
@@ -218,10 +221,11 @@ export function tableSort(sortOption, dataSource, order) {
   return targetDataSource;
 }
 export default {
+  name: 'StkTable',
   props: {
     minWidth: {
       type: String,
-      default: '100%',
+      default: 'min-content',
     },
     /** 虚拟滚动 */
     virtual: {
@@ -331,7 +335,7 @@ export default {
         scrollLeft: 0, // 横向滚动位置，用于判断是横向滚动还是纵向
       },
       thDrag: {
-        dragIndex: null,
+        dragStartKey: null,
       },
     };
   },
@@ -513,30 +517,35 @@ export default {
     },
     /** 固定列的style */
     fixedStyle(tagType, col) {
-      let cols = [...this.tableProps]; // tbody col
-      if (tagType === 'th') {
-        cols = [...this.tableHeaders.flat()]; // thead col
-      }
+      // let cols = [...this.tableProps]; // tbody col
+      // if (tagType === 'th') {
+      //   cols = [...this.tableHeaders.flat()]; // thead col
+      // }
       const style = {};
       if (['left', 'right'].includes(col.fixed)) {
-        if (col.fixed === 'right') cols.reverse(); // 右边固定列要反转
-        let position = 0; // left | right 的距离
-        const fixedCols = [];
-        for (let i = 0; i < cols.length; i++) {
-          const item = cols[i];
-          if (item.fixed === col.fixed) fixedCols.push(item);
-          if (item.dataIndex === col.dataIndex) break; // 遇到本列就结束循环，不再添加
-        }
-        // const unit = fixedRows[0].width.replace(/\d+/, '');
-        // -1: 不计算本列的宽度
-        for (let i = 0; i < fixedCols.length - 1; i++) {
-          position += parseInt(fixedCols[i].width);
-        }
-        style.position = 'sticky';
+        // if (col.fixed === 'right') cols.reverse(); // 右边固定列要反转
+        // let position = 0; // left | right 的距离
+        // const fixedCols = [];
+        // for (let i = 0; i < cols.length; i++) {
+        //   const item = cols[i];
+        //   if (item.fixed === col.fixed) fixedCols.push(item);
+        //   if (item.dataIndex === col.dataIndex) break; // 遇到本列就结束循环，不再添加
+        // }
+        // // const unit = fixedRows[0].width.replace(/\d+/, '');
+        // // -1: 不计算本列的宽度
+        // for (let i = 0; i < fixedCols.length - 1; i++) {
+        //   position += parseInt(fixedCols[i].width);
+        // }
+        // style.position = 'sticky';
         if (col.fixed === 'left') {
-          style.left = position + 'px';
+          // style.left = position + 'px';
+          if (this.virtualX_on)
+            style.transform = `translateX(${this.virtualScrollX.scrollLeft - this.virtualScrollX.offsetLeft}px)`;
+          else style.transform = `translateX(${this.virtualScrollX.scrollLeft}px)`;
         } else {
-          style.right = position + 'px';
+          // style.right = position + 'px';
+          // TODO:计算右侧距离
+          style.transform = `translateX(${this.virtualX_offsetRight}px)`;
         }
         if (tagType === 'th') {
           style.zIndex = 2; // 保证固定列高于其他单元格
@@ -643,17 +652,17 @@ export default {
     /** 滚动条监听 */
     onTableScroll(e) {
       if (!e?.target) return;
+      const { scrollTop, scrollLeft } = e.target;
+      // 纵向滚动有变化
+      if (scrollTop !== this.virtualScroll.scrollTop) this.virtualScroll.scrollTop = scrollTop;
       if (this.virtual_on) {
-        const scrollTop = e.target.scrollTop;
         this.updateVirtualScrollY(scrollTop);
-        // 纵向滚动有变化
-        if (scrollTop !== this.virtualScroll.scrollTop) this.virtualScroll.scrollTop = scrollTop;
       }
+
+      // 横向滚动有变化
+      if (scrollLeft !== this.virtualScrollX.scrollLeft) this.virtualScrollX.scrollLeft = scrollLeft;
       if (this.virtualX_on) {
-        const scrollLeft = e.target.scrollLeft;
         this.updateVirtualScrollX(scrollLeft);
-        // 横向滚动有变化
-        if (scrollLeft !== this.virtualScrollX.scrollLeft) this.virtualScrollX.scrollLeft = scrollLeft;
       }
       // const res = {
       //   isTop: e.target.scrollTop <= 0,
@@ -676,17 +685,17 @@ export default {
         if (th.tagName === 'TH') break;
         th = th.parentNode;
       }
-      const i = Array.prototype.indexOf.call(th.parentNode.children, th); // 得到是第几个子元素
-      if (this.thDrag.dragIndex !== i) {
-        this.$emit('col-order-change', this.thDrag.dragIndex, i);
+      // const i = Array.prototype.indexOf.call(th.parentNode.children, th); // 得到是第几个子元素
+      if (this.thDrag.dragStartKey !== th.dataset.colKey) {
+        this.$emit('col-order-change', this.thDrag.dragStartKey, th.dataset.colKey);
       }
-      this.$emit('th-drop', i);
+      this.$emit('th-drop', th.dataset.colKey);
     },
     /** 开始拖动记录th位置 */
     onThDragStart(e) {
-      const i = Array.prototype.indexOf.call(e.target.parentNode.children, e.target); // 得到是第几个子元素
-      this.thDrag.dragIndex = i;
-      this.$emit('th-drag-start', i);
+      // const i = Array.prototype.indexOf.call(e.target.parentNode.children, e.target); // 得到是第几个子元素
+      this.thDrag.dragStartKey = e.target.dataset.colKey;
+      this.$emit('th-drag-start', this.thDrag.dragStartKey);
     },
     onThDragOver(e) {
       e.preventDefault();
@@ -761,8 +770,9 @@ export default {
       this.dataSourceCopy = [...this.dataSource];
     },
     /** 滚动 */
-    scrollTo(top = 0) {
-      this.$refs.tableContainer.scrollTop = top;
+    scrollTo(top = 0, left = 0) {
+      if (top !== null) this.$refs.tableContainer.scrollTop = top;
+      if (left !== null) this.$refs.tableContainer.scrollLeft = left;
     },
   },
 };
@@ -980,7 +990,8 @@ export default {
     --border-color: #26292e;
     --tr-active-bg-color: #283f63;
     --tr-hover-bg-color: #1a2b46;
-    --highlight-color: rgba(34, 103, 218, 0.65);
+    --highlight-color: #1e4c99; // 不能用rgba，因为固定列时，会变成半透明
+    // --highlight-color: rgba(34, 103, 218, 0.65);
     // --highlight-color-to: rgba(19, 55, 125, 0);
     --sort-arrow-color: #5d6064;
     --sort-arrow-hover-color: #727782;
