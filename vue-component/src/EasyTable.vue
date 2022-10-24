@@ -98,7 +98,13 @@
       <tbody>
         <template v-if="virtual_on">
           <!-- 用于虚拟滚动表格内容定位 -->
-          <tr :style="{ height: virtualScroll.offsetTop + 'px' }"></tr>
+          <tr :style="{ height: virtualScroll.offsetTop + 'px' }">
+            <!-- <td
+              v-for="col in virtualX_on ? virtualX_columnPart : tableProps"
+              :key="col.dataIndex"
+              class="perch-td top"
+            ></td> -->
+          </tr>
         </template>
         <template v-if="dataSourceCopy && dataSourceCopy.length">
           <tr
@@ -140,7 +146,13 @@
         </template>
         <template v-if="virtual_on">
           <!-- 用于虚拟滚动表格内容定位 -->
-          <tr :style="{ height: virtual_offsetBottom + 'px' }"></tr>
+          <tr :style="{ height: virtual_offsetBottom + 'px' }">
+            <!-- <td
+              v-for="col in virtualX_on ? virtualX_columnPart : tableProps"
+              :key="col.dataIndex"
+              class="perch-td bottom"
+            ></td> -->
+          </tr>
         </template>
       </tbody>
     </table>
@@ -780,6 +792,7 @@ export default {
 
 <style lang="less" scoped>
 .stk-table-wrapper {
+  // contain: strict;
   --row-height: 28px;
   --border-color: #e8eaec;
   // --border: 1px #ececf7 solid;
@@ -954,6 +967,30 @@ export default {
               text-overflow: ellipsis;
             }
           }
+          //   &.perch-td {
+          //     padding: 0;
+          //     height: 0;
+          //     &.top {
+          //       background-image: repeating-linear-gradient(
+          //           180deg,
+          //           transparent 0,
+          //           transparent var(--row-height),
+          //           var(--border-color) var(--row-height),
+          //           var(--border-color) calc(var(--row-height) + 1px)
+          //         ),
+          //         var(--bg-border-right);
+          //     }
+          //     &.bottom {
+          //       background-image: repeating-linear-gradient(
+          //           0deg,
+          //           transparent 0,
+          //           transparent var(--row-height),
+          //           var(--border-color) var(--row-height),
+          //           var(--border-color) calc(var(--row-height) + 1px)
+          //         ),
+          //         var(--bg-border-right);
+          //     }
+          //   }
         }
       }
       // 斑马纹
