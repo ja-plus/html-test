@@ -37,18 +37,78 @@
           top: 100px;
         }
       }
+
+      table {
+        table-layout: fixed;
+        /* border-collapse: collapse; */
+        border-spacing:0;
+      }
+      table thead {
+        position:sticky;
+        top:0;
+      }
+      table th, table td{
+        border: 1px solid #aaa;
+        border: 1px solid #aaa;
+        background-color:#eee;
+        padding: 0 10px;
+      }
+      table th {
+        background-color :#ffaa00;
+      }
+      table tr {
+        content-visibility: auto;
+        contain: strict;
+      }
+
     </style>
   </head>
   <body>
+    <p>content-visibility 影响该元素的所有子元素不渲染。设置为hidden可以看见，元素的轮廓被渲染，子元素不展示，以此优化性能。<b>对table标签及配套标签无效</b></p>
   </body>
   <script>
     let fgmt = document.createDocumentFragment();
+    let div = document.createElement('div');
+    div.style.cssText = 'width: 500px;height:500px;overflow:auto;contain:strict';
     for (let i = 0; i < 3000; i++) {
       let card = document.createElement('div');
       card.className = 'card';
       card.textContent = i;
       fgmt.append(card);
     }
-    document.body.append(fgmt);
+    div.append(fgmt);
+    document.body.append(div);
+
+    // content-visibility 对table标签无效
+    // let table = document.createElement('table');
+    // let thead = document.createElement('thead');
+    // table.append(thead);
+    // let thTr = document.createElement('tr');
+    // thead.append(thTr);
+    // for (let i = 0; i < 30; i++) {
+    //   let th = document.createElement('th');
+    //   th.textContent = 'head' + i;
+    //   th.style.cssText = 'min-width: 100px;';
+    //   thTr.append(th);
+    // }
+    // for (let k = 0; k < 100; k++) {
+    //   let tbody = document.createElement('tbody');
+    //   if (k > 3) tbody.style.contentVisibility = 'hidden';
+    //   table.append(tbody);
+    //   for (let i = 0; i < 20; i++) {
+    //     let tr = document.createElement('tr');
+    //     for (let j = 0; j < 30; j++) {
+    //       let td = document.createElement('td');
+    //       td.textContent = i + '-' + j;
+    //       // td.style.cssText = 'min-width: 100px;';
+    //       tr.append(td);
+    //     }
+    //     tbody.append(tr);
+    //   }
+    // }
+
+    // // div.append(table);
+    // fgmt.append(table);
+    // document.body.append(fgmt);
   </script>
 </html>
