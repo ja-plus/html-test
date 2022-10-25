@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>contain</title>
+    <style>
+        .outer{
+            width:500px;
+            height:300px;
+            /* overflow: hidden; */
+            border: 2px solid rebeccapurple;
+            contain: strict;
+        }
+        .inner {
+            width: 100px;
+            height: 50px;
+            background-color: orange;
+            border: 2px solid #aaa;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <p>
+        <ul>
+            <li>contain: none; /* 表示元素将正常渲染，没有包含规则 */</li>
+            <li>contain: layout; /* 表示元素外部无法影响元素内部的布局，反之亦然 */</li>
+            <li>contain: paint; /* 表示这个元素的子孙节点不会在它边缘外显示。如果一个元素在视窗外或因其他原因导致不可见，则同样保证它的子孙节点不会被显示。 */</li>
+            <li>contain: size; /* 表示这个元素的尺寸计算不依赖于它的子孙元素的尺寸 */</li>
+            <li>contain: content; /* 等价于 contain: layout paint */</li>
+            <li>contain: strict; /* 等价于 contain: size layout paint */</li>
+        </ul>
+    </p>
+    <div id="container" class="outer"></div>
+</body>
+<script>
+    let container = document.querySelector('#container');
+    for (let i = 0; i < 100000; i++) {
+      let div = document.createElement('div');
+      div.textContent = 'inner' + i;
+      div.classList.add('inner');
+      container.append(div);
+    }
+</script>
+</html>
