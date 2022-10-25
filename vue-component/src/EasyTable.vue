@@ -94,18 +94,15 @@
         </tr>
       </thead>
 
-      <!-- <tbody :style="{transform: `translateY(${virtualScroll.offsetTop}px)`}"> -->
+      <!-- 用于虚拟滚动表格内容定位 -->
+      <tbody v-if="virtual_on" :style="{ height: `${virtualScroll.offsetTop}px` }"></tbody>
+      <!-- <td
+          v-for="col in virtualX_on ? virtualX_columnPart : tableProps"
+          :key="col.dataIndex"
+          class="perch-td top"
+        ></td> -->
+      <!-- <tbody :style="{ transform: `translateY(${virtualScroll.offsetTop}px)` }"> -->
       <tbody>
-        <template v-if="virtual_on">
-          <!-- 用于虚拟滚动表格内容定位 -->
-          <tr :style="{ height: virtualScroll.offsetTop + 'px' }">
-            <!-- <td
-              v-for="col in virtualX_on ? virtualX_columnPart : tableProps"
-              :key="col.dataIndex"
-              class="perch-td top"
-            ></td> -->
-          </tr>
-        </template>
         <template v-if="dataSourceCopy && dataSourceCopy.length">
           <tr
             v-for="(item, i) in virtual_dataSourcePart"
@@ -144,17 +141,8 @@
             </td>
           </tr>
         </template>
-        <template v-if="virtual_on">
-          <!-- 用于虚拟滚动表格内容定位 -->
-          <tr :style="{ height: virtual_offsetBottom + 'px' }">
-            <!-- <td
-              v-for="col in virtualX_on ? virtualX_columnPart : tableProps"
-              :key="col.dataIndex"
-              class="perch-td bottom"
-            ></td> -->
-          </tr>
-        </template>
       </tbody>
+      <tbody v-if="virtual_on" :style="{ height: `${virtual_offsetBottom}px` }"></tbody>
     </table>
     <div
       v-if="(!dataSourceCopy || !dataSourceCopy.length) && showNoData"
@@ -828,6 +816,7 @@ export default {
     // position: absolute;
     // top: 0;
     border-spacing: 0;
+    border-collapse: separate;
     table-layout: fixed;
     th,
     td {
@@ -1063,10 +1052,12 @@ export default {
         position: relative;
         tr {
           td {
+            // content-visibility: auto;
+            height: var(--row-height);
+            line-height: var(--row-height);
             .table-cell-wrapper {
+              height: inherit;
               overflow: hidden;
-              height: var(--row-height);
-              line-height: var(--row-height);
             }
           }
         }
