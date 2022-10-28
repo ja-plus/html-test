@@ -59,3 +59,14 @@ interface A {
     [K: string]?:string; // 报错
 }
 ```
+
+### Distributive Conditional Types
+```ts
+type ToArray<Type> = Type extends any ? Type[] : never;
+type StrArrOrNumArr = ToArray<string | number>; // =>  ToArray<string> | ToArray<number>;
+```
+
+### boolean 转换number类型推断有误???
+```ts
+let a: 0 | 1 = +true// +boolean 结果为number，类型校验不通过
+```
