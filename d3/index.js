@@ -93,7 +93,31 @@ const dataLeft = {
 const width = 1500;
 const height = 600;
 let svg = window.d3.select('body').append('svg').attr('width', width).attr('height', height);
-const g = svg.append('g').attr('transform', 'translate(20,20)');
+// d3 drag
+const g = svg.append('g').attr('fill', '#eee');
+const rect = g.append('rect').attr('width', '100%').attr('height', '100%').attr('x', 0).attr('y', 0).attr('opactiy', 0).attr('fill', '#eee');
+
+const dragTemp = { x: 0, y: 0, transform: [width / 2, height / 2] };
+const drag = window.d3
+  .drag()
+  .on('start', function (e) {
+    dragTemp.x = e.x;
+    dragTemp.y = e.y;
+  })
+  .on('drag', function (e) {
+    let x = e.x - dragTemp.x + dragTemp.transform[0];
+    let y = e.y - dragTemp.y + dragTemp.transform[1];
+    console.log(x, y);
+    window.d3.select(this).attr('transform', `translate(${x},${y})`);
+  })
+  .on('end', function (e) {
+    let transform = window.d3.select(this).attr('transform');
+    let [x, y] = transform.match(/\d+/g);
+    // console.log(arr, 'arr');
+    dragTemp.transform = [+x, +y];
+  });
+g.call(drag);
+
 const hierarchyData = window.d3.hierarchy(data);
 const hierarchyDataLeft = window.d3.hierarchy(dataLeft);
 console.log('——————d3.hierarchy(data)——————');
@@ -208,7 +232,8 @@ let foreignObject = nodes
     } else if (d.depth === 1) {
       return 'tree-node';
     } else if (d.depth === 2) {
-      return 'leaf-node';
+      if (d.data.nodeType === 'more') return 'leaf-node more';
+      else return 'leaf-node';
     }
   })
   .style('background-color', d => {
