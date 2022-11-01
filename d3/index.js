@@ -26,8 +26,16 @@ const data = {
           lineText: ' 16次',
         },
         {
-          name: '查看更多(3)',
-          nodeType: 'more',
+          name: '上海银行',
+          lineText: ' 16次',
+        },
+        {
+          name: '上海银行',
+          lineText: ' 16次',
+        },
+        {
+          name: '上海银行',
+          lineText: ' 16次',
         },
       ],
     },
@@ -72,6 +80,21 @@ const data = {
   ],
 };
 
+let dataCopy = JSON.parse(JSON.stringify(data));
+(function recursion(tree) {
+  if (tree.children) {
+    if (tree.children.length > 5) {
+      const treeLen = tree.children.length;
+      tree.children = tree.children.slice(0, 5);
+      tree.children.push({
+        name: `查看更多(${treeLen - 5})`,
+        nodeType: 'more',
+      });
+    }
+    tree.children.forEach(recursion);
+  }
+})(dataCopy);
+
 const dataLeft = {
   name: 'root',
   children: [
@@ -92,12 +115,9 @@ const dataLeft = {
 };
 const width = 1500;
 const height = 600;
-let svg = window.d3.select('body').append('svg').attr('width', width).attr('height', height);
-// d3 drag
+let svg = window.d3.select('body').append('svg').attr('class', 'tree-svg').attr('width', width).attr('height', height);
 const g = svg.append('g').attr('fill', '#eee');
-const rect = g.append('rect').attr('width', '100%').attr('height', '100%').attr('x', 0).attr('y', 0).attr('opactiy', 0).attr('fill', '#eee');
-
-const dragTemp = { x: 0, y: 0, transform: [width / 2, height / 2] };
+const dragTemp = { x: 0, y: 0, transform: [width / 2, height / 2], scale: 1 };
 const drag = window.d3
   .drag()
   .on('start', function (e) {
@@ -107,150 +127,249 @@ const drag = window.d3
   .on('drag', function (e) {
     let x = e.x - dragTemp.x + dragTemp.transform[0];
     let y = e.y - dragTemp.y + dragTemp.transform[1];
-    console.log(x, y);
-    window.d3.select(this).attr('transform', `translate(${x},${y})`);
+    // console.log(x, y);
+    g.attr('transform', `translate(${x},${y}) scale(${dragTemp.scale})`);
   })
   .on('end', function (e) {
-    let transform = window.d3.select(this).attr('transform');
+    let transform = g.attr('transform');
     let [x, y] = transform.match(/\d+/g);
     // console.log(arr, 'arr');
     dragTemp.transform = [+x, +y];
   });
-g.call(drag);
+svg.call(drag);
+svg.on('wheel', e => {
+  console.log(e.wheelDelta > 0);
+  let { scale } = dragTemp;
+  if (e.wheelDelta > 0) {
+    scale += 0.1;
+  } else {
+    scale -= 0.1;
+  }
+  dragTemp.scale = scale;
+  g.attr('transform', `translate(${dragTemp.transform[0]},${dragTemp.transform[1]}) scale(${dragTemp.scale})`);
+});
 
-const hierarchyData = window.d3.hierarchy(data);
-const hierarchyDataLeft = window.d3.hierarchy(dataLeft);
-console.log('——————d3.hierarchy(data)——————');
-console.log(hierarchyData);
-const nodeWidth = 100;
-const nodeHeight = 24;
-const treeLayout = window.d3
-  .tree()
-  // .size([height, width / 2]) // 设置tree的大小
-  .nodeSize([nodeHeight + 10, nodeWidth * 2])
-  .separation((a, b) => {
-    // 根据是否为同一父节点设置节点距离比例
-    return a.parent === b.parent ? 1 : 2;
-  });
-console.log('——————treeLayout——————');
-console.log(treeLayout);
-// const diagonal = window.d3.svg.diagonal().projection(d => [d.y, d.x]);
-const nodesData = treeLayout(hierarchyData);
-const nodesDataLeft = treeLayout(hierarchyDataLeft);
-console.log('——————nodesData——————');
-console.log(nodesData);
-const links = g
-  .attr('transform', `translate(${width / 2},${height / 2})`)
-  .selectAll('.links')
-  .data(nodesData.descendants().slice(1)) // nodesData.descendants()返回所有节点的数据，利于我们绑定数据，slcie(1)截取root后的全部节点，防止重绘
-  .enter()
-  .append('path') // 用path画线
-  .attr('fill', 'none')
-  .attr('stroke', '#313131')
-  .attr('stroke-width', 2)
-  .attr('d', d => {
-    // 通过三次贝塞尔曲线设置连线的弯曲程度。M：move to，即到控制点 C后设置两个控制点及终点
-    // return `
-    //     M${d.x},${d.y}
-    //     C${d.x},${(d.y + d.parent.y) / 2}
-    //     ${d.parent.x},${(d.y + d.parent.y) / 2.5}
-    //     ${d.parent.x},${d.parent.y}`;
-    console.log(d, 'd');
-    // if (d.depth === 1) {
-    //   // return `M${d.y},${d.x} L${d.y - 150},${d.x} L${d.y - 150},${height / 2} L0,${height / 2}`;
-    //   return `M${d.x},${d.y} L${1.5 * d.x - d.parent.x / 2},${d.y} L${1.5 * d.x - d.parent.x / 2},${d.parent.x} L0,${d.parent.x}`;
-    // } else {
-    let half = (d.y - d.parent.y) / 2;
-    return `M${d.y},${d.x} L${d.y - half},${d.x} L${d.y - half},${d.parent.x} L${d.parent.y},${d.parent.x}`;
-    // return `M${d.x},${d.y}  L${d.parent.x},${d.parent.y}`;
-    // }
-    // if (d.depth === 1) {
-    //   // return `M${d.y},${d.x} L${d.y - 150},${d.x} L${d.y - 150},${height / 2} L0,${height / 2}`;
-    //   return `M${d.y},${d.x} L${d.y - 150},${d.x} L${d.y - 150},${d.parent.x} L0,${d.parent.x}`;
-    // } else {
-    //   return `M${d.y},${d.x} L${d.y - 150},${d.x} L${d.y - 150},${d.parent.x} L${d.parent.y},${d.parent.x}`;
-    // }
-  });
-// const linksLeft = g
-//   .selectAll('.linksLeft')
-//   .data(nodesDataLeft.descendants().slice(1)) // nodesData.descendants()返回所有节点的数据，利于我们绑定数据，slcie(1)截取root后的全部节点，防止重绘
-//   .enter()
-//   .append('path') // 用path画线
-//   .attr('fill', 'none')
-//   .attr('stroke', '#313131')
-//   .attr('stroke-width', 2)
-//   .attr('d', d => {
-//     // 通过三次贝塞尔曲线设置连线的弯曲程度。M：move to，即到控制点 C后设置两个控制点及终点
-//     // return `
-//     //     M${d.x},${d.y}
-//     //     C${d.x},${(d.y + d.parent.y) / 2}
-//     //     ${d.parent.x},${(d.y + d.parent.y) / 2.5}
-//     //     ${d.parent.x},${d.parent.y}`;
-//     if (d.depth === 1) {
-//       return `M${-d.y},${d.x} L0,${height / 2}`;
-//     } else {
-//       return `M${-d.y},${d.x} L${-d.parent.y},${d.parent.x}`;
-//     }
-//   });
+function renderTree() {
+  // d3 drag
+  // const rect = g.append('rect').attr('width', '100%').attr('height', '100%').attr('x', 0).attr('y', 0).attr('opactiy', 0).attr('fill', '#eee');
 
-// 当一个节点中有多个子元素时(比如本例中有text和circle)，我个人喜欢用g作为容器
-const nodes = g
-  .selectAll('.node')
-  .data(nodesData.descendants()) // 同样是获得所有节点，便于数据绑定
-  .enter()
-  .append('g')
-  .attr('transform', d => {
-    // if (d.depth === 0) {
-    //   return `translate(${d.y}, ${height / 2})`; // 位移
-    // } else {
-    return `translate(${d.y}, ${d.x})`; // 位移
-    // }
-  })
-  .on('click', () => {
-    console.log('click node');
+  const hierarchyData = window.d3.hierarchy(dataCopy);
+  const hierarchyDataLeft = window.d3.hierarchy(dataLeft);
+  console.log('——————d3.hierarchy(data)——————');
+  console.log(hierarchyData);
+  const nodeWidth = 100;
+  const nodeHeight = 24;
+  const treeLayout = window.d3
+    .tree()
+    // .size([height, width / 2]) // 设置tree的大小
+    .nodeSize([nodeHeight + 10, nodeWidth * 2])
+    .separation((a, b) => {
+      // 根据是否为同一父节点设置节点距离比例
+      return a.parent === b.parent ? 1 : 2;
+    });
+  console.log('——————treeLayout——————');
+  console.log(treeLayout);
+  // const diagonal = window.d3.svg.diagonal().projection(d => [d.y, d.x]);
+  const nodesData = treeLayout(hierarchyData);
+  const nodesDataLeft = treeLayout(hierarchyDataLeft);
+  console.log('——————nodesData——————');
+  console.log(nodesData);
+  const links = g
+    .attr('transform', `translate(${width / 2},${height / 2})`)
+    .selectAll('.links')
+    .data(nodesData.descendants().slice(1)) // nodesData.descendants()返回所有节点的数据，利于我们绑定数据，slcie(1)截取root后的全部节点，防止重绘
+    .enter()
+    .append('path') // 用path画线
+    .attr('fill', 'none')
+    .attr('stroke', '#313131')
+    .attr('stroke-width', 2)
+    .attr('d', d => {
+      // 通过三次贝塞尔曲线设置连线的弯曲程度。M：move to，即到控制点 C后设置两个控制点及终点
+      // return `
+      //     M${d.x},${d.y}
+      //     C${d.x},${(d.y + d.parent.y) / 2}
+      //     ${d.parent.x},${(d.y + d.parent.y) / 2.5}
+      //     ${d.parent.x},${d.parent.y}`;
+      // console.log(d, 'd');
+      // if (d.depth === 1) {
+      //   // return `M${d.y},${d.x} L${d.y - 150},${d.x} L${d.y - 150},${height / 2} L0,${height / 2}`;
+      //   return `M${d.x},${d.y} L${1.5 * d.x - d.parent.x / 2},${d.y} L${1.5 * d.x - d.parent.x / 2},${d.parent.x} L0,${d.parent.x}`;
+      // } else {
+      let half = (d.y - d.parent.y) / 2;
+      return `M${d.y},${d.x} L${d.y - half},${d.x} L${d.y - half},${d.parent.x} L${d.parent.y},${d.parent.x}`;
+      // return `M${d.x},${d.y}  L${d.parent.x},${d.parent.y}`;
+      // }
+      // if (d.depth === 1) {
+      //   // return `M${d.y},${d.x} L${d.y - 150},${d.x} L${d.y - 150},${height / 2} L0,${height / 2}`;
+      //   return `M${d.y},${d.x} L${d.y - 150},${d.x} L${d.y - 150},${d.parent.x} L0,${d.parent.x}`;
+      // } else {
+      //   return `M${d.y},${d.x} L${d.y - 150},${d.x} L${d.y - 150},${d.parent.x} L${d.parent.y},${d.parent.x}`;
+      // }
+    });
+  const linksLeft = g
+    .selectAll('.linksLeft')
+    .data(nodesDataLeft.descendants().slice(1)) // nodesData.descendants()返回所有节点的数据，利于我们绑定数据，slcie(1)截取root后的全部节点，防止重绘
+    .enter()
+    .append('path') // 用path画线
+    .attr('fill', 'none')
+    .attr('stroke', '#313131')
+    .attr('stroke-width', 2)
+    .attr('d', d => {
+      // 通过三次贝塞尔曲线设置连线的弯曲程度。M：move to，即到控制点 C后设置两个控制点及终点
+      // return `
+      //     M${d.x},${d.y}
+      //     C${d.x},${(d.y + d.parent.y) / 2}
+      //     ${d.parent.x},${(d.y + d.parent.y) / 2.5}
+      //     ${d.parent.x},${d.parent.y}`;
+      let half = (d.y - d.parent.y) / 2;
+      // if (d.depth === 1) {
+      //   return `M${-d.y},${d.x} L${-d.y + half},${d.x} L${-d.y + half},${d.parent.x} L0,${d.parent.x}`;
+      // } else {
+      return `M${-d.y},${d.x} L${-d.y + half},${d.x} L${-d.y + half},${d.parent.x} L${-d.parent.y},${d.parent.x}`;
+      // }
+    });
+
+  // 当一个节点中有多个子元素时(比如本例中有text和circle)，我个人喜欢用g作为容器
+  const nodes = g
+    .selectAll('.node')
+    .data(nodesData.descendants()) // 同样是获得所有节点，便于数据绑定
+    .enter()
+    .append('g')
+    .attr('transform', d => {
+      // if (d.depth === 0) {
+      //   return `translate(${d.y}, ${height / 2})`; // 位移
+      // } else {
+      return `translate(${d.y}, ${d.x})`; // 位移
+      // }
+    });
+  // .on('click', d => {
+  //   console.log('click node', d);
+  // });
+
+  const nodesLeft = g
+    .selectAll('.node')
+    .data(nodesDataLeft.descendants()) // 同样是获得所有节点，便于数据绑定
+    .enter()
+    .append('g')
+    .attr('transform', d => {
+      // if (d.depth === 0) {
+      //   return `translate(${d.y}, ${height / 2})`; // 位移
+      // } else {
+      return `translate(-${d.y}, ${d.x})`; // 位移
+      // }
+    })
+    .on('click', () => {
+      console.log('click node');
+    });
+
+  const moreNode = g.select('.left-node .more');
+  // 画
+  // nodes
+  //   .append('rect')
+  //   .style('fill', '#ccc')
+  //   .attr('width', nodeWidth)
+  //   .attr('height', nodeHeight)
+  //   .attr('rx', 5)
+  //   .attr('ry', 5)
+  //   .attr('transform', `translate(-${nodeWidth / 2},-${nodeHeight / 2})`);
+  const rootNodeWidth = 150;
+  const rootNodeHeight = 150;
+  let foreignObject = nodes
+    .append('foreignObject')
+    .attr('width', d => (d.depth === 0 ? rootNodeWidth : nodeWidth))
+    .attr('height', d => (d.depth === 0 ? rootNodeHeight : nodeHeight))
+    .attr('transform', d => (d.depth === 0 ? `translate(-${rootNodeWidth / 2},-${rootNodeHeight / 3})` : `translate(0,-${nodeHeight / 2})`))
+    .append('xhtml:div')
+    .attr('class', d => {
+      if (d.depth === 0) {
+        return 'root-node';
+      } else if (d.depth === 1) {
+        return 'tree-node';
+      } else if (d.depth === 2) {
+        if (d.data.nodeType === 'more') return 'leaf-node more';
+        else return 'leaf-node';
+      }
+    })
+    .style('background-color', d => {
+      if (d.depth === 1) {
+        return `rgba(${Math.round(Math.random() * 255)},${Math.round(Math.random() * 255)},${Math.round(Math.random() * 255)})`;
+      }
+    })
+    .append('xhtml:span')
+    .text(d => {
+      if (d.depth > 0) return d.data.name;
+    });
+
+  let foreignObjectLeft = nodesLeft
+    .append('foreignObject')
+    .attr('width', d => (d.depth === 0 ? rootNodeWidth : nodeWidth))
+    .attr('height', d => (d.depth === 0 ? rootNodeHeight : nodeHeight))
+    .attr('transform', d => (d.depth === 0 ? `translate(-${rootNodeWidth / 2},-${rootNodeHeight / 3})` : `translate(0,-${nodeHeight / 2})`))
+    .append('xhtml:div')
+    .attr('class', d => {
+      if (d.depth === 0) {
+        return 'root-node';
+      } else if (d.depth === 1) {
+        return 'tree-node';
+      } else if (d.depth === 2) {
+        if (d.data.nodeType === 'more') return 'leaf-node more';
+        else return 'leaf-node';
+      }
+    })
+    .style('background-color', d => {
+      if (d.depth === 1) {
+        return `rgba(${Math.round(Math.random() * 255)},${Math.round(Math.random() * 255)},${Math.round(Math.random() * 255)})`;
+      }
+    })
+    .append('xhtml:span')
+    .text(d => {
+      if (d.depth > 0) return d.data.name;
+    });
+
+  const rootNodes = window.d3.select('.root-node');
+  rootNodes.append('xhtml:div').attr('class', 'root-node-icon');
+  rootNodes.append('xhtml:div').attr('class', 'root-node-name').text('建设银行及其关联方');
+  // // 插入文字
+  // lineText
+  nodes
+    .append('text')
+    .attr('class', 'line-text')
+    .attr('transform', `translate(-${nodeWidth},-4)`)
+    //   .attr('dx', '1em')
+    .text(d => {
+      return d.data.lineText;
+    });
+  // nodes.append('text').attr('transform', `translate(0,-${nodeHeight})`).text('line text');
+
+  // more
+  nodes.selectAll('.more').on('click', (e, d) => {
+    // console.log('d', e, d);
+    showMore(d.parent.data.name);
+    console.log('dataCopy', dataCopy);
+    renderTree();
   });
-// 画
-// nodes
-//   .append('rect')
-//   .style('fill', '#ccc')
-//   .attr('width', nodeWidth)
-//   .attr('height', nodeHeight)
-//   .attr('rx', 5)
-//   .attr('ry', 5)
-//   .attr('transform', `translate(-${nodeWidth / 2},-${nodeHeight / 2})`);
-const rootNodeWidth = 200;
-const rootNodeHeight = 100;
-let foreignObject = nodes
-  .append('foreignObject')
-  .attr('width', d => (d.depth === 0 ? rootNodeWidth : nodeWidth))
-  .attr('height', d => (d.depth === 0 ? rootNodeHeight : nodeHeight))
-  .attr('transform', d => (d.depth === 0 ? `translate(-${rootNodeWidth / 2},0)` : `translate(0,-${nodeHeight / 2})`))
-  .append('xhtml:div')
-  .attr('class', d => {
-    if (d.depth === 0) {
-      return 'root-node';
-    } else if (d.depth === 1) {
-      return 'tree-node';
-    } else if (d.depth === 2) {
-      if (d.data.nodeType === 'more') return 'leaf-node more';
-      else return 'leaf-node';
+}
+
+renderTree();
+
+function showMore(name) {
+  let children = [];
+  (function recursion(tree) {
+    if (tree.name === name) {
+      children = tree.children;
+      return;
     }
-  })
-  .style('background-color', d => {
-    if (d.depth === 1) {
-      return `rgba(${Math.round(Math.random() * 255)},${Math.round(Math.random() * 255)},${Math.round(Math.random() * 255)})`;
+    if (tree.children) {
+      tree.children.forEach(recursion);
     }
-  })
-  .append('xhtml:span')
-  .text(d => d.data.name);
-// // 插入文字
-// lineText
-nodes
-  .append('text')
-  .attr('class', 'line-text')
-  .attr('transform', `translate(-${nodeWidth},-4)`)
-  //   .attr('dx', '1em')
-  .text(d => {
-    return d.data.lineText;
-  });
-// nodes.append('text').attr('transform', `translate(0,-${nodeHeight})`).text('line text');
+  })(data);
+  (function recursion(tree) {
+    if (tree.name === name) {
+      tree.children = children;
+      return;
+    }
+    if (tree.children) {
+      tree.children.forEach(recursion);
+    }
+  })(dataCopy);
+}
