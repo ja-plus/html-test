@@ -20,11 +20,23 @@ $svg.attr('height', '100%');
 $svg.attr('viewBox', '-500 -500 1000 1000');
 
 const $wrap = $svg.append('g');
-$svg.call(
-  D3.zoom().on('zoom', ev => {
+// 拖动和缩放功能
+const zoom = D3.zoom()
+  .duration(200)
+  .scaleExtent([0.1, 10])
+  .on('zoom', ev => {
+    console.log('zoom', ev.transform);
     $wrap.attr('transform', ev.transform);
-  }),
-);
+  });
+$svg
+  // .transition()
+  // .duration(100)
+  .call(zoom);
+
+setTimeout(() => {
+  zoom.scaleTo($svg, 0.5);
+}, 3000);
+
 const $linkGroup = $wrap.append('g').attr('class', 'link-group');
 const $nodeGroup = $wrap.append('g').attr('class', 'node-group');
 
