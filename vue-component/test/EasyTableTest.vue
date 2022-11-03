@@ -253,10 +253,10 @@ export default {
     //   this.$refs.easyTable.setHighlightDimCell('add2', 'gender');
     //   this.$refs.easyTableC.setHighlightDimCell('add2', 'gender');
     // }, 2000);
-    // setInterval(() => {
-    //   this.$refs.easyTable.setHighlightDimRow('add0');
-    //   this.$refs.easyTableC.setHighlightDimRow('add0');
-    // }, 1000);
+    setInterval(() => {
+      this.$refs.easyTable.setHighlightDimRow('add0');
+      this.$refs.easyTableC.setHighlightDimRow('add0');
+    }, 1000);
   },
   methods: {
     handleHeightInput(e) {

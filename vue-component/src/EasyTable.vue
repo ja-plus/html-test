@@ -130,6 +130,7 @@
                 textAlign: col.align,
                 minWidth: col.minWidth || col.width,
                 maxWidth: col.maxWidth || col.width,
+                backgroundColor: `rgba(34, 103, 218, ${item._highlight_opacity})`,
                 ...fixedStyle('td', col),
               }"
               @click="e => onCellClick(e, item, col)"
@@ -315,7 +316,7 @@ export default {
       tableHeaders: [],
       /** 若有多级表头时，的tableHeaders */
       tableProps: [],
-      dataSourceCopy: [],
+      dataSourceCopy: Object.freeze([]),
       /** 高亮后渐暗的单元格 */
       // highlightDimCells: {},
       /** 高亮后渐暗的行定时器 */
@@ -327,6 +328,8 @@ export default {
         offsetTop: 0, // 表格定位上边距
         scrollTop: 0, // 纵向滚动条位置，用于判断是横向滚动还是纵向
       },
+      highlightDimRows: new Set(), // 存放高亮行的对象
+      calcHighlightDimLoop: false, // 是否正在执行循环
       virtualScrollX: {
         containerWidth: 0,
         startIndex: 0,
@@ -351,9 +354,8 @@ export default {
     /** 虚拟滚动展示的行 */
     virtual_dataSourcePart() {
       if (!this.virtual_on) return this.dataSourceCopy;
-      return this.dataSourceCopy.slice(
-        this.virtualScroll.startIndex,
-        this.virtualScroll.startIndex + this.virtual_pageSize,
+      return Object.freeze(
+        this.dataSourceCopy.slice(this.virtualScroll.startIndex, this.virtualScroll.startIndex + this.virtual_pageSize),
       );
     },
     /** 虚拟表格定位下边距*/
@@ -381,8 +383,8 @@ export default {
           const col = this.columns[i];
           if (col.fixed === 'left') fixedLeftColumns.push(col);
         }
-        return fixedLeftColumns.concat(
-          this.columns.slice(this.virtualScrollX.startIndex, this.virtualScrollX.endIndex),
+        return Object.freeze(
+          fixedLeftColumns.concat(this.columns.slice(this.virtualScrollX.startIndex, this.virtualScrollX.endIndex)),
         );
       }
       return this.columns;
@@ -700,6 +702,56 @@ export default {
     onThDragOver(e) {
       e.preventDefault();
     },
+    // ---tool func
+    calcHighlightLoop() {
+      if (this.calcHighlightDimLoop) return;
+      console.log('asdf');
+      this.calcHighlightDimLoop = true;
+      // window.requestAnimationFrame(() => {
+      //   const highlightRows = [...this.highlightDimRows];
+      //   for (let i = 0; i < highlightRows.length; i++) {
+      //     const row = highlightRows[i];
+      //     row._highlight_opacity -= 0.2;
+      //     if (row._highlight_opacity < 0) {
+      //       row._highlight_opacity = 0;
+      //       highlightRows.splice(i--, 1);
+      //     }
+      //   }
+      //   this.highlightDimRows = new Set(highlightRows);
+      //   if (highlightRows.length > 0) {
+      //     this.calcHighlightLoop();
+      //   } else {
+      //     this.calcHighlightDimLoop = false;
+      //   }
+      // });
+      // TODO: js计算gradient
+      window.requestAnimationFrame(
+        function recursion() {
+          const highlightRows = [...this.highlightDimRows];
+          for (let i = 0; i < highlightRows.length; i++) {
+            const row = highlightRows[i];
+            row._highlight_opacity -= 0.01;
+            if (row._highlight_opacity < 0) {
+              row._highlight_opacity = 0;
+              highlightRows.splice(i--, 1);
+            }
+          }
+          this.highlightDimRows = new Set(highlightRows);
+          // this.highlightDimRows.forEach(row => {
+          //   row._highlight_opacity -= 0.01;
+          //   if (row._highlight_opacity < 0) {
+          //     row._highlight_opacity = 0;
+          //     this.highlightDimRows.delete(row);
+          //   }
+          // });
+          if (this.highlightDimRows.size > 0) {
+            window.requestAnimationFrame(recursion.bind(this));
+          } else {
+            this.calcHighlightDimLoop = false;
+          }
+        }.bind(this),
+      );
+    },
 
     // ---- ref function-----
     /**
@@ -726,22 +778,31 @@ export default {
     },
     /** 高亮一行 */
     setHighlightDimRow(rowKeyValue) {
-      const rowEl = this.$el.querySelector(`[data-row-key="${rowKeyValue}"]`);
-      if (!rowEl) return;
-      if (rowEl.classList.contains('highlight-row')) {
-        rowEl.classList.remove('highlight-row');
-        void rowEl.offsetWidth;
-      }
-      rowEl.classList.add('highlight-row');
-      // 动画结束移除class
-      window.clearTimeout(this.highlightDimRowsTimeout.get(rowKeyValue));
-      this.highlightDimRowsTimeout.set(
-        rowKeyValue,
-        window.setTimeout(() => {
+      if (this.virtual) {
+        // 虚拟滚动用计算的的高亮方案
+        const row = this.dataSource.find(it => this.rowKeyGen(it) === rowKeyValue);
+        if (!row) return;
+        row._highlight_opacity = 0.65;
+        this.highlightDimRows.add(row);
+        this.calcHighlightLoop();
+      } else {
+        const rowEl = this.$el.querySelector(`[data-row-key="${rowKeyValue}"]`);
+        if (!rowEl) return;
+        if (rowEl.classList.contains('highlight-row')) {
           rowEl.classList.remove('highlight-row');
-          this.highlightDimRowsTimeout.delete(rowKeyValue); // 回收内存
-        }, 2000),
-      );
+          void rowEl.offsetWidth;
+        }
+        rowEl.classList.add('highlight-row');
+        // 动画结束移除class
+        window.clearTimeout(this.highlightDimRowsTimeout.get(rowKeyValue));
+        this.highlightDimRowsTimeout.set(
+          rowKeyValue,
+          window.setTimeout(() => {
+            rowEl.classList.remove('highlight-row');
+            this.highlightDimRowsTimeout.delete(rowKeyValue); // 回收内存
+          }, 2000),
+        );
+      }
     },
     /**
      * 设置表头排序状态
@@ -803,6 +864,7 @@ export default {
   overflow: auto;
   display: flex;
   flex-direction: column;
+
   // .stk-table-fixed-left-col-box-shadow {
   //   position: sticky;
   //   left: 0;
@@ -818,6 +880,7 @@ export default {
     border-spacing: 0;
     border-collapse: separate;
     table-layout: fixed;
+
     th,
     td {
       z-index: 1;
@@ -828,6 +891,7 @@ export default {
       padding: 0 8px;
       background-image: var(--bg-border-right), var(--bg-border-bottom);
     }
+
     thead {
       tr {
         &:first-child th {
@@ -835,22 +899,27 @@ export default {
           top: 0;
           // border-top: 1px solid var(--border-color);
           background-image: var(--bg-border-top), var(--bg-border-right), var(--bg-border-bottom);
+
           &:first-child {
             background-image: var(--bg-border-top), var(--bg-border-right), var(--bg-border-bottom),
               var(--bg-border-left);
           }
         }
+
         th {
           background-color: var(--th-bg-color);
+
           &.sortable {
             cursor: pointer;
           }
+
           &:first-child {
             // border-left: 1px solid var(--border-color);
             background-image: var(--bg-border-top), var(--bg-border-right), var(--bg-border-bottom),
               var(--bg-border-left);
             // padding-left: 12px;
           }
+
           // &:last-child {
           //   padding-right: 12px;
           // }
@@ -858,32 +927,39 @@ export default {
             .table-header-cell-wrapper {
               white-space: nowrap;
               overflow: hidden;
+
               .table-header-title {
                 text-overflow: ellipsis;
                 overflow: hidden;
               }
             }
           }
+
           &:not(.sorter-desc):not(.sorter-asc):hover .table-header-cell-wrapper .table-header-sorter {
             #arrow-up {
               fill: var(--sort-arrow-hover-color);
             }
+
             #arrow-down {
               fill: var(--sort-arrow-hover-color);
             }
           }
+
           &.sorter-desc .table-header-cell-wrapper .table-header-sorter {
             #arrow-up {
               fill: var(--sort-arrow-active-sub-color);
             }
+
             #arrow-down {
               fill: var(--sort-arrow-active-color);
             }
           }
+
           &.sorter-asc .table-header-cell-wrapper .table-header-sorter {
             #arrow-up {
               fill: var(--sort-arrow-active-color);
             }
+
             #arrow-down {
               fill: var(--sort-arrow-active-sub-color);
             }
@@ -898,11 +974,13 @@ export default {
               overflow: hidden;
               align-self: flex-start;
             }
+
             .table-header-sorter {
               flex-shrink: 0;
               margin-left: 4px;
               width: 16px;
               height: 16px;
+
               #arrow-up,
               #arrow-down {
                 fill: var(--sort-arrow-color);
@@ -912,6 +990,7 @@ export default {
         }
       }
     }
+
     tbody {
       /**高亮渐暗 */
       @keyframes dim {
@@ -919,6 +998,7 @@ export default {
           background-color: var(--highlight-color);
         }
       }
+
       tr {
         &.highlight-row td:not(.highlight-cell) {
           animation: dim 2s linear;
@@ -930,18 +1010,22 @@ export default {
             background-color: var(--tr-hover-bg-color);
           }
         }
+
         &.active {
           td {
             background-color: var(--tr-active-bg-color);
           }
         }
+
         td {
           background-color: var(--td-bg-color);
+
           &:first-child {
             // border-left: 1px solid var(--border-color);
             background-image: var(--bg-border-right), var(--bg-border-bottom), var(--bg-border-left);
             // padding-left: 12px;
           }
+
           // &:last-child {
           //   padding-right: 12px;
           // }
@@ -949,6 +1033,7 @@ export default {
           &.highlight-cell {
             animation: dim 2s linear;
           }
+
           &.text-overflow {
             .table-cell-wrapper {
               white-space: nowrap;
@@ -956,6 +1041,7 @@ export default {
               text-overflow: ellipsis;
             }
           }
+
           //   &.perch-td {
           //     padding: 0;
           //     height: 0;
@@ -982,6 +1068,7 @@ export default {
           //   }
         }
       }
+
       // 斑马纹
       // tr:nth-child(2n) td {
       //   background-color: #fafafc;
@@ -991,6 +1078,7 @@ export default {
       // }
     }
   }
+
   .stk-table-no-data {
     line-height: var(--row-height);
     text-align: center;
@@ -1003,6 +1091,7 @@ export default {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+
     &.no-data-full {
       flex: 1;
     }
@@ -1029,6 +1118,7 @@ export default {
     // .stk-table-main {
     // }
   }
+
   /**虚拟滚动模式 */
   &.virtual {
     .virtual-table-height {
@@ -1036,6 +1126,7 @@ export default {
       z-index: -2;
       position: absolute;
     }
+
     .stk-table-main {
       thead {
         tr {
@@ -1048,13 +1139,16 @@ export default {
           }
         }
       }
+
       tbody {
         position: relative;
+
         tr {
           td {
             // content-visibility: auto;
             height: var(--row-height);
             line-height: var(--row-height);
+
             .table-cell-wrapper {
               height: inherit;
               overflow: hidden;
