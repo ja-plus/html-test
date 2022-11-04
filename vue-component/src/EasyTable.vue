@@ -554,6 +554,7 @@ export default {
           style.transform = `translateX(${this.virtualX_offsetRight}px)`;
         }
         if (tagType === 'th') {
+          style.top = this.virtualScroll.scrollTop + 'px';
           style.zIndex = 2; // 保证固定列高于其他单元格
         }
       }
