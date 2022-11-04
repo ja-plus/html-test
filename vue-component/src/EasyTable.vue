@@ -469,6 +469,7 @@ export default {
     },
     initVirtualScrollX() {
       if (this.virtualX) {
+        this.scrollTo(null, 0);
         this.virtualScrollX.containerWidth = this.$refs.tableContainer?.offsetWidth;
         this.updateVirtualScrollX(this.$refs.tableContainer?.scrollLeft);
       }
@@ -538,12 +539,15 @@ export default {
         // for (let i = 0; i < fixedCols.length - 1; i++) {
         //   position += parseInt(fixedCols[i].width);
         // }
-        // style.position = 'sticky';
+        // style.position = 'sticky';// sticky 方案在低版本浏览器不兼容。具体表现为横向滚动超过一个父容器宽度（非table宽度）会导致sticky吸附失效。浏览器bug。
+        style.position = 'relative'; // 固定列方案替换为relative。原因:transform 在chrome84浏览器，列变动会导致横向滚动条计算出问题。
         if (col.fixed === 'left') {
           // style.left = position + 'px';
-          if (this.virtualX_on)
-            style.transform = `translateX(${this.virtualScrollX.scrollLeft - this.virtualScrollX.offsetLeft}px)`;
-          else style.transform = `translateX(${this.virtualScrollX.scrollLeft}px)`;
+          // if (this.virtualX_on)
+          //   style.transform = `translateX(${this.virtualScrollX.scrollLeft - this.virtualScrollX.offsetLeft}px)`;
+          // else style.transform = `translateX(${this.virtualScrollX.scrollLeft}px)`;
+          if (this.virtualX_on) style.left = this.virtualScrollX.scrollLeft - this.virtualScrollX.offsetLeft + 'px';
+          else style.left = this.virtualScrollX.scrollLeft + 'px';
         } else {
           // style.right = position + 'px';
           // TODO:计算右侧距离
