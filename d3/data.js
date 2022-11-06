@@ -72,6 +72,11 @@ const data = {
         {
           name: '3-2',
         },
+        {
+          type: 'more',
+          name: 'show more',
+          data: [{ name: '3-3' }, { name: '3-4' }],
+        },
       ],
     },
     {

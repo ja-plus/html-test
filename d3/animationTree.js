@@ -45,7 +45,7 @@ document.body.appendChild($svg.node());
 /* tree */
 
 const tree = D3.tree().nodeSize([Node.height, Node.width]);
-const data = D3.hierarchy(Data);
+let data = D3.hierarchy(Data);
 
 /* draw */
 
@@ -81,9 +81,12 @@ function draw(init = false) {
     .data(nodes, d => d.data.name)
     .join(
       enter => {
+        // console.log(enter, 'enter');
         let $gs = enter.append('g');
         $gs
           .append('rect')
+          // .transition()
+          // .duration(init ? 0 : TransitionDuration)
           .attr('width', Node.width / 2)
           .attr('height', Node.height * 0.66)
           .attr('transform', `translate(${-Node.width / 4}, ${-Node.height * 0.33})`)
@@ -108,8 +111,13 @@ function draw(init = false) {
 
         return $gs;
       },
-      update => update,
+      update => {
+        console.log('update', update);
+        // update.selectAll('rect').attr('fill', 'red');
+        return update;
+      },
       exit => {
+        // 点击收起会进来
         exit
           .transition()
           .duration(init ? 0 : TransitionDuration)
@@ -119,12 +127,20 @@ function draw(init = false) {
       },
     )
     .attr('class', 'node')
-    .on('click', handle_node_click);
+    .on('click', (e, d) => {
+      if (d.data.type === 'more') {
+        handle_more_click(e, d);
+      } else {
+        handle_node_click(e, d);
+      }
+    });
 
+  // 重置节点展开时，动画的初始位置
   $nodes
     .filter(a => a.originX !== undefined && a.originY !== undefined)
     .attr('opacity', 0)
     .attr('transform', d => {
+      // console.log('d :>> ', d);
       let x, y;
 
       if (d.originX) {
@@ -142,7 +158,7 @@ function draw(init = false) {
 
       return `translate(${x}, ${y})`;
     });
-
+  // 运行节点展开动画
   $nodes
     .transition()
     .duration(init ? 0 : TransitionDuration)
@@ -161,6 +177,8 @@ function draw(init = false) {
           .attr('class', 'link')
           .attr('fill', 'none')
           .attr('stroke', 'gray')
+          // .transition()
+          // .duration(init ? 0 : TransitionDuration)
           .attr('d', d => {
             let s = d.source;
             let origin = `${s.sourceX || s.x},${s.sourceY || s.y}`;
@@ -185,6 +203,9 @@ function draw(init = false) {
     .attr('d', d => {
       let s = d.source;
       let t = d.target;
+      // console.log('s :>> ', s);
+      // console.log('t :>> ', t);
+
       let mx = (s.x + t.x) / 2;
 
       return `M ${s.x},${s.y} L ${mx},${s.y} L ${mx},${t.y} L ${t.x},${t.y}`;
@@ -196,25 +217,39 @@ function draw(init = false) {
  * @param {Object} d 数据
  */
 function handle_node_click(ev, d) {
-  // d.sourceX = d.x
-  // d.sourceY = d.y
+  d.sourceX = d.x;
+  d.sourceY = d.y;
 
   if (d.depth !== 0) {
-    if (d.children) {
+    if (d.children && !d._children) {
+      // 收起
       d._children = d.children;
+      // d._children = d.children.slice(2);
       d.children = undefined;
+      // d.children = d.children.slice(0, 2);
 
       draw();
     } else if (d._children) {
+      // 展开
       for (let a of d._children) {
         a.originX = a.parent.x;
         a.originY = a.parent.y;
       }
-
       d.children = d._children;
-
+      // d.children = d.children.concat(d._children);
+      delete d._children;
       draw();
     }
+  }
+}
+
+function handle_more_click(ev, d) {
+  if (d.depth !== 0) {
+    // 修改源数据
+    Data.children[2].children = Data.children[2].children.slice(0, -1); // 查看更多节点移除
+    Data.children[2].children = Data.children[2].children.concat(d.data.data); // 节点添加
+    data = D3.hierarchy(Data); // 数据源转换
+    draw(); // 重绘
   }
 }
 
