@@ -130,7 +130,7 @@
                 textAlign: col.align,
                 minWidth: col.minWidth || col.width,
                 maxWidth: col.maxWidth || col.width,
-                backgroundColor: `rgba(34, 103, 218, ${item._highlight_opacity})`,
+                backgroundColor: item._bgc,
                 ...fixedStyle('td', col),
               }"
               @click="e => onCellClick(e, item, col)"
@@ -160,6 +160,12 @@
  * @author JA+
  * 存在的问题：column.dataIndex 作为唯一键，不能重复
  */
+import TWEEN from '@tweenjs/tween.js';
+console.log(TWEEN, 'sdfsdf');
+const _highlightBgc = '#1e4c99';
+const _rowBgc = '#181c21';
+const _highlightDuration = 2000;
+
 function _howDeepTheColumn(arr, level = 1) {
   const levels = [level];
   arr.forEach(item => {
@@ -321,6 +327,10 @@ export default {
       // highlightDimCells: {},
       /** 高亮后渐暗的行定时器 */
       highlightDimRowsTimeout: new Map(),
+      /** 存放高亮行的对象*/
+      highlightDimRows: new Set(),
+      /** 是否正在执行循环*/
+      calcHighlightDimLoop: false,
       virtualScroll: {
         containerHeight: 0,
         startIndex: 0, // 数组开始位置
@@ -328,8 +338,6 @@ export default {
         offsetTop: 0, // 表格定位上边距
         scrollTop: 0, // 纵向滚动条位置，用于判断是横向滚动还是纵向
       },
-      highlightDimRows: new Set(), // 存放高亮行的对象
-      calcHighlightDimLoop: false, // 是否正在执行循环
       virtualScrollX: {
         containerWidth: 0,
         startIndex: 0,
@@ -360,7 +368,7 @@ export default {
     },
     /** 虚拟表格定位下边距*/
     virtual_offsetBottom() {
-      if (!this.virtual_on) return 0; // 小于一页则不用虚拟滚动
+      if (!this.virtual_on) return 0;
       return (
         (this.dataSourceCopy.length - this.virtualScroll.startIndex - this.virtual_dataSourcePart.length) *
         this.virtualScroll.rowHeight
@@ -708,9 +716,9 @@ export default {
       e.preventDefault();
     },
     // ---tool func
+    /** 计算高亮渐暗颜色的循环 */
     calcHighlightLoop() {
       if (this.calcHighlightDimLoop) return;
-      console.log('asdf');
       this.calcHighlightDimLoop = true;
       // window.requestAnimationFrame(() => {
       //   const highlightRows = [...this.highlightDimRows];
@@ -735,11 +743,24 @@ export default {
           const highlightRows = [...this.highlightDimRows];
           for (let i = 0; i < highlightRows.length; i++) {
             const row = highlightRows[i];
-            row._highlight_opacity -= 0.01;
-            if (row._highlight_opacity < 0) {
-              row._highlight_opacity = 0;
-              highlightRows.splice(i--, 1);
+            if (!row._tween) {
+              row._tween = new TWEEN.Tween({ bgc: _highlightBgc })
+                .to({ bgc: _rowBgc }, _highlightDuration)
+                .start()
+                .onUpdate(obj => {
+                  row._bgc = obj.bgc;
+                })
+                .onComplete(() => {
+                  delete row._tween;
+                  delete row._bgc;
+                });
             }
+            row._tween.update();
+            // row._highlight_opacity -= 0.01;
+            // if (row._highlight_opacity < 0) {
+            //   row._highlight_opacity = 0;
+            //   highlightRows.splice(i--, 1);
+            // }
           }
           this.highlightDimRows = new Set(highlightRows);
           // this.highlightDimRows.forEach(row => {
@@ -805,7 +826,7 @@ export default {
           window.setTimeout(() => {
             rowEl.classList.remove('highlight-row');
             this.highlightDimRowsTimeout.delete(rowKeyValue); // 回收内存
-          }, 2000),
+          }, _highlightDuration),
         );
       }
     },
