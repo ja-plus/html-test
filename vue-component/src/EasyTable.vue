@@ -2,7 +2,7 @@
   <div
     ref="tableContainer"
     class="stk-table-wrapper dark"
-    :class="{ virtual: virtual }"
+    :class="{ virtual: virtual, 'virtual-x': virtualX }"
     :style="virtual && { '--row-height': virtualScroll.rowHeight + 'px' }"
     @scroll="onTableScroll"
   >
@@ -29,7 +29,11 @@
       <thead>
         <tr v-for="(row, index) in tableHeaders" :key="index" @contextmenu="e => onHeaderMenu(e)">
           <!-- 这个th用于横向虚拟滚动表格左边距 -->
-          <th v-if="virtualX_on" :style="{ minWidth: virtualScrollX.offsetLeft + 'px', padding: 0 }"></th>
+          <th
+            v-if="virtualX_on"
+            class="virtual-x-left"
+            :style="{ minWidth: virtualScrollX.offsetLeft + 'px', padding: 0 }"
+          ></th>
           <th
             v-for="col in virtualX_on ? virtualX_columnPart : row"
             :key="col.dataIndex"
@@ -120,7 +124,7 @@
             @mouseover="e => onTrMouseOver(e, item)"
           >
             <!--这个td用于配合虚拟滚动的th对应，防止列错位-->
-            <td v-if="virtualX_on" style="padding: 0"></td>
+            <td v-if="virtualX_on" class="virtual-x-left" style="padding: 0"></td>
             <td
               v-for="col in virtualX_on ? virtualX_columnPart : tableProps"
               :key="col.dataIndex"
@@ -160,11 +164,12 @@
  * @author JA+
  * 存在的问题：column.dataIndex 作为唯一键，不能重复
  */
-import TWEEN from '@tweenjs/tween.js';
-console.log(TWEEN, 'sdfsdf');
+import { interpolateRgb } from 'd3-interpolate';
 const _highlightBgc = '#1e4c99';
 const _rowBgc = '#181c21';
-const _highlightDuration = 2000;
+const _highlightDuration = 10000;
+/** 颜色插值 */
+const _highlightInter = interpolateRgb(_highlightBgc, _rowBgc);
 
 function _howDeepTheColumn(arr, level = 1) {
   const levels = [level];
@@ -177,7 +182,7 @@ function _howDeepTheColumn(arr, level = 1) {
 }
 /**
  * 表格排序抽离
- * @param {object} sortOption 列配置
+ * @param {{sorter:function|boolean,dataIndex:string,sortField:string,sortType: 'number'|'string'}} sortOption 列配置
  * @param {any} dataSource 排序的数组
  * @param {string|null} order 排序方式
  */
@@ -737,46 +742,29 @@ export default {
       //     this.calcHighlightDimLoop = false;
       //   }
       // });
-      // TODO: js计算gradient
-      window.requestAnimationFrame(
-        function recursion() {
-          const highlightRows = [...this.highlightDimRows];
-          for (let i = 0; i < highlightRows.length; i++) {
-            const row = highlightRows[i];
-            if (!row._tween) {
-              row._tween = new TWEEN.Tween({ bgc: _highlightBgc })
-                .to({ bgc: _rowBgc }, _highlightDuration)
-                .start()
-                .onUpdate(obj => {
-                  row._bgc = obj.bgc;
-                })
-                .onComplete(() => {
-                  delete row._tween;
-                  delete row._bgc;
-                });
-            }
-            row._tween.update();
-            // row._highlight_opacity -= 0.01;
-            // if (row._highlight_opacity < 0) {
-            //   row._highlight_opacity = 0;
-            //   highlightRows.splice(i--, 1);
-            // }
+      // js计算gradient
+      const that = this;
+      window.requestAnimationFrame(function recursion() {
+        const highlightRows = [...that.highlightDimRows];
+        const nowTs = Date.now();
+        for (let i = 0; i < highlightRows.length; i++) {
+          const row = highlightRows[i];
+          //  经过的时间 ÷ 2s 计算出 颜色过渡进度 (0-1)
+          const progress = (nowTs - row._bgc_progress) / _highlightDuration;
+          row._bgc = _highlightInter(progress);
+          if (progress > 1) {
+            highlightRows.splice(i--, 1);
           }
-          this.highlightDimRows = new Set(highlightRows);
-          // this.highlightDimRows.forEach(row => {
-          //   row._highlight_opacity -= 0.01;
-          //   if (row._highlight_opacity < 0) {
-          //     row._highlight_opacity = 0;
-          //     this.highlightDimRows.delete(row);
-          //   }
-          // });
-          if (this.highlightDimRows.size > 0) {
-            window.requestAnimationFrame(recursion.bind(this));
-          } else {
-            this.calcHighlightDimLoop = false;
-          }
-        }.bind(this),
-      );
+        }
+        that.highlightDimRows = new Set(highlightRows);
+
+        if (that.highlightDimRows.size > 0) {
+          // 还有高亮的行则下一次循环
+          window.requestAnimationFrame(recursion);
+        } else {
+          that.calcHighlightDimLoop = false;
+        }
+      });
     },
 
     // ---- ref function-----
@@ -808,7 +796,7 @@ export default {
         // 虚拟滚动用计算的的高亮方案
         const row = this.dataSource.find(it => this.rowKeyGen(it) === rowKeyValue);
         if (!row) return;
-        row._highlight_opacity = 0.65;
+        row._bgc_progress = Date.now(); // 重置渐变进度
         this.highlightDimRows.add(row);
         this.calcHighlightLoop();
       } else {
@@ -870,15 +858,16 @@ export default {
   // contain: strict;
   --row-height: 28px;
   --border-color: #e8eaec;
+  --border-width: 1px;
   // --border: 1px #ececf7 solid;
   --td-bg-color: #fff;
   --th-bg-color: #f8f8f9;
   --tr-active-bg-color: rgb(230, 247, 255);
   --tr-hover-bg-color: rgba(230, 247, 255, 0.7);
-  --bg-border-top: linear-gradient(180deg, var(--border-color) 1px, transparent 1px);
-  --bg-border-right: linear-gradient(270deg, var(--border-color) 1px, transparent 1px);
-  --bg-border-bottom: linear-gradient(0deg, var(--border-color) 1px, transparent 1px);
-  --bg-border-left: linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
+  --bg-border-top: linear-gradient(180deg, var(--border-color) var(--border-width), transparent var(--border-width));
+  --bg-border-right: linear-gradient(270deg, var(--border-color) var(--border-width), transparent var(--border-width));
+  --bg-border-bottom: linear-gradient(0deg, var(--border-color) var(--border-width), transparent var(--border-width));
+  --bg-border-left: linear-gradient(90deg, var(--border-color) var(--border-width), transparent var(--border-width));
   --highlight-color: rgba(113, 162, 253, 1);
 
   --sort-arrow-color: #5d5f69;
@@ -1181,6 +1170,17 @@ export default {
             }
           }
         }
+      }
+    }
+  }
+  &.virtual-x {
+    .stk-table-main {
+      thead tr:first-child .virtual-x-left + th {
+        // 横向虚拟滚动时，左侧第一个单元格加上border-left
+        background-image: var(--bg-border-top), var(--bg-border-right), var(--bg-border-bottom), var(--bg-border-left);
+      }
+      tr .virtual-x-left + th {
+        background-image: var(--bg-border-right), var(--bg-border-bottom), var(--bg-border-left);
       }
     }
   }
