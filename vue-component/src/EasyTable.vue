@@ -165,11 +165,12 @@
  * 存在的问题：column.dataIndex 作为唯一键，不能重复
  */
 import { interpolateRgb } from 'd3-interpolate';
-const _highlightBgc = '#1e4c99';
-const _rowBgc = '#181c21';
-const _highlightDuration = 10000;
+/** 高亮背景色 */
+const _highlightBgc = { from: '#1e4c99', to: '#181c21' };
+/** 高亮持续时间 */
+const _highlightDuration = 2000;
 /** 颜色插值 */
-const _highlightInter = interpolateRgb(_highlightBgc, _rowBgc);
+const _highlightInter = interpolateRgb(_highlightBgc.from, _highlightBgc.to);
 
 function _howDeepTheColumn(arr, level = 1) {
   const levels = [level];
@@ -312,8 +313,8 @@ export default {
   ],
   data() {
     return {
-      /** 是否展示横向滚动固定列的阴影 */
-      showFixedLeftShadow: false,
+      /** 是否展示横向滚动固定列的阴影 
+      showFixedLeftShadow: false,*/
 
       /** 当前选中的一行*/
       currentItem: { value: null },
@@ -328,13 +329,11 @@ export default {
       /** 若有多级表头时，的tableHeaders */
       tableProps: [],
       dataSourceCopy: Object.freeze([]),
-      /** 高亮后渐暗的单元格 */
-      // highlightDimCells: {},
-      /** 高亮后渐暗的行定时器 */
-      highlightDimRowsTimeout: new Map(),
       /** 存放高亮行的对象*/
       highlightDimRows: new Set(),
-      /** 是否正在执行循环*/
+      /** 高亮后渐暗的行定时器 */
+      highlightDimRowsTimeout: new Map(),
+      /** 是否正在计算高亮行的循环*/
       calcHighlightDimLoop: false,
       virtualScroll: {
         containerHeight: 0,
@@ -744,6 +743,7 @@ export default {
       // });
       // js计算gradient
       const that = this;
+      // TODO: raf 太频繁。考虑分段设置颜色，过渡靠css transition 补间是否可行
       window.requestAnimationFrame(function recursion() {
         const highlightRows = [...that.highlightDimRows];
         const nowTs = Date.now();
@@ -782,40 +782,54 @@ export default {
     },
     /** 高亮一个单元格 */
     setHighlightDimCell(rowKeyValue, dataIndex) {
+      // TODO: 支持动态计算高亮颜色
       const cellEl = this.$el.querySelector(`[data-row-key="${rowKeyValue}"]>[data-index="${dataIndex}"]`);
       if (!cellEl) return;
       if (cellEl.classList.contains('highlight-cell')) {
         cellEl.classList.remove('highlight-cell');
-        void cellEl.offsetHeight;
+        void cellEl.offsetHeight; // 通知浏览器重绘
       }
       cellEl.classList.add('highlight-cell');
     },
-    /** 高亮一行 */
-    setHighlightDimRow(rowKeyValue) {
+    /**
+     * 高亮一行
+     * @param {Array<string|number>} rowKeyValues
+     */
+    setHighlightDimRow(rowKeyValues) {
       if (this.virtual) {
-        // 虚拟滚动用计算的的高亮方案
-        const row = this.dataSource.find(it => this.rowKeyGen(it) === rowKeyValue);
-        if (!row) return;
-        row._bgc_progress = Date.now(); // 重置渐变进度
-        this.highlightDimRows.add(row);
+        // --------虚拟滚动用js计算颜色渐变的高亮方案
+        const nowTs = Date.now(); // 重置渐变进度
+        for (let i = 0; i < rowKeyValues.length; i++) {
+          const rowKeyValue = rowKeyValues[i];
+
+          const row = this.dataSource.find(it => this.rowKeyGen(it) === rowKeyValue);
+          if (!row) continue;
+          row._bgc_progress = nowTs;
+          this.highlightDimRows.add(row);
+        }
         this.calcHighlightLoop();
       } else {
-        const rowEl = this.$el.querySelector(`[data-row-key="${rowKeyValue}"]`);
-        if (!rowEl) return;
-        if (rowEl.classList.contains('highlight-row')) {
-          rowEl.classList.remove('highlight-row');
-          void rowEl.offsetWidth;
-        }
-        rowEl.classList.add('highlight-row');
-        // 动画结束移除class
-        window.clearTimeout(this.highlightDimRowsTimeout.get(rowKeyValue));
-        this.highlightDimRowsTimeout.set(
-          rowKeyValue,
-          window.setTimeout(() => {
+        // -------- 普通滚动用css @keyframes动画，实现高亮
+        for (let i = 0; i < rowKeyValues.length; i++) {
+          const rowKeyValue = rowKeyValues[i];
+
+          const rowEl = this.$el.querySelector(`[data-row-key="${rowKeyValue}"]`);
+          if (!rowEl) continue;
+          if (rowEl.classList.contains('highlight-row')) {
             rowEl.classList.remove('highlight-row');
-            this.highlightDimRowsTimeout.delete(rowKeyValue); // 回收内存
-          }, _highlightDuration),
-        );
+            void rowEl.offsetWidth; // 通知浏览器重绘 // TODO: 统一重绘
+          }
+          rowEl.classList.add('highlight-row');
+          // 动画结束移除class
+          window.clearTimeout(this.highlightDimRowsTimeout.get(rowKeyValue));
+          this.highlightDimRowsTimeout.set(
+            rowKeyValue,
+            window.setTimeout(() => {
+              rowEl.classList.remove('highlight-row');
+              this.highlightDimRowsTimeout.delete(rowKeyValue); // 回收内存
+            }, _highlightDuration),
+          );
+        }
       }
     },
     /**
@@ -829,7 +843,7 @@ export default {
     setSorter(dataIndex, order, option = {}) {
       option = { silent: true, sortOption: null, sort: true, ...option };
       this.sortCol = dataIndex;
-      this.sortOrderIndex = this.sortSwitchOrder.findIndex(it => it == order);
+      this.sortOrderIndex = this.sortSwitchOrder.findIndex(it => it === order);
       if (option.sort && this.dataSourceCopy?.length) {
         // 如果表格有数据，则进行排序
         const column = option.sortOption || this.columns.find(it => it.dataIndex === this.sortCol);
@@ -874,11 +888,26 @@ export default {
   --sort-arrow-hover-color: #8f90b5;
   --sort-arrow-active-color: #1b63d9;
   --sort-arrow-active-sub-color: #cbcbe1;
-  // --highlight-color-to: rgba(113, 162, 253, 0);
   position: relative;
   overflow: auto;
   display: flex;
   flex-direction: column;
+  /**深色模式 */
+  &.dark {
+    --th-bg-color: #181c21;
+    --td-bg-color: #181c21;
+    --border-color: #26292e;
+    --tr-active-bg-color: #283f63;
+    --tr-hover-bg-color: #1a2b46;
+    --highlight-color: #1e4c99; // 不能用rgba，因为固定列时，会变成半透明
+    --sort-arrow-color: #5d6064;
+    --sort-arrow-hover-color: #727782;
+    --sort-arrow-active-color: #d0d1d2;
+    --sort-arrow-active-sub-color: #5d6064;
+
+    background-color: var(--th-bg-color);
+    color: #d0d1d2;
+  }
 
   // .stk-table-fixed-left-col-box-shadow {
   //   position: sticky;
@@ -930,8 +959,7 @@ export default {
 
           &:first-child {
             // border-left: 1px solid var(--border-color);
-            background-image: var(--bg-border-top), var(--bg-border-right), var(--bg-border-bottom),
-              var(--bg-border-left);
+            background-image: var(--bg-border-right), var(--bg-border-bottom), var(--bg-border-left);
             // padding-left: 12px;
           }
 
@@ -1026,10 +1054,8 @@ export default {
           }
         }
 
-        &.active {
-          td {
-            background-color: var(--tr-active-bg-color);
-          }
+        &.active td {
+          background-color: var(--tr-active-bg-color);
         }
 
         td {
@@ -1101,46 +1127,23 @@ export default {
     position: sticky;
     width: 100%;
     left: 0px;
-    background: var(--bg-border-left), var(--bg-border-bottom), var(--bg-border-right);
+    border: var(--border-width) solid var(--border-color);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-
     &.no-data-full {
       flex: 1;
     }
   }
 
-  /**深色模式 */
-  &.dark {
-    // --th-bg-color: #26272c;
-    --th-bg-color: #181c21;
-    --td-bg-color: #181c21;
-    --border-color: #26292e;
-    --tr-active-bg-color: #283f63;
-    --tr-hover-bg-color: #1a2b46;
-    --highlight-color: #1e4c99; // 不能用rgba，因为固定列时，会变成半透明
-    // --highlight-color: rgba(34, 103, 218, 0.65);
-    // --highlight-color-to: rgba(19, 55, 125, 0);
-    --sort-arrow-color: #5d6064;
-    --sort-arrow-hover-color: #727782;
-    --sort-arrow-active-color: #d0d1d2;
-    --sort-arrow-active-sub-color: #5d6064;
-
-    background-color: var(--th-bg-color);
-    color: #d0d1d2;
-    // .stk-table-main {
-    // }
-  }
-
   /**虚拟滚动模式 */
   &.virtual {
-    .virtual-table-height {
-      width: 1px;
-      z-index: -2;
-      position: absolute;
-    }
+    // .virtual-table-height {
+    //   width: 1px;
+    //   z-index: -2;
+    //   position: absolute;
+    // }
 
     .stk-table-main {
       thead {
@@ -1157,13 +1160,10 @@ export default {
 
       tbody {
         position: relative;
-
         tr {
           td {
-            // content-visibility: auto;
             height: var(--row-height);
             line-height: var(--row-height);
-
             .table-cell-wrapper {
               height: inherit;
               overflow: hidden;

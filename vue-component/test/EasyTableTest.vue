@@ -10,6 +10,7 @@ div
 div(style="display:flex;")
   div
     button(@click="handleClearSorter") clearSorter
+    button(@click="handleClearTableData") clearTableData
     button(@click="addRow()") pushRow
     button(@click="addRow(100)") push100Row
     button(@click="addRow(1,true)") unshiftRow
@@ -29,9 +30,9 @@ div(:style="{width: tableWidth}" style="padding:10px;")
   EasyTable(
     ref="easyTable" 
     rowKey="name" 
-    noDataFull 
-    virtual
-    virtualX
+    :noDataFull="true"
+    :virtual="true"
+    :virtualX="true"
     :style="{height:props.height}" 
     v-bind="props"
     :columns="columns" 
@@ -52,8 +53,8 @@ div(:style="{width: tableWidth}" style="padding:10px;")
   EasyTableC(
     ref="easyTableC" 
     rowKey="name" 
-    noDataFull 
-    virtual
+    :noDataFull="true"
+    :virtual="true"
     :style="{height:props.height}" 
     :columns="columns" 
     :dataSource="dataSource" 
@@ -254,8 +255,8 @@ export default {
     //   this.$refs.easyTableC.setHighlightDimCell('add2', 'gender');
     // }, 2000);
     setInterval(() => {
-      this.$refs.easyTable.setHighlightDimRow('add0');
-      this.$refs.easyTableC.setHighlightDimRow('add0');
+      this.$refs.easyTable.setHighlightDimRow(['add0']);
+      this.$refs.easyTableC.setHighlightDimRow(['add0']);
     }, 1000);
   },
   methods: {
@@ -304,6 +305,9 @@ export default {
     handleClearSorter() {
       this.$refs.easyTable.resetSorter();
       this.$refs.easyTableC.resetSorter();
+    },
+    handleClearTableData() {
+      this.dataSource = [];
     },
     handleSortChange(col, order) {
       console.log('排序改变事件触发：', col, order);
@@ -355,16 +359,15 @@ export default {
         } else {
           this.dataSource.push(data);
         }
-        tmpIndex.push(this.addIndex);
+        tmpIndex.push(data);
         this.addIndex++;
       }
       this.dataSource = [...this.dataSource]; // 没有监听deep
 
       this.$nextTick(() => {
-        tmpIndex.forEach(addIndex => {
-          this.$refs.easyTable.setHighlightDimRow('add' + addIndex);
-          this.$refs.easyTableC.setHighlightDimRow('add' + addIndex);
-        });
+        const rowKeys = tmpIndex.map(it => it.name);
+        this.$refs.easyTable.setHighlightDimRow(rowKeys);
+        this.$refs.easyTableC.setHighlightDimRow(rowKeys);
       });
     },
     addColumn(num = 1) {
