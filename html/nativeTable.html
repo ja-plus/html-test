@@ -40,7 +40,7 @@
   <article>
     <section>
       <div class="container">
-        <div style="background-color:orange">自动换行自动换行自动换行自动换行自动换行</div>
+        <div style="background-color:orange;display:inline-block">inline-block最宽到父元素，自动换行自动换行自动换行自动换行自动换行</div>
       </div>
       <div class="container">
         <div style="background-color:orange;width:300px;">width:300px</div>
@@ -115,8 +115,10 @@
         <ul>
           <li>table-layout:auto;列宽总和&gt;父元素宽度，情况下，若想使table宽度大于父元素，则设置每列的min-width</li>
           <li>table-layout:auto;列宽总和&lt;父元素宽度，情况下。若想拉伸列宽，则设置表格min-width:100%</li>
-          <li>table-layout:fixed 由table元素决定宽度。布局可以溢出父元素</li>
+          <li>table-layout:auto;列宽总和&lt;父元素宽度，情况下。若每列都设置了width，列宽被拉伸，拉伸比例根据width比例来。</li>
+          <li>table-layout:auto;列宽总和&lt;父元素宽度，情况下。若想使width生效，则至少有一列不设置width。</li>
           <li>table-layout:auto 由table列决定整体宽度。类流式布局，默认情况，宽度不大于父元素。</li>
+          <li>table-layout:fixed 由table元素决定宽度。布局可以溢出父元素</li>
         </ul>
       </fieldset>
     </section>

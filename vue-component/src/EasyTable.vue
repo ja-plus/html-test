@@ -54,6 +54,7 @@
               col.dataIndex === sortCol && sortOrderIndex !== 0 && 'sorter-' + sortSwitchOrder[sortOrderIndex],
               showHeaderOverflow ? 'text-overflow' : '',
               col.headerClassName,
+              col.fixed ? 'fixed-cell' : '',
             ]"
             @click="
               e => {
@@ -129,7 +130,7 @@
               v-for="col in virtualX_on ? virtualX_columnPart : tableProps"
               :key="col.dataIndex"
               :data-index="col.dataIndex"
-              :class="[col.className, showOverflow ? 'text-overflow' : '']"
+              :class="[col.className, showOverflow ? 'text-overflow' : '', col.fixed ? 'fixed-cell' : '']"
               :style="{
                 textAlign: col.align,
                 minWidth: col.minWidth || col.width,
@@ -753,6 +754,7 @@ export default {
           const progress = (nowTs - row._bgc_progress) / _highlightDuration;
           row._bgc = _highlightInter(progress);
           if (progress > 1) {
+            row._bgc = ''; // 清空颜色
             highlightRows.splice(i--, 1);
           }
         }
