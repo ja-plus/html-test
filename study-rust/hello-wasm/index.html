@@ -46,20 +46,13 @@ function loadWebAssembly(path, imports = {}) {
 //    console.log('exports', exports);
 //  });
 
-// fetch('pkg/hello_wasm_bg.wasm')
-//     .then(res => res.arrayBuffer())
-//     .then(bytes => WebAssembly.instantiate(bytes, { imports: { alert } }))
-//   .then(result => {
-//       // console.log(result);
+// import('./pkg/hello_wasm.js').then(async m => {
+//     await m.default();
+//     m.greet('异步加载js');
 //   });
-
-import('./pkg/hello_wasm.js').then(async m => {
-    await m.default();
-    m.greet('异步加载js');
-  });
 </script>
 <script type="module">
-  import init, { initSync, greet } from './pkg/hello_wasm.js';
+  import init, { initSync, greet, run } from './pkg/hello_wasm.js';
   init().then(() => {
     /** 这样调用无法传参,接收返回 */
     // let res = module.greet('esmodule');
@@ -67,7 +60,12 @@ import('./pkg/hello_wasm.js').then(async m => {
     // 正确方式
     let res = greet('异步初始化wasm');
     console.log(res, 'res');
+    run();
   });
+  // 执行run后，该方法会被rust调用
+  window.getData = function (str) {
+    console.log('receive rust call func', str);
+  };
 
   // initSync(); // 不会用
   // greet('同步初始化wasm');
