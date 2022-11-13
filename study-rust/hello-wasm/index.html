@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WASM</title>
+</head>
+<body>
+  
+</body>
+<script type="module">
+  // import { greet } from './hello_wasm_bg.js';
+/**
+ * @param {String} path wasm 文件路径
+ * @param {Object} imports 传递到 wasm 代码中的变量
+ */
+function loadWebAssembly(path, imports = {}) {
+    return fetch(path) // 加载文件
+      .then(response => response.arrayBuffer()) // 转成 ArrayBuffer
+      .then(buffer => WebAssembly.compile(buffer))
+      .then(module => {
+        imports.env = imports.env || {};
+
+        // 开辟内存空间
+        imports.env.memoryBase = imports.env.memoryBase || 0;
+        if (!imports.env.memory) {
+          imports.env.memory = new WebAssembly.Memory({ initial: 256 });
+        }
+
+        // 创建变量映射表
+        imports.env.tableBase = imports.env.tableBase || 0;
+        if (!imports.env.table) {
+          // 在 MVP 版本中 element 只能是 "anyfunc"
+          imports.env.table = new WebAssembly.Table({ initial: 0, element: 'anyfunc' });
+        }
+
+        // 创建 WebAssembly 实例
+        return new WebAssembly.Instance(module, imports);
+      });
+}
+// 加载wasm文件
+//  loadWebAssembly('hello_wasm_bg.wasm').then(instance => {
+//    // 调用c里面的方法
+//    const exports = instance.exports;
+//    console.log('exports', exports);
+//  });
+
+// fetch('pkg/hello_wasm_bg.wasm')
+//     .then(res => res.arrayBuffer())
+//     .then(bytes => WebAssembly.instantiate(bytes, { imports: { alert } }))
+//   .then(result => {
+//       // console.log(result);
+//   });
+
+import('./pkg/hello_wasm.js').then(async m => {
+    await m.default();
+    m.greet('异步加载js');
+  });
+</script>
+<script type="module">
+  import init, { initSync, greet } from './pkg/hello_wasm.js';
+  init().then(() => {
+    /** 这样调用无法传参,接收返回 */
+    // let res = module.greet('esmodule');
+    // console.log('greet res', res);
+    // 正确方式
+    let res = greet('异步初始化wasm');
+    console.log(res, 'res');
+  });
+
+  // initSync(); // 不会用
+  // greet('同步初始化wasm');
+</script>
+</html>
