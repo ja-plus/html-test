@@ -10,6 +10,16 @@
 * Omit 取出个别字段
 * Exclude 去除个别字段
 * Partial 字段全部转换为可选 k?:v
+
+### 初始化对象为{}的方式
+```typescript
+type A ={
+  name: string,
+  age: number
+}
+let a:Partial<A> = {};
+let b:A | Record<string,never> = {}
+```
 ### 指定方法的this类型
 ```ts
 type Person = {name:string,age:number}

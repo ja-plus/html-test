@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>draggable Flip Animation</title>
+  <style>
+    body {
+      margin:0;
+      height: 100vh;
+      display:flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .list {
+      list-style-type: none;
+    }
+
+    .list li {
+      box-sizing: border-box;
+      height: 40px;
+      line-height: 40px;
+      width: 300px;
+      background-color: #1b63d9;
+      margin: 10px 0;
+      font-size: 16px;
+      color: #fff;
+      text-align: center;
+      border-radius: 10px/20px;
+      ;
+    }
+
+    .list li.move {
+      background-color: transparent;
+      border: 2px dashed #1b64d9;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Flip Animation</h1>
+  <ul class="list">
+    <li draggable="true">1</li>
+    <li draggable="true">2</li>
+    <li draggable="true">3</li>
+    <li draggable="true">4</li>
+    <li draggable="true">5</li>
+  </ul>
+  <script type="module">
+    import Flip from '../js/Filp.js';
+    const ul = document.querySelector('.list');
+    let movingEle = null;
+    let flip = null;
+    ul.addEventListener('dragstart', e => {
+      if (e.target === ul) return;
+      e.dataTransfer.effectAllowed = 'move'; // 鼠标样式，标志为移动
+      // drag出去的样式是当前的样式，因此要异步设置当前元素样式。
+      setTimeout(() => {
+        e.target.classList.add('move');
+      });
+      movingEle = e.target;
+      flip = new Flip(ul.children, 0.5);
+    });
+    ul.addEventListener('dragover', e => {
+      e.preventDefault();
+    });
+    ul.addEventListener('dragenter', e => {
+      e.preventDefault();
+      if (e.target === movingEle || e.target === ul) return;
+      // li
+      // console.log('e :>> ', e.target);
+      /** @type {HTMLElement}*/
+      const targetLi = e.target;
+      const ulChildren = Array.from(ul.children);
+      const sourceIndex = ulChildren.indexOf(movingEle);
+      const targetIndex = ulChildren.indexOf(targetLi);
+      if (sourceIndex < targetIndex) {
+        console.log('下移,插入到下一个元素之前。', targetLi.nextElementSibling);
+        ul.insertBefore(movingEle, targetLi.nextElementSibling);
+      } else {
+        console.log('上移，插入目标元素之前', targetLi);
+        ul.insertBefore(movingEle, targetLi);
+      }
+      flip.play();
+    });
+    ul.addEventListener('dragend', e => {
+      e.target.classList.remove('move');
+      movingEle = null;
+    });
+  </script>
+</body>
+
+</html>
