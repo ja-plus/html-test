@@ -52,7 +52,7 @@ function loadWebAssembly(path, imports = {}) {
 //   });
 </script>
 <script type="module">
-  import init, { initSync, greet, run } from './pkg/hello_wasm.js';
+  import init, { initSync, greet, sub_data, cpu_calc } from './pkg/hello_wasm.js';
   init().then(() => {
     /** 这样调用无法传参,接收返回 */
     // let res = module.greet('esmodule');
@@ -60,9 +60,14 @@ function loadWebAssembly(path, imports = {}) {
     // 正确方式
     let res = greet('异步初始化wasm');
     console.log(res, 'res');
-    run();
+    /* 模拟订阅*/
+    sub_data();
+    console.time('rust cpu');
+    // cpu密集任务
+    cpu_calc(10000);
+    console.timeEnd('rust cpu');
   });
-  // 执行run后，该方法会被rust调用
+  /** 执行run后，该方法会被rust调用*/
   window.getData = function (str) {
     console.log('receive rust call func', str);
   };
