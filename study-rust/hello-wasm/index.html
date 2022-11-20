@@ -64,8 +64,12 @@ function loadWebAssembly(path, imports = {}) {
     sub_data();
     console.time('rust cpu');
     // cpu密集任务
-    cpu_calc(10000);
+    cpu_calc(1000000);
     console.timeEnd('rust cpu');
+
+    console.time('js cpu');
+    cpuCalc(1000000);
+    console.timeEnd('js cpu');
   });
   /** 执行run后，该方法会被rust调用*/
   window.getData = function (str) {
@@ -74,5 +78,25 @@ function loadWebAssembly(path, imports = {}) {
 
   // initSync(); // 不会用
   // greet('同步初始化wasm');
+  /** 返回最大的质数*/
+  function cpuCalc(num) {
+    // let resultArr = [];
+    let result = 0;
+    for (let i = 2; i < num; i++) {
+      let flag = true;
+      for (let j = 2; j < Math.sqrt(i); j++) {
+        if (i % j === 0) {
+          flag = false;
+          break;
+        }
+      }
+      if (flag) {
+        // resultArr.push(i);
+        result = i;
+      }
+    }
+    // console.log(resultArr.join(','));
+    console.log('js素数：', result);
+  }
 </script>
 </html>
