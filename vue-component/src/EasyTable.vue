@@ -100,7 +100,10 @@
       </thead>
 
       <!-- 用于虚拟滚动表格内容定位 -->
-      <tbody v-if="virtual_on" :style="{ height: `${virtualScroll.offsetTop}px` }"></tbody>
+      <tbody v-if="virtual_on" :style="{ height: `${virtualScroll.offsetTop}px` }">
+        <!--这个tr兼容火狐-->
+        <tr></tr>
+      </tbody>
       <!-- <td
           v-for="col in virtualX_on ? virtualX_columnPart : tableProps"
           :key="col.dataIndex"
@@ -148,7 +151,9 @@
           </tr>
         </template>
       </tbody>
-      <tbody v-if="virtual_on" :style="{ height: `${virtual_offsetBottom}px` }"></tbody>
+      <tbody v-if="virtual_on" :style="{ height: `${virtual_offsetBottom}px` }">
+        <tr></tr>
+      </tbody>
     </table>
     <div
       v-if="(!dataSourceCopy || !dataSourceCopy.length) && showNoData"
@@ -453,6 +458,22 @@ export default {
   },
   mounted() {
     this.initVirtualScroll();
+    // 通过wheel 模拟scroll事件，passive:false 使合成器线程等待主线程
+    // this.$refs.tableContainer.addEventListener(
+    //   'wheel',
+    //   e => {
+    //     e.preventDefault();
+    //     const event = {
+    //       target: {
+    //         scrollTop: this.$refs.tableContainer.scrollTop + (e.deltaY > 0 ? 60 : -60),
+    //         scrollLeft: 0,
+    //       },
+    //     };
+    //     this.onTableScroll(event);
+    //     this.$refs.tableContainer.scrollTop = event.target.scrollTop < 0 ? 0 : event.target.scrollTop;
+    //   },
+    //   { passive: false },
+    // );
   },
   methods: {
     /**
