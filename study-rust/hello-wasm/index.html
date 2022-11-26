@@ -52,7 +52,7 @@ function loadWebAssembly(path, imports = {}) {
 //   });
 </script>
 <script type="module">
-  import init, { initSync, greet, sub_data, cpu_calc } from './pkg/hello_wasm.js';
+  import init, { initSync, greet, sub_data, cpu_calc, fib as rust_fib, fib_recursion as rust_fib_recursion } from './pkg/hello_wasm.js';
   init().then(() => {
     /** 这样调用无法传参,接收返回 */
     // let res = module.greet('esmodule');
@@ -62,14 +62,40 @@ function loadWebAssembly(path, imports = {}) {
     console.log(res, 'res');
     /* 模拟订阅*/
     sub_data();
-    console.time('rust cpu');
-    // cpu密集任务
-    cpu_calc(1000000);
-    console.timeEnd('rust cpu');
+    // console.time('rust cpu');
+    // cpu_calc(1000000);
+    // console.timeEnd('rust cpu');
 
-    console.time('js cpu');
-    cpuCalc(1000000);
-    console.timeEnd('js cpu');
+    // console.time('js cpu');
+    // cpuCalc(1000000);
+    // console.timeEnd('js cpu');
+    console.time('rust while fib cpu');
+    res = rust_fib(40);
+    console.log('rust while fib result:', res);
+    console.timeEnd('rust while fib cpu');
+
+    console.log('-----------');
+  
+    console.time('rust recursion fib cpu');
+    res = rust_fib_recursion(40);
+    console.log('rust recursion fib result:', res);
+    console.timeEnd('rust recursion fib cpu');
+  
+    console.log('-----------');
+
+    console.time('js while fib cpu');
+    res = fib(40);
+    console.log('js while fib result:', res);
+    console.timeEnd('js while fib cpu');
+  
+    console.log('-----------');
+
+    console.time('js recursion fib cpu');
+    res = fibRecursion(40);
+    console.log('js recursion fib result:', res);
+    console.timeEnd('js recursion fib cpu');
+  
+    console.log('-----------');
   });
   /** 执行run后，该方法会被rust调用*/
   window.getData = function (str) {
@@ -97,6 +123,35 @@ function loadWebAssembly(path, imports = {}) {
     }
     // console.log(resultArr.join(','));
     console.log('js素数：', result);
+  }
+  /** 斐波那契数列*/
+  function fib(num) {
+    let result = 0;
+    for (let i = 1; i < num; i++) {
+      let num1 = 1;
+      let num2 = 1;
+      let j = 1;
+      while (j < i) {
+        j += 1;
+        let temp = num2;
+        num2 = num1 + num2;
+        num1 = temp;
+        result = num2;
+      }
+    }
+    return result;
+  }
+  function fibRec(num) {
+    if (num < 2) return 1;
+    return fibRec(num - 1) + fibRec(num - 2);
+  }
+  function fibRecursion(time) {
+    let i = 1;
+    let result = 0;
+    while (i < time) {
+      result = fibRec(i++);
+    }
+    return result;
   }
 </script>
 </html>

@@ -70,3 +70,40 @@ pub fn cpu_calc(count: i32) {
 
     console_log(&format!("rust 素数:{}", result));
 }
+
+#[wasm_bindgen]
+pub fn fib(num: i32) -> i64 {
+    let mut result = 0;
+    for i in 1..num {
+        let mut num1 = 1;
+        let mut num2 = 1;
+        let mut j = 1;
+        while j < i {
+            j += 1;
+            let temp = num2;
+            num2 = num2 + num1;
+            num1 = temp;
+            result = num2;
+        }
+    }
+    result
+}
+
+fn fib_rec(num: i16) -> i64 {
+    if num < 2 {
+        return 1; // rust 中值要return
+    }
+
+    fib_rec(num - 1) + fib_rec(num - 2)
+}
+
+#[wasm_bindgen]
+pub fn fib_recursion(time: i16) -> i64 {
+    let mut result = 0;
+    let mut i = 1;
+    while i < time {
+        result = fib_rec(i);
+        i += 1;
+    }
+    result
+}
