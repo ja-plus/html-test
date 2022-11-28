@@ -171,6 +171,12 @@
  * 存在的问题：column.dataIndex 作为唯一键，不能重复
  */
 import { interpolateRgb } from 'd3-interpolate';
+let chromeVersion = 0;
+try {
+  chromeVersion = +navigator.userAgent.match(/chrome\/\d+/i)[0].split('/')[1];
+} catch (e) {
+  console.err('获取浏览器版本出错！', e);
+}
 /** 高亮背景色 */
 const _highlightBgc = { from: '#1e4c99', to: '#181c21' };
 /** 高亮持续时间 */
@@ -430,6 +436,29 @@ export default {
     //   }
     //   return width;
     // },
+    /** 计算每个fixed:left列前面列的总宽度，fixed:right右边列的总宽度，用于定位 */
+    fixedColumnsPositionStore() {
+      const store = {};
+      const cols = [...this.columns];
+      let left = 0;
+      for (let i = 0; i < cols.length; i++) {
+        const item = cols[i];
+        if (item.fixed === 'left') {
+          store[item.dataIndex] = left;
+          left += parseInt(item.width);
+        }
+      }
+      let right = 0;
+      for (let i = cols.length - 1; i >= 0; i--) {
+        const item = cols[i];
+        if (item.fixed === 'right') {
+          store[item.dataIndex] = right;
+          right += parseInt(item.width);
+        }
+      }
+
+      return store;
+    },
   },
   watch: {
     columns: {
@@ -554,42 +583,44 @@ export default {
     },
     /** 固定列的style */
     fixedStyle(tagType, col) {
-      // let cols = [...this.tableProps]; // tbody col
-      // if (tagType === 'th') {
-      //   cols = [...this.tableHeaders.flat()]; // thead col
-      // }
       const style = {};
-      if (['left', 'right'].includes(col.fixed)) {
-        // if (col.fixed === 'right') cols.reverse(); // 右边固定列要反转
-        // let position = 0; // left | right 的距离
-        // const fixedCols = [];
-        // for (let i = 0; i < cols.length; i++) {
-        //   const item = cols[i];
-        //   if (item.fixed === col.fixed) fixedCols.push(item);
-        //   if (item.dataIndex === col.dataIndex) break; // 遇到本列就结束循环，不再添加
-        // }
-        // // const unit = fixedRows[0].width.replace(/\d+/, '');
-        // // -1: 不计算本列的宽度
-        // for (let i = 0; i < fixedCols.length - 1; i++) {
-        //   position += parseInt(fixedCols[i].width);
-        // }
-        // style.position = 'sticky';// sticky 方案在低版本浏览器不兼容。具体表现为横向滚动超过一个父容器宽度（非table宽度）会导致sticky吸附失效。浏览器bug。
-        style.position = 'relative'; // 固定列方案替换为relative。原因:transform 在chrome84浏览器，列变动会导致横向滚动条计算出问题。
-        if (col.fixed === 'left') {
-          // style.left = position + 'px';
-          // if (this.virtualX_on)
-          //   style.transform = `translateX(${this.virtualScrollX.scrollLeft - this.virtualScrollX.offsetLeft}px)`;
-          // else style.transform = `translateX(${this.virtualScrollX.scrollLeft}px)`;
-          if (this.virtualX_on) style.left = this.virtualScrollX.scrollLeft - this.virtualScrollX.offsetLeft + 'px';
-          else style.left = this.virtualScrollX.scrollLeft + 'px';
-        } else {
-          // style.right = position + 'px';
-          // TODO:计算右侧距离
-          style.transform = `translateX(${this.virtualX_offsetRight}px)`;
-        }
+      if (chromeVersion < 56) {
         if (tagType === 'th') {
+          style.position = 'relative';
           style.top = this.virtualScroll.scrollTop + 'px';
-          style.zIndex = 2; // 保证固定列高于其他单元格
+        }
+      }
+      if (['left', 'right'].includes(col.fixed)) {
+        if (chromeVersion > 84) {
+          /**
+           * -------------高版本浏览器----------------
+           */
+          style.position = 'sticky'; // sticky 方案在低版本浏览器不兼容。具体表现为横向滚动超过一个父容器宽度（非table宽度）会导致sticky吸附失效。浏览器bug。
+          if (col.fixed === 'left') {
+            style.left = this.fixedColumnsPositionStore[col.dataIndex] + 'px';
+          } else {
+            style.right = this.fixedColumnsPositionStore[col.dataIndex] + 'px';
+          }
+          if (tagType === 'th') {
+            style.top = '0px';
+            style.zIndex = 2; // 保证固定列高于其他单元格
+          }
+        } else {
+          /**
+           * ----------浏览器兼容--------------
+           */
+          style.position = 'relative'; // 固定列方案替换为relative。原因:transform 在chrome84浏览器，列变动会导致横向滚动条计算出问题。
+          if (col.fixed === 'left') {
+            if (this.virtualX_on) style.left = this.virtualScrollX.scrollLeft - this.virtualScrollX.offsetLeft + 'px';
+            else style.left = this.virtualScrollX.scrollLeft + 'px';
+          } else {
+            // TODO:计算右侧距离
+            style.transform = `translateX(${this.virtualX_offsetRight}px)`;
+          }
+          if (tagType === 'th') {
+            style.top = this.virtualScroll.scrollTop + 'px';
+            style.zIndex = 2; // 保证固定列高于其他单元格
+          }
         }
       }
 
@@ -746,35 +777,21 @@ export default {
     calcHighlightLoop() {
       if (this.calcHighlightDimLoop) return;
       this.calcHighlightDimLoop = true;
-      // window.requestAnimationFrame(() => {
-      //   const highlightRows = [...this.highlightDimRows];
-      //   for (let i = 0; i < highlightRows.length; i++) {
-      //     const row = highlightRows[i];
-      //     row._highlight_opacity -= 0.2;
-      //     if (row._highlight_opacity < 0) {
-      //       row._highlight_opacity = 0;
-      //       highlightRows.splice(i--, 1);
-      //     }
-      //   }
-      //   this.highlightDimRows = new Set(highlightRows);
-      //   if (highlightRows.length > 0) {
-      //     this.calcHighlightLoop();
-      //   } else {
-      //     this.calcHighlightDimLoop = false;
-      //   }
-      // });
       // js计算gradient
       const that = this;
-      // TODO: raf 太频繁。考虑分段设置颜色，过渡靠css transition 补间是否可行
-      window.requestAnimationFrame(function recursion() {
+      // raf 太频繁。考虑setTimeout分段设置颜色，过渡靠css transition 补间
+      window.setTimeout(function recursion() {
         const highlightRows = [...that.highlightDimRows];
         const nowTs = Date.now();
         for (let i = 0; i < highlightRows.length; i++) {
           const row = highlightRows[i];
+          // const rowKeyValue = that.rowKeyGen(row);
+          // const rowEl = that.$el.querySelector(`[data-row-key="${rowKeyValue}"]`);
           //  经过的时间 ÷ 2s 计算出 颜色过渡进度 (0-1)
           const progress = (nowTs - row._bgc_progress) / _highlightDuration;
-          row._bgc = _highlightInter(progress);
-          if (progress > 1) {
+          if (progress <= 1) {
+            row._bgc = _highlightInter(progress);
+          } else {
             row._bgc = ''; // 清空颜色
             highlightRows.splice(i--, 1);
           }
@@ -783,11 +800,12 @@ export default {
 
         if (that.highlightDimRows.size > 0) {
           // 还有高亮的行则下一次循环
-          window.requestAnimationFrame(recursion);
+          window.setTimeout(recursion, 100);
         } else {
+          // 没有则停止循环
           that.calcHighlightDimLoop = false;
         }
-      });
+      }, 100);
     },
 
     // ---- ref function-----
@@ -1148,7 +1166,6 @@ export default {
     text-align: center;
     font-size: 14px;
     position: sticky;
-    width: 100%;
     left: 0px;
     border: var(--border-width) solid var(--border-color);
     display: flex;

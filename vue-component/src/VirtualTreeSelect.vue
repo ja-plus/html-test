@@ -111,7 +111,7 @@ export default {
     },
     selectedLabel() {
       let label = '';
-      let item = this.getItemByKey(this.storedValue);
+      const item = this.getItemByKey(this.storedValue);
       if (item) {
         if (this.labelFormatter) {
           label = this.labelFormatter(item);
@@ -206,7 +206,7 @@ export default {
             return 0;
           }
           if (item[this.assignedFields.children]) {
-            let res = recursion.bind(this)(item[this.assignedFields.children] || []);
+            const res = recursion.bind(this)(item[this.assignedFields.children] || []);
             if (res === 0) return 0;
           }
         }
@@ -233,7 +233,7 @@ export default {
 };
 </script>
 <style lang="less" scoped>
-::v-deep .vtScroll-tree ul li .list-item:hover:not(.item-highlight) {
+:v-deep(.vtScroll-tree ul li .list-item:hover:not(.item-highlight)) {
   background-color: #f7f7fc;
 }
 
