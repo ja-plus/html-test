@@ -47,6 +47,9 @@ async function sleep(ms) {
 //     value: kv.split('=')[1].trim(),
 //   };
 // });
+
+const _userName = '';
+const _pwd = '';
 async function confluence() {
   const page = await browser.newPage();
   await page.setViewport({ width: 1366, height: 768 });
@@ -54,12 +57,14 @@ async function confluence() {
   // await page.setCookie(...cookieArr);
   // await page.reload();
 
-  // await page.type('#username-fake', '');
-  // await page.type('#os_password', '');
-  // await page.click('#loginButton');
+  await page.type('#username-fake', _userName);
+  await sleep(1000);
+  await page.type('#os_password', _pwd);
+  await sleep(1000);
+  await page.click('#loginButton');
 
-  // await page.waitForNavigation(); // 等待页面跳转
-  // await sleep(2000);
+  await page.waitForNavigation(); // 等待页面跳转
+  await sleep(1000);
 
   // const cookie = await page.evaluate(() => {
   //   // 这个方法执行在浏览器环境中
@@ -144,13 +149,10 @@ async function confluence() {
     'http://172.20.200.191:8003/pages/viewpage.action?pageId=949625177',
     'http://172.20.200.191:8003/pages/viewpage.action?pageId=951618388',
   ];
-  let promArr = [];
   for (const url of urlArr) {
-    // let page = await browser.newPage();
-    // promArr.push(page.goto(url));
     await page.goto(url);
-    // await page.waitFor
+    await sleep(1000);
+    await page.keyboard.press('End'); // 键盘案件事件,滚动到页面底部
     await sleep(2000);
   }
-  // await Promise.all(promArr);
 }
