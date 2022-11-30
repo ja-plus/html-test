@@ -37,7 +37,7 @@ async function test() {
 }
 
 async function sleep(ms) {
-  await new Promise(resolve => setTimeout(resolve, ms));
+  await new Promise(resolve => setTimeout(resolve, ms + Math.random(ms / parseInt(Math.random() * 3 + 2))));
 }
 // const COOKIE =
 //   'isTFLicensed=true; _ga=GA1.1.1035169818.1656393368; __adroll_fpc=0ea10e1dee7d26266c95499f82713dc8-1656504146495; easy-heading-pro.nav-width=250; easy-heading-pro.editor-nav-width=356; mywork.tab.tasks=false; _gid=GA1.1.771622579.1669596977; __exc-aa_v1=1669619169056; __ar_v4=MHBDWRJJNNCDBJNMEVKIDW%3A20221114%3A6%7CYB3U65ETPVB2PGJUSNWDAN%3A20221114%3A6%7C4AZEHCGDXVAQJODIXAIH7Z%3A20221114%3A6; atlassian.xsrf.token=BMF8-JWSP-9O18-MSG7_bbc7395b4f93b029c601cf417245b40672af5cbf_lin';
@@ -48,8 +48,8 @@ async function sleep(ms) {
 //   };
 // });
 
-const _userName = '';
-const _pwd = '';
+const _userName = 'chenjunan';
+const _pwd = 'hx.123123';
 async function confluence() {
   const page = await browser.newPage();
   await page.setViewport({ width: 1366, height: 768 });
@@ -57,11 +57,13 @@ async function confluence() {
   // await page.setCookie(...cookieArr);
   // await page.reload();
 
-  await page.type('#username-fake', _userName);
-  await sleep(1000);
-  await page.type('#os_password', _pwd);
-  await sleep(1000);
-  await page.click('#loginButton');
+  // await sleep(5000);
+  await page.type('#username-fake', _userName, { delay: 100 }); // delay 打字间隔
+  // await sleep(1000);
+  await page.type('#os_password', _pwd, { delay: 100 });
+  // await sleep(1000);
+  await page.keyboard.press('Enter');
+  // await page.click('#loginButton');
 
   await page.waitForNavigation(); // 等待页面跳转
   await sleep(1000);
@@ -151,8 +153,23 @@ async function confluence() {
   ];
   for (const url of urlArr) {
     await page.goto(url);
-    await sleep(1000);
+    await sleep(500);
     await page.keyboard.press('End'); // 键盘案件事件,滚动到页面底部
+    // await page.mouse.wheel({ deltaY: -1000 });
+
+    let liked = await page.evaluate(() => {
+      let likeText = document.querySelector('#likes-section .like-button-text').textContent;
+      console.log('likeText', likeText);
+      return likeText === '取消赞同';
+    });
+    console.log(liked, 'slll');
+    if (!liked) {
+      // 如果没有点赞则点赞
+      await page.hover('#likes-section'); // 鼠标移动到点赞上
+      await sleep(500);
+      await page.click('#likes-section');
+    }
+    // await page.mouse.move();
     await sleep(2000);
   }
 }
