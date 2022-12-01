@@ -1,6 +1,6 @@
 <template>
   <div ref="stkTableC" class="stk-table-compatible" @mouseleave="clearHover">
-    <EasyTable
+    <StkTable
       v-if="fixedLeftColumns.length"
       ref="stkTableFixedLeft"
       class="stk-table-fixed-left"
@@ -13,8 +13,8 @@
       @sort-change="(col, order) => handleSorterChange(col, order, 'l')"
       @th-drag-start="i => onThDragStart('l', i)"
       @th-drop="i => onThDrop('l', i)"
-    ></EasyTable>
-    <EasyTable
+    ></StkTable>
+    <StkTable
       ref="stkTableMain"
       v-bind="$attrs"
       show-tr-hover-class
@@ -24,14 +24,14 @@
       @scroll="handleMainTableScroll"
       @th-drag-start="i => onThDragStart('m', i)"
       @th-drop="i => onThDrop('m', i)"
-    ></EasyTable>
+    ></StkTable>
   </div>
 </template>
 <script>
-import EasyTable from '../EasyTable.vue';
+import StkTable from '../StkTable.vue';
 import store from './store';
 export default {
-  components: { EasyTable },
+  components: { StkTable },
   props: {
     columns: {
       type: Array,
@@ -83,13 +83,13 @@ export default {
     },
   },
   mounted() {
-    this.initEasyTableData();
+    this.initStkTableData();
     this.fixedTableHeight = this.$refs.stkTableMain.$el.clientHeight - 1; // -1px border
     this.$refs.stkTableFixedLeft?.initVirtualScroll(this.fixedTableHeight);
   },
   methods: {
     /** 初始化表格共享data */
-    initEasyTableData() {
+    initStkTableData() {
       if (this.fixedLeftColumns.length) {
         this.$refs.stkTableFixedLeft.currentHover = store.state.currentHover;
         this.$refs.stkTableFixedLeft.currentItem = store.state.currentItem;

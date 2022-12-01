@@ -1,18 +1,18 @@
 <template lang="pug">
 VirtualTree
 VirtualTreeSelectTest
-EasyTableTest
+StkTableTest
  
 </template>
 
 <script>
 import VirtualTree from './test/VirtualTree.vue';
-import EasyTableTest from './test/EasyTableTest.vue';
+import StkTableTest from './test/StkTableTest.vue';
 import VirtualTreeSelectTest from './test/VirtualTreeSelect.vue';
 export default {
   components: {
     VirtualTree,
-    EasyTableTest,
+    StkTableTest,
     VirtualTreeSelectTest,
   },
 };

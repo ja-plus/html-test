@@ -20,15 +20,15 @@ div(style="display:flex;")
     button(@click="props.showHeaderOverflow=!props.showHeaderOverflow") showHeaderOverflow:{{props.showHeaderOverflow}}
     button(@click="props.sortRemote=!props.sortRemote") sortRemote:{{props.sortRemote}}
 div(style="margin-left:10px")
-  div virtualScroll: {{$refs.easyTable&& $refs.easyTable.virtualScroll}}
-  div virtual_pageSize: {{$refs.easyTable&& $refs.easyTable.virtual_pageSize}}
-  div virtualScrollX: {{$refs.easyTable&& $refs.easyTable.virtualScrollX}}
-  div virtualX_offsetRight: {{$refs.easyTable&& $refs.easyTable.virtualX_offsetRight}}
-  div virtualX_start/end:{{$refs.easyTable && $refs.easyTable.virtualX_startIndex}}/{{$refs.easyTable && $refs.easyTable.virtualX_endIndex}}
+  div virtualScroll: {{$refs.stkTable&& $refs.stkTable.virtualScroll}}
+  div virtual_pageSize: {{$refs.stkTable&& $refs.stkTable.virtual_pageSize}}
+  div virtualScrollX: {{$refs.stkTable&& $refs.stkTable.virtualScrollX}}
+  div virtualX_offsetRight: {{$refs.stkTable&& $refs.stkTable.virtualX_offsetRight}}
+  div virtualX_start/end:{{$refs.stkTable && $refs.stkTable.virtualX_startIndex}}/{{$refs.stkTable && $refs.stkTable.virtualX_endIndex}}
 
 div(:style="{width: tableWidth}" style="padding:10px;")
-  EasyTable(
-    ref="easyTable" 
+  StkTable(
+    ref="stkTable" 
     rowKey="name" 
     :noDataFull="true"
     :virtual="true"
@@ -50,8 +50,8 @@ div(:style="{width: tableWidth}" style="padding:10px;")
   )
     //- template(#table-header="{ column }")
     //-   span {{column.title}} (slot)
-  EasyTableC(
-    ref="easyTableC" 
+  StkTableC(
+    ref="stkTableC" 
     rowKey="name" 
     :noDataFull="true"
     :virtual="true"
@@ -65,11 +65,11 @@ div(:style="{width: tableWidth}" style="padding:10px;")
 div columns:{{columns}} 
 //- div dataSource:{{dataSource}}
 hr
-//- div tableHeaders:{{easyTable.tableHeaders}}
-//- div tableProps:{{easyTable.tableProps}}
+//- div tableHeaders:{{stkTable.tableHeaders}}
+//- div tableProps:{{stkTable.tableProps}}
 div(style="width:max-content")
   h2 API
-  EasyTable(
+  StkTable(
     :columns="docTableColumns" 
     :dataSource="docTableData" 
   )
@@ -78,15 +78,15 @@ div(style="width:max-content")
 
 <script>
 import { h } from 'vue';
-import EasyTable from '../src/EasyTable.vue';
-import EasyTableC from '../src/EasyTableC/index.vue'; // 兼容版本 fixedLeft
+import StkTable from '../src/StkTable.vue';
+import StkTableC from '../src/StkTableC/index.vue'; // 兼容版本 fixedLeft
 export default {
-  name: 'EasyTableTest',
-  components: { EasyTable, EasyTableC },
+  name: 'StkTableTest',
+  components: { StkTable, StkTableC },
   props: {},
   data() {
     return {
-      easyTable: {},
+      stkTable: {},
       tableWidth: '500px',
       props: {
         height: '200px',
@@ -243,27 +243,27 @@ export default {
   computed: {},
   created() {},
   mounted() {
-    this.easyTable = this.$refs.easyTable;
-    // this.$refs.easyTable.setCurrentRow('name0');
-    // this.$refs.easyTable.setHighlightDimCell('add1', 'age');
+    this.stkTable = this.$refs.stkTable;
+    // this.$refs.stkTable.setCurrentRow('name0');
+    // this.$refs.stkTable.setHighlightDimCell('add1', 'age');
     // setInterval(() => {
-    //   this.$refs.easyTable.setHighlightDimCell('add1', 'age');
-    //   this.$refs.easyTableC.setHighlightDimCell('add1', 'age');
+    //   this.$refs.stkTable.setHighlightDimCell('add1', 'age');
+    //   this.$refs.stkTableC.setHighlightDimCell('add1', 'age');
     // }, 1500);
     // setInterval(() => {
-    //   this.$refs.easyTable.setHighlightDimCell('add2', 'gender');
-    //   this.$refs.easyTableC.setHighlightDimCell('add2', 'gender');
+    //   this.$refs.stkTable.setHighlightDimCell('add2', 'gender');
+    //   this.$refs.stkTableC.setHighlightDimCell('add2', 'gender');
     // }, 2000);
     setInterval(() => {
-      this.$refs.easyTable.setHighlightDimRow(['add0']);
-      this.$refs.easyTableC.setHighlightDimRow(['add0']);
+      this.$refs.stkTable.setHighlightDimRow(['add0']);
+      this.$refs.stkTableC.setHighlightDimRow(['add0']);
     }, 1000);
   },
   methods: {
     handleHeightInput(e) {
       this.props.height = e.target.value + 'px';
       this.$nextTick(() => {
-        this.$refs.easyTable.initVirtualScroll();
+        this.$refs.stkTable.initVirtualScroll();
       });
     },
     handleWidthInput(e) {
@@ -303,8 +303,8 @@ export default {
       );
     },
     handleClearSorter() {
-      this.$refs.easyTable.resetSorter();
-      this.$refs.easyTableC.resetSorter();
+      this.$refs.stkTable.resetSorter();
+      this.$refs.stkTableC.resetSorter();
     },
     handleClearTableData() {
       this.dataSource = [];
@@ -322,7 +322,7 @@ export default {
       this.columns.splice(targetIndex, 0, deleteEle[0]);
       this.columns = [...this.columns];
     },
-    /** easyTableC列顺序变化 */
+    /** stkTableC列顺序变化 */
     onColOrderChange2(sourceIndex, targetIndex) {
       console.log(sourceIndex, targetIndex, 'sdf');
       const targetCol = this.columns[targetIndex];
@@ -366,8 +366,8 @@ export default {
 
       this.$nextTick(() => {
         const rowKeys = tmpIndex.map(it => it.name);
-        this.$refs.easyTable.setHighlightDimRow(rowKeys);
-        this.$refs.easyTableC.setHighlightDimRow(rowKeys);
+        this.$refs.stkTable.setHighlightDimRow(rowKeys);
+        this.$refs.stkTableC.setHighlightDimRow(rowKeys);
       });
     },
     addColumn(num = 1) {

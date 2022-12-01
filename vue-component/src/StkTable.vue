@@ -1,7 +1,7 @@
 <template>
   <div
     ref="tableContainer"
-    class="stk-table-wrapper dark"
+    class="stk-table dark"
     :class="{ virtual: virtual, 'virtual-x': virtualX }"
     :style="virtual && { '--row-height': virtualScroll.rowHeight + 'px' }"
     @scroll="onTableScroll"
@@ -28,11 +28,15 @@
       <!-- transform: virtualX_on ? `translateX(${virtualScrollX.offsetLeft}px)` : null, 用transform控制虚拟滚动左边距，sticky会有问题 -->
       <thead>
         <tr v-for="(row, index) in tableHeaders" :key="index" @contextmenu="e => onHeaderMenu(e)">
-          <!-- 这个th用于横向虚拟滚动表格左边距 -->
+          <!-- 这个th用于横向虚拟滚动表格左边距,width、maxWidth 用于兼容低版本浏览器 -->
           <th
             v-if="virtualX_on"
             class="virtual-x-left"
-            :style="{ minWidth: virtualScrollX.offsetLeft + 'px', padding: 0 }"
+            :style="{
+              minWidth: virtualScrollX.offsetLeft + 'px',
+              width: virtualScrollX.offsetLeft + 'px',
+              maxWidth: virtualScrollX.offsetLeft + 'px',
+            }"
           ></th>
           <th
             v-for="col in virtualX_on ? virtualX_columnPart : row"
@@ -94,8 +98,16 @@
               </span>
             </div>
           </th>
-          <!-- 这个th用于横向虚拟滚动表格右边距 -->
-          <th v-if="virtualX_on" style="padding: 0" :style="{ minWidth: virtualX_offsetRight + 'px' }"></th>
+          <!-- 这个th用于横向虚拟滚动表格右边距 width、maxWidth 用于兼容低版本浏览器-->
+          <th
+            v-if="virtualX_on"
+            style="padding: 0"
+            :style="{
+              minWidth: virtualX_offsetRight + 'px',
+              width: virtualScrollX.offsetLeft + 'px',
+              maxWidth: virtualScrollX.offsetLeft + 'px',
+            }"
+          ></th>
         </tr>
       </thead>
 
@@ -909,7 +921,7 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.stk-table-wrapper {
+.stk-table {
   // contain: strict;
   --row-height: 28px;
   --border-color: #e8eaec;
@@ -1215,6 +1227,9 @@ export default {
   }
   &.virtual-x {
     .stk-table-main {
+      .virtual-x-left {
+        padding: 0;
+      }
       thead tr:first-child .virtual-x-left + th {
         // 横向虚拟滚动时，左侧第一个单元格加上border-left
         background-image: var(--bg-border-top), var(--bg-border-right), var(--bg-border-bottom), var(--bg-border-left);
