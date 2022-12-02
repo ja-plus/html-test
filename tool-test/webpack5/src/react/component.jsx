@@ -30,6 +30,7 @@ export default class HelloMessage extends React.Component {
   constructor(props) {
     super(props);
     this.state = { date: new Date(), num: 0 };
+    // this.refs.child.focus(); // like vue this.$refs
     this.childRef = React.createRef();
   }
 
@@ -49,7 +50,7 @@ export default class HelloMessage extends React.Component {
         <button onClick={this.handleClick.bind(this)}>click{this.state.num}</button>
 
         <div>{this.list()}</div>
-        <Child /* ref="child" */ ref={this.childRef} num={this.state.num} changeNum={this.handleChangeNum.bind(this)}></Child>
+        <Child /* ref="child" */ ref={this.childRef} num={this.state.num} changeNum={this.handleChangeNum}></Child>
       </div>
     );
   }
@@ -66,12 +67,13 @@ export default class HelloMessage extends React.Component {
     });
   }
 
-  handleChangeNum(val) {
+  /** 这样写去除bind */
+  handleChangeNum = val => {
     this.setState(state => {
       state.num = val;
       return state;
     });
-  }
+  };
 
   list() {
     let els = [];

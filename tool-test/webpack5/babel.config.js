@@ -1,12 +1,12 @@
 module.exports = {
   presets: [
-    ['solid'],
+    // ['solid'],
     [
       '@babel/preset-env',
       {
         modules: false,
         useBuiltIns: 'entry', // webpack在使用usage配置时会出问题
-        corejs: 3,
+        corejs: 3.21,
         targets: {
           chrome: 49,
         },

@@ -1,7 +1,6 @@
 const path = require('path');
 const ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPlugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { ESBuildPlugin } = require('esbuild-loader');
 const SpeedMeasurePlugin = require('speed-measure-webpack-plugin');
 const smp = new SpeedMeasurePlugin();
 module.exports = smp.wrap({
@@ -54,7 +53,6 @@ module.exports = smp.wrap({
     ],
   },
   plugins: [
-    new ESBuildPlugin(),
     new ModuleFederationPlugin({
       name: 'app',
       // library: { type: 'var', name: 'app' },
