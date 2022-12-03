@@ -247,6 +247,7 @@ dependencies = [
  "chrono",
  "rand",
  "reqwest",
+ "serde_json",
  "tokio",
 ]
 

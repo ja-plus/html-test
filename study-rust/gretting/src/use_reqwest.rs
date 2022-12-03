@@ -2,7 +2,8 @@
 
 use std::collections::HashMap;
 
-use reqwest::Result;
+use reqwest::{Result, header::HeaderMap};
+use serde_json::Value;
 
 pub async fn main() -> Result<HashMap<String, String>> {
     // let client = reqwest::Client::new();
@@ -20,10 +21,34 @@ pub async fn main() -> Result<HashMap<String, String>> {
     // // .headers(headers)
     // .body(body_str)
     // .send();
-    let res = reqwest::get("https://localhost:8080/getData")
+    let res = reqwest::get("http://localhost:8080/getTestData")
         .await?
         .json::<HashMap<String, String>>()
         .await?;
 
     Ok(res)
+}
+
+pub async fn post_test() -> Result<HashMap<String, Value>> {
+    // post 请求要创建client
+    let client = reqwest::Client::new();
+
+    // 组装header
+    let mut headers = HeaderMap::new();
+    headers.insert("Content-Type", "application/json".parse().unwrap());
+
+    // 组装要提交的数据
+    let mut data = HashMap::new();
+    data.insert("user", "tangjz");
+    data.insert("password", "dev-tang.com");
+
+    // 发起post请求并返回
+    Ok(client
+        .post("http://localhost:8080/postTestData")
+        .headers(headers)
+        .json(&data)
+        .send()
+        .await?
+        .json::<HashMap<String, Value>>()
+        .await?)
 }
