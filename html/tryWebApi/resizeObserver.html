@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ResizeObserver</title>
+    <style>
+        .container {
+            width: 300px;
+            height: 200px;
+            overflow:auto;
+            border: 1px solid;
+            background-color: yellow;
+            position: relative;
+            display:flex;
+            flex-direction: column;
+        }
+
+       
+        .tip {
+            position:absolute;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+            background-color:rgba(34,103,218,0.65);
+            backdrop-filter:blur(2px);
+
+        }
+        .inner {
+            flex:1;
+            box-sizing: border-box;
+            width: 100%;
+            border: 2px dashed red;
+            overflow: auto;
+        }
+        .inner__inner {
+            background-color:bisque;
+            height: 100px;
+            transition: all ease 0.5s;
+            border: 4px dotted black;
+        }
+        .inner__inner:hover{
+            height: 400px;
+            background-color: orange;
+        }
+    </style>
+</head>
+<body>
+    <p>ResizeObserver 处理黄色元素出现滚动条时，clientWidth变化，因此要将蓝色absolute元素的宽度与黄色元素clientWidth保持相同</p>
+    <div class="container">
+        <div class="tip">tip position:absolute</div>
+        <div class="inner">
+            <div class="inner__inner">
+                <p>
+                    inner2 inner
+                    </p>
+                    <p>hover me</p>
+                
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    let container = document.querySelector('.container');
+    let inner = document.querySelector('.inner');
+    let tip = document.querySelector('.tip');
+    let rObs = new ResizeObserver(entries => {
+      console.log(entries, '监听了几个元素，数组中就有几个元素');
+      let target = entries.find(it => it.target === inner).target;
+      tip.style.width = target.clientWidth + 'px';
+    });
+    rObs.observe(inner);
+    rObs.observe(container);
+</script>
+</html>
