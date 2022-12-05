@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>录屏</title>
 </head>
+
 <body>
   <button id="btnStart">开始录制</button>
   <button id="btnEnd">结束录制</button>
@@ -16,27 +18,36 @@
   /** @type {MediaRecorder}*/
   let recorder;
   btnStart.addEventListener('click', () => {
-    navigator.mediaDevices.getDisplayMedia({ audio: true, video: true }).then(stream => {
-      recorder = new MediaRecorder(stream);
-      let data = [];
-      recorder.ondataavailable = function (e) {
-        data.push(e.data);
-      };
-      recorder.onstop = function (e) {
-        this.stream.getTracks().forEach(track => track.stop());
-        let blob = new Blob(data, { type: this.mimeType });
-        let link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = new Date().toLocaleString() + '.webm';
-        link.click();
-        URL.revokeObjectURL(link.href);
-        link.remove();
-      };
-      recorder.start();
-    });
+    navigator.mediaDevices
+      .getDisplayMedia({
+        audio: true,
+        video: { width: 1920, height: 1080 }, // video: true
+      })
+      .then(stream => {
+        recorder = new MediaRecorder(stream, {
+          /* mimeType: 'video/mp4'*/
+        });
+        let data = [];
+        recorder.ondataavailable = function (e) {
+          data.push(e.data);
+        };
+        recorder.onstop = function () {
+          recorder.stream.getTracks().forEach(track => track.stop());
+          let blob = new Blob(data, { type: this.mimeType });
+
+          let link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = new Date().toLocaleString() + '.webm';
+          link.click();
+          URL.revokeObjectURL(link.href);
+          link.remove();
+        };
+        recorder.start();
+      });
   });
   btnEnd.addEventListener('click', () => {
     recorder.stop();
   });
 </script>
+
 </html>
