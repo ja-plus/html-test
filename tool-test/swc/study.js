@@ -1,3 +1,4 @@
+import 'core-js/stable';
 import Vue from 'vue/dist/vue.esm';
 import comm from './comm.js';
 console.log(comm.a);
