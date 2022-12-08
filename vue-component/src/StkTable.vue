@@ -1,8 +1,8 @@
 <template>
   <div
     ref="tableContainer"
-    class="stk-table dark"
-    :class="{ virtual: virtual, 'virtual-x': virtualX }"
+    class="stk-table"
+    :class="{ virtual: virtual, 'virtual-x': virtualX, dark: theme === 'dark' }"
     :style="virtual && { '--row-height': virtualScroll.rowHeight + 'px' }"
     @scroll="onTableScroll"
   >
@@ -180,7 +180,10 @@
 <script>
 /**
  * @author JA+
- * 存在的问题：column.dataIndex 作为唯一键，不能重复
+ * TODO:存在的问题：
+ * [] column.dataIndex 作为唯一键，不能重复
+ * [] 计算的高亮颜色，挂在数据源上对象上，若多个表格使用同一个数据源对象会有问题。需要深拷贝。(解决方案：获取组件uid)
+ *
  */
 import { interpolateRgb } from 'd3-interpolate';
 let chromeVersion = 0;
@@ -190,11 +193,12 @@ try {
   console.err('获取浏览器版本出错！', e);
 }
 /** 高亮背景色 */
-const _highlightBgc = { from: '#1e4c99', to: '#181c21' };
+const _highlightColor = {
+  light: { from: '#71a2fd', to: '#fff' },
+  dark: { from: '#1e4c99', to: '#181c21' },
+};
 /** 高亮持续时间 */
 const _highlightDuration = 2000;
-/** 颜色插值 */
-const _highlightInter = interpolateRgb(_highlightBgc.from, _highlightBgc.to);
 
 function _howDeepTheColumn(arr, level = 1) {
   const levels = [level];
@@ -207,6 +211,8 @@ function _howDeepTheColumn(arr, level = 1) {
 }
 /**
  * 表格排序抽离
+ * 可以在组件外部自己实现表格排序，组件配置remote，使表格不排序。
+ * 使用者在@sort-change事件中自行更改table props 'dataSource'完成排序。
  * @param {{sorter:function|boolean,dataIndex:string,sortField:string,sortType: 'number'|'string'}} sortOption 列配置
  * @param {any} dataSource 排序的数组
  * @param {string|null} order 排序方式
@@ -263,6 +269,11 @@ export default {
     minWidth: {
       type: String,
       default: 'min-content',
+    },
+    theme: {
+      type: String,
+      default: 'light',
+      validator: v => ['dark', 'light'].includes(v),
     },
     /** 虚拟滚动 */
     virtual: {
@@ -379,6 +390,11 @@ export default {
     };
   },
   computed: {
+    /** 高亮颜色插值方法 */
+    highlightInter() {
+      return interpolateRgb(_highlightColor[this.theme].from, _highlightColor[this.theme].to);
+    },
+
     /** 数据量大于2页才开始虚拟滚动*/
     virtual_on() {
       return this.virtual && this.dataSourceCopy.length > this.virtual_pageSize * 2;
@@ -688,8 +704,8 @@ export default {
         this.sortOrderIndex = 0;
       }
       if (click) this.sortOrderIndex++;
+      this.sortOrderIndex = this.sortOrderIndex % 3;
 
-      if (this.sortOrderIndex > 2) this.sortOrderIndex = 0;
       const order = this.sortSwitchOrder[this.sortOrderIndex];
 
       if (!this.sortRemote || options.force) {
@@ -785,7 +801,10 @@ export default {
       e.preventDefault();
     },
     // ---tool func
-    /** 计算高亮渐暗颜色的循环 */
+    /**
+     * 计算高亮渐暗颜色的循环
+     * FIXME: 相同数据源，相同引用的情况，将颜色值挂在数据源对象上，在多个表格使用相同数据源时会出问题。
+     */
     calcHighlightLoop() {
       if (this.calcHighlightDimLoop) return;
       this.calcHighlightDimLoop = true;
@@ -802,7 +821,7 @@ export default {
           //  经过的时间 ÷ 2s 计算出 颜色过渡进度 (0-1)
           const progress = (nowTs - row._bgc_progress) / _highlightDuration;
           if (progress <= 1) {
-            row._bgc = _highlightInter(progress);
+            row._bgc = that.highlightInter(progress);
           } else {
             row._bgc = ''; // 清空颜色
             highlightRows.splice(i--, 1);
@@ -811,7 +830,7 @@ export default {
         that.highlightDimRows = new Set(highlightRows);
 
         if (that.highlightDimRows.size > 0) {
-          // 还有高亮的行则下一次循环
+          // 还有高亮的行,则下一次循环
           window.setTimeout(recursion, 100);
         } else {
           // 没有则停止循环
@@ -916,6 +935,11 @@ export default {
       if (top !== null) this.$refs.tableContainer.scrollTop = top;
       if (left !== null) this.$refs.tableContainer.scrollLeft = left;
     },
+
+    /** 获取当前状态的表格数据 */
+    getTableData() {
+      return [...this.dataSourceCopy];
+    },
   },
 };
 </script>
@@ -935,7 +959,7 @@ export default {
   --bg-border-right: linear-gradient(270deg, var(--border-color) var(--border-width), transparent var(--border-width));
   --bg-border-bottom: linear-gradient(0deg, var(--border-color) var(--border-width), transparent var(--border-width));
   --bg-border-left: linear-gradient(90deg, var(--border-color) var(--border-width), transparent var(--border-width));
-  --highlight-color: rgba(113, 162, 253, 1);
+  --highlight-color: #71a2fd;
 
   --sort-arrow-color: #5d5f69;
   --sort-arrow-hover-color: #8f90b5;
@@ -1179,7 +1203,9 @@ export default {
     font-size: 14px;
     position: sticky;
     left: 0px;
-    border: var(--border-width) solid var(--border-color);
+    border-left: var(--border-width) solid var(--border-color);
+    border-right: var(--border-width) solid var(--border-color);
+    border-bottom: var(--border-width) solid var(--border-color);
     display: flex;
     flex-direction: column;
     align-items: center;

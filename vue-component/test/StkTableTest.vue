@@ -28,20 +28,21 @@ div(style="margin-left:10px")
 
 div(:style="{width: tableWidth}" style="padding:10px;")
   StkTable(
-    ref="stkTable" 
-    rowKey="name" 
+    ref="stkTable"
+    rowKey="name"
+    theme="dark"
     :noDataFull="true"
     :virtual="true"
     :virtualX="true"
-    :style="{height:props.height}" 
+    :style="{height:props.height}"
     v-bind="props"
-    :columns="columns" 
-    :dataSource="dataSource" 
-    @current-change="onCurrentChange" 
+    :columns="columns"
+    :dataSource="dataSource"
+    @current-change="onCurrentChange"
     @row-menu="onRowMenu"
     @header-row-menu="onHeaderRowMenu"
     @row-click="onRowClick"
-    @row-dblclick="onRowDblclick" 
+    @row-dblclick="onRowDblclick"
     @sort-change="handleSortChange"
     @cell-click="onCellClick"
     @header-cell-click="onHeaderCellClick"
@@ -51,27 +52,30 @@ div(:style="{width: tableWidth}" style="padding:10px;")
     //- template(#table-header="{ column }")
     //-   span {{column.title}} (slot)
   StkTableC(
-    ref="stkTableC" 
-    rowKey="name" 
+    ref="stkTableC"
+    rowKey="name"
     :noDataFull="true"
     :virtual="true"
-    :style="{height:props.height}" 
-    :columns="columns" 
-    :dataSource="dataSource" 
-    @current-change="onCurrentChange" 
+    :style="{height:props.height}"
+    :columns="columns"
+    :dataSource="dataSource2"
+    @current-change="onCurrentChange"
     @row-dblclick="onRowDblclick"
     @col-order-change="onColOrderChange2"
   )
-div columns:{{columns}} 
+div columns:{{columns}}
 //- div dataSource:{{dataSource}}
+StkTableInsertSort
+
 hr
 //- div tableHeaders:{{stkTable.tableHeaders}}
 //- div tableProps:{{stkTable.tableProps}}
 div(style="width:max-content")
   h2 API
   StkTable(
-    :columns="docTableColumns" 
-    :dataSource="docTableData" 
+    theme="dark"
+    :columns="docTableColumns"
+    :dataSource="docTableData"
   )
 
 </template>
@@ -80,9 +84,10 @@ div(style="width:max-content")
 import { h } from 'vue';
 import StkTable from '../src/StkTable.vue';
 import StkTableC from '../src/StkTableC/index.vue'; // 兼容版本 fixedLeft
+import StkTableInsertSort from './StkTableInsertSort.vue'; // 插入排序
 export default {
   name: 'StkTableTest',
-  components: { StkTable, StkTableC },
+  components: { StkTable, StkTableC, StkTableInsertSort },
   props: {},
   data() {
     return {
@@ -165,6 +170,7 @@ export default {
       // })),
       addIndex: 0,
       dataSource: [],
+      dataSource2: [],
       docTableColumns: [
         { title: '字段', dataIndex: 'key' },
         { title: '描述', dataIndex: 'desc' },
@@ -308,6 +314,7 @@ export default {
     },
     handleClearTableData() {
       this.dataSource = [];
+      this.dataSource2 = [];
     },
     handleSortChange(col, order) {
       console.log('排序改变事件触发：', col, order);
@@ -356,13 +363,16 @@ export default {
         };
         if (unshift) {
           this.dataSource.unshift(data);
+          this.dataSource2.unshift(structuredClone(data));
         } else {
           this.dataSource.push(data);
+          this.dataSource2.push(structuredClone(data));
         }
         tmpIndex.push(data);
         this.addIndex++;
       }
       this.dataSource = [...this.dataSource]; // 没有监听deep
+      this.dataSource2 = [...this.dataSource2]; // 没有监听deep
 
       this.$nextTick(() => {
         const rowKeys = tmpIndex.map(it => it.name);

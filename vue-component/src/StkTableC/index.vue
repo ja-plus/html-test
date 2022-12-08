@@ -62,7 +62,7 @@ export default {
                 maxWidth: col.width,
                 fixed: null,
                 customCell() {
-                  return {};
+                  return { render: h => '' };
                 },
               }
             : {}),
