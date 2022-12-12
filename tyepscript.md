@@ -7,23 +7,46 @@
 ## 内置类型
 * Parameter 获取函数参数类型
 * ReturnType 获取函数的返回值类型
-* Omit 取出个别字段
-* Exclude 去除个别字段
+* Omit 去除对象中的指定字段
+* Pick 与Omit相反
+* Exclude 去联合类型中的个别类型
+* Extract 与Exclude相反
 * Partial 字段全部转换为可选 k?:v
-
+## never类型
+使用 never 避免出现新增了联合类型没有对应的实现，目的就是写出类型绝对安全的代码<br>
+具有 never 返回类型的函数永不返回。它也不返回 undefined。该函数没有正常完成，这意味着它可能会抛出异常或根本无法退出执行<br>
+任意类型与 never 交叉都得到 never。string & never => never
+```typescript
+type Foo = string | number;
+function controlFlowAnalysisWithNever(foo: Foo) {
+  if(typeof foo === "string") {
+    // 这里 foo 被收窄为 string 类型
+  } else if(typeof foo === "number") {
+    // 这里 foo 被收窄为 number 类型
+  } else {
+    // foo 在这里是 never
+    const check: never = foo;
+  }
+}
+```
+### 从另一个类型中获取类型
+```typescript
+type A = {name: string};
+type B = A["name"]; // string
+```
 ### 初始化对象为{}的方式
 ```typescript
 type A ={
   name: string,
   age: number
 }
-let a:Partial<A> = {};
-let b:A | Record<string,never> = {}
+let a: Partial<A> = {};
+let b: A | Record<string, never> = {}
 ```
 ### 指定方法的this类型
 ```ts
-type Person = {name:string,age:number}
-function a(this:Person,val:string){
+type Person = {name: string, age: number}
+function a(this: Person, val: string){
   this // type
 }
 a('string') // error
