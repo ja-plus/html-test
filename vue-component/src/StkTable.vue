@@ -210,10 +210,65 @@ function _howDeepTheColumn(arr, level = 1) {
   return Math.max(...levels);
 }
 /**
+ * 对有序数组插入新数据
+ * @param {object} sortState
+ * @param {string} sortState.dataIndex 排序的列
+ * @param {null|'asc'|'desc'} sortState.order 排序方式
+ * @param {object} newItem 要插入的数据
+ * @param {Array} targetArray 表格数据
+ */
+export function insertToOrderedArray(sortState, newItem, targetArray) {
+  const { dataIndex, order } = sortState;
+  const data = [...targetArray];
+  if (!order) {
+    data.unshift(newItem);
+    return data;
+  }
+  // 二分插入
+  let sIndex = 0;
+  let eIndex = data.length - 1;
+  while (eIndex > sIndex) {
+    // console.log(startIndex, endIndex);
+    const midIndex = Math.floor((sIndex + eIndex) / 2);
+    const midVal = data[midIndex][dataIndex];
+    const targetVal = newItem[dataIndex];
+    if (order === 'asc') {
+      if (midVal > targetVal) {
+        eIndex = midIndex - 1;
+      } else {
+        sIndex = midIndex + 1;
+      }
+    } else if (order === 'desc') {
+      if (midVal > targetVal) {
+        sIndex = midIndex + 1;
+      } else {
+        eIndex = midIndex - 1;
+      }
+    }
+  }
+  // console.log('startIndex', startIndex);
+  if (sIndex === data.length - 1 && data[sIndex][dataIndex] !== newItem[dataIndex]) {
+    // 与数组最后一条记录不相等，则插入在最后
+    // data.splice(startIndex + 1, 0, row);
+    data.push(newItem);
+  } else {
+    data.splice(sIndex, 0, newItem); // insert a new row
+  }
+  return data;
+}
+
+/**
+ * @typedef SortOption
+ * @prop {function|boolean} sorter
+ * @prop {string} dataIndex
+ * @prop {string} sortField
+ * @prop {'number'|'string'} sortType
+ */
+/**
  * 表格排序抽离
  * 可以在组件外部自己实现表格排序，组件配置remote，使表格不排序。
  * 使用者在@sort-change事件中自行更改table props 'dataSource'完成排序。
- * @param {{sorter:function|boolean,dataIndex:string,sortField:string,sortType: 'number'|'string'}} sortOption 列配置
+ * @param {SortOption} sortOption 列配置
  * @param {string|null} order 排序方式
  * @param {any} dataSource 排序的数组
  */
