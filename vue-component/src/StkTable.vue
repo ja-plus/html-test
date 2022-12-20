@@ -214,10 +214,10 @@ function _howDeepTheColumn(arr, level = 1) {
  * 可以在组件外部自己实现表格排序，组件配置remote，使表格不排序。
  * 使用者在@sort-change事件中自行更改table props 'dataSource'完成排序。
  * @param {{sorter:function|boolean,dataIndex:string,sortField:string,sortType: 'number'|'string'}} sortOption 列配置
- * @param {any} dataSource 排序的数组
  * @param {string|null} order 排序方式
+ * @param {any} dataSource 排序的数组
  */
-export function tableSort(sortOption, dataSource, order) {
+export function tableSort(sortOption, order, dataSource) {
   let targetDataSource = [...dataSource];
   if (typeof sortOption.sorter === 'function') {
     const customSorterData = sortOption.sorter(targetDataSource, { order, column: sortOption });
@@ -497,16 +497,19 @@ export default {
       // deep: true, // 不能加，因为this.dealColumns 中操作了this.columns
     },
     /** 监听表格数据变化 */
-    dataSource(val) {
-      // this.dealColumns(val);
-      this.dataSourceCopy = [...val];
-      // TODO: 数据长度没变则不计算虚拟滚动
-      this.initVirtualScrollY();
-      if (this.sortCol) {
-        // 排序
-        const column = this.columns.find(it => it.dataIndex === this.sortCol);
-        this.onColumnSort(column, false);
-      }
+    dataSource: {
+      handler(val) {
+        // this.dealColumns(val);
+        this.dataSourceCopy = [...val];
+        // TODO: 数据长度没变则不计算虚拟滚动
+        this.initVirtualScrollY();
+        if (this.sortCol) {
+          // 排序
+          const column = this.columns.find(it => it.dataIndex === this.sortCol);
+          this.onColumnSort(column, false);
+        }
+      },
+      deep: false, // TODO:prop 控制监听
     },
   },
   created() {
@@ -709,7 +712,7 @@ export default {
       const order = this.sortSwitchOrder[this.sortOrderIndex];
 
       if (!this.sortRemote || options.force) {
-        this.dataSourceCopy = tableSort(col, this.dataSource, order);
+        this.dataSourceCopy = tableSort(col, order, this.dataSource);
       }
       // 只有点击才触发事件
       if (click || options.emit) {
@@ -868,6 +871,7 @@ export default {
      * @param {Array<string|number>} rowKeyValues
      */
     setHighlightDimRow(rowKeyValues) {
+      if (!Array.isArray(rowKeyValues)) rowKeyValues = [rowKeyValues];
       if (this.virtual) {
         // --------虚拟滚动用js计算颜色渐变的高亮方案
         const nowTs = Date.now(); // 重置渐变进度
@@ -882,14 +886,17 @@ export default {
         this.calcHighlightLoop();
       } else {
         // -------- 普通滚动用css @keyframes动画，实现高亮
+        /**是否需要重绘 */
+        let needRepaint = false;
         for (let i = 0; i < rowKeyValues.length; i++) {
           const rowKeyValue = rowKeyValues[i];
-
+          /**@type {HTMLElement|null} */
           const rowEl = this.$el.querySelector(`[data-row-key="${rowKeyValue}"]`);
           if (!rowEl) continue;
           if (rowEl.classList.contains('highlight-row')) {
             rowEl.classList.remove('highlight-row');
-            void rowEl.offsetWidth; // 通知浏览器重绘 // TODO: 统一重绘
+            // void rowEl.offsetWidth; // 强制浏览器重绘 // TODO: 统一重绘
+            needRepaint = true;
           }
           rowEl.classList.add('highlight-row');
           // 动画结束移除class
@@ -901,6 +908,9 @@ export default {
               this.highlightDimRowsTimeout.delete(rowKeyValue); // 回收内存
             }, _highlightDuration),
           );
+        }
+        if (needRepaint) {
+          void this.$el.offsetWidth;
         }
       }
     },
