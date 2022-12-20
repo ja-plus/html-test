@@ -227,14 +227,14 @@ export function insertToOrderedArray(sortState, newItem, targetArray) {
   // 二分插入
   let sIndex = 0;
   let eIndex = data.length - 1;
+  const targetVal = newItem[dataIndex];
   while (eIndex > sIndex) {
-    // console.log(startIndex, endIndex);
+    // console.log(sIndex, eIndex);
     const midIndex = Math.floor((sIndex + eIndex) / 2);
     const midVal = data[midIndex][dataIndex];
-    const targetVal = newItem[dataIndex];
     if (order === 'asc') {
       if (midVal > targetVal) {
-        eIndex = midIndex - 1;
+        eIndex = midIndex > 0 ? midIndex - 1 : 0;
       } else {
         sIndex = midIndex + 1;
       }
@@ -242,17 +242,19 @@ export function insertToOrderedArray(sortState, newItem, targetArray) {
       if (midVal > targetVal) {
         sIndex = midIndex + 1;
       } else {
-        eIndex = midIndex - 1;
+        eIndex = midIndex > 0 ? midIndex - 1 : 0;
       }
     }
   }
-  // console.log('startIndex', startIndex);
-  if (sIndex === data.length - 1 && data[sIndex][dataIndex] !== newItem[dataIndex]) {
-    // 与数组最后一条记录不相等，则插入在最后
-    // data.splice(startIndex + 1, 0, row);
-    data.push(newItem);
-  } else {
-    data.splice(sIndex, 0, newItem); // insert a new row
+  // console.log('startIndex', sIndex);
+  // 与eIndex 的数据比较大小，选择插入在前方还是后方
+  const lastVal = data[eIndex][dataIndex];
+  if (order === 'asc') {
+    if (targetVal > lastVal) data.splice(eIndex + 1, 0, newItem);
+    else data.splice(sIndex, 0, newItem);
+  } else if (order === 'desc') {
+    if (targetVal < lastVal) data.splice(eIndex + 1, 0, newItem);
+    else data.splice(sIndex, 0, newItem);
   }
   return data;
 }
