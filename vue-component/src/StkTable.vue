@@ -795,7 +795,6 @@ export default {
     },
     /** 插入一行 
     insertData(data) {
-      // TODO: 根据排序情况插入数据
       if(!this.sortCol) return;
       const col = this.columns.find(it => it.dataIndex === this.sortCol);
       const sorter = col.sorter;
@@ -931,7 +930,7 @@ export default {
     },
     /** 高亮一个单元格 */
     setHighlightDimCell(rowKeyValue, dataIndex) {
-      // TODO: 支持动态计算高亮颜色
+      // TODO: 支持动态计算高亮颜色。不易实现。需记录每一个单元格的颜色情况。
       const cellEl = this.$el.querySelector(`[data-row-key="${rowKeyValue}"]>[data-index="${dataIndex}"]`);
       if (!cellEl) return;
       if (cellEl.classList.contains('highlight-cell')) {
@@ -969,7 +968,6 @@ export default {
           if (!rowEl) continue;
           if (rowEl.classList.contains('highlight-row')) {
             rowEl.classList.remove('highlight-row');
-            // void rowEl.offsetWidth; // 强制浏览器重绘 // TODO: 统一重绘
             needRepaint = true;
           }
           rowEl.classList.add('highlight-row');
@@ -984,7 +982,7 @@ export default {
           );
         }
         if (needRepaint) {
-          void this.$el.offsetWidth;
+          void this.$el.offsetWidth; //强制浏览器重绘
         }
       }
     },
