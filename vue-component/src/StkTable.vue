@@ -81,17 +81,13 @@
               <!-- 排序图图标 -->
               <span v-if="col.sorter" class="table-header-sorter">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16px" height="16px" viewBox="0 0 16 16">
-                  <g id="sort-btn" fill-rule="nonzero">
-                    <polygon
-                      id="arrow-up"
-                      fill="#757699"
-                      points="7.99693049 2.00077299 4.79705419 6.00077299 11.1722317 6.00077299"
-                    ></polygon>
+                  <g id="sort-btn">
+                    <polygon id="arrow-up" fill="#757699" points="8 2 4.8 6 11.2 6"></polygon>
                     <polygon
                       id="arrow-down"
                       fill="#757699"
-                      transform="translate(7.984643, 11.999227) scale(-1, 1) rotate(-180.000000) translate(-7.984643, -11.999227) "
-                      points="7.99693049 9.999227 4.79705419 13.999227 11.1722317 13.999227"
+                      transform="translate(8, 12) rotate(-180.000000) translate(-8, -12) "
+                      points="8 10 4.8 14 11.2 14"
                     ></polygon>
                   </g>
                 </svg>
@@ -213,12 +209,14 @@ function _howDeepTheColumn(arr, level = 1) {
  * 对有序数组插入新数据
  * @param {object} sortState
  * @param {string} sortState.dataIndex 排序的列
- * @param {null|'asc'|'desc'} sortState.order 排序方式
+ * @param {null|'asc'|'desc'} sortState.order 排序顺序
+ * @param {'number'|'string'} [sortState.sortType] 排序方式
  * @param {object} newItem 要插入的数据
  * @param {Array} targetArray 表格数据
  */
 export function insertToOrderedArray(sortState, newItem, targetArray) {
-  const { dataIndex, order } = sortState;
+  let { dataIndex, order, sortType } = sortState;
+  if (!sortType) sortType = typeof newItem[dataIndex];
   const data = [...targetArray];
   if (!order) {
     data.unshift(newItem);
@@ -233,13 +231,13 @@ export function insertToOrderedArray(sortState, newItem, targetArray) {
     const midIndex = Math.floor((sIndex + eIndex) / 2);
     const midVal = data[midIndex][dataIndex];
     if (order === 'asc') {
-      if (midVal > targetVal) {
+      if (strCompare(midVal, targetVal, sortType) === 1) {
         eIndex = midIndex > 0 ? midIndex - 1 : 0;
       } else {
         sIndex = midIndex + 1;
       }
     } else if (order === 'desc') {
-      if (midVal > targetVal) {
+      if (strCompare(midVal, targetVal, sortType) === 1) {
         sIndex = midIndex + 1;
       } else {
         eIndex = midIndex > 0 ? midIndex - 1 : 0;
@@ -250,13 +248,30 @@ export function insertToOrderedArray(sortState, newItem, targetArray) {
   // 与eIndex 的数据比较大小，选择插入在前方还是后方
   const lastVal = data[eIndex][dataIndex];
   if (order === 'asc') {
-    if (targetVal > lastVal) data.splice(eIndex + 1, 0, newItem);
+    if (strCompare(targetVal, lastVal, sortType) === 1) data.splice(eIndex + 1, 0, newItem);
     else data.splice(sIndex, 0, newItem);
   } else if (order === 'desc') {
-    if (targetVal < lastVal) data.splice(eIndex + 1, 0, newItem);
+    if (strCompare(targetVal, lastVal, sortType) === -1) data.splice(eIndex + 1, 0, newItem);
     else data.splice(sIndex, 0, newItem);
   }
   return data;
+}
+/**
+ * 字符串比较
+ * @param {string} a
+ * @param {string} b
+ * @param {'number'|'string'} [type] 类型
+ * @return {-1|0|1}
+ */
+function strCompare(a, b, type) {
+  // if (typeof a === 'number' && typeof b === 'number') type = 'number';
+  if (type === 'number') {
+    if (+a > +b) return 1;
+    if (+a === +b) return 0;
+    if (+a < +b) return -1;
+  } else {
+    return String(a).localeCompare(b);
+  }
 }
 
 /**
@@ -280,9 +295,11 @@ export function tableSort(sortOption, order, dataSource) {
     const customSorterData = sortOption.sorter(targetDataSource, { order, column: sortOption });
     if (customSorterData) targetDataSource = customSorterData;
   } else if (order) {
-    let sortField = sortOption.dataIndex;
-    if (sortOption.sortField) sortField = sortOption.sortField;
-    if (sortOption.sortType === 'number') {
+    const sortField = sortOption.sortField || sortOption.dataIndex;
+    let { sortType } = sortOption;
+    if (!sortType) sortType = typeof dataSource[0][sortField];
+
+    if (sortType === 'number') {
       // 按数字类型排序
       const nanArr = []; // 非数字
       const numArr = []; // 数字
