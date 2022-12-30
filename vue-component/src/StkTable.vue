@@ -175,6 +175,7 @@
 
 <script>
 /**
+ * @version 1.0.0
  * @author JA+
  * TODO:存在的问题：
  * [] column.dataIndex 作为唯一键，不能重复
