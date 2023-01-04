@@ -15,6 +15,11 @@ module.exports = {
         loader: 'vue-loader',
       },
       {
+        test: /\.jsx?$/,
+        exclude: /node_modules/,
+        loader: 'babel-loader',
+      },
+      {
         test: /\.less$/,
         use: ['vue-style-loader', 'css-loader', 'less-loader'],
       },
@@ -27,6 +32,14 @@ module.exports = {
         use: ['pug-html-loader'],
       },
     ],
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+  cache: {
+    type: 'filesystem',
   },
   plugins: [
     new VueLoaderPlugin(),

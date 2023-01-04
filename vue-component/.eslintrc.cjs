@@ -8,7 +8,10 @@ module.exports = {
   },
   parser: 'vue-eslint-parser',
   parserOptions: {
-    parser: '@typescript-eslint/parser',
+    parser: {
+      js: '@babel/eslint-parser',
+      ts: '@typescript-eslint/parser',
+    },
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
@@ -18,7 +21,7 @@ module.exports = {
     'prettier/prettier': 1,
     '@typescript-eslint/no-empty-function': 1, // 不能有空方法，改为1警告
     '@typescript-eslint/no-var-requires': 0, // 解决vue.config.js中require语法的报错
-    '@typescript-eslint/no-unused-vars': [1, { argsIgnorePattern: 'h' }], // 用于取消tsx,jsx 渲染函数render(h) 中提示形参h未使用的问题
+    '@typescript-eslint/no-unused-vars': [1, { varsIgnorePattern: 'h' }], // 用于取消tsx,jsx 渲染函数render(h) 中提示形参h未使用的问题
     // 'spaced-comment': 1, // 注释斜杠后空格
     eqeqeq: 1, // 使用 ===
     'dot-notation': 1, // 强制使用.不用[]

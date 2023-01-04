@@ -144,6 +144,7 @@
               :class="[col.className, showOverflow ? 'text-overflow' : '', col.fixed ? 'fixed-cell' : '']"
               :style="{
                 textAlign: col.align,
+                width: col.width,
                 minWidth: col.minWidth || col.width,
                 maxWidth: col.maxWidth || col.width,
                 backgroundColor: item._bgc,
@@ -151,7 +152,9 @@
               }"
               @click="e => onCellClick(e, item, col)"
             >
-              <component :is="col.customCell(col, item)" v-if="col.customCell" />
+              <template v-if="col.customCell">
+                <component :is="col.customCell(col, item)" />
+              </template>
               <div v-else class="table-cell-wrapper" :title="item[col.dataIndex]">
                 {{ item[col.dataIndex] ?? emptyCellText }}
               </div>

@@ -1,21 +1,15 @@
-<template lang="pug">
-VirtualTree
-VirtualTreeSelectTest
-StkTableTest
- 
+<template>
+  <!-- <VirtualTree></VirtualTree> -->
+  <!-- <VirtualTreeSelectTest></VirtualTreeSelectTest> -->
+  <!-- <StkTableTest></StkTableTest> -->
+  <StkTableExpandCellVue></StkTableExpandCellVue>
 </template>
 
-<script>
-import VirtualTree from './test/VirtualTree.vue';
-import StkTableTest from './test/StkTableTest.vue';
-import VirtualTreeSelectTest from './test/VirtualTreeSelect.vue';
-export default {
-  components: {
-    VirtualTree,
-    StkTableTest,
-    VirtualTreeSelectTest,
-  },
-};
+<script setup>
+// import VirtualTree from './test/VirtualTree.vue';
+// import StkTableTest from './test/StkTableTest.vue';
+// import VirtualTreeSelectTest from './test/VirtualTreeSelect.vue';
+import StkTableExpandCellVue from './test/StkTableExpandCell.vue';
 </script>
 
 <style>
