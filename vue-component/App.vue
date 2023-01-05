@@ -9,7 +9,7 @@
 // import VirtualTree from './test/VirtualTree.vue';
 // import StkTableTest from './test/StkTableTest.vue';
 // import VirtualTreeSelectTest from './test/VirtualTreeSelect.vue';
-import StkTableExpandCellVue from './test/StkTableExpandCell.vue';
+import StkTableExpandCellVue from './test/StkTableExpandCell/index.vue';
 </script>
 
 <style>

@@ -121,19 +121,19 @@
       <tbody>
         <template v-if="dataSourceCopy && dataSourceCopy.length">
           <tr
-            v-for="(item, i) in virtual_dataSourcePart"
-            :key="rowKey ? rowKeyGen(item) : i"
-            :data-row-key="rowKey ? rowKeyGen(item) : i"
+            v-for="(row, i) in virtual_dataSourcePart"
+            :key="rowKey ? rowKeyGen(row) : i"
+            :data-row-key="rowKey ? rowKeyGen(row) : i"
             :class="{
               active: rowKey
-                ? rowKeyGen(item) === (currentItem.value && rowKeyGen(currentItem.value))
-                : item === currentItem.value,
-              hover: rowKey ? rowKeyGen(item) === currentHover.value : item === currentHover.value,
+                ? rowKeyGen(row) === (currentItem.value && rowKeyGen(currentItem.value))
+                : row === currentItem.value,
+              hover: rowKey ? rowKeyGen(row) === currentHover.value : row === currentHover.value,
             }"
-            @click="e => onRowClick(e, item)"
-            @dblclick="e => onRowDblclick(e, item)"
-            @contextmenu="e => onRowMenu(e, item)"
-            @mouseover="e => onTrMouseOver(e, item)"
+            @click="e => onRowClick(e, row)"
+            @dblclick="e => onRowDblclick(e, row)"
+            @contextmenu="e => onRowMenu(e, row)"
+            @mouseover="e => onTrMouseOver(e, row)"
           >
             <!--这个td用于配合虚拟滚动的th对应，防止列错位-->
             <td v-if="virtualX_on" class="virtual-x-left" style="padding: 0"></td>
@@ -147,16 +147,19 @@
                 width: col.width,
                 minWidth: col.minWidth || col.width,
                 maxWidth: col.maxWidth || col.width,
-                backgroundColor: item._bgc,
+                backgroundColor: row._bgc,
                 ...fixedStyle('td', col),
               }"
-              @click="e => onCellClick(e, item, col)"
+              @click="e => onCellClick(e, row, col)"
             >
-              <template v-if="col.customCell">
-                <component :is="col.customCell(col, item)" />
-              </template>
-              <div v-else class="table-cell-wrapper" :title="item[col.dataIndex]">
-                {{ item[col.dataIndex] ?? emptyCellText }}
+              <component
+                :is="typeof col.customCell === 'function' ? col.customCell(col, row) : col.customCell"
+                v-if="col.customCell"
+                :col="col"
+                :row="row"
+              />
+              <div v-else class="table-cell-wrapper" :title="row[col.dataIndex]">
+                {{ row[col.dataIndex] ?? emptyCellText }}
               </div>
             </td>
           </tr>
@@ -178,7 +181,7 @@
 
 <script>
 /**
- * @version 1.0.0
+ * @version 1.0.1
  * @author JA+
  * TODO:存在的问题：
  * [] column.dataIndex 作为唯一键，不能重复
