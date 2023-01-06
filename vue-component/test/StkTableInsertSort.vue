@@ -6,6 +6,8 @@
     <StkTable
       ref="stkTable"
       row-key="age"
+      style="height: 200px"
+      max-width="max-content"
       :columns="columns"
       :data-source="dataSource"
       sort-remote
@@ -20,9 +22,9 @@ import { nextTick, ref } from 'vue';
 const stkTable = ref();
 
 const columns = [
-  { title: 'name', dataIndex: 'name' },
-  { title: 'age', dataIndex: 'age', sorter: true, sortType: 'number' },
-  { title: 'gender', dataIndex: 'gender' },
+  { title: 'name', dataIndex: 'name', width: '200px' },
+  { title: 'age', dataIndex: 'age', width: '200px', sorter: true, sortType: 'number' },
+  { title: 'gender', dataIndex: 'gender', width: '100px' },
 ];
 const dataSource = ref(
   new Array(5).fill(null).map((it, i) => {

@@ -23,6 +23,7 @@
       class="stk-table-main"
       :style="{
         minWidth: minWidth,
+        maxWidth: maxWidth,
       }"
     >
       <!-- transform: virtualX_on ? `translateX(${virtualScrollX.offsetLeft}px)` : null, 用transform控制虚拟滚动左边距，sticky会有问题 -->
@@ -181,7 +182,7 @@
 
 <script>
 /**
- * @version 1.0.1
+ * @version 1.0.2
  * @author JA+
  * TODO:存在的问题：
  * [] column.dataIndex 作为唯一键，不能重复
@@ -350,6 +351,11 @@ export default {
     minWidth: {
       type: String,
       default: 'min-content',
+    },
+    /**表格最大宽度，设置max-content 使表格按设置的width来 */
+    maxWidth: {
+      type: String,
+      default: '',
     },
     theme: {
       type: String,
@@ -1089,7 +1095,7 @@ export default {
     // top: 0;
     border-spacing: 0;
     border-collapse: separate;
-    table-layout: fixed;
+    table-layout: fixed; // 似乎不需要
 
     th,
     td {
