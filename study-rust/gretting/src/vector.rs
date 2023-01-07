@@ -23,5 +23,10 @@ fn main() {
   let mut v1: Vec<i32> = vec![1, 2, 4, 8];
   let mut v2: Vec<i32> = vec![16, 32, 64];
   v1.append(&mut v2);
+  println!("v1:{}",v1[0]); // 通过下标访问
   println!("append:{:?}", v1);
+
+   // Iterators can be collected into vectors
+   let collected_iterator: Vec<i32> = (0..10).collect();
+   println!("Collected (0..10) into: {:?}", collected_iterator);
 }
