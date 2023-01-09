@@ -253,7 +253,54 @@ let option = {
       xAxisIndex: 2,
       yAxisIndex: 2,
       type: 'bar',
-      data: [2, 3, 4, 5],
+      // barCategoryGap: 0,
+      markPoint: {
+        animation: false,
+        silent: true,
+        data: [
+          {
+            name: 'Max',
+            value: '95.430058',
+            xAxis: 0,
+            yAxis: 5,
+            symbolSize: [8, 14], // 使菱形压扁
+            symbol: 'diamond',
+            symbolOffset: [-10, 0],
+
+            itemStyle: {
+              color: '#C5D962',
+              // opacity: 0.6,
+            },
+            label: {
+              // fontFamily: 'ArialMT',
+              align: 'right',
+              show: true,
+              height: 14,
+              fontSize: 12,
+              // lineHeight: 14,
+              color: '#1B1B24',
+              backgroundColor: 'rbga(197,217,98)',
+              padding: [0, 4],
+              borderRadius: [2, 0, 0, 2],
+            },
+          },
+        ],
+      },
+      data: [
+        2,
+        3,
+        4,
+        5,
+        4,
+        {
+          value: 3,
+          itemStyle: {
+            color: 'orange',
+          },
+          // label: { show: true },
+        },
+        2,
+      ],
     },
     {
       name: 'bottom-right-line',
@@ -262,6 +309,20 @@ let option = {
       type: 'line',
       smooth: true,
       data: [1, 2, 3, 4, 5, 4, 3, 2, 1],
+    },
+    {
+      name: 'bottom-right-dash-split',
+      xAxisIndex: 2,
+      yAxisIndex: 2,
+      type: 'bar',
+      data: [[2, 7]],
+      // barWidth: 1,
+      itemStyle: {
+        borderWidth: 1,
+        borderType: 'dashed',
+        borderColor: '#000',
+        color: 'transparent',
+      },
     },
   ],
 };
