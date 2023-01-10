@@ -23,7 +23,7 @@
               ? baseIndentWidth + indentWidth * item._vt_level + 'px'
               : baseIndentWidth + indentWidth * (item._vt_level - 1) + 20 + 'px',
           }"
-          @click="handleItemClick(item)"
+          @click="handleItemClick(item, isClick)"
           @dblclick="onItemDblClick(item)"
           @contextmenu="e => onContextMenu(e, item)"
         >
@@ -332,8 +332,12 @@ export default {
 
       this.offsetBottom = this.allHeight - this.mainPageHeight - this.offsetTop;
     },
-    /** 点击一项 */
-    handleItemClick(item) {
+    /** 
+     * 点击一项
+     * @param {object} item
+     * @param {boolean} isClick 是否点击列表触发
+     */
+    handleItemClick(item, isClick = false) {
       if (this.clickItemExpand && item[this.assignedFields.children]) {
         this.changeList(item); // 展开
       }
@@ -348,7 +352,7 @@ export default {
           this.currentItem = item;
         }
       }
-      this.$emit('item-click', item);
+      this.$emit('item-click', item, isClick);
       // this.setSelectedItem(item);
     },
     /** 设置选中项 */
