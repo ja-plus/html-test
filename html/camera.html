@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Camera</title>
+  <style>
+    video {
+      width: 200px;
+      height:200px;
+    }
+    .phtots img{
+      border:1px dashed;
+    }
+  </style>
+</head>
+<body>
+  <video id="video" autoplay style="background-color:#000"></video>
+  <canvas id="canvas" style="display:none;"></canvas>
+  <button id="takePhoto">takePhoto</button>
+  <div class="phtots" id="photos"></div>
+</body>
+<script>
+  /** @type {HTMLCanvasElement}*/
+  const canvas = document.querySelector('#canvas');
+  /** @type {HTMLVideoElement}*/
+  const video = document.getElementById('video');
+  /** @type {HTMLButtonElement}*/
+  const takePhotoBtn = document.getElementById('takePhoto');
+  /** @type {HTMLElement}*/
+  const photos = document.getElementById('photos');
+
+  canvas.width = canvas.height = video.width = video.height = 200;
+  const { width, height } = canvas;
+  const ctx = canvas.getContext('2d');
+  navigator.mediaDevices
+    .getUserMedia({
+      video: {
+        width,
+        height,
+      },
+    })
+    .then(stream => {
+      video.src = stream;
+      video.onloadedmetadata = () => {
+        video.play();
+      };
+    })
+    .catch(err => {
+      alert(err);
+      console.error(err);
+    });
+  
+  takePhotoBtn.addEventListener('click', () => {
+    ctx.drawImage(video, 0, 0, width, height);
+    addImage(canvas.toDataURL());
+  });
+  function addImage(src) {
+    /** @type {HTMLImageElement}*/
+    let img = document.createElement('img');
+    img.src = src;
+    photos.appendChild(img);
+  }
+</script>
+</html>
