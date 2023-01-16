@@ -1,5 +1,6 @@
 // mod use_reqwest;
-mod dimen2_arr_lookup;
+// mod dimen2_arr_lookup;
+mod order_arr;
 // #[tokio::main]
 fn main() {
     // 接收命令行参数
@@ -16,6 +17,7 @@ fn main() {
     // if let Ok(post_resp) = post_res.await {
     //     println!("post Response: {:#?}", post_resp);
     // }
-    dimen2_arr_lookup::main();
+    // dimen2_arr_lookup::main();
+    order_arr::main();
 }
 
