@@ -1,4 +1,5 @@
 import { Component } from 'vue';
+import { VNode } from 'vue/types/umd';
 export type StkTableColumn<T> = {
   dataIndex: keyof T;
   title?: string;
@@ -12,6 +13,6 @@ export type StkTableColumn<T> = {
   sortField?: keyof T;
   sortType?: 'number' | 'string';
   fixed?: 'left' | null;
-  customCell?: (col: StkTableColumn<T>, item: T) => Component;
-  customHeaderCell?: (col: StkTableColumn<T>) => Component;
+  customCell?: (col: StkTableColumn<T>, item: T) => Component | VNode;
+  customHeaderCell?: (col: StkTableColumn<T>) => Component | VNode;
 };

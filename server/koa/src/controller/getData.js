@@ -110,3 +110,18 @@ exports.setStatusCode = async function (ctx) {
     query: ctx.request.query,
   };
 };
+
+/** 接收客户端推送文件 */
+exports.uploadFile = async function (ctx) {
+  const file = ctx.request.files.file;
+  console.log('uploadFile request.files', ctx.request.files);
+  console.log('uploadFile request.body', ctx.request.body);
+  let fileContent = fs.readFileSync(file.path);
+
+  ctx.body = {
+    query: ctx.request.query,
+    code: 1,
+    fileContent: fileContent.toString(),
+    path: file.path,
+  };
+};

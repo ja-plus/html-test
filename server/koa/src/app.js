@@ -32,6 +32,12 @@ app.use(
 app.use(
   koaBody({
     multipart: true, // 支持formData
+    formidable: {
+      // 上传目录 不配置就会暂存在 \AppData\\Local\\Temp\\
+      // uploadDir: path.join(__dirname, '../uploadFiles'),
+      // 保留文件扩展名
+      keepExtensions: true,
+    },
   }),
 );
 
