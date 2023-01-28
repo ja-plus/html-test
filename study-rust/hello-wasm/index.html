@@ -52,14 +52,14 @@ function loadWebAssembly(path, imports = {}) {
 //   });
 </script>
 <script type="module">
-  import init, { initSync, greet, sub_data, cpu_calc, fib as rust_fib, fib_recursion as rust_fib_recursion } from './pkg/hello_wasm.js';
+  import init, { initSync, greet, sub_data, cpu_calc, fib as rust_fib } from './pkg/hello_wasm.js';
   init().then(() => {
     /** 这样调用无法传参,接收返回 */
     // let res = module.greet('esmodule');
     // console.log('greet res', res);
     // 正确方式
     let res = greet('异步初始化wasm');
-    console.log(res, 'res');
+    console.log(res);
     /* 模拟订阅*/
     sub_data();
     // console.time('rust cpu');
@@ -76,12 +76,12 @@ function loadWebAssembly(path, imports = {}) {
 
     console.log('-----------');
   
-    console.time('rust recursion fib cpu');
-    res = rust_fib_recursion(40);
-    console.log('rust recursion fib result:', res);
-    console.timeEnd('rust recursion fib cpu');
+    // console.time('rust recursion fib cpu');
+    // res = rust_fib_recursion(40);
+    // console.log('rust recursion fib result:', res);
+    // console.timeEnd('rust recursion fib cpu');
   
-    console.log('-----------');
+    // console.log('-----------');
 
     console.time('js while fib cpu');
     res = fib(40);
@@ -90,12 +90,12 @@ function loadWebAssembly(path, imports = {}) {
   
     console.log('-----------');
 
-    console.time('js recursion fib cpu');
-    res = fibRecursion(40);
-    console.log('js recursion fib result:', res);
-    console.timeEnd('js recursion fib cpu');
+    // console.time('js recursion fib cpu');
+    // res = fibRecursion(40);
+    // console.log('js recursion fib result:', res);
+    // console.timeEnd('js recursion fib cpu');
   
-    console.log('-----------');
+    // console.log('-----------');
   });
   /** 执行run后，该方法会被rust调用*/
   window.getData = function (str) {
@@ -138,18 +138,6 @@ function loadWebAssembly(path, imports = {}) {
         num1 = temp;
         result = num2;
       }
-    }
-    return result;
-  }
-  function fibRec(num) {
-    if (num < 2) return 1;
-    return fibRec(num - 1) + fibRec(num - 2);
-  }
-  function fibRecursion(time) {
-    let i = 1;
-    let result = 0;
-    while (i < time) {
-      result = fibRec(i++);
     }
     return result;
   }

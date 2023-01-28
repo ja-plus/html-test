@@ -25,7 +25,7 @@ pub fn greet(name: &str) -> String {
     let log_string = &format!("Hello, {}!", name);
     // alert(&format!("Hello, {}!", name));
     console_log(log_string);
-    String::from("res data")
+    String::from(log_string)
 }
 
 #[wasm_bindgen]
@@ -89,21 +89,21 @@ pub fn fib(num: i32) -> i64 {
     result
 }
 
-fn fib_rec(num: i16) -> i64 {
-    if num < 2 {
-        return 1; // rust 中值要return
-    }
+// fn fib_rec(num: i16) -> i64 {
+//     if num < 2 {
+//         return 1; // rust 中值要return
+//     }
 
-    fib_rec(num - 1) + fib_rec(num - 2)
-}
+//     fib_rec(num - 1) + fib_rec(num - 2)
+// }
 
-#[wasm_bindgen]
-pub fn fib_recursion(time: i16) -> i64 {
-    let mut result = 0;
-    let mut i = 1;
-    while i < time {
-        result = fib_rec(i);
-        i += 1;
-    }
-    result
-}
+// #[wasm_bindgen]
+// pub fn fib_recursion(time: i16) -> i64 {
+//     let mut result = 0;
+//     let mut i = 1;
+//     while i < time {
+//         result = fib_rec(i);
+//         i += 1;
+//     }
+//     result
+// }
