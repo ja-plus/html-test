@@ -23,7 +23,7 @@ onClickOutside(outside, () => {
 });
 
 const draggable = ref();
-/** 这里必须要用结构，否则style无法响应 */
+/** 这里必须要用解构，否则style无法响应 */
 const {
   style: draggableStyle,
   x: draggableX,
