@@ -33,4 +33,7 @@ fn main() {
    // change v1
    v1[0] = 21;
    println!("v1[0]:{}",v1[0]);
+
+   let mut vec = Vec::new();
+   vec.push(1);
 }
