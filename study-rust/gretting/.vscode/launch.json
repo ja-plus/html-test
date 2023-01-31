@@ -3,11 +3,16 @@
   "configurations": [
       {
           "name": "Debug",
-          "type": "gdb",
+          "type": "cppvsdbg",
           "preLaunchTask": "build",
           "request": "launch",
-          "target": "${workspaceFolder}/target/debug/${workspaceFolderBasename}",
-          "cwd": "${workspaceFolder}"
+          // "target": "${workspaceFolder}/target/debug/${workspaceFolderBasename}",
+          "program": "${workspaceRoot}/src/order_arr.exe",
+          "args": [],
+          "cwd": "${workspaceFolder}",
+          "stopAtEntry": false,
+          "environment": [],
+          "console": "integratedTerminal",
       }
   ]
 }
