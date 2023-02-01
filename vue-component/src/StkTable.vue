@@ -108,11 +108,11 @@
         </tr>
       </thead>
 
-      <!-- 用于虚拟滚动表格内容定位 -->
-      <tbody v-if="virtual_on" :style="{ height: `${virtualScroll.offsetTop}px` }">
-        <!--这个tr兼容火狐-->
+      <!-- 用于虚拟滚动表格内容定位 @deprecated 有兼容问题-->
+      <!-- <tbody v-if="virtual_on" :style="{ height: `${virtualScroll.offsetTop}px` }">
+        <!==这个tr兼容火狐==>
         <tr></tr>
-      </tbody>
+      </tbody> -->
       <!-- <td
           v-for="col in virtualX_on ? virtualX_columnPart : tableProps"
           :key="col.dataIndex"
@@ -120,6 +120,7 @@
         ></td> -->
       <!-- <tbody :style="{ transform: `translateY(${virtualScroll.offsetTop}px)` }"> -->
       <tbody>
+        <tr v-if="virtual_on" :style="{ height: `${virtualScroll.offsetTop}px` }"></tr>
         <template v-if="dataSourceCopy && dataSourceCopy.length">
           <tr
             v-for="(row, i) in virtual_dataSourcePart"
@@ -164,10 +165,8 @@
               </div>
             </td>
           </tr>
+          <tr v-if="virtual_on" :style="{ height: `${virtual_offsetBottom}px` }"></tr>
         </template>
-      </tbody>
-      <tbody v-if="virtual_on" :style="{ height: `${virtual_offsetBottom}px` }">
-        <tr></tr>
       </tbody>
     </table>
     <div
@@ -182,7 +181,7 @@
 
 <script>
 /**
- * @version 1.0.2
+ * @version 1.0.3
  * @author JA+
  * TODO:存在的问题：
  * [] column.dataIndex 作为唯一键，不能重复
