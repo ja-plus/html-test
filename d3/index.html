@@ -6,12 +6,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>D3.js test</title>
-    <script src="https://cdn.bootcdn.net/ajax/libs/d3/7.6.1/d3.min.js"></script>
+    <!-- <script src="https://cdn.bootcdn.net/ajax/libs/d3/7.6.1/d3.min.js"></script> -->
     <style>
         @keyframes sca {
             from {
                 transform: scale(0.2)
             }
+
             to {
                 transform: scale(1)
             }
@@ -85,13 +86,20 @@
             font-size: 12px;
             fill: #1b63d9;
         }
+
+        /* 连接线样式 */
+        .node-link {
+            fill: none;
+            stroke: #313131;
+            stroke-width: 2;
+        }
     </style>
 </head>
 
 <body>
 
 </body>
-<!-- <script type="module" src="./index.js"></script> -->
-<script type="module" src="./animationTree.js"></script>
+<script type="module" src="./index.js"></script>
+<!-- <script type="module" src="./animationTree.js"></script> -->
 
 </html>

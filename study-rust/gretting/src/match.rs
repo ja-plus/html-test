@@ -30,12 +30,20 @@ fn main(){
   println!("{}",value_in_cents(Coin::Penny));
   println!("{}",value_in_cents(Coin::Quarter(UsState::Alaska)));
   value_in_cents(Coin::Nickel);
-  let v = Some(3);
+  let v = Some(2);
   match v {
     Some(3) => println!("three"),
-    _ => (),
+    _ => println!("match Some default"),
   }
   if let Some(3) = v {
-    println!("three");
+    println!("Some(3) = v");
+  }else {
+    println!("let Some else");
+  }
+  if let Some(n) = v {
+    println!("let Some(n) = v,v:{:?},n:{} ",v,n);
+  }else {
+    // None
+    println!("None");
   }
 }

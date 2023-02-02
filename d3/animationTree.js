@@ -33,9 +33,9 @@ $svg
   // .duration(100)
   .call(zoom);
 
-setTimeout(() => {
-  zoom.scaleTo($svg, 0.5);
-}, 3000);
+// setTimeout(() => {
+//   zoom.scaleTo($svg, 0.5);
+// }, 3000);
 
 const $linkGroup = $wrap.append('g').attr('class', 'link-group');
 const $nodeGroup = $wrap.append('g').attr('class', 'node-group');
@@ -78,7 +78,9 @@ function draw(init = false) {
 
   let $nodes = $nodeGroup
     .selectAll('.node')
-    .data(nodes, d => d.data.name)
+    .data(nodes, d => {
+      return d.data.name;
+    })
     .join(
       enter => {
         // console.log(enter, 'enter');
@@ -135,28 +137,15 @@ function draw(init = false) {
       }
     });
 
-  // 重置节点展开时，动画的初始位置
+  // 重置节点展开时，动画的初始位置 FLIP
   $nodes
     .filter(a => a.originX !== undefined && a.originY !== undefined)
     .attr('opacity', 0)
     .attr('transform', d => {
-      // console.log('d :>> ', d);
-      let x, y;
-
-      if (d.originX) {
-        x = d.originX;
-        delete d.originX;
-      } else {
-        x = d.x;
-      }
-      if (d.originY) {
-        y = d.originY;
-        delete d.originY;
-      } else {
-        y = d.y;
-      }
-
-      return `translate(${x}, ${y})`;
+      let transform = `translate(${d.originX || d.x}, ${d.originY || d.y})`;
+      delete d.originX;
+      delete d.originY;
+      return transform;
     });
   // 运行节点展开动画
   $nodes
@@ -193,7 +182,6 @@ function draw(init = false) {
           .attr('d', d => {
             let s = d.source;
             let origin = `${s.x},${s.y}`;
-
             return `M ${origin} L ${origin} L ${origin} L ${origin}`;
           })
           .remove(),
@@ -217,6 +205,7 @@ function draw(init = false) {
  * @param {Object} d 数据
  */
 function handle_node_click(ev, d) {
+  // 记录当前节点的位置，用于制作动画
   d.sourceX = d.x;
   d.sourceY = d.y;
 
@@ -224,19 +213,15 @@ function handle_node_click(ev, d) {
     if (d.children && !d._children) {
       // 收起
       d._children = d.children;
-      // d._children = d.children.slice(2);
       d.children = undefined;
-      // d.children = d.children.slice(0, 2);
-
       draw();
     } else if (d._children) {
       // 展开
       for (let a of d._children) {
-        a.originX = a.parent.x;
-        a.originY = a.parent.y;
+        a.originX = d.x; // 把每个叶子节点的开始位置设置为当前节点父节点的位置，动画从父节点开始
+        a.originY = d.y;
       }
       d.children = d._children;
-      // d.children = d.children.concat(d._children);
       delete d._children;
       draw();
     }
@@ -246,10 +231,23 @@ function handle_node_click(ev, d) {
 function handle_more_click(ev, d) {
   if (d.depth !== 0) {
     // 修改源数据
-    Data.children[2].children = Data.children[2].children.slice(0, -1); // 查看更多节点移除
-    Data.children[2].children = Data.children[2].children.concat(d.data.data); // 节点添加
-    data = D3.hierarchy(Data); // 数据源转换
+    // Data.children[2].children = Data.children[2].children.slice(0, -1); // 查看更多节点移除
+    // Data.children[2].children = Data.children[2].children.concat(d.data.data); // 节点添加
+    // data = D3.hierarchy(Data); // 数据源转换
+    d.parent.children = d.parent.children.slice(0, -1);
+    d.parent.data.children = d.parent.data.children.splice(d.parent.data.children.length - 1, 1, d.data.moreData);
+    // let moreDataList = D3.hierarchy(d.data.moreData);
+    let moreDataList = d.data.moreData.map(item => {
+      let node = D3.hierarchy(item);
+      node.parent = d.parent;
+      node.depth = d.depth;
+      node.originX = d.x;
+      node.originY = d.y;
+      return node;
+    });
+    d.parent.children.push(...moreDataList);
     draw(); // 重绘
+    console.log(data);
   }
 }
 
