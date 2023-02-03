@@ -186,28 +186,32 @@ function renderTree() {
         rootNodeDiv.append('xhtml:div').attr('class', 'root-node__name').text('建设银行及其关联方');
 
         // 其他节点
-        g.filter(node => node.depth > 0)
+        const typeNode = g
+          .filter(node => node.depth === 1)
+          .append('foreignObject')
+          .attr('width', nodeWidth)
+          .attr('height', nodeHeight)
+          .attr('transform', `translate(-${nodeWidth / 2},-${nodeHeight / 2})`)
+          .append('xhtml:div')
+          .attr('class', 'tree-node')
+          .style('background-color', d => {
+            return `rgba(${Math.round(Math.random() * 255)},${Math.round(Math.random() * 255)},${Math.round(Math.random() * 255)})`;
+          })
+          .append('xhtml:span')
+          .text(d => d.data.name);
+        const leafNode = g
+          .filter(node => node.depth > 1)
           .append('foreignObject')
           .attr('width', nodeWidth)
           .attr('height', nodeHeight)
           .attr('transform', `translate(0,-${nodeHeight / 2})`)
           .append('xhtml:div')
           .attr('class', d => {
-            if (d.depth === 1) {
-              return 'tree-node';
-            } else if (d.depth === 2) {
-              if (d.data.nodeType === 'more') return 'leaf-node more';
-              else return 'leaf-node';
-            }
-          })
-          .style('background-color', d => {
-            if (d.depth === 1) {
-              return `rgba(${Math.round(Math.random() * 255)},${Math.round(Math.random() * 255)},${Math.round(Math.random() * 255)})`;
-            }
+            if (d.data.nodeType === 'more') return 'leaf-node more';
+            else return 'leaf-node';
           })
           .append('xhtml:span')
           .text(d => d.data.name);
-
         return g;
       },
       update => update,
