@@ -1,6 +1,7 @@
 import Data from './data.js';
-import * as D3 from 'https://cdn.skypack.dev/d3@7';
-
+import * as d3 from 'https://cdn.skypack.dev/d3@7';
+/** @type {import('d3')} */
+const D3 = d3;
 const Node = {
   width: 200,
   height: 60,
@@ -113,11 +114,7 @@ function draw(init = false) {
 
         return $gs;
       },
-      update => {
-        console.log('update', update);
-        // update.selectAll('rect').attr('fill', 'red');
-        return update;
-      },
+      update => update,
       exit => {
         // 点击收起会进来
         exit
@@ -138,27 +135,25 @@ function draw(init = false) {
     });
 
   // 重置节点展开时，动画的初始位置 FLIP
-  $nodes
-    .filter(a => a.originX !== undefined && a.originY !== undefined)
-    .attr('opacity', 0)
-    .attr('transform', d => {
-      let transform = `translate(${d.originX || d.x}, ${d.originY || d.y})`;
-      delete d.originX;
-      delete d.originY;
-      return transform;
-    });
-  // 运行节点展开动画
-  $nodes
-    .transition()
-    .duration(init ? 0 : TransitionDuration)
-    .attr('opacity', 1)
-    .attr('transform', d => `translate(${d.x}, ${d.y})`);
-
-  let links = root.links();
+  // $nodes
+  //   .filter(a => a.originX !== undefined && a.originY !== undefined)
+  //   .attr('opacity', 0)
+  //   .attr('transform', d => {
+  //     let transform = `translate(${d.originX || d.x}, ${d.originY || d.y})`;
+  //     delete d.originX;
+  //     delete d.originY;
+  //     return transform;
+  //   });
+  // // 运行节点展开动画
+  // $nodes
+  //   .transition()
+  //   .duration(init ? 0 : TransitionDuration)
+  //   .attr('opacity', 1)
+  //   .attr('transform', d => `translate(${d.x}, ${d.y})`);
 
   $linkGroup
     .selectAll('.link')
-    .data(links, d => d.target.data.name)
+    .data(root.links(), d => d.target.data.name)
     .join(
       enter =>
         enter
@@ -166,8 +161,6 @@ function draw(init = false) {
           .attr('class', 'link')
           .attr('fill', 'none')
           .attr('stroke', 'gray')
-          // .transition()
-          // .duration(init ? 0 : TransitionDuration)
           .attr('d', d => {
             let s = d.source;
             let origin = `${s.sourceX || s.x},${s.sourceY || s.y}`;

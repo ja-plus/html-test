@@ -181,7 +181,7 @@
 
 <script>
 /**
- * @version 1.0.3
+ * @version 1.0.4
  * @author JA+
  * TODO:存在的问题：
  * [] column.dataIndex 作为唯一键，不能重复
@@ -193,7 +193,7 @@ let chromeVersion = 0;
 try {
   chromeVersion = +navigator.userAgent.match(/chrome\/\d+/i)[0].split('/')[1];
 } catch (e) {
-  console.err('获取浏览器版本出错！', e);
+  console.error('获取浏览器版本出错！', e);
 }
 /** 高亮背景色 */
 const _highlightColor = {
