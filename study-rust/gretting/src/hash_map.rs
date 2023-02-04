@@ -7,7 +7,12 @@ fn main() {
   let initial_scores = vec![12, 13];
   let scores: HashMap<_, _> = teams.iter().zip(initial_scores.iter()).collect();
   println!("scores:{:?}", scores);
-
+  match hm.get("hhh"){
+    Some(v) => {
+      println!("hashMap.get:{}",v);
+    }
+    _ => {}
+  }
   // 不存在key则插入
   hm.entry(String::from("hhh")).or_insert(20);
   // hm.entry(String::from("aaa")).or_default();
