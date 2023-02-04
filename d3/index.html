@@ -41,6 +41,7 @@
         }
 
         .tree-node {
+            width: 100%;
             display: inline-block;
             box-sizing: border-box;
             border: 1px solid #aaa;
@@ -64,13 +65,16 @@
         }
 
         .leaf-node {
+            display: block;
+            border: 1px dashed #aaa;
+            font-size: 14px;
+        }
+        .leaf-node .node-text {
             display: inline-block;
             background-color: rgba(230, 230, 230, 0.8);
-            font-size: 14px;
-            padding: 2px 4px;
         }
 
-        .leaf-node.more {
+        .leaf-node.more .node-text{
             color: blue;
             background-color: transparent;
             cursor: pointer;

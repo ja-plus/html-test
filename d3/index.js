@@ -1,6 +1,8 @@
 import * as d3 from 'https://cdn.skypack.dev/d3@7';
-/** @type {import('d3')} */
+/** @typedef {import('d3')} D3 */
+/** @type {D3} */
 const D3 = d3;
+
 // import * as D3 from 'd3';
 const data = {
   name: '建设银行及其关联方',
@@ -85,6 +87,14 @@ const data = {
         {
           name: '深圳市万科发展有限公司',
           lineText: '2次',
+          children: [
+            {
+              name: '3-1',
+            },
+            {
+              name: '3-2',
+            },
+          ],
         },
       ],
     },
@@ -97,21 +107,25 @@ let dataCopy = JSON.parse(JSON.stringify(data));
   if (tree.children) {
     if (tree.children.length > 5) {
       const treeLen = tree.children.length;
-      tree.children = tree.children.slice(0, 5);
-      tree.children.push({
+      const tmp = tree.children.slice(0, 5);
+      const moreData = tree.children.slice(6);
+      tmp.push({
         name: `查看更多(${treeLen - 5})`,
         nodeType: 'more',
-        moreData: tree.children.slice(6),
+        moreData,
       });
+      tree.children = tmp;
     }
     tree.children.forEach(recursion);
   }
 })(dataCopy);
 
-const width = 800;
+const width = 1000;
 const height = 600;
 const nodeWidth = 100;
 const nodeHeight = 24;
+const typeNodeWidth = 80;
+const typeNodeHeight = 24;
 const rootNodeWidth = 150;
 const rootNodeHeight = 150;
 const animationDuration = 500;
@@ -189,8 +203,8 @@ function renderTree() {
         const typeNode = g
           .filter(node => node.depth === 1)
           .append('foreignObject')
-          .attr('width', nodeWidth)
-          .attr('height', nodeHeight)
+          .attr('width', typeNodeWidth)
+          .attr('height', typeNodeHeight)
           .attr('transform', `translate(-${nodeWidth / 2},-${nodeHeight / 2})`)
           .append('xhtml:div')
           .attr('class', 'tree-node')
@@ -199,18 +213,24 @@ function renderTree() {
           })
           .append('xhtml:span')
           .text(d => d.data.name);
+
         const leafNode = g
           .filter(node => node.depth > 1)
           .append('foreignObject')
           .attr('width', nodeWidth)
           .attr('height', nodeHeight)
-          .attr('transform', `translate(0,-${nodeHeight / 2})`)
+          .attr('transform', d => {
+            return `translate(-${d.x < 0 ? nodeWidth : 0},-${nodeHeight / 2})`;
+          })
           .append('xhtml:div')
           .attr('class', d => {
-            if (d.data.nodeType === 'more') return 'leaf-node more';
-            else return 'leaf-node';
+            const classStr = ['leaf-node'];
+            if (d.data.nodeType === 'more') classStr.push('more');
+            return classStr.join(' ');
           })
-          .append('xhtml:span')
+          .style('text-align', d => d.x < 0 && 'right') // 左侧树，右对齐
+          .append('xhtml:div')
+          .attr('class', 'node-text')
           .text(d => d.data.name);
         return g;
       },
@@ -228,21 +248,34 @@ function renderTree() {
     .attr('class', 'node')
     .on('click', (e, d) => {
       if (d.data.nodeType === 'more') {
-        showMore(d.parent.data.name);
+        showMore(d);
       } else {
-        toggleNode(e, d);
+        toggleNode(d);
       }
     });
   // #endregion
 
-  // 插入文字
+  // #region 插入文字
   nodesGroup
+    .filter(node => node.data.lineText)
     .append('text')
     .attr('class', 'line-text')
-    .attr('transform', `translate(-${nodeWidth},-4)`)
+    .attr('transform', d => {
+      if (d.parent) {
+        const textStartX = (d.parent.x - d.x) / 2;
+        return `translate(${textStartX},-4)`;
+      }
+    })
+    .style('text-anchor', d => {
+      if (d.x < 0) {
+        // 左侧树的数据左对齐
+        return 'end';
+      }
+    })
     .text(d => {
       return d.data.lineText;
     });
+  // #endregion
 
   // #region 设置节点位置
   nodesGroup
@@ -297,7 +330,7 @@ function renderTree() {
 
 renderTree();
 /** 折叠节点 */
-function toggleNode(e, d) {
+function toggleNode(d) {
   d.sourceX = d.x; // 记录连接线的起始位置
   d.sourceY = d.y;
   if (d.depth !== 0) {
@@ -317,16 +350,19 @@ function toggleNode(e, d) {
     renderTree();
   }
 }
-function showMore(name) {
-  let children = [];
-  (function recursion(tree) {
-    if (tree.name === name) {
-      tree.children = children;
-      return;
-    }
-    if (tree.children) {
-      tree.children.forEach(recursion);
-    }
-  })(dataCopy);
+/** 点击查看更多 */
+function showMore(d) {
+  const { parent } = d;
+  // 去除查看更多节点
+  parent.data.children = parent.data.children.slice(0, -1);
+  parent.children = parent.children.slice(0, -1);
+  // 补充更多节点
+  const moreData = d.data.moreData.map(data => {
+    const node = D3.hierarchy(data);
+    node.depth = d.depth;
+    node.parent = d.parent;
+    return node;
+  });
+  parent.children.push(...moreData);
   renderTree();
 }
