@@ -181,8 +181,9 @@
 
 <script>
 /**
- * @version 1.0.4
+ * @version 1.0.5
  * @author JA+
+ * 不支持低版本浏览器非虚拟滚动表格的表头固定，列固定，因为会卡。
  * TODO:存在的问题：
  * [] column.dataIndex 作为唯一键，不能重复
  * [] 计算的高亮颜色，挂在数据源上对象上，若多个表格使用同一个数据源对象会有问题。需要深拷贝。(解决方案：获取组件uid)
@@ -476,6 +477,9 @@ export default {
     };
   },
   computed: {
+    isLegacyMode() {
+      return chromeVersion < 56;
+    },
     /** 高亮颜色插值方法 */
     highlightInter() {
       return interpolateRgb(_highlightColor[this.theme].from, _highlightColor[this.theme].to);
@@ -708,21 +712,7 @@ export default {
         }
       }
       if (['left', 'right'].includes(col.fixed)) {
-        if (chromeVersion > 84) {
-          /**
-           * -------------高版本浏览器----------------
-           */
-          style.position = 'sticky'; // sticky 方案在低版本浏览器不兼容。具体表现为横向滚动超过一个父容器宽度（非table宽度）会导致sticky吸附失效。浏览器bug。
-          if (col.fixed === 'left') {
-            style.left = this.fixedColumnsPositionStore[col.dataIndex] + 'px';
-          } else {
-            style.right = this.fixedColumnsPositionStore[col.dataIndex] + 'px';
-          }
-          if (tagType === 'th') {
-            style.top = '0px';
-            style.zIndex = 2; // 保证固定列高于其他单元格
-          }
-        } else {
+        if (this.isLegacyMode) {
           /**
            * ----------浏览器兼容--------------
            */
@@ -736,6 +726,20 @@ export default {
           }
           if (tagType === 'th') {
             style.top = this.virtualScroll.scrollTop + 'px';
+            style.zIndex = 2; // 保证固定列高于其他单元格
+          }
+        } else {
+          /**
+           * -------------高版本浏览器----------------
+           */
+          style.position = 'sticky'; // sticky 方案在低版本浏览器不兼容。具体表现为横向滚动超过一个父容器宽度（非table宽度）会导致sticky吸附失效。浏览器bug。
+          if (col.fixed === 'left') {
+            style.left = this.fixedColumnsPositionStore[col.dataIndex] + 'px';
+          } else {
+            style.right = this.fixedColumnsPositionStore[col.dataIndex] + 'px';
+          }
+          if (tagType === 'th') {
+            style.top = '0px';
             style.zIndex = 2; // 保证固定列高于其他单元格
           }
         }
@@ -840,6 +844,7 @@ export default {
     /** 滚动条监听 */
     onTableScroll(e) {
       if (!e?.target) return;
+      // 此处可优化，因为访问e.target.scrollXX消耗性能
       const { scrollTop, scrollLeft } = e.target;
       // 纵向滚动有变化
       if (scrollTop !== this.virtualScroll.scrollTop) this.virtualScroll.scrollTop = scrollTop;
@@ -852,11 +857,7 @@ export default {
       if (this.virtualX_on) {
         this.updateVirtualScrollX(scrollLeft);
       }
-      // const res = {
-      //   isTop: e.target.scrollTop <= 0,
-      //   isBottom: e.target.scrollHeight === e.target.scrollTop + e.target.clientHeight,
-      // };
-      this.$emit('scroll', e); // vue3 不需要暴露，因为事件在根元素上
+      this.$emit('scroll', e);
       // this.showFixedLeftShadow = e.target.scrollLeft > 0;
     },
     /** tr hover事件 */
@@ -1044,7 +1045,6 @@ export default {
   --row-height: 28px;
   --border-color: #e8eaec;
   --border-width: 1px;
-  // --border: 1px #ececf7 solid;
   --td-bg-color: #fff;
   --th-bg-color: #f8f8f9;
   --tr-active-bg-color: rgb(230, 247, 255);
