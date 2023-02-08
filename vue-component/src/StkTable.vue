@@ -43,7 +43,7 @@
             v-for="col in virtualX_on ? virtualX_columnPart : row"
             :key="col.dataIndex"
             :data-col-key="col.dataIndex"
-            draggable="true"
+            :draggable="headerDrag? 'true':'false'"
             :rowspan="col.rowSpan"
             :colspan="col.colSpan"
             :style="{
@@ -181,7 +181,7 @@
 
 <script>
 /**
- * @version 1.0.5
+ * @version 1.0.6
  * @author JA+
  * 不支持低版本浏览器非虚拟滚动表格的表头固定，列固定，因为会卡。
  * TODO:存在的问题：
@@ -418,6 +418,11 @@ export default {
       type: Boolean,
       default: false,
     },
+    /**表头是否可拖动 */
+    headerDrag: {
+      type:Boolean,
+      default: false
+    }
   },
   emits: [
     'row-click',

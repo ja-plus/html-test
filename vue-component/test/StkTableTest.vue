@@ -192,6 +192,7 @@ export default {
         },
         { key: 'noDataFull', desc: '暂无数据占满表格', value: 'boolean', defaultValue: 'false' },
         { key: 'showNoData', desc: '是否展示暂无数据', value: 'boolean', defaultValue: 'true' },
+        { key: 'headerDrag', desc: '是否可拖动表头', value: 'boolean', defaultValue: 'false' },
         { key: 'emptyCellText', desc: '空单元格的占位文字', value: 'string', defaultValue: '--' },
         { key: 'showTrHoverClass', desc: '是否增加行hover class', value: 'boolean', defaultValue: 'false' },
         { key: 'virtual', desc: '是否开启虚拟滚动', defaultValue: 'false' },
