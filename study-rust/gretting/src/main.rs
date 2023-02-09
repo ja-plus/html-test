@@ -5,6 +5,7 @@ mod string;
 mod vector;
 mod hash_map;
 mod tempCodeRunnerFile;
+mod owner_ship;
 // #[tokio::main]
 fn main() {
     // 接收命令行参数

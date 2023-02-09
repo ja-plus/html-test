@@ -1,3 +1,6 @@
+/**
+ * 所有权
+*/
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct TreeNode {
     pub val: i32,
@@ -22,18 +25,7 @@ impl Solution {
     fn new() -> Self {
         Solution {}
     }
-
-    /**
-     * 代码中的类名、方法名、参数名已经指定，请勿修改，直接返回方法规定的值即可
-     *
-     * @param t1 TreeNode类
-     * @param t2 TreeNode类
-     * @return TreeNode类
-     */
-    pub fn Mirror(
-        &self,
-        t1: Option<Box<TreeNode>>,
-    ) -> Option<Box<TreeNode>> {
+    pub fn Mirror(&self, t1: Option<Box<TreeNode>>) -> Option<Box<TreeNode>> {
         // write code here
         // self.recursion(t1, t2)
         match t1 {
@@ -50,13 +42,14 @@ impl Solution {
                 let tmp = p.right;
                 p.right = p.left;
                 p.left = tmp;
+                // self.Mirror(p.left);// p.left 被借走，不重新获得所有权的话，返回的p会报错，表示p的部分被借走
+                // self.Mirror(p.right);
                 p.left = self.Mirror(p.left);
                 p.right = self.Mirror(p.right);
-                
+
                 Some(p)
             }
             None => None,
         }
     }
-
 }
