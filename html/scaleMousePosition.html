@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="wrapper" style="height:200px;width: 400px;border:1px dashed #aaa;overflow:hidden;">
+        <img id="img" src="./img/searah.jpg" alt="" style="width:100%;height:100%;transform-origin:0 0;">
+    </div>
+</body>
+<script>
+    const wrapper = document.querySelector('#wrapper');
+    const img = document.querySelector('#img');
+    let scale = 1;
+    img.addEventListener(
+      'wheel',
+      e => {
+        console.log(e.offsetX, e.offsetY, 'img', e.target);
+        e.stopPropagation;
+      },
+      {
+        capture: true,
+      },
+    );
+    wrapper.addEventListener(
+      'wheel',
+      e => {
+        console.log(e.offsetX, e.offsetY, e, 'e', e.target);
+        if (e.deltaY < 0) {
+          scale = scale + 0.1;
+          img.style.transform = `translate(-${e.offsetX}px,-${e.offsetY}px) scale(${scale})`;
+        } else {
+          scale = scale - 0.1;
+          img.style.transform = `translate(-${e.offsetX}px,-${e.offsetY}px) scale(${scale})`;
+        }
+      },
+      {
+        capture: true,
+      },
+    );
+</script>
+
+</html>
