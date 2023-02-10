@@ -250,8 +250,10 @@ function renderTree() {
       if (d.data.nodeType === 'more') {
         showMore(d);
       } else {
+        resetCenter(d);
         toggleNode(d);
       }
+      renderTree();
     });
   // #endregion
 
@@ -266,7 +268,7 @@ function renderTree() {
         return `translate(${textStartX},-4)`;
       }
     })
-    .style('text-anchor', d => {
+    .attr('text-anchor', d => {
       if (d.x < 0) {
         // 左侧树的数据左对齐
         return 'end';
@@ -347,7 +349,16 @@ function toggleNode(d) {
       d.children = d._children;
       delete d._children;
     }
-    renderTree();
+  }
+}
+/** 重设画布中心*/
+function resetCenter(d) {
+  if (d.children && !d._children) {
+    // 收起
+    zoom.translateTo(wrap, d.parent.x, d.parent.y);
+  } else if (d._children) {
+    // 展开
+    zoom.translateTo(wrap, d.x, d.y);
   }
 }
 /** 点击查看更多 */
@@ -364,5 +375,4 @@ function showMore(d) {
     return node;
   });
   parent.children.push(...moreData);
-  renderTree();
 }

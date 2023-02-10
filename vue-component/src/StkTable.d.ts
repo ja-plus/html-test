@@ -13,6 +13,6 @@ export type StkTableColumn<T> = {
   sortField?: keyof T;
   sortType?: 'number' | 'string';
   fixed?: 'left' | null;
-  customCell?: (col: StkTableColumn<T>, item: T) => Component | VNode;
-  customHeaderCell?: (col: StkTableColumn<T>) => Component | VNode;
+  customCell?: ((col: StkTableColumn<T>, item: T) => Component | VNode) | (Component | VNode);
+  customHeaderCell?: ((col: StkTableColumn<T>) => Component | VNode) | (Component | VNode);
 };

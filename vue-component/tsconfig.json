@@ -7,6 +7,7 @@
         "allowJs": true,
         "sourceMap": true,
         "baseUrl": ".",
+        "moduleResolution": "node",
         "lib": [
             "ESNext",
             "DOM",
