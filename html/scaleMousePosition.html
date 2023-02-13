@@ -1,48 +1,76 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>在鼠标位置缩放</title>
 </head>
 
 <body>
     <div id="wrapper" style="height:200px;width: 400px;border:1px dashed #aaa;overflow:hidden;">
-        <img id="img" src="./img/searah.jpg" alt="" style="width:100%;height:100%;transform-origin:0 0;">
+        <img id="img" src="./img/searah.jpg" alt="" style="width:100%;height:100%;">
     </div>
 </body>
 <script>
     const wrapper = document.querySelector('#wrapper');
     const img = document.querySelector('#img');
-    let scale = 1;
-    img.addEventListener(
-      'wheel',
-      e => {
-        console.log(e.offsetX, e.offsetY, 'img', e.target);
-        e.stopPropagation;
-      },
-      {
-        capture: true,
-      },
-    );
-    wrapper.addEventListener(
-      'wheel',
-      e => {
-        console.log(e.offsetX, e.offsetY, e, 'e', e.target);
-        if (e.deltaY < 0) {
-          scale = scale + 0.1;
-          img.style.transform = `translate(-${e.offsetX}px,-${e.offsetY}px) scale(${scale})`;
-        } else {
-          scale = scale - 0.1;
-          img.style.transform = `translate(-${e.offsetX}px,-${e.offsetY}px) scale(${scale})`;
-        }
-      },
-      {
-        capture: true,
-      },
-    );
+    const imgWidth = 400;
+    const imgHeight = 200;
+    const mouseInfo = {
+      clientX: 0,
+      clientY: 0,
+      scale: 1,
+      /** 鼠标是否被按下*/
+      mouseDown: false,
+      /** 开始拖动的位置*/
+      startPosition: [0, 0],
+      /** 图片当前的位置*/
+      currentPosition: [0, 0],
+      /** 记录图片上一次位置*/
+      imgPosition: [0, 0],
+    };
+    // img.addEventListener('wheel', e => {
+    //   console.log(e.offsetX, e.offsetY, 'img', e.target);
+    // });
+    wrapper.addEventListener('wheel', e => {
+      if (e.deltaY < 0) {
+        mouseInfo.scale = mouseInfo.scale + 0.1;
+      } else {
+        mouseInfo.scale = mouseInfo.scale - 0.1;
+      }
+
+      if (e.target.tagName === 'IMG') {
+        // 鼠标在img上，才随鼠标位置缩放，否则为css默认缩放（中心）
+        // imgWidth /2 为 将缩放位置移动到左上角
+        mouseInfo.currentPosition[0] = mouseInfo.imgPosition[0] + (mouseInfo.clientX - mouseInfo.imgPosition[0] - imgWidth / 2) * (1 - mouseInfo.scale);
+        mouseInfo.currentPosition[1] = mouseInfo.imgPosition[1] + (mouseInfo.clientY - mouseInfo.imgPosition[1] - imgHeight / 2) * (1 - mouseInfo.scale);
+      }
+      updatePosition();
+      mouseInfo.imgPosition = [...mouseInfo.currentPosition]; // 重置位置
+    });
+    function updatePosition() {
+      img.style.transform = `translate(${mouseInfo.currentPosition[0]}px,${mouseInfo.currentPosition[1]}px) scale(${mouseInfo.scale})`;
+    }
+    wrapper.addEventListener('mousedown', e => {
+      e.preventDefault();
+      mouseInfo.mouseDown = true;
+      mouseInfo.startPosition = [e.clientX, e.clientY];
+    });
+    wrapper.addEventListener('mousemove', e => {
+      mouseInfo.clientX = e.clientX;
+      mouseInfo.clientY = e.clientY;
+      if (mouseInfo.mouseDown) {
+        const [x, y] = mouseInfo.imgPosition;
+        mouseInfo.currentPosition = [x + e.clientX - mouseInfo.startPosition[0], y + e.clientY - mouseInfo.startPosition[1]];
+        updatePosition();
+      }
+    });
+    wrapper.addEventListener('mouseup', () => {
+      mouseInfo.mouseDown = false;
+      mouseInfo.imgPosition = [...mouseInfo.currentPosition];
+    });
 </script>
 
 </html>
