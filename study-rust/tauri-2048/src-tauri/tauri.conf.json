@@ -1,18 +1,22 @@
 {
-  "$schema": "../node_modules/@tauri-apps/cli/schema.json",
   "build": {
-    "beforeBuildCommand": "",
     "beforeDevCommand": "",
-    "devPath": "../dist",
-    "distDir": "../dist"
+    "beforeBuildCommand": "",
+    "devPath": "../src",
+    "distDir": "../src",
+    "withGlobalTauri": true
   },
   "package": {
-    "productName": "tauri-app",
-    "version": "0.1.0"
+    "productName": "2048",
+    "version": "0.0.0"
   },
   "tauri": {
     "allowlist": {
-      "all": true
+      "all": false,
+      "shell": {
+        "all": false,
+        "open": true
+      }
     },
     "bundle": {
       "active": true,
@@ -23,9 +27,7 @@
       },
       "externalBin": [],
       "icon": [
-        "icons/32x32.png",
-        "icons/128x128.png",
-        "icons/128x128@2x.png",
+        "icons/512x512.png",
         "icons/icon.icns",
         "icons/icon.ico"
       ],
@@ -57,9 +59,9 @@
       {
         "fullscreen": false,
         "height": 600,
-        "resizable": true,
-        "title": "Tauri App",
-        "width": 800
+        "resizable": false,
+        "title": "2048",
+        "width": 400
       }
     ]
   }

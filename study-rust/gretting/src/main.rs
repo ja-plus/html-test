@@ -24,5 +24,7 @@ fn main() {
     // }
     // dimen2_arr_lookup::main();
     // order_arr::main();
+    let num = (2 as i64).pow(10);
+    println!("{},", num!= 1024);
 }
 

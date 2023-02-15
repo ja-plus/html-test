@@ -16,47 +16,49 @@ impl TreeNode {
     }
 }
 
-struct Solution {}
+struct Solution{
+
+}
 
 impl Solution {
     fn new() -> Self {
-        Solution {}
+        Solution{}
     }
 
     /**
-     * 代码中的类名、方法名、参数名已经指定，请勿修改，直接返回方法规定的值即可
-     *
-     * @param t1 TreeNode类
-     * @param t2 TreeNode类
-     * @return TreeNode类
-     */
-    pub fn Mirror(
-        &self,
-        t1: Option<Box<TreeNode>>,
-    ) -> Option<Box<TreeNode>> {
-        // write code here
-        // self.recursion(t1, t2)
-        match t1 {
-            Some(mut p) => {
-                // let tmp = p.right;
-                // p.right = self.Mirror(p.left);
-                // p.left = self.Mirror(tmp);
-                // Some(p)
-                // let left = self.Mirror(p.left);
-                // let right = self.Mirror(p.right);
-                // p.left = right;
-                // p.right = left;
-
-                let tmp = p.right;
-                p.right = p.left;
-                p.left = tmp;
-                p.left = self.Mirror(p.left);
-                p.right = self.Mirror(p.right);
-                
-                Some(p)
-            }
-            None => None,
+    * 代码中的类名、方法名、参数名已经指定，请勿修改，直接返回方法规定的值即可
+    *
+    * 
+        * @param root TreeNode类 
+        * @return bool布尔型
+    */
+    pub fn isCompleteTree(&self, root: Option<Box<TreeNode>>) -> bool {
+        let mut vec:Vec<i32> = Vec::new();
+        self.recursion( root,&mut vec,0);
+        println!("{:?}",&vec);
+        for i in 0..vec.len() -2 {
+        
+            if (2 as i32).pow(i as u32) != vec[i] {return false;} 
         }
+        false
     }
 
+    fn recursion(&self, node: Option<Box<TreeNode>>,vec:&mut Vec<i32>,level:usize){
+        match node {
+            Some(n) => {
+                if let Some(item) = vec.get(level){
+                    vec[level] +=1;
+                }
+                self.recursion(n.left,vec,level +1,);
+                self.recursion(n.right,vec,level+1);
+            },
+            None => {
+                if vec.get(level) == None{
+                    println!("{}level",level);
+                    vec.push(0);
+                }
+            }
+        };
+
+    }
 }
