@@ -1,10 +1,10 @@
-// import * as D3 from 'd3';
-import * as d3 from 'https://cdn.skypack.dev/d3@7';
+import * as D3 from 'd3';
+// import * as d3 from 'https://cdn.skypack.dev/d3@7';
 /** @typedef {import('d3')} D3 */
 /** @type {D3} */
-const D3 = d3;
+// const D3 = d3;
 import { treeConfig } from './config.js';
-// import './style.less';
+import './style.less';
 import { addLeafNode, addLineText, addMoreNode, addParentNode, addRootNode } from './treeNodes.js';
 import { addShowMoreNode, eachChildren, PositionStore } from './utils.js';
 
@@ -14,7 +14,7 @@ const height = 600;
 const animationDuration = 1000;
 /**
  * 事件类型
- * @typedef {'leftClick'} EventType
+ * @typedef {'leafClick'} EventType
  */
 
 export class Tree {
@@ -233,7 +233,7 @@ export class Tree {
    * @param {function} fun
    */
   addEventListener(eventType, fun) {
-    if (typeof fun !== 'function') throw new TypeError('Invalid paran fun');
+    if (typeof fun !== 'function') throw new TypeError('Invalid param fun');
     this.eventCallbacks[eventType].push(fun);
   }
   /**
@@ -242,7 +242,7 @@ export class Tree {
    * @param {function} fun
    */
   removeEventListener(eventType, fun) {
-    if (typeof fun !== 'function') throw new TypeError('Invalid paran fun');
+    if (typeof fun !== 'function') throw new TypeError('Invalid param fun');
     this.eventCallbacks[eventType] = this.eventCallbacks[eventType].filter(it => it === fun);
   }
 }

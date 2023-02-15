@@ -32,7 +32,7 @@ export function addParentNode(d3Selection) {
     .attr('height', parentNodeHeight)
     .attr('transform', `translate(-${parentNodeWidth / 2},-${parentNodeHeight / 2})`)
     .append('xhtml:div')
-    .attr('class', 'tree-node')
+    .attr('class', 'parent-node')
     .style('background-color', () => {
       return `rgba(${Math.round(Math.random() * 255)},${Math.round(Math.random() * 255)},${Math.round(Math.random() * 255)})`;
     })
