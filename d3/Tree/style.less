@@ -1,0 +1,83 @@
+@keyframes sca {
+    from {
+        transform: scale(0.2)
+    }
+
+    to {
+        transform: scale(1)
+    }
+}
+
+.tree-svg {
+    animation: sca 0.5s ease;
+    .root-node {
+        font-size: 18px;
+        .root-node__icon {
+            width: 36px;
+            height: 36px;
+            background-color: #1b63d9;
+            border-radius: 5px;
+            margin:0 auto;
+        }
+        
+        .root-node__name {
+            font-size: 18px;
+            margin-top: 10px;
+            line-height: 1.2;
+            text-align: center;
+            color: #1b63d9;
+            font-weight: bolder;
+        }
+    }
+    .parent-node {
+        width: 100%;
+        height: 100%;
+        display: inline-flex;
+        box-sizing: border-box;
+        font-weight: bolder;
+        text-align: center;
+        color: #fff;
+        cursor: pointer;
+        border-radius: 4px;
+        align-items: center;
+        justify-content: center;
+        &:hover {
+            background-color: #ddd;
+        }
+        .text {
+            line-height: 1;
+        }
+    }
+    .leaf-node {
+        display: block;
+        // border: 1px dashed #aaa;
+        color: #494966;
+        .node-text {
+            display: inline-block;
+            // background-color: rgba(230, 230, 230, 0.8);
+        }
+        
+        &.more .node-text{
+            color: blue;
+            background-color: transparent;
+            cursor: pointer;
+        }
+    }
+    .line-text {
+        font-size: 12px;
+        fill: #3978dd;
+    }
+    
+    /* 连接线样式 */
+    .node-link {
+        fill: none;
+        stroke: #d2d2e5;
+        stroke-width: 1;
+    }
+}
+
+
+
+
+
+
