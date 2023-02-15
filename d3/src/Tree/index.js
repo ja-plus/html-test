@@ -96,10 +96,12 @@ export class Tree {
           const parentNodes = g.filter(node => node.data.nodeType === 'parent');
           const moreNodes = g.filter(node => node.data.nodeType === 'more');
           const leafNodes = g.filter(node => !node.data.nodeType);
+          const lineTextNodes = g.filter(node => node.data.lineText);
           addRootNode(rootNodes);
           addParentNode(parentNodes);
           addMoreNode(moreNodes);
           addLeafNode(leafNodes);
+          addLineText(lineTextNodes);
           return g;
         },
         update => update,
@@ -122,9 +124,6 @@ export class Tree {
         this.renderTree();
       });
     // #endregion
-
-    const lineTextSelection = allNodesGroup.filter(node => node.data.lineText);
-    addLineText(lineTextSelection);
 
     // #region 设置节点位置
     allNodesGroup
