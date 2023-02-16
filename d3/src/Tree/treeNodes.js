@@ -1,7 +1,7 @@
 import { treeConfig } from './config.js';
 
-const rootNodeWidth = 150;
-const rootNodeHeight = 150;
+const rootNodeWidth = 110;
+const rootNodeHeight = 110;
 const parentNodeWidth = 70;
 const parentNodeHeight = 24;
 const lineOffset = 10; // 偏移量
@@ -18,7 +18,10 @@ export function addRootNode(d3Selection) {
     .attr('transform', `translate(-${rootNodeWidth / 2},-20)`);
   const rootNodeDiv = rootForeignObject.append('xhtml:div').attr('class', 'root-node');
   rootNodeDiv.append('xhtml:div').attr('class', 'root-node__icon');
-  rootNodeDiv.append('xhtml:div').attr('class', 'root-node__name').text('建设银行及其关联方');
+  rootNodeDiv
+    .append('xhtml:div')
+    .attr('class', 'root-node__name')
+    .text(d => d.data.name);
 }
 
 /**

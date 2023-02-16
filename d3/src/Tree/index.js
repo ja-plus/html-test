@@ -1,8 +1,5 @@
 import * as D3 from 'd3';
 // import * as d3 from 'https://cdn.skypack.dev/d3@7';
-/** @typedef {import('d3')} D3 */
-/** @type {D3} */
-// const D3 = d3;
 import { treeConfig } from './config.js';
 import './style.less';
 import { addLeafNode, addLineText, addMoreNode, addParentNode, addRootNode } from './treeNodes.js';
@@ -11,16 +8,21 @@ import { addShowMoreNode, eachChildren, PositionStore } from './utils.js';
 const width = '100%';
 const height = 600;
 
-const animationDuration = 1000;
 /**
  * 事件类型
  * @typedef {'leafClick'} EventType
  */
-
+/**
+ * d3 tree
+ */
 export class Tree {
-  #$zoom;
+  /** 是否处于高亮模式,是将调整所有节点opacity */
+  #highlightMode = false;
+  #$svg;
+  #$wrapGroup;
   #$linkGroup;
   #$nodeGroup;
+  #$zoom;
 
   #treeLayout = D3.tree()
     .nodeSize([treeConfig.nodeHeight + 10, treeConfig.nodeWidth * 2]) // 设置tree的大小
@@ -38,22 +40,17 @@ export class Tree {
   };
 
   constructor(selector) {
-    const $svg = D3.select(selector)
-      .append('svg')
-      .attr('class', 'tree-svg')
-      .attr('width', width)
-      .attr('height', height)
-      .attr('viewBox', '-800 -300 1600 600');
-    const $wrapGroup = $svg.append('g');
+    this.#$svg = D3.select(selector).append('svg').attr('width', width).attr('height', height).attr('viewBox', '-800 -300 1600 600');
+    this.#$wrapGroup = this.#$svg.append('g');
     this.#$zoom = D3.zoom()
-      .duration(animationDuration)
+      .duration(treeConfig.animationDuration)
       .scaleExtent([0.1, 10])
       .on('zoom', ev => {
-        $wrapGroup.attr('transform', ev.transform);
+        this.#$wrapGroup.attr('transform', ev.transform);
       });
-    $svg.call(this.#$zoom);
-    this.#$linkGroup = $wrapGroup.append('g').attr('class', 'link-group');
-    this.#$nodeGroup = $wrapGroup.append('g').attr('class', 'node-group');
+    this.#$svg.call(this.#$zoom);
+    this.#$linkGroup = this.#$wrapGroup.append('g').attr('class', 'link-group');
+    this.#$nodeGroup = this.#$wrapGroup.append('g').attr('class', 'node-group');
   }
 
   setTreeData(data) {
@@ -63,7 +60,14 @@ export class Tree {
     this.#hierarchyData = D3.hierarchy(this.#dataCopy);
     this.renderTree();
   }
+
   renderTree() {
+    this.#$svg.attr('class', () => {
+      let classList = ['tree-svg'];
+      if (this.#highlightMode) classList.push('highlight-mode');
+      return classList.join(' ');
+    });
+
     const nodesData = this.#treeLayout(this.#hierarchyData);
     const nodes = nodesData.descendants();
     nodes.forEach(a => ([a.x, a.y] = [a.y, a.x])); // 旋转90度
@@ -109,7 +113,7 @@ export class Tree {
           // 节点移除，收起动画
           exit
             .transition()
-            .duration(animationDuration)
+            .duration(treeConfig.animationDuration)
             .attr('opacity', 0)
             .attr('transform', d => {
               const position = parentPositionStore.getPosition(d, d.moveToParent).join(',');
@@ -118,10 +122,13 @@ export class Tree {
             .remove();
         },
       )
-      .attr('class', 'node')
+      .attr('class', d => {
+        const classList = ['node'];
+        if ((this.#highlightMode && d.depth < 2) || d.highlight) classList.push('highlight');
+        return classList.join(' ');
+      })
       .on('click', (e, d) => {
         this.#handleNodeClick(d);
-        this.renderTree();
       });
     // #endregion
 
@@ -137,7 +144,7 @@ export class Tree {
     // 节点展开动画
     allNodesGroup
       .transition()
-      .duration(animationDuration)
+      .duration(treeConfig.animationDuration)
       .attr('opacity', 1)
       .attr('transform', d => `translate(${d.x},${d.y})`);
     // #endregion
@@ -158,7 +165,7 @@ export class Tree {
         exit => {
           exit
             .transition()
-            .duration(animationDuration)
+            .duration(treeConfig.animationDuration)
             .attr('d', d => {
               let parentPosition = parentPositionStore.getPosition(d.target, d.target.moveToParent, 'source').join(',');
               return `M ${parentPosition} L ${parentPosition} L ${parentPosition} L ${parentPosition}`;
@@ -166,9 +173,13 @@ export class Tree {
             .remove();
         },
       )
-      .attr('class', 'node-link') // 必须加，用于selectAll
+      .attr('class', d => {
+        const classList = ['node-link'];
+        if ((this.#highlightMode && d.target.depth < 2) || d.target.highlight) classList.push('highlight');
+        return classList.join(' ');
+      }) // 必须加，用于selectAll
       .transition()
-      .duration(animationDuration)
+      .duration(treeConfig.animationDuration)
       .attr('d', d => {
         let half = (d.target.x - d.source.x) / 2;
         return `M${d.source.x},${d.source.y} L${d.source.x + half},${d.source.y} L${d.source.x + half},${d.target.y} L${d.target.x},${d.target.y}`;
@@ -179,13 +190,14 @@ export class Tree {
   #handleNodeClick(d) {
     if (d.data.nodeType === 'more') {
       this.#showMore(d);
+      this.renderTree();
     } else if (d.data.nodeType === 'parent') {
-      // resetCenter(d);
       this.#toggleNode(d);
+      this.renderTree();
     } else {
       const leafCbs = this.eventCallbacks.leafClick;
       leafCbs.forEach(cb => {
-        cb(d.data);
+        cb(d.data, d);
       });
     }
   }
@@ -214,6 +226,7 @@ export class Tree {
         });
         d._children = d.children;
         delete d.children;
+        this.translateTo(d.parent.x, d.parent.y); // 重设中心
       } else if (d._children) {
         // 展开
         d.lineStartPosition = [d.x, d.y];
@@ -223,6 +236,7 @@ export class Tree {
           child.lineStartPosition = [d.x, d.y];
         });
         delete d._children;
+        this.translateTo(d.x, d.y); // 重设中心
       }
     }
   }
@@ -243,5 +257,57 @@ export class Tree {
   removeEventListener(eventType, fun) {
     if (typeof fun !== 'function') throw new TypeError('Invalid param fun');
     this.eventCallbacks[eventType] = this.eventCallbacks[eventType].filter(it => it === fun);
+  }
+  /**
+   *
+   * @param {string} nodeName
+   */
+  highlightNode(nodeName) {
+    (function recursion(node) {
+      // TODO:
+      if (node.data.name === nodeName) {
+        return true;
+      }
+      let isHighlight = false;
+      if (node.children) {
+        for (const childNode of node.children) {
+          let result = recursion(childNode);
+          if (result) {
+            childNode.highlight = true;
+          } else if (childNode.highlight) {
+            delete childNode.highlight;
+          }
+          isHighlight = isHighlight || result;
+        }
+      }
+      return isHighlight;
+    })(this.#hierarchyData);
+    this.#highlightMode = true;
+    this.renderTree();
+  }
+  resetHighlight() {
+    this.#highlightMode = false;
+    this.renderTree();
+  }
+  /**
+   * @param {number} num 缩放倍数
+   */
+  scale(num) {
+    this.#$zoom.scaleBy(this.#$svg.transition().duration(treeConfig.animationDurationFast), num);
+  }
+  /**
+   * @param {number} num 缩放倍数
+   */
+  scaleTo(num) {
+    this.#$zoom.scaleTo(this.#$svg.transition().duration(treeConfig.animationDurationFast), num);
+  }
+
+  translateTo(x, y) {
+    this.#$zoom.translateTo(this.#$svg.transition().duration(treeConfig.animationDurationFast), x, y);
+  }
+  reset() {
+    this.scaleTo(1);
+    this.translateTo(0, 0);
+    this.resetHighlight();
   }
 }
