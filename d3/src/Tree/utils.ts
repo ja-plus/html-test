@@ -1,24 +1,50 @@
+import * as D3 from 'd3';
+import { HierarchyNode, HierarchyPointNode } from 'd3';
 import { Key, TreeData } from './types';
 
 /**
  * 增加查看更多按钮
- * @param {TreeData} tree
+ * @param {HierarchyNode<TreeData>} tree
  */
-export function addShowMoreNode(tree: TreeData, size = 5) {
+export function addShowMoreNode(tree: HierarchyNode<TreeData>, size = 5) {
   if (tree.children) {
     if (tree.children.length > size) {
       const treeLen = tree.children.length;
       const tmp = tree.children.slice(0, size);
       const moreData = tree.children.slice(size + 1);
-      tmp.push({
+      const moreNode = D3.hierarchy<TreeData>({
         name: `查看更多(${treeLen - size})`,
         nodeType: 'more',
-        moreData,
       });
+      // (moreNode as any).moreData = moreData;
+      // tmp.push(moreNode); // TODO:
       tree.children = tmp;
     }
     tree.children.forEach(it => addShowMoreNode(it, size));
   }
+}
+/**将树分成左右两边，横坐标置反 */
+export function separateTree(nodes: HierarchyPointNode<TreeData>) {
+  const leftTree: HierarchyPointNode<TreeData>[] = [];
+  const rightTree: HierarchyPointNode<TreeData>[] = [];
+  nodes.children?.forEach(child => {
+    if (child.data.align === 'left') leftTree.push(child);
+    else rightTree.push(child);
+  });
+  // 左右树分开，并垂直居中
+  const leftMiddleOffset = leftTree.length > 1 ? (leftTree[0].y + leftTree.at(-1)!.y) / 2 : leftTree[0]?.y || 0;
+  leftTree.forEach(a => {
+    a.descendants().forEach(b => {
+      b.x = -b.x;
+      b.y -= leftMiddleOffset;
+    });
+  });
+  const rightMiddleOffset = rightTree.length > 1 ? (rightTree[0].y + rightTree.at(-1)!.y) / 2 : rightTree[0]?.y || 0;
+  rightTree.forEach(a => {
+    a.descendants().forEach(b => {
+      b.y -= rightMiddleOffset; // 垂直居中
+    });
+  });
 }
 
 /**

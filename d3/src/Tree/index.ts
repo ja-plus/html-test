@@ -1,11 +1,11 @@
 import * as D3 from 'd3';
-import { HierarchyNode } from 'd3';
+import { HierarchyNode, HierarchyPointNode } from 'd3';
 // import * as d3 from 'https://cdn.skypack.dev/d3@7';
 import { treeConfig } from './config';
 import './style.less';
 import { addLeafNode, addLineText, addMoreNode, addParentNode, addRootNode } from './treeNodes';
 import { EventCb, EventType, Key, TreeData } from './types';
-import { addShowMoreNode, eachChildren, keyGen, PositionStore } from './utils';
+import { addShowMoreNode, eachChildren, keyGen, PositionStore, separateTree } from './utils';
 
 const width = '100%';
 const height = 600;
@@ -31,6 +31,7 @@ export class Tree {
 
   #dataCopy: any;
   #hierarchyData: HierarchyNode<TreeData> = D3.hierarchy({} as TreeData);
+  #nodes!: HierarchyPointNode<TreeData>;
 
   eventCallbacks: { [k in EventType]: EventCb[] } = {
     leafClick: [],
@@ -68,51 +69,31 @@ export class Tree {
   setTreeData(data: TreeData) {
     if (!data) throw new TypeError('Invalid param data');
     this.#dataCopy = window.structuredClone(data);
-    this.#setHierarchyData();
+    this.#initHierarchyData();
     this.renderTree();
   }
-  #setHierarchyData() {
+  #initHierarchyData() {
     const dataClone = window.structuredClone(this.#dataCopy);
-    addShowMoreNode(dataClone);
     this.#hierarchyData = D3.hierarchy<TreeData>(dataClone);
+    addShowMoreNode(this.#hierarchyData);
   }
 
   renderTree() {
+    this.#nodes = this.#treeLayout(this.#hierarchyData);
+    this.#nodes.each(a => ([a.x, a.y] = [a.y, a.x])); // 旋转90度
+    separateTree(this.#nodes); // left tree | right tree
+
     this.#$svg.attr('class', () => {
       const classList = ['tree-svg'];
       if (this.#highlightMode) classList.push('highlight-mode');
       return classList.join(' ');
     });
 
-    const nodesData = this.#treeLayout(this.#hierarchyData);
-    const nodes = nodesData.descendants(); // 返回后代节点数组（展平）
-    nodes.forEach(a => ([a.x, a.y] = [a.y, a.x])); // 旋转90度
-    const leftTree: typeof nodesData[] = [];
-    const rightTree: typeof nodesData[] = [];
-    nodesData.children?.forEach(child => {
-      if (child.data.align === 'left') leftTree.push(child);
-      else rightTree.push(child);
-    });
-    // 左右树分开，并垂直居中
-    const leftMiddleOffset = leftTree.length > 1 ? (leftTree[0].y + leftTree.at(-1)!.y) / 2 : leftTree[0]?.y || 0;
-    leftTree.forEach(a => {
-      a.descendants().forEach(b => {
-        b.x = -b.x;
-        b.y -= leftMiddleOffset;
-      });
-    });
-    const rightMiddleOffset = rightTree.length > 1 ? (rightTree[0].y + rightTree.at(-1)!.y) / 2 : rightTree[0]?.y || 0;
-    rightTree.forEach(a => {
-      a.descendants().forEach(b => {
-        b.y -= rightMiddleOffset; // 垂直居中
-      });
-    });
-
     const parentPositionStore = new PositionStore(this.key);
     // #region 绘制节点
     const allNodesGroup = this.#$nodeGroup
       .selectAll('.node')
-      .data(nodes, (d: any) => keyGen(d.data, this.key))
+      .data(this.#nodes.descendants(), (d: any) => keyGen(d.data, this.key))
       .join(
         enter => {
           const g = enter.append('g');
@@ -170,7 +151,7 @@ export class Tree {
     // #region 绘制连接线
     this.#$linkGroup
       .selectAll('.node-link')
-      .data(nodesData.links(), (d: any) => keyGen(d.target.data, this.key)) // nodesData.links()，得到连接线数据对象
+      .data(this.#nodes.links(), (d: any) => keyGen(d.target.data, this.key)) // nodesData.links()，得到连接线数据对象
       .join(
         enter => {
           return enter.append('path').attr('d', (d: any) => {
@@ -318,7 +299,7 @@ export class Tree {
   reset() {
     this.#$zoom.transform(this.#$svg.transition().duration(treeConfig.animationDurationFast) as any, D3.zoomIdentity.translate(0, 0).scale(1));
     this.resetHighlight();
-    // this.#setHierarchyData();
+    this.#initHierarchyData();
     this.renderTree();
   }
 }
