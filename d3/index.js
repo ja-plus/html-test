@@ -41,6 +41,7 @@ const data = {
       name: '并购信息',
       nodeType: 'parent',
       lineText: '卖方8次',
+      align: 'left',
       children: [
         { name: '配股', nodeType: 'parent', lineText: '2次', children: [{ name: '3-1' }, { name: '3-2' }] },
         { name: 'PEVC', nodeType: 'parent', lineText: '12次', children: [{ name: '3-3' }, { name: '3-4' }] },

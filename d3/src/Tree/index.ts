@@ -68,9 +68,13 @@ export class Tree {
   setTreeData(data: TreeData) {
     if (!data) throw new TypeError('Invalid param data');
     this.#dataCopy = window.structuredClone(data);
-    addShowMoreNode(this.#dataCopy);
-    this.#hierarchyData = D3.hierarchy<TreeData>(this.#dataCopy);
+    this.#setHierarchyData();
     this.renderTree();
+  }
+  #setHierarchyData() {
+    const dataClone = window.structuredClone(this.#dataCopy);
+    addShowMoreNode(dataClone);
+    this.#hierarchyData = D3.hierarchy<TreeData>(dataClone);
   }
 
   renderTree() {
@@ -90,25 +94,17 @@ export class Tree {
       else rightTree.push(child);
     });
     // 左右树分开，并垂直居中
-    const leftMiddleOffset = leftTree.length > 1 ? (leftTree[0].y + leftTree.at(-1)!.y) / 2 : 0;
+    const leftMiddleOffset = leftTree.length > 1 ? (leftTree[0].y + leftTree.at(-1)!.y) / 2 : leftTree[0]?.y || 0;
     leftTree.forEach(a => {
       a.descendants().forEach(b => {
         b.x = -b.x;
-        if (leftTree.length < 2) {
-          b.y = 0;
-        } else {
-          b.y -= leftMiddleOffset;
-        }
+        b.y -= leftMiddleOffset;
       });
     });
-    const rightMiddleOffset = rightTree.length > 1 ? (rightTree[0].y + rightTree.at(-1)!.y) / 2 : 0;
+    const rightMiddleOffset = rightTree.length > 1 ? (rightTree[0].y + rightTree.at(-1)!.y) / 2 : rightTree[0]?.y || 0;
     rightTree.forEach(a => {
       a.descendants().forEach(b => {
-        if (rightTree.length < 2) {
-          b.y = 0;
-        } else {
-          b.y -= rightMiddleOffset; // 垂直居中
-        }
+        b.y -= rightMiddleOffset; // 垂直居中
       });
     });
 
@@ -320,11 +316,9 @@ export class Tree {
     this.#$zoom.translateTo(this.#$svg.transition().duration(treeConfig.animationDurationFast) as any, x, y);
   }
   reset() {
-    this.scaleTo(1);
-    this.translateTo(0, 0);
+    this.#$zoom.transform(this.#$svg.transition().duration(treeConfig.animationDurationFast) as any, D3.zoomIdentity.translate(0, 0).scale(1));
     this.resetHighlight();
-    // TODO: 重新计算查看更多
-    // TODO: 重新展开节点
+    // this.#setHierarchyData();
     this.renderTree();
   }
 }

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <polygon id="路径" stroke="#FFFFFF" stroke-width="1.66666667" fill="#FFFFFF" fill-rule="nonzero" stroke-linejoin="round" points="18.3333333 18.3333333 18.3333333 8.33333333 10 1.66666667 1.66666667 8.33333333 1.66666667 18.3333333 6.66666667 18.3333333 6.66666667 10.8333333 13.3333333 10.8333333 13.3333333 18.3333333"></polygon>
+    <line x1="10" y1="18.3333333" x2="10" y2="14.1666667" id="路径" stroke="#FFFFFF" stroke-width="1.66666667" stroke-linecap="round" stroke-linejoin="round"></line>
+</svg>

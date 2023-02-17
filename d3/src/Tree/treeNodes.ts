@@ -1,8 +1,8 @@
 import { treeConfig } from './config';
 import { Tree } from './index';
 
-const rootNodeWidth = 110;
-const rootNodeHeight = 110;
+const rootNodeWidth = 100;
+const rootNodeHeight = 100;
 const parentNodeWidth = 70;
 const parentNodeHeight = 24;
 const lineOffset = 10; // 偏移量
