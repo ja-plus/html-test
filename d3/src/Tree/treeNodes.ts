@@ -1,4 +1,5 @@
-import { treeConfig } from './config.js';
+import { treeConfig } from './config';
+import { Selection } from 'd3';
 
 const rootNodeWidth = 110;
 const rootNodeHeight = 110;
@@ -10,7 +11,7 @@ const lineOffset = 10; // 偏移量
  * 添加根节点
  * @param {import('d3').Selection} d3Selection
  */
-export function addRootNode(d3Selection) {
+export function addRootNode(d3Selection: any) {
   const rootForeignObject = d3Selection
     .append('foreignObject')
     .attr('width', rootNodeHeight)
@@ -21,14 +22,14 @@ export function addRootNode(d3Selection) {
   rootNodeDiv
     .append('xhtml:div')
     .attr('class', 'root-node__name')
-    .text(d => d.data.name);
+    .text((d: any) => d.data.name);
 }
 
 /**
  * 添加根节点
  * @param {import('d3').Selection} d3Selection
  */
-export function addParentNode(d3Selection) {
+export function addParentNode(d3Selection: any) {
   d3Selection
     .append('foreignObject')
     .attr('width', parentNodeWidth)
@@ -40,71 +41,71 @@ export function addParentNode(d3Selection) {
       return `rgba(${Math.round(Math.random() * 255)},${Math.round(Math.random() * 255)},${Math.round(Math.random() * 255)})`;
     })
     .append('xhtml:span')
-    .text(d => d.data.name);
+    .text((d: any) => d.data.name);
 }
 
 /**
  * 添加叶子节点
  * @param {import('d3').Selection} d3Selection
  */
-export function addLeafNode(d3Selection) {
+export function addLeafNode(d3Selection: any) {
   d3Selection
     .append('foreignObject')
     .attr('width', treeConfig.nodeWidth)
     .attr('height', treeConfig.nodeHeight)
-    .attr('transform', d => {
+    .attr('transform', (d: any) => {
       return `translate(-${d.x < 0 ? treeConfig.nodeWidth : 0},-${treeConfig.nodeHeight / 2})`;
     })
     .append('xhtml:div')
     .attr('class', 'leaf-node')
-    .style('text-align', d => d.x < 0 && 'right') // 左侧树，右对齐
+    .style('text-align', (d: any) => d.x < 0 && 'right') // 左侧树，右对齐
     .append('xhtml:div')
     .attr('class', 'node-text')
-    .text(d => d.data.name);
+    .text((d: any) => d.data.name);
 }
 
 /**
  * 添加更多节点
  * @param {import('d3').Selection} d3Selection
  */
-export function addMoreNode(d3Selection) {
+export function addMoreNode(d3Selection: any) {
   d3Selection
     .append('foreignObject')
     .attr('width', treeConfig.nodeWidth)
     .attr('height', treeConfig.nodeHeight)
-    .attr('transform', d => {
+    .attr('transform', (d: any) => {
       return `translate(-${d.x < 0 ? treeConfig.nodeWidth : 0},-${treeConfig.nodeHeight / 2})`;
     })
     .append('xhtml:div')
     .attr('class', 'leaf-node more')
-    .style('text-align', d => d.x < 0 && 'right') // 左侧树，右对齐
+    .style('text-align', (d: any) => d.x < 0 && 'right') // 左侧树，右对齐
     .append('xhtml:div')
     .attr('class', 'node-text')
-    .text(d => d.data.name);
+    .text((d: any) => d.data.name);
 }
 
 /**
  * 添加根节点
  * @param {import('d3').Selection} d3Selection
  */
-export function addLineText(d3Selection) {
+export function addLineText(d3Selection: any) {
   d3Selection
     .append('text')
     .attr('class', 'line-text')
-    .attr('transform', d => {
+    .attr('transform', (d: any) => {
       let offset = lineOffset;
       if (!d.data.nodeType) offset *= 3;
       if (d.x < 0) offset = -offset;
       const textStartX = (d.parent.x - d.x) / 2 + offset;
       return `translate(${textStartX},-4)`;
     })
-    .attr('text-anchor', d => {
+    .attr('text-anchor', (d: any) => {
       if (d.x < 0) {
         // 左侧树的数据左对齐
         return 'end';
       }
     })
-    .text(d => {
+    .text((d: any) => {
       return d.data.lineText;
     });
 }

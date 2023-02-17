@@ -1,17 +1,15 @@
 import * as D3 from 'd3';
+import { HierarchyNode } from 'd3';
 // import * as d3 from 'https://cdn.skypack.dev/d3@7';
-import { treeConfig } from './config.js';
+import { treeConfig } from './config';
 import './style.less';
-import { addLeafNode, addLineText, addMoreNode, addParentNode, addRootNode } from './treeNodes.js';
-import { addShowMoreNode, eachChildren, PositionStore } from './utils.js';
+import { addLeafNode, addLineText, addMoreNode, addParentNode, addRootNode } from './treeNodes';
+import { EventCb, EventType, Key, TreeData } from './types';
+import { addShowMoreNode, eachChildren, keyGen, PositionStore } from './utils';
 
 const width = '100%';
 const height = 600;
 
-/**
- * 事件类型
- * @typedef {'leafClick'} EventType
- */
 /**
  * d3 tree
  */
@@ -24,22 +22,34 @@ export class Tree {
   #$nodeGroup;
   #$zoom;
 
-  #treeLayout = D3.tree()
+  #treeLayout = D3.tree<TreeData>()
     .nodeSize([treeConfig.nodeHeight + 10, treeConfig.nodeWidth * 2]) // 设置tree的大小
     .separation((a, b) => {
       // 根据是否为同一父节点设置节点距离比例
       return a.parent === b.parent ? 1 : 2;
     });
 
-  #dataCopy;
-  #hierarchyData;
+  #dataCopy: any;
+  #hierarchyData: HierarchyNode<TreeData> = D3.hierarchy({} as TreeData);
 
-  /** @type {{[k in EventType]:function[]}} */
-  eventCallbacks = {
+  eventCallbacks: { [k in EventType]: EventCb[] } = {
     leafClick: [],
   };
+  #option = {
+    key: 'id',
+  };
+  get key() {
+    return this.#option.key;
+  }
+  /**
+   *
+   * @param {string} selector 选择器
+   * @param {object} option
+   * @param {string|function} option.key 唯一值的键
+   */
+  constructor(selector: string, option: { key: Key }) {
+    Object.assign(this.#option, option || {});
 
-  constructor(selector) {
     this.#$svg = D3.select(selector).append('svg').attr('width', width).attr('height', height).attr('viewBox', '-800 -300 1600 600');
     this.#$wrapGroup = this.#$svg.append('g');
     this.#$zoom = D3.zoom()
@@ -48,51 +58,63 @@ export class Tree {
       .on('zoom', ev => {
         this.#$wrapGroup.attr('transform', ev.transform);
       });
-    this.#$svg.call(this.#$zoom);
+    this.#$svg.call(this.#$zoom as any);
     this.#$linkGroup = this.#$wrapGroup.append('g').attr('class', 'link-group');
     this.#$nodeGroup = this.#$wrapGroup.append('g').attr('class', 'node-group');
   }
 
-  setTreeData(data) {
-    if (!data) throw new TypeError('invalid param data');
-    this.#dataCopy = JSON.parse(JSON.stringify(data));
+  setTreeData(data: TreeData) {
+    if (!data) throw new TypeError('Invalid param data');
+    this.#dataCopy = window.structuredClone(data);
     addShowMoreNode(this.#dataCopy);
-    this.#hierarchyData = D3.hierarchy(this.#dataCopy);
+    this.#hierarchyData = D3.hierarchy<TreeData>(this.#dataCopy);
     this.renderTree();
   }
 
   renderTree() {
     this.#$svg.attr('class', () => {
-      let classList = ['tree-svg'];
+      const classList = ['tree-svg'];
       if (this.#highlightMode) classList.push('highlight-mode');
       return classList.join(' ');
     });
 
     const nodesData = this.#treeLayout(this.#hierarchyData);
-    const nodes = nodesData.descendants();
+    const nodes = nodesData.descendants(); // 返回后代节点数组（展平）
     nodes.forEach(a => ([a.x, a.y] = [a.y, a.x])); // 旋转90度
-    const left = nodesData.children.slice(0, nodesData.children.length / 2);
-    const right = nodesData.children.slice(nodesData.children.length / 2);
+    const leftTree: typeof nodesData[] = [];
+    const rightTree: typeof nodesData[] = [];
+    nodesData.children?.forEach(child => {
+      if (child.data.align === 'left') leftTree.push(child);
+      else rightTree.push(child);
+    });
     // 左右树分开，并垂直居中
-    const leftMiddleOffset = (left[0].y + left[1].y) / 2;
-    left.forEach(a => {
+    const leftMiddleOffset = leftTree.length > 1 ? (leftTree[0].y + leftTree.at(-1)!.y) / 2 : 0;
+    leftTree.forEach(a => {
       a.descendants().forEach(b => {
         b.x = -b.x;
-        b.y -= leftMiddleOffset;
+        if (leftTree.length < 2) {
+          b.y = 0;
+        } else {
+          b.y -= leftMiddleOffset;
+        }
       });
     });
-    const rightMiddleOffset = (right[0].y + right[1].y) / 2;
-    right.forEach(a => {
+    const rightMiddleOffset = rightTree.length > 1 ? (rightTree[0].y + rightTree.at(-1)!.y) / 2 : 0;
+    rightTree.forEach(a => {
       a.descendants().forEach(b => {
-        b.y -= rightMiddleOffset;
+        if (rightTree.length < 2) {
+          b.y = 0;
+        } else {
+          b.y -= rightMiddleOffset; // 垂直居中
+        }
       });
     });
 
-    const parentPositionStore = new PositionStore();
+    const parentPositionStore = new PositionStore(this.key);
     // #region 绘制节点
     const allNodesGroup = this.#$nodeGroup
       .selectAll('.node')
-      .data(nodes, d => d.data.name)
+      .data(nodes, (d: any) => keyGen(d.data, this.key))
       .join(
         enter => {
           const g = enter.append('g');
@@ -100,7 +122,7 @@ export class Tree {
           const parentNodes = g.filter(node => node.data.nodeType === 'parent');
           const moreNodes = g.filter(node => node.data.nodeType === 'more');
           const leafNodes = g.filter(node => !node.data.nodeType);
-          const lineTextNodes = g.filter(node => node.data.lineText);
+          const lineTextNodes = g.filter(node => Boolean(node.data.lineText));
           addRootNode(rootNodes);
           addParentNode(parentNodes);
           addMoreNode(moreNodes);
@@ -115,15 +137,16 @@ export class Tree {
             .transition()
             .duration(treeConfig.animationDuration)
             .attr('opacity', 0)
-            .attr('transform', d => {
+            .attr('transform', (d: any) => {
               const position = parentPositionStore.getPosition(d, d.moveToParent).join(',');
               return `translate(${position})`;
             })
             .remove();
         },
       )
-      .attr('class', d => {
+      .attr('class', (d: any) => {
         const classList = ['node'];
+        // 一级节点一直高亮
         if ((this.#highlightMode && d.depth < 2) || d.highlight) classList.push('highlight');
         return classList.join(' ');
       })
@@ -134,10 +157,10 @@ export class Tree {
 
     // #region 设置节点位置
     allNodesGroup
-      .filter(a => a.nodeStartPosition)
+      .filter((d: any) => d.nodeStartPosition)
       .attr('opacity', 0.1)
-      .attr('transform', d => {
-        let transform = `translate(${d.nodeStartPosition[0]}, ${d.nodeStartPosition[1]})`;
+      .attr('transform', (d: any) => {
+        const transform = `translate(${d.nodeStartPosition[0]}, ${d.nodeStartPosition[1]})`;
         delete d.nodeStartPosition;
         return transform;
       });
@@ -152,10 +175,10 @@ export class Tree {
     // #region 绘制连接线
     this.#$linkGroup
       .selectAll('.node-link')
-      .data(nodesData.links(), d => d.target.data.name) // nodesData.links()，得到连接线数据对象
+      .data(nodesData.links(), (d: any) => keyGen(d.target.data, this.key)) // nodesData.links()，得到连接线数据对象
       .join(
         enter => {
-          return enter.append('path').attr('d', d => {
+          return enter.append('path').attr('d', (d: any) => {
             const lineStartPosition = d.source.lineStartPosition;
             const origin = lineStartPosition ? `${lineStartPosition[0]},${lineStartPosition[1]}` : `${d.source.x},${d.source.y}`;
             return `M ${origin} L ${origin} L ${origin} L ${origin}`;
@@ -166,14 +189,14 @@ export class Tree {
           exit
             .transition()
             .duration(treeConfig.animationDuration)
-            .attr('d', d => {
-              let parentPosition = parentPositionStore.getPosition(d.target, d.target.moveToParent, 'source').join(',');
+            .attr('d', (d: any) => {
+              const parentPosition = parentPositionStore.getPosition(d.target, d.target.moveToParent, 'source').join(',');
               return `M ${parentPosition} L ${parentPosition} L ${parentPosition} L ${parentPosition}`;
             })
             .remove();
         },
       )
-      .attr('class', d => {
+      .attr('class', (d: any) => {
         const classList = ['node-link'];
         if ((this.#highlightMode && d.target.depth < 2) || d.target.highlight) classList.push('highlight');
         return classList.join(' ');
@@ -181,13 +204,13 @@ export class Tree {
       .transition()
       .duration(treeConfig.animationDuration)
       .attr('d', d => {
-        let half = (d.target.x - d.source.x) / 2;
+        const half = (d.target.x - d.source.x) / 2;
         return `M${d.source.x},${d.source.y} L${d.source.x + half},${d.source.y} L${d.source.x + half},${d.target.y} L${d.target.x},${d.target.y}`;
       });
     // #endregion
   }
 
-  #handleNodeClick(d) {
+  #handleNodeClick(d: any) {
     if (d.data.nodeType === 'more') {
       this.#showMore(d);
       this.renderTree();
@@ -202,14 +225,14 @@ export class Tree {
     }
   }
   /** 点击查看更多 */
-  #showMore(d) {
+  #showMore(d: any) {
     const { parent } = d;
     // 去除查看更多节点
     parent.data.children = parent.data.children.slice(0, -1);
     parent.children = parent.children.slice(0, -1);
     // 补充更多节点
-    const moreData = d.data.moreData.map(data => {
-      const node = D3.hierarchy(data);
+    const moreData = d.data.moreData.map((data: any) => {
+      const node: any = D3.hierarchy(data);
       node.depth = d.depth;
       node.parent = d.parent;
       return node;
@@ -217,12 +240,12 @@ export class Tree {
     parent.children.push(...moreData);
   }
   /** 折叠节点 */
-  #toggleNode(d) {
+  #toggleNode(d: any) {
     if (d.depth !== 0) {
       if (d.children && !d._children) {
         // 需要收起
-        eachChildren(d.children, child => {
-          child.moveToParent = d.data.name;
+        eachChildren(d.children, (child: any) => {
+          child.moveToParent = keyGen(d.data, this.key);
         });
         d._children = d.children;
         delete d.children;
@@ -231,7 +254,7 @@ export class Tree {
         // 展开
         d.lineStartPosition = [d.x, d.y];
         d.children = d._children;
-        eachChildren(d.children, child => {
+        eachChildren(d.children, (child: any) => {
           child.nodeStartPosition = [d.x, d.y];
           child.lineStartPosition = [d.x, d.y];
         });
@@ -245,7 +268,7 @@ export class Tree {
    * @param {EventType} eventType
    * @param {function} fun
    */
-  addEventListener(eventType, fun) {
+  addEventListener(eventType: EventType, fun: EventCb) {
     if (typeof fun !== 'function') throw new TypeError('Invalid param fun');
     this.eventCallbacks[eventType].push(fun);
   }
@@ -254,60 +277,69 @@ export class Tree {
    * @param {EventType} eventType
    * @param {function} fun
    */
-  removeEventListener(eventType, fun) {
+  removeEventListener(eventType: EventType, fun: EventCb) {
     if (typeof fun !== 'function') throw new TypeError('Invalid param fun');
     this.eventCallbacks[eventType] = this.eventCallbacks[eventType].filter(it => it === fun);
   }
   /**
-   *
-   * @param {string} nodeName
+   * 高亮单元格
+   * @param {string} id
    */
-  highlightNode(nodeName) {
-    (function recursion(node) {
-      // TODO:
-      if (node.data.name === nodeName) {
-        return true;
-      }
+  highlightNode(id: string) {
+    const recursion = (node: HierarchyNode<TreeData>): boolean => {
+      if (keyGen(node.data, this.key) === id) return true;
       let isHighlight = false;
       if (node.children) {
         for (const childNode of node.children) {
-          let result = recursion(childNode);
+          const result = recursion(childNode);
           if (result) {
-            childNode.highlight = true;
-          } else if (childNode.highlight) {
-            delete childNode.highlight;
+            (childNode as any).highlight = true;
+          } else if ((childNode as any).highlight) {
+            delete (childNode as any).highlight;
           }
           isHighlight = isHighlight || result;
         }
       }
       return isHighlight;
-    })(this.#hierarchyData);
+    };
+    recursion(this.#hierarchyData);
     this.#highlightMode = true;
     this.renderTree();
   }
+  /** 取消高亮模式 */
   resetHighlight() {
     this.#highlightMode = false;
-    this.renderTree();
+    // 删除所有highlight
+    const recursion = (node: HierarchyNode<TreeData>) => {
+      node.children?.forEach(childNode => {
+        delete (childNode as any).highlight;
+        recursion(childNode);
+      });
+    };
+    recursion(this.#hierarchyData);
   }
   /**
    * @param {number} num 缩放倍数
    */
-  scale(num) {
-    this.#$zoom.scaleBy(this.#$svg.transition().duration(treeConfig.animationDurationFast), num);
+  scale(num: number) {
+    this.#$zoom.scaleBy(this.#$svg.transition().duration(treeConfig.animationDurationFast) as any, num);
   }
   /**
    * @param {number} num 缩放倍数
    */
-  scaleTo(num) {
-    this.#$zoom.scaleTo(this.#$svg.transition().duration(treeConfig.animationDurationFast), num);
+  scaleTo(num: number) {
+    this.#$zoom.scaleTo(this.#$svg.transition().duration(treeConfig.animationDurationFast) as any, num);
   }
 
-  translateTo(x, y) {
-    this.#$zoom.translateTo(this.#$svg.transition().duration(treeConfig.animationDurationFast), x, y);
+  translateTo(x: number, y: number) {
+    this.#$zoom.translateTo(this.#$svg.transition().duration(treeConfig.animationDurationFast) as any, x, y);
   }
   reset() {
     this.scaleTo(1);
     this.translateTo(0, 0);
     this.resetHighlight();
+    // TODO: 重新计算查看更多
+    // TODO: 重新展开节点
+    this.renderTree();
   }
 }

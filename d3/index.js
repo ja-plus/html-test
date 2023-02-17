@@ -1,4 +1,4 @@
-import { Tree } from './src/Tree/index.js';
+import { Tree } from './src/Tree';
 const data = {
   name: '建设银行及其关联方',
   nodeType: 'root',
@@ -46,15 +46,19 @@ const data = {
         { name: 'PEVC', nodeType: 'parent', lineText: '12次', children: [{ name: '3-3' }, { name: '3-4' }] },
       ],
     },
+    {
+      name: '股权融资',
+      align: 'left',
+      nodeType: 'parent',
+    },
   ],
 };
-const tree = new Tree('.tree');
+const tree = new Tree('.tree', { key: 'name' });
 tree.setTreeData(data);
 tree.addEventListener('leafClick', data => {
   console.log('leaf click', data);
 });
-
-tree.highlightNode('配股');
+// tree.highlightNode('配股');
 
 const plus = document.querySelector('#plus');
 const reset = document.querySelector('#reset');
