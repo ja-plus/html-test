@@ -34,6 +34,8 @@ export class Tree {
 
   eventCallbacks: { [k in EventType]: EventCb[] } = {
     leafClick: [],
+    lineTextClick: [],
+    rootClick: [],
   };
   #option = {
     key: 'id',
@@ -123,11 +125,11 @@ export class Tree {
           const moreNodes = g.filter(node => node.data.nodeType === 'more');
           const leafNodes = g.filter(node => !node.data.nodeType);
           const lineTextNodes = g.filter(node => Boolean(node.data.lineText));
-          addRootNode(rootNodes);
-          addParentNode(parentNodes);
-          addMoreNode(moreNodes);
-          addLeafNode(leafNodes);
-          addLineText(lineTextNodes);
+          addRootNode.call(this, rootNodes);
+          addParentNode.call(this, parentNodes);
+          addMoreNode.call(this, moreNodes);
+          addLeafNode.call(this, leafNodes);
+          addLineText.call(this, lineTextNodes);
           return g;
         },
         update => update,
@@ -149,9 +151,6 @@ export class Tree {
         // 一级节点一直高亮
         if ((this.#highlightMode && d.depth < 2) || d.highlight) classList.push('highlight');
         return classList.join(' ');
-      })
-      .on('click', (e, d) => {
-        this.#handleNodeClick(d);
       });
     // #endregion
 
@@ -210,22 +209,8 @@ export class Tree {
     // #endregion
   }
 
-  #handleNodeClick(d: any) {
-    if (d.data.nodeType === 'more') {
-      this.#showMore(d);
-      this.renderTree();
-    } else if (d.data.nodeType === 'parent') {
-      this.#toggleNode(d);
-      this.renderTree();
-    } else {
-      const leafCbs = this.eventCallbacks.leafClick;
-      leafCbs.forEach(cb => {
-        cb(d.data, d);
-      });
-    }
-  }
   /** 点击查看更多 */
-  #showMore(d: any) {
+  showMore(d: any) {
     const { parent } = d;
     // 去除查看更多节点
     parent.data.children = parent.data.children.slice(0, -1);
@@ -240,7 +225,7 @@ export class Tree {
     parent.children.push(...moreData);
   }
   /** 折叠节点 */
-  #toggleNode(d: any) {
+  toggleNode(d: any) {
     if (d.depth !== 0) {
       if (d.children && !d._children) {
         // 需要收起

@@ -58,6 +58,12 @@ tree.setTreeData(data);
 tree.addEventListener('leafClick', data => {
   console.log('leaf click', data);
 });
+tree.addEventListener('lineTextClick', data => {
+  console.log('line text click', data);
+});
+tree.addEventListener('rootClick', data => {
+  console.log('root click', data);
+});
 // tree.highlightNode('配股');
 
 const plus = document.querySelector('#plus');
