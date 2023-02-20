@@ -26,10 +26,14 @@
     }
     
     let myEvent = new Event('turnOn');
+    myEvent.name = 'ghagaga'; // 可以在事件对象上添加数据
     document.addEventListener('turnOn', e => {
-      console.log(e.data);
+      console.log('turnOn:', e, e.data); //undefined
+      console.log('new Event data:', e.name);
     });
-    document.dispatchEvent(myEvent, 'hah');
+    document.dispatchEvent(myEvent);
+    myEvent.name = 'change name gegege';
+    document.dispatchEvent(myEvent);
 
     // 可传入数据的事件
     document.addEventListener('dataEvent', e => {

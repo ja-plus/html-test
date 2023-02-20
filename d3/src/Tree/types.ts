@@ -16,5 +16,5 @@ export type Key = string | KeyFunc;
  * @description lineTextClick - 线上的字点击
  * @description rootClick - 根节点点击
  */
-export type EventType = 'leafClick' | 'lineTextClick' | 'rootClick';
-export type EventCb = (it: TreeData, d: any) => void;
+export type EventType = 'leafClick' | 'lineTextClick' | 'rootClick' | 'zoom';
+export type EventCb = (...args: any[]) => void;

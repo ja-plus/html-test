@@ -37,6 +37,7 @@ export class Tree {
     leafClick: [],
     lineTextClick: [],
     rootClick: [],
+    zoom: [],
   };
   #option = {
     key: 'id',
@@ -57,9 +58,10 @@ export class Tree {
     this.#$wrapGroup = this.#$svg.append('g');
     this.#$zoom = D3.zoom()
       .duration(treeConfig.animationDuration)
-      .scaleExtent([0.1, 10])
+      .scaleExtent([0.2, 10])
       .on('zoom', ev => {
         this.#$wrapGroup.attr('transform', ev.transform);
+        this.dispatchEvent('zoom', ev);
       });
     this.#$svg.call(this.#$zoom as any);
     this.#$linkGroup = this.#$wrapGroup.append('g').attr('class', 'link-group');
@@ -242,6 +244,15 @@ export class Tree {
   removeEventListener(eventType: EventType, fun: EventCb) {
     if (typeof fun !== 'function') throw new TypeError('Invalid param fun');
     this.eventCallbacks[eventType] = this.eventCallbacks[eventType].filter(it => it === fun);
+  }
+  /**
+   * 触发事件
+   */
+  dispatchEvent(eventType: EventType, ...args: any[]) {
+    const callbacks = this.eventCallbacks[eventType];
+    callbacks.forEach(cb => {
+      cb(...args);
+    });
   }
   /**
    * 高亮单元格

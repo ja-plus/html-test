@@ -65,6 +65,9 @@ tree.addEventListener('lineTextClick', data => {
 tree.addEventListener('rootClick', data => {
   console.log('root click', data);
 });
+tree.addEventListener('zoom', ev => {
+  console.log('ev:', ev.transform);
+});
 // tree.highlightNode('配股');
 
 const plus = document.querySelector('#plus');

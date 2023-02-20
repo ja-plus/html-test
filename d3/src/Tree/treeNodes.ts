@@ -18,10 +18,7 @@ export function addRootNode(this: Tree, d3Selection: any) {
     .attr('height', rootNodeHeight)
     .attr('transform', `translate(-${rootNodeWidth / 2},-20)`)
     .on('click', (e: any, d: any) => {
-      const rootClickCbs = this.eventCallbacks.rootClick;
-      rootClickCbs.forEach(cb => {
-        cb(d.data, d);
-      });
+      this.dispatchEvent('rootClick', d.data, d);
     });
   const rootNodeDiv = rootForeignObject.append('xhtml:div').attr('class', 'root-node');
   rootNodeDiv.append('xhtml:div').attr('class', 'root-node__icon');
@@ -69,10 +66,7 @@ export function addLeafNode(this: Tree, d3Selection: any) {
       return `translate(-${d.x < 0 ? treeConfig.nodeWidth : 0},-${treeConfig.nodeHeight / 2})`;
     })
     .on('click', (e: any, d: any) => {
-      const leafCbs = this.eventCallbacks.leafClick;
-      leafCbs.forEach(cb => {
-        cb(d.data, d);
-      });
+      this.dispatchEvent('leafClick', d.data, d);
     });
   fObj
     .append('xhtml:div')
@@ -111,7 +105,7 @@ export function addMoreNode(this: Tree, d3Selection: any) {
 }
 
 /**
- * 添加根节点
+ * 添加线上的文字
  * @param {import('d3').Selection} d3Selection
  */
 export function addLineText(this: Tree, d3Selection: any) {
@@ -132,9 +126,6 @@ export function addLineText(this: Tree, d3Selection: any) {
       return d.data.lineText;
     })
     .on('click', (e: any, d: any) => {
-      const lineTextClickCbs = this.eventCallbacks.lineTextClick;
-      lineTextClickCbs.forEach(cb => {
-        cb(d.data, d);
-      });
+      this.dispatchEvent('lineTextClick', d.data, d);
     });
 }
