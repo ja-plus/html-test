@@ -6,14 +6,19 @@ import { Key, TreeData } from './types';
  * 增加查看更多按钮
  * @param {HierarchyNode<TreeData>} tree
  */
-export function addShowMoreNode(tree: HierarchyNode<TreeData>, size = 5) {
+export function addShowMoreNode(tree: HierarchyNode<TreeData>, options?: { size: number; depth: number }) {
+  const { size, depth } = Object.assign({ size: 5, depth: 0 }, options || {});
+
   if (tree.children) {
-    if (tree.children.length > size) {
+    if (tree.children.length > size && tree.depth > depth) {
       const treeLen = tree.children.length;
       const visibleNode = tree.children.slice(0, size);
       const moreData = tree.children.slice(size);
       if (moreData.length === 1 && moreData[0].data.nodeType === 'more') return;
+      moreData.forEach(it => addShowMoreNode(it, options)); // 隐藏起来的节点也要遍历子节点
+
       const showMoreNode = D3.hierarchy<TreeData>({
+        id: Date.now() + '' + Math.random(),
         name: `查看更多(${treeLen - size})`,
         nodeType: 'more',
       });
@@ -24,7 +29,7 @@ export function addShowMoreNode(tree: HierarchyNode<TreeData>, size = 5) {
       visibleNode.push(showMoreNode);
       tree.children = visibleNode;
     }
-    tree.children.forEach(it => addShowMoreNode(it, size));
+    tree.children.forEach(it => addShowMoreNode(it, options));
   }
 }
 /**将树分成左右两边，横坐标置反 */

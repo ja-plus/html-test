@@ -4,11 +4,8 @@ import { HierarchyNode, HierarchyPointNode } from 'd3';
 import { treeConfig } from './config';
 import './style.less';
 import { addLeafNode, addLineText, addMoreNode, addParentNode, addRootNode } from './treeNodes';
-import { EventCb, EventType, Key, TreeData } from './types';
+import { ConsOption, EventCb, EventType, TreeData } from './types';
 import { addShowMoreNode, eachChildren, keyGen, PositionStore, separateTree } from './utils';
-
-const width = '100%';
-const height = 600;
 
 /**
  * d3 tree
@@ -20,13 +17,15 @@ export class Tree {
   #$wrapGroup;
   #$linkGroup;
   #$nodeGroup;
-  #$zoom;
+  #$zoom = D3.zoom().duration(treeConfig.animationDuration).scaleExtent([0.2, 10]);
 
   #treeLayout = D3.tree<TreeData>()
-    .nodeSize([treeConfig.nodeHeight + 10, treeConfig.nodeWidth * 2]) // 设置tree的大小
+    .nodeSize([treeConfig.nodeHeight, treeConfig.nodeWidth * 2]) // 设置tree的大小
     .separation((a, b) => {
       // 根据是否为同一父节点设置节点距离比例
-      return a.parent === b.parent ? 1 : 2;
+      if (a.parent !== b.parent) return 2;
+      if (!a.data.nodeType || a.data.nodeType === 'more') return 1.2; // 叶子节点间距
+      return 1.5;
     });
 
   #dataCopy: any;
@@ -39,8 +38,10 @@ export class Tree {
     rootClick: [],
     zoom: [],
   };
-  #option = {
+  #option: ConsOption = {
     key: 'id',
+    width: '100%',
+    height: '100%',
   };
   get key() {
     return this.#option.key;
@@ -51,18 +52,19 @@ export class Tree {
    * @param {object} option
    * @param {string|function} option.key 唯一值的键
    */
-  constructor(selector: string, option: { key: Key }) {
+  constructor(selector: string, option?: Partial<ConsOption>) {
     Object.assign(this.#option, option || {});
 
-    this.#$svg = D3.select(selector).append('svg').attr('width', width).attr('height', height).attr('viewBox', '-800 -300 1600 600');
+    this.#$svg = D3.select(selector)
+      .append('svg')
+      .attr('width', this.#option.width)
+      .attr('height', this.#option.height)
+      .attr('viewBox', '-800 -300 1600 600');
     this.#$wrapGroup = this.#$svg.append('g');
-    this.#$zoom = D3.zoom()
-      .duration(treeConfig.animationDuration)
-      .scaleExtent([0.2, 10])
-      .on('zoom', ev => {
-        this.#$wrapGroup.attr('transform', ev.transform);
-        this.dispatchEvent('zoom', ev);
-      });
+    this.#$zoom.on('zoom', ev => {
+      this.#$wrapGroup.attr('transform', ev.transform);
+      this.dispatchEvent('zoom', ev);
+    });
     this.#$svg.call(this.#$zoom as any);
     this.#$linkGroup = this.#$wrapGroup.append('g').attr('class', 'link-group');
     this.#$nodeGroup = this.#$wrapGroup.append('g').attr('class', 'node-group');
@@ -182,7 +184,7 @@ export class Tree {
       .transition()
       .duration(treeConfig.animationDuration)
       .attr('d', d => {
-        const half = (d.target.x - d.source.x) / 2;
+        const half = (d.target.x - d.source.x) * treeConfig.linkTuringPointRatio;
         return `M${d.source.x},${d.source.y} L${d.source.x + half},${d.source.y} L${d.source.x + half},${d.target.y} L${d.target.x},${d.target.y}`;
       });
     // #endregion

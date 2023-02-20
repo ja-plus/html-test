@@ -4,8 +4,8 @@ import { Tree } from './index';
 const rootNodeWidth = 100;
 const rootNodeHeight = 100;
 const parentNodeWidth = 70;
-const parentNodeHeight = 24;
-const lineOffset = 10; // 偏移量
+const parentNodeHeight = 22;
+const lineTextOffset = [15, -4]; // 偏移量
 
 /**
  * 添加根节点
@@ -45,10 +45,18 @@ export function addParentNode(this: Tree, d3Selection: any) {
   fObj
     .append('xhtml:div')
     .attr('class', 'parent-node')
-    .style('background-color', () => {
+    .style('background-color', (d: any) => {
+      // if (d.data.backgroundColor) return d.data.backgroundColor;
+      // else {
+      //   let ancestor = d;
+      //   while ((ancestor = d.parent)) {
+      //     if (ancestor.data.backgroundColor) return ancestor.data.backgroundColor;
+      //   }
+      // }
       return `rgba(${Math.round(Math.random() * 255)},${Math.round(Math.random() * 255)},${Math.round(Math.random() * 255)})`;
     })
     .append('xhtml:span')
+    .attr('class', 'text')
     .text((d: any) => d.data.name);
   return fObj;
 }
@@ -71,8 +79,9 @@ export function addLeafNode(this: Tree, d3Selection: any) {
   fObj
     .append('xhtml:div')
     .attr('class', 'leaf-node')
+    .attr('title', (d: any) => d.data.name)
     .style('text-align', (d: any) => d.x < 0 && 'right') // 左侧树，右对齐
-    .append('xhtml:div')
+    .append('xhtml:span')
     .attr('class', 'node-text')
     .text((d: any) => d.data.name);
   return fObj;
@@ -113,11 +122,11 @@ export function addLineText(this: Tree, d3Selection: any) {
     .append('text')
     .attr('class', 'line-text')
     .attr('transform', (d: any) => {
-      let offset = lineOffset;
-      if (!d.data.nodeType) offset *= 3;
-      if (d.x < 0) offset = -offset;
-      const textStartX = (d.parent.x - d.x) / 2 + offset;
-      return `translate(${textStartX},-6)`;
+      let offsetX = lineTextOffset[0];
+      if (!d.data.nodeType) offsetX *= 3;
+      if (d.x < 0) offsetX = -offsetX;
+      const textStartX = (d.parent.x - d.x) * (1 - treeConfig.linkTuringPointRatio) + offsetX;
+      return `translate(${textStartX},${lineTextOffset[1]})`;
     })
     .attr('text-anchor', (d: any) => {
       if (d.x < 0) return 'end'; // 左侧树的数据左对齐

@@ -23,7 +23,7 @@ const data = {
       nodeType: 'parent',
       lineText: '融资19次',
       children: [
-        { name: 'C', value: '叶子节点' },
+        { name: '中国对外经济贸易信托有限公司', value: '叶子节点' },
         { name: 'D', value: '叶子节点' },
         { name: 'D1', value: '叶子节点' },
         { name: 'D2', value: '叶子节点' },
