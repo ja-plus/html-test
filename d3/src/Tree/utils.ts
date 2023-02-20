@@ -10,15 +10,19 @@ export function addShowMoreNode(tree: HierarchyNode<TreeData>, size = 5) {
   if (tree.children) {
     if (tree.children.length > size) {
       const treeLen = tree.children.length;
-      const tmp = tree.children.slice(0, size);
-      const moreData = tree.children.slice(size + 1);
-      const moreNode = D3.hierarchy<TreeData>({
+      const visibleNode = tree.children.slice(0, size);
+      const moreData = tree.children.slice(size);
+      if (moreData.length === 1 && moreData[0].data.nodeType === 'more') return;
+      const showMoreNode = D3.hierarchy<TreeData>({
         name: `查看更多(${treeLen - size})`,
         nodeType: 'more',
       });
-      // (moreNode as any).moreData = moreData;
-      // tmp.push(moreNode); // TODO:
-      tree.children = tmp;
+      (showMoreNode as any).depth = moreData[0].depth;
+      (showMoreNode as any).height = moreData[0].height;
+      (showMoreNode as any).parent = moreData[0].parent;
+      (showMoreNode as any).moreData = moreData;
+      visibleNode.push(showMoreNode);
+      tree.children = visibleNode;
     }
     tree.children.forEach(it => addShowMoreNode(it, size));
   }

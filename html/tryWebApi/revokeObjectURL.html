@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test URL.removeObjectULR</title>
+</head>
+
+<body>
+    <button onclick="add()">add</button>
+    <button onclick="fr()">fileReader</button>
+</body>
+<script>
+    let iArr = new Int32Array(100000).fill(37373737);
+    let blob = new Blob(iArr);
+    window.arr = [];
+    function add() {
+      let src = URL.createObjectURL(blob);
+  //   URL.revokeObjectURL(src);
+    }
+    function fr() {
+      let fileReader = new FileReader();
+      fileReader.onload = function () {
+        let result = fileReader.result;
+        window.arr.push(result);
+      };
+      fileReader.readAsDataURL(blob);
+    }
+</script>
+
+</html>

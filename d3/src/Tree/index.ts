@@ -191,17 +191,9 @@ export class Tree {
   /** 点击查看更多 */
   showMore(d: any) {
     const { parent } = d;
-    // 去除查看更多节点
-    parent.data.children = parent.data.children.slice(0, -1);
+    // 去除"查看更多"节点
     parent.children = parent.children.slice(0, -1);
-    // 补充更多节点
-    const moreData = d.data.moreData.map((data: any) => {
-      const node: any = D3.hierarchy(data);
-      node.depth = d.depth;
-      node.parent = d.parent;
-      return node;
-    });
-    parent.children.push(...moreData);
+    parent.children.push(...d.moreData);
   }
   /** 折叠节点 */
   toggleNode(d: any) {
@@ -309,8 +301,14 @@ export class Tree {
   }
   reset() {
     this.#$zoom.transform(this.#$svg.transition().duration(treeConfig.animationDurationFast) as any, D3.zoomIdentity.translate(0, 0).scale(1));
-    this.resetHighlight();
+    // this.resetHighlight();
+    this.#highlightMode = false;
     this.#initHierarchyData();
+
+    // addShowMoreNode(this.#hierarchyData); // 重新添加产
+    // 将节点移除
+    this.#$nodeGroup.selectAll('.node').remove();
+    this.#$linkGroup.selectAll('.node-link').remove();
     this.renderTree();
   }
 }
