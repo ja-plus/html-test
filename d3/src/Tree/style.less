@@ -9,12 +9,14 @@
 }
 
 .tree-svg {
-    animation: sca 0.5s ease;
+    animation: sca 0.8s cubic-bezier(.02, .96, .43, 1);
     font-size: 14px;
+
     &.highlight-mode {
         .node {
             opacity: 0.1;
         }
+
         .node-link {
             opacity: 0.1;
         }
@@ -75,9 +77,10 @@
                 padding: 0 4px;
                 overflow: hidden;
                 text-overflow: ellipsis;
+
                 .node-text {
                     white-space: nowrap;
-                   
+
                     cursor: pointer;
                 }
 
@@ -89,8 +92,9 @@
             .line-text {
                 font-size: 12px;
                 fill: #3978dd;
-                cursor:pointer;
-                &:hover{
+                cursor: pointer;
+
+                &:hover {
                     text-decoration: underline;
                 }
             }
@@ -102,8 +106,9 @@
         /* 连接线样式 */
         .node-link {
             &.highlight {
-                opacity:1;
+                opacity: 1;
             }
+
             fill: none;
             stroke: #d2d2e5;
             stroke-width: 1;

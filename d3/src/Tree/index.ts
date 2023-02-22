@@ -3,7 +3,7 @@ import { HierarchyNode, HierarchyPointNode } from 'd3';
 // import * as d3 from 'https://cdn.skypack.dev/d3@7';
 import { treeConfig } from './config';
 import './style.less';
-import { addLeafNode, addLineText, addLink, addMoreNode, addParentNode, addRootNode, exitMoreNode, exitMoreNodeLink } from './treeNodes';
+import { addLeafNode, addLineText, addLink, addMoreNode, addParentNode, addRootNode, fadeOutNode, fadeOutLink } from './treeNodes';
 import { ConsOption, EventCb, EventType, TreeData } from './types';
 import { addShowMoreNode, eachChildren, keyGen, PositionStore, separateTree } from './utils';
 
@@ -74,7 +74,7 @@ export class Tree {
     if (!data) throw new TypeError('Invalid param data');
     this.#dataCopy = window.structuredClone(data);
     this.#initHierarchyData();
-    this.renderTree();
+    this.renderTree(true);
   }
   #initHierarchyData() {
     const dataClone = window.structuredClone(this.#dataCopy);
@@ -82,7 +82,10 @@ export class Tree {
     addShowMoreNode(this.#hierarchyData);
   }
 
-  renderTree() {
+  /**
+   * @param init 是否为初始化，初始化没有动画
+   */
+  renderTree(init = false) {
     this.#nodes = this.#treeLayout(this.#hierarchyData);
     this.#nodes.each(a => ([a.x, a.y] = [a.y, a.x])); // 旋转90度
     separateTree(this.#nodes); // left tree | right tree
@@ -116,15 +119,15 @@ export class Tree {
         update => update,
         exit => {
           // 节点移除，收起动画
-          const moreNode = exit.filter(d => d.data.nodeType === 'more');
-          exitMoreNode.call(this, moreNode);
+          const fadeOutNodes = exit.filter((d: any) => d.transition === 'fadeOut');
+          fadeOutNode.call(this, fadeOutNodes);
           exit
-            .filter(d => d.data.nodeType !== 'more')
+            .filter((d: any) => !d.transition)
             .transition()
             .duration(treeConfig.animationDuration)
             .attr('opacity', 0)
             .attr('transform', (d: any) => {
-              const position = parentPositionStore.getPosition(d, d.moveToParent).join(',');
+              const position = parentPositionStore.getPosition(d, d.exitToParent).join(',');
               return `translate(${position})`;
             })
             .remove();
@@ -139,20 +142,24 @@ export class Tree {
     // #endregion
 
     // #region 设置节点位置
-    allNodesGroup
-      .filter((d: any) => d.nodeStartPosition)
-      .attr('opacity', 0)
-      .attr('transform', (d: any) => {
-        const transform = `translate(${d.nodeStartPosition[0]}, ${d.nodeStartPosition[1]})`;
-        delete d.nodeStartPosition;
-        return transform;
-      });
-    // 节点展开动画
-    allNodesGroup
-      .transition()
-      .duration(treeConfig.animationDuration)
-      .attr('opacity', 1)
-      .attr('transform', d => `translate(${d.x},${d.y})`);
+    if (init) {
+      allNodesGroup.attr('opacity', 1).attr('transform', d => `translate(${d.x},${d.y})`);
+    } else {
+      allNodesGroup
+        .filter((d: any) => d.nodeStartPosition)
+        .attr('opacity', 0)
+        .attr('transform', (d: any) => {
+          const transform = `translate(${d.nodeStartPosition[0]}, ${d.nodeStartPosition[1]})`;
+          delete d.nodeStartPosition;
+          return transform;
+        });
+      // 节点展开动画
+      allNodesGroup
+        .transition()
+        .duration(treeConfig.animationDuration)
+        .attr('opacity', 1)
+        .attr('transform', d => `translate(${d.x},${d.y})`);
+    }
     // #endregion
 
     // #region 绘制连接线
@@ -166,15 +173,15 @@ export class Tree {
         update => update,
         exit => {
           // 点击“查看更多”节点不需要移出动画
-          const moreNodeLink = exit.filter(d => d.target.data.nodeType === 'more');
-          exitMoreNodeLink.call(this, moreNodeLink);
+          const fadeOutLinks = exit.filter((d: any) => d.target.transition === 'fadeOut');
+          fadeOutLink.call(this, fadeOutLinks);
 
           exit
-            .filter(d => d.target.data.nodeType !== 'more')
+            .filter((d: any) => !d.target.transition)
             .transition()
             .duration(treeConfig.animationDuration)
             .attr('d', (d: any) => {
-              const parentPosition = parentPositionStore.getPosition(d.target, d.target.moveToParent, 'source').join(',');
+              const parentPosition = parentPositionStore.getPosition(d.target, d.target.exitToParent, 'source').join(',');
               return `M ${parentPosition} L ${parentPosition} L ${parentPosition} L ${parentPosition}`;
             })
             .remove();
@@ -186,7 +193,7 @@ export class Tree {
         return classList.join(' ');
       })
       .transition()
-      .duration(treeConfig.animationDuration)
+      .duration(init ? 0 : treeConfig.animationDuration)
       .attr('d', d => {
         const half = (d.target.x - d.source.x) * treeConfig.linkTuringPointRatio;
         return `M${d.source.x},${d.source.y} L${d.source.x + half},${d.source.y} L${d.source.x + half},${d.target.y} L${d.target.x},${d.target.y}`;
@@ -195,15 +202,17 @@ export class Tree {
   }
 
   /** 点击查看更多 */
-  showMore(d: any) {
+  showMore(d: HierarchyPointNode<TreeData>) {
     const { parent } = d;
+    if (!parent) return;
     // 去除"查看更多"节点
-    parent.children = parent.children.slice(0, -1);
-    eachChildren(d.moreData, (child: any) => {
+    parent.children = parent.children?.slice(0, -1);
+    (d as any).transition = 'fadeOut'; // 节点动画临时变为 渐出
+    eachChildren((d as any).moreData, (child: any) => {
       child.nodeStartPosition = [d.x, d.y]; //新节点从父节点移出
-      child.lineStartPosition = [d.parent.x, d.parent.y, d.x, d.y]; // 曲线开始与结束位置
+      child.lineStartPosition = [parent.x, parent.y, d.x, d.y]; // 曲线开始与结束位置
     });
-    parent.children.push(...d.moreData);
+    parent.children?.push(...(d as any).moreData);
   }
   /** 折叠节点 */
   toggleNode(d: any) {
@@ -211,7 +220,7 @@ export class Tree {
       if (d.children && !d._children) {
         // 需要收起
         eachChildren(d.children, (child: any) => {
-          child.moveToParent = keyGen(d.data, this.key);
+          child.exitToParent = keyGen(d.data, this.key); // 表明
         });
         d._children = d.children;
         delete d.children;
@@ -305,17 +314,21 @@ export class Tree {
   scaleTo(num: number) {
     this.#$zoom.scaleTo(this.#$svg.transition().duration(treeConfig.animationDurationFast) as any, num);
   }
-
-  translateTo(x: number, y: number, origin?: [number, number]) {
-    this.#$zoom.translateTo(this.#$svg.transition().duration(treeConfig.animationDurationFast) as any, x, y, origin);
+  /**
+   * @param transition  是否执行动画
+   */
+  translateTo(x: number, y: number, origin?: [number, number], transition = true) {
+    this.#$zoom.translateTo(this.#$svg.transition().duration(transition ? treeConfig.animationDurationFast : 0) as any, x, y, origin);
   }
+  /**将树图移动到中心 */
   setTreeToCenter() {
     const svg = document.querySelector(this.selector);
     if (svg) {
       const { width, height } = svg.getBoundingClientRect();
-      this.translateTo(0, 0, [width / 2, height / 2]);
+      this.translateTo(0, 0, [width / 2, height / 2], false);
     }
   }
+  /**重设树图 */
   reset() {
     const svg = document.querySelector(this.selector);
     const { width, height } = svg?.getBoundingClientRect() || { width: 800, height: 600 };

@@ -19,7 +19,7 @@ export function addRootNode(this: Tree, d3Selection: NodeSelection) {
     .attr('width', rootNodeHeight)
     .attr('height', rootNodeHeight)
     .attr('transform', `translate(-${rootNodeWidth / 2},-20)`)
-    .on('click', (e: any, d: any) => {
+    .on('click', (e, d) => {
       this.dispatchEvent('rootClick', d.data, d);
     });
   const rootNodeDiv = rootForeignObject.append('xhtml:div').attr('class', 'root-node');
@@ -27,7 +27,7 @@ export function addRootNode(this: Tree, d3Selection: NodeSelection) {
   rootNodeDiv
     .append('xhtml:div')
     .attr('class', 'root-node__name')
-    .text((d: any) => d.data.name);
+    .text(d => d.data.name);
 }
 
 /**
@@ -39,26 +39,27 @@ export function addParentNode(this: Tree, d3Selection: NodeSelection) {
     .attr('width', parentNodeWidth)
     .attr('height', parentNodeHeight)
     .attr('transform', `translate(-${parentNodeWidth / 2},-${parentNodeHeight / 2})`)
-    .on('click', (e: any, d: any) => {
+    .on('click', (e, d) => {
       this.toggleNode(d);
       this.renderTree();
     });
   fObj
     .append('xhtml:div')
     .attr('class', 'parent-node')
-    .style('background-color', (d: any) => {
-      // if (d.data.backgroundColor) return d.data.backgroundColor;
-      // else {
-      //   let ancestor = d;
-      //   while ((ancestor = d.parent)) {
-      //     if (ancestor.data.backgroundColor) return ancestor.data.backgroundColor;
-      //   }
-      // }
+    .style('background-color', d => {
+      if (d.data.backgroundColor) return d.data.backgroundColor;
+      else {
+        // 继承祖先节点背景颜色
+        let ancestor: HierarchyPointNode<TreeData> | null = d;
+        while ((ancestor = ancestor.parent)) {
+          if (ancestor.data.backgroundColor) return ancestor.data.backgroundColor;
+        }
+      }
       return `rgba(${Math.round(Math.random() * 255)},${Math.round(Math.random() * 255)},${Math.round(Math.random() * 255)})`;
     })
     .append('xhtml:span')
     .attr('class', 'text')
-    .text((d: any) => d.data.name);
+    .text(d => d.data.name);
   return fObj;
 }
 
@@ -70,20 +71,20 @@ export function addLeafNode(this: Tree, d3Selection: NodeSelection) {
     .append('foreignObject')
     .attr('width', treeConfig.nodeWidth)
     .attr('height', treeConfig.nodeHeight)
-    .attr('transform', (d: any) => {
+    .attr('transform', d => {
       return `translate(-${d.x < 0 ? treeConfig.nodeWidth : 0},-${treeConfig.nodeHeight / 2})`;
     })
-    .on('click', (e: any, d: any) => {
+    .on('click', (e, d) => {
       this.dispatchEvent('leafClick', d.data, d);
     });
   fObj
     .append('xhtml:div')
     .attr('class', 'leaf-node')
-    .attr('title', (d: any) => d.data.name)
-    .style('text-align', (d: any) => d.x < 0 && 'right') // 左侧树，右对齐
+    .attr('title', d => d.data.name)
+    .style('text-align', d => d.x < 0 && 'right') // 左侧树，右对齐
     .append('xhtml:span')
     .attr('class', 'node-text')
-    .text((d: any) => d.data.name);
+    .text(d => d.data.name);
   return fObj;
 }
 
@@ -95,20 +96,20 @@ export function addMoreNode(this: Tree, d3Selection: NodeSelection) {
     .append('foreignObject')
     .attr('width', treeConfig.nodeWidth)
     .attr('height', treeConfig.nodeHeight)
-    .attr('transform', (d: any) => {
+    .attr('transform', d => {
       return `translate(-${d.x < 0 ? treeConfig.nodeWidth : 0},-${treeConfig.nodeHeight / 2})`;
     })
-    .on('click', (e: any, d: any) => {
+    .on('click', (e, d) => {
       this.showMore(d);
       this.renderTree();
     });
   fObj
     .append('xhtml:div')
     .attr('class', 'leaf-node more')
-    .style('text-align', (d: any) => d.x < 0 && 'right') // 左侧树，右对齐
+    .style('text-align', d => d.x < 0 && 'right') // 左侧树，右对齐
     .append('xhtml:div')
     .attr('class', 'node-text')
-    .text((d: any) => d.data.name);
+    .text(d => d.data.name);
   return fObj;
 }
 
@@ -119,20 +120,21 @@ export function addLineText(this: Tree, d3Selection: NodeSelection) {
   return d3Selection
     .append('text')
     .attr('class', 'line-text')
-    .attr('transform', (d: any) => {
+    .attr('transform', d => {
       let offsetX = lineTextOffset[0];
       if (!d.data.nodeType) offsetX *= 3;
       if (d.x < 0) offsetX = -offsetX;
-      const textStartX = (d.parent.x - d.x) * (1 - treeConfig.linkTuringPointRatio) + offsetX;
+      const textStartX = ((d.parent?.x || 0) - d.x) * (1 - treeConfig.linkTuringPointRatio) + offsetX;
       return `translate(${textStartX},${lineTextOffset[1]})`;
     })
-    .attr('text-anchor', (d: any) => {
+    .attr('text-anchor', d => {
       if (d.x < 0) return 'end'; // 左侧树的数据左对齐
+      return '';
     })
-    .text((d: any) => {
-      return d.data.lineText;
+    .text(d => {
+      return d.data.lineText || '';
     })
-    .on('click', (e: any, d: any) => {
+    .on('click', (e, d) => {
       this.dispatchEvent('lineTextClick', d.data, d);
     });
 }
@@ -147,24 +149,24 @@ export function addLink(this: Tree, d3Selection: Selection<EnterElement, Hierarc
       let result = '';
       if (lineStartPosition?.length === 2) {
         const origin = lineStartPosition.join(',');
-        result = `M ${origin} L ${origin} L ${origin} L ${origin}`;
+        result = `M${origin} L${origin} L${origin} L${origin}`;
       } else if (lineStartPosition?.length === 4) {
         const [sourceX, sourceY, targetX, targetY] = lineStartPosition;
         const half = (d.target.x - d.source.x) * treeConfig.linkTuringPointRatio;
-        result = `M ${sourceX},${sourceY} L L${sourceX + half},${sourceY} L${sourceX + half},${targetY} L ${targetX},${targetY}`;
+        result = `M${sourceX},${sourceY} L${sourceX + half},${sourceY} L${sourceX + half},${targetY} L${targetX},${targetY}`;
       } else {
         const origin = `${d.source.x},${d.source.y}`;
-        result = `M ${origin} L ${origin} L ${origin} L ${origin}`;
+        result = `M${origin} L${origin} L${origin} L${origin}`;
       }
       delete d.target.lineStartPosition;
       return result;
     });
 }
 /**exit 查看更多更多节点 */
-export function exitMoreNode(this: Tree, d3Selection: Selection<BaseType, HierarchyPointNode<TreeData>, SVGGElement, unknown>) {
+export function fadeOutNode(this: Tree, d3Selection: Selection<BaseType, HierarchyPointNode<TreeData>, SVGGElement, unknown>) {
   return d3Selection.transition().duration(treeConfig.animationDuration).attr('opacity', 0).remove();
 }
 /** exit 查看更多连接线 */
-export function exitMoreNodeLink(this: Tree, d3Selection: Selection<BaseType, HierarchyPointLink<TreeData>, SVGGElement, unknown>) {
+export function fadeOutLink(this: Tree, d3Selection: Selection<BaseType, HierarchyPointLink<TreeData>, SVGGElement, unknown>) {
   return d3Selection.transition().duration(treeConfig.animationDuration).attr('opacity', 0).remove();
 }
