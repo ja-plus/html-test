@@ -3,7 +3,7 @@ import { HierarchyNode, HierarchyPointNode } from 'd3';
 // import * as d3 from 'https://cdn.skypack.dev/d3@7';
 import { treeConfig } from './config';
 import './style.less';
-import { addLeafNode, addLineText, addMoreNode, addParentNode, addRootNode } from './treeNodes';
+import { addLeafNode, addLineText, addLink, addMoreNode, addParentNode, addRootNode, exitMoreNode, exitMoreNodeLink } from './treeNodes';
 import { ConsOption, EventCb, EventType, TreeData } from './types';
 import { addShowMoreNode, eachChildren, keyGen, PositionStore, separateTree } from './utils';
 
@@ -11,6 +11,7 @@ import { addShowMoreNode, eachChildren, keyGen, PositionStore, separateTree } fr
  * d3 tree
  */
 export class Tree {
+  selector: string;
   /** 是否处于高亮模式,是将调整所有节点opacity */
   #highlightMode = false;
   #$svg;
@@ -53,13 +54,11 @@ export class Tree {
    * @param {string|function} option.key 唯一值的键
    */
   constructor(selector: string, option?: Partial<ConsOption>) {
+    this.selector = selector;
     Object.assign(this.#option, option || {});
 
-    this.#$svg = D3.select(selector)
-      .append('svg')
-      .attr('width', this.#option.width)
-      .attr('height', this.#option.height)
-      .attr('viewBox', '-800 -300 1600 600');
+    this.#$svg = D3.select(selector).append('svg').attr('width', this.#option.width).attr('height', this.#option.height).attr('class', 'tree-svg');
+    // .attr('viewBox', '-800 -300 1600 600');
     this.#$wrapGroup = this.#$svg.append('g');
     this.#$zoom.on('zoom', ev => {
       this.#$wrapGroup.attr('transform', ev.transform);
@@ -68,6 +67,7 @@ export class Tree {
     this.#$svg.call(this.#$zoom as any);
     this.#$linkGroup = this.#$wrapGroup.append('g').attr('class', 'link-group');
     this.#$nodeGroup = this.#$wrapGroup.append('g').attr('class', 'node-group');
+    this.setTreeToCenter();
   }
 
   setTreeData(data: TreeData) {
@@ -116,7 +116,10 @@ export class Tree {
         update => update,
         exit => {
           // 节点移除，收起动画
+          const moreNode = exit.filter(d => d.data.nodeType === 'more');
+          exitMoreNode.call(this, moreNode);
           exit
+            .filter(d => d.data.nodeType !== 'more')
             .transition()
             .duration(treeConfig.animationDuration)
             .attr('opacity', 0)
@@ -138,7 +141,7 @@ export class Tree {
     // #region 设置节点位置
     allNodesGroup
       .filter((d: any) => d.nodeStartPosition)
-      .attr('opacity', 0.1)
+      .attr('opacity', 0)
       .attr('transform', (d: any) => {
         const transform = `translate(${d.nodeStartPosition[0]}, ${d.nodeStartPosition[1]})`;
         delete d.nodeStartPosition;
@@ -158,15 +161,16 @@ export class Tree {
       .data(this.#nodes.links(), (d: any) => keyGen(d.target.data, this.key)) // nodesData.links()，得到连接线数据对象
       .join(
         enter => {
-          return enter.append('path').attr('d', (d: any) => {
-            const lineStartPosition = d.source.lineStartPosition;
-            const origin = lineStartPosition ? `${lineStartPosition[0]},${lineStartPosition[1]}` : `${d.source.x},${d.source.y}`;
-            return `M ${origin} L ${origin} L ${origin} L ${origin}`;
-          });
+          return addLink.call(this, enter);
         },
         update => update,
         exit => {
+          // 点击“查看更多”节点不需要移出动画
+          const moreNodeLink = exit.filter(d => d.target.data.nodeType === 'more');
+          exitMoreNodeLink.call(this, moreNodeLink);
+
           exit
+            .filter(d => d.target.data.nodeType !== 'more')
             .transition()
             .duration(treeConfig.animationDuration)
             .attr('d', (d: any) => {
@@ -177,10 +181,10 @@ export class Tree {
         },
       )
       .attr('class', (d: any) => {
-        const classList = ['node-link'];
+        const classList = ['node-link']; // 必须加，用于selectAll
         if ((this.#highlightMode && d.target.depth < 2) || d.target.highlight) classList.push('highlight');
         return classList.join(' ');
-      }) // 必须加，用于selectAll
+      })
       .transition()
       .duration(treeConfig.animationDuration)
       .attr('d', d => {
@@ -195,6 +199,10 @@ export class Tree {
     const { parent } = d;
     // 去除"查看更多"节点
     parent.children = parent.children.slice(0, -1);
+    eachChildren(d.moreData, (child: any) => {
+      child.nodeStartPosition = [d.x, d.y]; //新节点从父节点移出
+      child.lineStartPosition = [d.parent.x, d.parent.y, d.x, d.y]; // 曲线开始与结束位置
+    });
     parent.children.push(...d.moreData);
   }
   /** 折叠节点 */
@@ -298,11 +306,24 @@ export class Tree {
     this.#$zoom.scaleTo(this.#$svg.transition().duration(treeConfig.animationDurationFast) as any, num);
   }
 
-  translateTo(x: number, y: number) {
-    this.#$zoom.translateTo(this.#$svg.transition().duration(treeConfig.animationDurationFast) as any, x, y);
+  translateTo(x: number, y: number, origin?: [number, number]) {
+    this.#$zoom.translateTo(this.#$svg.transition().duration(treeConfig.animationDurationFast) as any, x, y, origin);
+  }
+  setTreeToCenter() {
+    const svg = document.querySelector(this.selector);
+    if (svg) {
+      const { width, height } = svg.getBoundingClientRect();
+      this.translateTo(0, 0, [width / 2, height / 2]);
+    }
   }
   reset() {
-    this.#$zoom.transform(this.#$svg.transition().duration(treeConfig.animationDurationFast) as any, D3.zoomIdentity.translate(0, 0).scale(1));
+    const svg = document.querySelector(this.selector);
+    const { width, height } = svg?.getBoundingClientRect() || { width: 800, height: 600 };
+
+    this.#$zoom.transform(
+      this.#$svg.transition().duration(treeConfig.animationDurationFast) as any,
+      D3.zoomIdentity.translate(width / 2, height / 2).scale(1),
+    );
     // this.resetHighlight();
     this.#highlightMode = false;
     this.#initHierarchyData();

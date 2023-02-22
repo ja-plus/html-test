@@ -74,6 +74,7 @@ const plus = document.querySelector('#plus');
 const reset = document.querySelector('#reset');
 const minus = document.querySelector('#minus');
 const search = document.querySelector('#search');
+const download = document.querySelector('#download');
 plus.addEventListener('click', () => {
   tree.scale(1.5);
 });
@@ -90,4 +91,31 @@ search.addEventListener('change', e => {
   } else {
     tree.resetHighlight();
   }
+});
+download.addEventListener('click', () => {
+  const type = 'png';
+  const imgName = 'sss';
+  window.saveSvgAsPng(document.querySelector('.tree-svg'), 's.png', {
+    backgroundColor: '#fff',
+    left: -900,
+    top: -300,
+  });
+
+  // let serializer = new XMLSerializer();
+  // let source = '<?xml version="1.0" standalone="no"?>\r\n' + serializer.serializeToString(document.querySelector('.tree-svg'));
+  // let image = new Image();
+  // image.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(source);
+  // let canvas = document.createElement('canvas');
+  // canvas.width = 1920;
+  // canvas.height = 1080;
+  // let context = canvas.getContext('2d');
+  // context.fillStyle = '#fff';
+  // context.fillRect(0, 0, 10000, 10000);
+  // image.onload = function () {
+  //   context.drawImage(image, 0, 0);
+  //   let a = document.createElement('a');
+  //   a.download = `${imgName}.${type}`;
+  //   a.href = canvas.toDataURL(`image/${type}`);
+  //   a.click();
+  // };
 });

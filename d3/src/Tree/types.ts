@@ -1,12 +1,12 @@
-export type NodeType = 'root' | 'more' | 'parent' | 'leaf';
+export type NodeType = 'root' | 'parent' | 'leaf' | 'more';
 export type TreeData = {
-  id: string;
-  name: string;
-  align?: 'left';
-  lineText?: string;
-  nodeType?: NodeType;
-  moreData?: TreeData[];
-  children?: TreeData[];
+  id: string; //唯一值
+  name: string; //标签名称
+  align?: 'left'; // 左侧还是右侧
+  lineText?: string; // 线上的数值
+  nodeType?: NodeType; //节点类型
+  moreData?: TreeData[]; // 暂存更多的节点
+  children?: TreeData[]; // 子节点
   backgroundColor?: string; // 仅NodeType == 'parent'生效
 };
 /**构造函数传参 */

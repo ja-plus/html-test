@@ -1,5 +1,7 @@
+import { BaseType, EnterElement, HierarchyPointLink, HierarchyPointNode, Selection } from 'd3';
 import { treeConfig } from './config';
 import { Tree } from './index';
+import { TreeData } from './types';
 
 const rootNodeWidth = 100;
 const rootNodeHeight = 100;
@@ -7,11 +9,11 @@ const parentNodeWidth = 70;
 const parentNodeHeight = 22;
 const lineTextOffset = [15, -4]; // 偏移量
 
+type NodeSelection = Selection<SVGGElement, HierarchyPointNode<TreeData>, SVGGElement, unknown>;
 /**
  * 添加根节点
- * @param {import('d3').Selection} d3Selection
  */
-export function addRootNode(this: Tree, d3Selection: any) {
+export function addRootNode(this: Tree, d3Selection: NodeSelection) {
   const rootForeignObject = d3Selection
     .append('foreignObject')
     .attr('width', rootNodeHeight)
@@ -30,9 +32,8 @@ export function addRootNode(this: Tree, d3Selection: any) {
 
 /**
  * 添加父节点
- * @param {import('d3').Selection} d3Selection
  */
-export function addParentNode(this: Tree, d3Selection: any) {
+export function addParentNode(this: Tree, d3Selection: NodeSelection) {
   const fObj = d3Selection
     .append('foreignObject')
     .attr('width', parentNodeWidth)
@@ -63,9 +64,8 @@ export function addParentNode(this: Tree, d3Selection: any) {
 
 /**
  * 添加叶子节点
- * @param {import('d3').Selection} d3Selection
  */
-export function addLeafNode(this: Tree, d3Selection: any) {
+export function addLeafNode(this: Tree, d3Selection: NodeSelection) {
   const fObj = d3Selection
     .append('foreignObject')
     .attr('width', treeConfig.nodeWidth)
@@ -89,9 +89,8 @@ export function addLeafNode(this: Tree, d3Selection: any) {
 
 /**
  * 添加更多节点
- * @param {import('d3').Selection} d3Selection
  */
-export function addMoreNode(this: Tree, d3Selection: any) {
+export function addMoreNode(this: Tree, d3Selection: NodeSelection) {
   const fObj = d3Selection
     .append('foreignObject')
     .attr('width', treeConfig.nodeWidth)
@@ -115,9 +114,8 @@ export function addMoreNode(this: Tree, d3Selection: any) {
 
 /**
  * 添加线上的文字
- * @param {import('d3').Selection} d3Selection
  */
-export function addLineText(this: Tree, d3Selection: any) {
+export function addLineText(this: Tree, d3Selection: NodeSelection) {
   return d3Selection
     .append('text')
     .attr('class', 'line-text')
@@ -137,4 +135,36 @@ export function addLineText(this: Tree, d3Selection: any) {
     .on('click', (e: any, d: any) => {
       this.dispatchEvent('lineTextClick', d.data, d);
     });
+}
+
+/**enter 连接线 */
+export function addLink(this: Tree, d3Selection: Selection<EnterElement, HierarchyPointLink<TreeData>, SVGGElement, unknown>) {
+  return d3Selection
+    .append('path')
+    .attr('opacity', 1)
+    .attr('d', (d: any) => {
+      const lineStartPosition = d.target.lineStartPosition; // 指定了曲线初始化位置
+      let result = '';
+      if (lineStartPosition?.length === 2) {
+        const origin = lineStartPosition.join(',');
+        result = `M ${origin} L ${origin} L ${origin} L ${origin}`;
+      } else if (lineStartPosition?.length === 4) {
+        const [sourceX, sourceY, targetX, targetY] = lineStartPosition;
+        const half = (d.target.x - d.source.x) * treeConfig.linkTuringPointRatio;
+        result = `M ${sourceX},${sourceY} L L${sourceX + half},${sourceY} L${sourceX + half},${targetY} L ${targetX},${targetY}`;
+      } else {
+        const origin = `${d.source.x},${d.source.y}`;
+        result = `M ${origin} L ${origin} L ${origin} L ${origin}`;
+      }
+      delete d.target.lineStartPosition;
+      return result;
+    });
+}
+/**exit 查看更多更多节点 */
+export function exitMoreNode(this: Tree, d3Selection: Selection<BaseType, HierarchyPointNode<TreeData>, SVGGElement, unknown>) {
+  return d3Selection.transition().duration(treeConfig.animationDuration).attr('opacity', 0).remove();
+}
+/** exit 查看更多连接线 */
+export function exitMoreNodeLink(this: Tree, d3Selection: Selection<BaseType, HierarchyPointLink<TreeData>, SVGGElement, unknown>) {
+  return d3Selection.transition().duration(treeConfig.animationDuration).attr('opacity', 0).remove();
 }

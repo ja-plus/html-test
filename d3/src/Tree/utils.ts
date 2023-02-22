@@ -6,7 +6,7 @@ import { Key, TreeData } from './types';
  * 增加查看更多按钮
  * @param {HierarchyNode<TreeData>} tree
  */
-export function addShowMoreNode(tree: HierarchyNode<TreeData>, options?: { size: number; depth: number }) {
+export function addShowMoreNode(tree: HierarchyNode<TreeData>, options?: { size?: number; depth?: number }) {
   const { size, depth } = Object.assign({ size: 5, depth: 0 }, options || {});
 
   if (tree.children) {
