@@ -84,12 +84,14 @@ reset.addEventListener('click', () => {
 minus.addEventListener('click', () => {
   tree.scale(1 / 1.5);
 });
-search.addEventListener('change', e => {
-  const text = e.target.value.trim();
-  if (text) {
-    tree.highlightNode(text);
-  } else {
-    tree.resetHighlight();
+search.addEventListener('keypress', e => {
+  if (e.keyCode === 13) {
+    const text = search.value.trim();
+    if (text) {
+      tree.highlightNode([text]);
+    } else {
+      tree.resetHighlight();
+    }
   }
 });
 download.addEventListener('click', () => {

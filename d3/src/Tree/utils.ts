@@ -113,3 +113,57 @@ export class PositionStore {
     }
   }
 }
+
+type HighlightConsOption = {
+  /**注入的键 */
+  highlightKeyName: string;
+  /**高亮规则 */
+  highlightRule: (node: HierarchyPointNode<TreeData>) => boolean;
+};
+/**
+ * 增加高亮标记
+ * 保存需要展开的节点
+ */
+export class HighlightHelper {
+  /**需要展开的节点的栈 */
+  #expandStack: HierarchyPointNode<TreeData>[] = [];
+  options: HighlightConsOption;
+  constructor(options: HighlightConsOption) {
+    this.options = options;
+  }
+  reset() {
+    this.#expandStack = [];
+  }
+  /**得到需要展开的节点的栈 */
+  getExpandStack() {
+    return this.#expandStack;
+  }
+  /**给高亮的节点增加标记 */
+  setHighlightFlag(node: HierarchyPointNode<TreeData>): boolean {
+    if (this.options.highlightRule(node)) {
+      (node as any)[this.options.highlightKeyName] = true;
+      return true;
+    }
+    // 先清除当前节点高亮
+    delete (node as any)[this.options.highlightKeyName];
+
+    let isHighlight = false;
+    // 收起的children 暂存在_children中，根据这两个属性判断节点收起还是展开
+    const children = node.children || (node as any)._children || (node as any).moreData;
+    if (!children?.length) return false;
+
+    for (const childNode of children) {
+      const res = this.setHighlightFlag(childNode);
+      isHighlight = isHighlight || res; // 千万不能写成isHighlight || setHighlightFlag(childNode) 导致方法不执行
+    }
+    if (isHighlight) {
+      // 如果有子节点高亮，则当前节点高亮
+      (node as any)[this.options.highlightKeyName] = true;
+      if ((node as any)._children || (node as any).moreData) {
+        // 展开当前节点，当前节点是查看更多节点
+        this.#expandStack.push(node);
+      }
+    }
+    return isHighlight;
+  }
+}

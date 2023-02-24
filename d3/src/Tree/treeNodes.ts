@@ -23,7 +23,10 @@ export function addRootNode(this: Tree, d3Selection: NodeSelection) {
       this.dispatchEvent('rootClick', d.data, d);
     });
   const rootNodeDiv = rootForeignObject.append('xhtml:div').attr('class', 'root-node');
-  rootNodeDiv.append('xhtml:div').attr('class', 'root-node__icon');
+  rootNodeDiv
+    .append('xhtml:div')
+    .attr('class', 'root-node__icon')
+    .html(d => d.data.icon || '');
   rootNodeDiv
     .append('xhtml:div')
     .attr('class', 'root-node__name')
@@ -41,6 +44,7 @@ export function addParentNode(this: Tree, d3Selection: NodeSelection) {
     .attr('transform', `translate(-${parentNodeWidth / 2},-${parentNodeHeight / 2})`)
     .on('click', (e, d) => {
       this.toggleNode(d);
+      this.updateTreeNodePosition();
       this.renderTree();
     });
   fObj
@@ -89,7 +93,7 @@ export function addLeafNode(this: Tree, d3Selection: NodeSelection) {
 }
 
 /**
- * 添加更多节点
+ * 添加查看更多节点
  */
 export function addMoreNode(this: Tree, d3Selection: NodeSelection) {
   const fObj = d3Selection
@@ -101,6 +105,7 @@ export function addMoreNode(this: Tree, d3Selection: NodeSelection) {
     })
     .on('click', (e, d) => {
       this.showMore(d);
+      this.updateTreeNodePosition();
       this.renderTree();
     });
   fObj
@@ -122,7 +127,7 @@ export function addLineText(this: Tree, d3Selection: NodeSelection) {
     .attr('class', 'line-text')
     .attr('transform', d => {
       let offsetX = lineTextOffset[0];
-      if (!d.data.nodeType) offsetX *= 3;
+      if (!d.data.nodeType || d.data.nodeType === 'leaf') offsetX *= 3;
       if (d.x < 0) offsetX = -offsetX;
       const textStartX = ((d.parent?.x || 0) - d.x) * (1 - treeConfig.linkTuringPointRatio) + offsetX;
       return `translate(${textStartX},${lineTextOffset[1]})`;

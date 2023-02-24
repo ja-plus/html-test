@@ -8,6 +8,7 @@ export type TreeData = {
   moreData?: TreeData[]; // 暂存更多的节点
   children?: TreeData[]; // 子节点
   backgroundColor?: string; // 仅NodeType == 'parent'生效
+  icon?: string; // 根节点图标
 };
 /**构造函数传参 */
 export type ConsOption = {
