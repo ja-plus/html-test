@@ -31,21 +31,22 @@ module.exports = smp.wrap({
         loader: 'babel-loader', // loader的名称（必须）
       },
       {
-        test: /\.ts$/,
-        loader: 'ts-loader',
+        test: /\.(t|j)s$/,
+        // loader: 'ts-loader',
+        loader: 'swc-loader',
       },
       {
         test: /\.svelte$/,
         loader: 'svelte-loader',
       },
-      {
-        test: /\.m?js$/,
-        loader: 'esbuild-loader',
-        exclude: /node_modules/,
-        options: {
-          target: 'es2015',
-        },
-      },
+      // {
+      //   test: /\.m?js$/,
+      //   loader: 'esbuild-loader',
+      //   exclude: /node_modules/,
+      //   options: {
+      //     target: 'es2015',
+      //   },
+      // },
       {
         test: /\.css$/,
         use: ['style-loader', 'css-loader', 'postcss-loader'],
