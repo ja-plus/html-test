@@ -30,67 +30,76 @@
                 pointer-events: all;
             }
 
-            .root-node {
-                font-size: 18px;
+            .root-node-wrapper {
+                .root-node {
+                    font-size: 18px;
 
-                .root-node__icon {
-                    width: 32px;
-                    height: 32px;
-                    background-color: #1b63d9;
-                    border-radius: 5px;
-                    margin: 0 auto;
-                    display: flex;
+                    .root-node__icon {
+                        width: 32px;
+                        height: 32px;
+                        background-color: #1b63d9;
+                        border-radius: 5px;
+                        margin: 0 auto;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+
+                    .root-node__name {
+                        font-size: 18px;
+                        margin-top: 10px;
+                        line-height: 1.2;
+                        text-align: center;
+                        color: #1b63d9;
+                        font-weight: bolder;
+                    }
+                }
+            }
+
+            .parent-node-wrapper {
+                text-align: center;
+
+                .parent-node {
+                    // width: 100%;
+                    height: 100%;
+                    display: inline-flex;
+                    box-sizing: border-box;
+                    font-weight: bolder;
+                    text-align: center;
+                    color: #fff;
+                    cursor: pointer;
+                    border-radius: 4px;
+                    padding: 0 5px;
                     align-items: center;
                     justify-content: center;
-                }
 
-                .root-node__name {
-                    font-size: 18px;
-                    margin-top: 10px;
-                    line-height: 1.2;
-                    text-align: center;
-                    color: #1b63d9;
-                    font-weight: bolder;
-                }
-            }
+                    .text {
+                        line-height: 1;
+                    }
 
-            .parent-node {
-                width: 100%;
-                height: 100%;
-                display: inline-flex;
-                box-sizing: border-box;
-                font-weight: bolder;
-                text-align: center;
-                color: #fff;
-                cursor: pointer;
-                border-radius: 4px;
-                align-items: center;
-                justify-content: center;
-
-                .text {
-                    line-height: 1;
-                }
-
-                &:hover {
-                    filter: brightness(1.2);
+                    &:hover {
+                        filter: brightness(1.2);
+                    }
                 }
             }
 
-            .leaf-node {
-                display: block;
-                color: #494966;
-                padding: 0 4px;
-                overflow: hidden;
-                text-overflow: ellipsis;
+            .leaf-node-wrapper {
+                .leaf-node {
+                    display: block;
+                    color: #494966;
+                    padding: 0 4px;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
 
-                .node-text {
-                    white-space: nowrap;
+                    .node-text {
+                        white-space: nowrap;
 
-                    cursor: pointer;
-                }
+                        cursor: pointer;
+                    }
 
-                &.more .node-text {
-                    color: #3978dd;
+                    &.more .node-text {
+                        color: #3978dd;
+                    }
                 }
             }
 

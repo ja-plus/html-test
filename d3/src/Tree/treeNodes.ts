@@ -18,6 +18,7 @@ export function addRootNode(this: Tree, d3Selection: NodeSelection) {
     .append('foreignObject')
     .attr('width', rootNodeHeight)
     .attr('height', rootNodeHeight)
+    .attr('class', 'root-node-wrapper')
     .attr('transform', `translate(-${rootNodeWidth / 2},-20)`)
     .on('click', (e, d) => {
       this.dispatchEvent('rootClick', d.data, d);
@@ -41,6 +42,7 @@ export function addParentNode(this: Tree, d3Selection: NodeSelection) {
     .append('foreignObject')
     .attr('width', parentNodeWidth)
     .attr('height', parentNodeHeight)
+    .attr('class', 'parent-node-wrapper')
     .attr('transform', `translate(-${parentNodeWidth / 2},-${parentNodeHeight / 2})`)
     .on('click', (e, d) => {
       this.toggleNode(d);
@@ -75,6 +77,7 @@ export function addLeafNode(this: Tree, d3Selection: NodeSelection) {
     .append('foreignObject')
     .attr('width', treeConfig.nodeWidth)
     .attr('height', treeConfig.nodeHeight)
+    .attr('class', 'leaf-node-wrapper')
     .attr('transform', d => {
       return `translate(-${d.x < 0 ? treeConfig.nodeWidth : 0},-${treeConfig.nodeHeight / 2})`;
     })
@@ -100,6 +103,7 @@ export function addMoreNode(this: Tree, d3Selection: NodeSelection) {
     .append('foreignObject')
     .attr('width', treeConfig.nodeWidth)
     .attr('height', treeConfig.nodeHeight)
+    .attr('class', 'leaf-node-wrapper')
     .attr('transform', d => {
       return `translate(-${d.x < 0 ? treeConfig.nodeWidth : 0},-${treeConfig.nodeHeight / 2})`;
     })
