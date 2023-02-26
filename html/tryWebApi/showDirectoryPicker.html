@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>打开文件夹</title>
+</head>
+<style>
+    body{
+        display: flex;
+        flex-direction: column;
+        margin:0;
+        height:100vh;
+    }
+    main {
+        display: flex;
+        flex:1;
+        height:0;
+    }
+    aside{
+        width: 200px;
+        border: 1px dashed #aaa;
+        overflow:auto
+    }
+    section {
+        flex:1;
+        border: 1px solid red;
+        overflow: auto;
+        white-space: pre;
+    }
+</style>
+<body>
+    <main >
+        <aside>
+            <button id="openFolderBtn">showDirectoryPicker(chrome >= 86)</button>
+            <ul id="fileList"></ul>
+        </aside>
+        <section id="fileContent">
+
+        </section>
+    </main>
+</body>
+<script>
+    const fileList = document.querySelector('#fileList');
+    const fileContent = document.querySelector('#fileContent');
+    const openFolderBtn = document.querySelector('#openFolderBtn');
+    openFolderBtn.addEventListener('click', async () => {
+      try {
+        const handle = await window.showDirectoryPicker(); // 弹出选择文件夹对话框
+        console.log(handle, 'h');
+        processHandle(handle);
+      } catch (error) {
+        // 用户拒绝
+        console.log(error);
+      }
+  //   window.showOpenFilePicker();// 选择文件对话框
+    });
+
+    /**
+     * @param {FileSystemDirectoryHandle} handle
+     */
+    async function processHandle(handle) {
+      removeChildNodes(fileList);
+      handle.children = [];
+      const iter = handle.entries();
+      for await (const item of iter) {
+        let li = document.createElement('li');
+        li.textContent = item[0];
+        fileList.append(li);
+        const handle = item[1];
+        li.onclick = async function () {
+          const file = await handle.getFile();
+          const fr = new FileReader();
+          fr.onload = function () {
+            const text = fr.result;
+            fileContent.innerText = text;
+          };
+          fr.readAsText(file);
+        };
+      }
+    }
+    /**
+     * @param {HTMLElement} el
+     */
+    function removeChildNodes(el) {
+      let cur = el;
+      while ((cur = el.lastChild)) {
+        cur.remove();
+      }
+    }
+</script>
+</html>
