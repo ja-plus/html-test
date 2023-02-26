@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Visualization</title>
+</head>
+<style>
+  body{
+    background-color: #000;
+  }
+  audio {
+    width: 100%;
+  }
+</style>
+<body>
+    <canvas style="border:1px dashed #aaa;"></canvas>
+    <audio src="./assets/music/Cyberangel.mp3" controls autoplay></audio>
+</body>
+<script>
+    /**@type {HTMLAudioElement}*/
+    const audioEle = document.querySelector('audio');
+    const cvs = document.querySelector('canvas');
+    const ctx = cvs.getContext('2d');
+    const localStorageKey = 'musicProgress';
+    window.addEventListener('beforeunload', () => {
+      storeProgress();
+    });
+    function initProgress() {
+      const currentTime = window.localStorage.getItem(localStorageKey);
+      audioEle.currentTime = currentTime;
+      console.log('get store time', currentTime);
+    }
+    initProgress();
+    // audioEle.oncanplay = function () {
+    //   audioEle.play();
+    // };
+    function initCvs() {
+      cvs.width = document.body.clientWidth;
+      cvs.height = window.innerHeight * 0.2;
+    }
+    initCvs();
+    window.addEventListener('resize', () => {
+      initCvs();
+    });
+
+    let isInit = false;
+    /**@type {Unit8Array}*/
+    let dataArr;
+    /**@type {AnalyserNode}*/
+    let analyzer;
+    audioEle.onplay = function () {
+      if (isInit) return;
+      // 初始化
+      const audCtx = new AudioContext(); // 创建音频上下文
+      const source = audCtx.createMediaElementSource(audioEle); // 创建音频源节点，从元素中获取音频
+      analyzer = audCtx.createAnalyser(); // 创建分析器
+      analyzer.fftSize = 512; // 傅里叶变化的窗口大小，窗口越大越细腻
+      dataArr = new Uint8Array(analyzer.frequencyBinCount); //字节数组，因为款苏傅里叶变化的图是对称的，只要一半就可以
+
+      source.connect(analyzer);
+      // 分析器连接到输出设备
+      analyzer.connect(audCtx.destination);
+      isInit = true;
+    };
+
+    /**把分析出的波形绘制到canvas上*/
+    function draw() {
+      ctx.fillStyle = '#eee';
+      window.requestAnimationFrame(() => {
+        const { width, height } = cvs;
+        // 清空画布
+        ctx.clearRect(0, 0, width, height);
+        draw();
+        if (!isInit) return;
+        // 将分析器节点分析的数据到数组中
+        analyzer.getByteFrequencyData(dataArr);
+        // console.log(dataArr);
+        const barWidth = width / dataArr.length;
+        for (let i = 0; i < dataArr.length; i++) {
+          const data = dataArr[i];
+          const barHeight = (data / 255) * height;
+          const x = i * barWidth;
+          const y = height - barHeight;
+          ctx.fillRect(x + i, y, barWidth, barHeight); // i 柱状图间隔
+        }
+      });
+    }
+    draw();
+
+    function storeProgress() {
+      const { currentTime } = audioEle;
+      console.log('store time:', currentTime);
+      window.localStorage.setItem(localStorageKey, currentTime);
+    }
+</script>
+</html>
