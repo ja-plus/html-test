@@ -23,6 +23,18 @@
         border: 1px dashed #aaa;
         overflow:auto
     }
+    aside ul {
+      list-style: none;
+      padding:10px;
+      margin:0;
+      width:max-content;
+    }
+    aside ul li {
+      cursor:pointer;
+    }
+    aside ul li:hover {
+      background-color:#eee;
+    }
     section {
         flex:1;
         border: 1px solid red;
@@ -57,27 +69,46 @@
   //   window.showOpenFilePicker();// 选择文件对话框
     });
 
+    let stack = [];
     /**
      * @param {FileSystemDirectoryHandle} handle
      */
     async function processHandle(handle) {
+      stack.push(handle);
       removeChildNodes(fileList);
       handle.children = [];
       const iter = handle.entries();
+      if (stack.length > 1) {
+        let li = document.createElement('li');
+        li.textContent = '../';
+        li.onclick = function () {
+          stack.pop();
+          processHandle(stack.pop());
+        };
+        fileList.append(li);
+      }
+    
       for await (const item of iter) {
         let li = document.createElement('li');
-        li.textContent = item[0];
-        fileList.append(li);
-        const handle = item[1];
-        li.onclick = async function () {
-          const file = await handle.getFile();
-          const fr = new FileReader();
-          fr.onload = function () {
-            const text = fr.result;
-            fileContent.innerText = text;
+        if (item[1].kind === 'directory') {
+          li.textContent = '/' + item[0];
+          li.onclick = async function () {
+            processHandle(item[1]);
           };
-          fr.readAsText(file);
-        };
+        } else {
+          li.textContent = item[0];
+          const handle = item[1];
+          li.onclick = async function () {
+            const file = await handle.getFile();
+            const fr = new FileReader();
+            fr.onload = function () {
+              const text = fr.result;
+              fileContent.innerText = text;
+            };
+            fr.readAsText(file);
+          };
+        }
+        fileList.append(li);
       }
     }
     /**

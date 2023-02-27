@@ -28,5 +28,14 @@ fn main() {
   println!("{:#?}", map);
 
   // 先定好map大小
-  let map:HashMap<i32, i32> = HashMap::with_capacity(10);
+  let mut map:HashMap<i32, i32> = HashMap::with_capacity(10);
+  map.insert(1,1);
+  map.insert(2,1);
+  map.remove(&2); // remove
+
+  // 遍历
+  for (k,v) in map {
+    println!("k:{},v:{}",k,v);
+  }
+
 }
