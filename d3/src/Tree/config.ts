@@ -1,5 +1,5 @@
 export const treeConfig = Object.freeze({
-  nodeWidth: 120,
+  nodeWidth: 220,
   nodeHeight: 18,
   /**折线转折点位置比例 */
   linkTuringPointRatio: 1 / 2,

@@ -3,7 +3,7 @@ import { HierarchyNode, HierarchyPointNode } from 'd3';
 // import * as d3 from 'https://cdn.skypack.dev/d3@7';
 import { treeConfig } from './config';
 import './style.less';
-import { addLeafNode, addLineText, addLink, addMoreNode, addParentNode, addRootNode, fadeOutNode, fadeOutLink } from './treeNodes';
+import { addLeafNode, addLineText, addLink, addMoreNode, addParentNode, addRootNode, fadeOutLink, fadeOutNode } from './treeNodes';
 import { ConsOption, EventCb, EventType, TreeData } from './types';
 import { addShowMoreNode, eachChildren, HighlightHelper, keyGen, PositionStore, separateTree } from './utils';
 
@@ -21,7 +21,7 @@ export class Tree {
   #$zoom = D3.zoom().duration(treeConfig.animationDuration).scaleExtent([0.2, 10]);
 
   #treeLayout = D3.tree<TreeData>()
-    .nodeSize([treeConfig.nodeHeight, treeConfig.nodeWidth * 2]) // 设置tree的大小
+    .nodeSize([treeConfig.nodeHeight, treeConfig.nodeWidth]) // 设置tree的大小
     .separation((a, b) => {
       // 根据是否为同一父节点设置节点距离比例
       if (a.parent !== b.parent) return 2;
@@ -77,6 +77,7 @@ export class Tree {
   setTreeData(data: TreeData) {
     if (!data) throw new TypeError('Invalid param data');
     this.#dataCopy = window.structuredClone(data);
+    this.#$nodeGroup.selectAll('.' + treeConfig.className.nodeGroup).remove(); // 把节点去除再重新添加(重新绑定节点事件)
     this.#initHierarchyData();
     this.renderTree(true);
   }
@@ -89,7 +90,9 @@ export class Tree {
   /**更新树节点位置 */
   updateTreeNodePosition() {
     this.#nodes = this.#treeLayout(this.#hierarchyData); // this.#nodes === this.#hierarchyData
-    this.#nodes.each(a => ([a.x, a.y] = [a.y, a.x])); // 旋转90度
+    this.#nodes.each(a => {
+      [a.x, a.y] = [a.y, a.x]; // 旋转90度
+    });
     separateTree(this.#nodes); // left tree | right tree
   }
 
@@ -354,8 +357,8 @@ export class Tree {
 
     // addShowMoreNode(this.#hierarchyData); // 重新添加产
     // 将节点移除
-    this.#$nodeGroup.selectAll('.node').remove();
-    this.#$linkGroup.selectAll('.node-link').remove();
-    this.renderTree();
+    this.#$nodeGroup.selectAll('.' + treeConfig.className.nodeGroup).remove();
+    this.#$linkGroup.selectAll('.' + treeConfig.className.linkGroup).remove();
+    this.renderTree(true);
   }
 }

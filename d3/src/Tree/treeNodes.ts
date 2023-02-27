@@ -7,6 +7,8 @@ const rootNodeWidth = 100;
 const rootNodeHeight = 100;
 const parentNodeWidth = 70;
 const parentNodeHeight = 22;
+const leafNodeWidth = 300;
+const leafNodeHeight = 20;
 const lineTextOffset = [15, -4]; // 偏移量
 
 type NodeSelection = Selection<SVGGElement, HierarchyPointNode<TreeData>, SVGGElement, unknown>;
@@ -75,11 +77,11 @@ export function addParentNode(this: Tree, d3Selection: NodeSelection) {
 export function addLeafNode(this: Tree, d3Selection: NodeSelection) {
   const fObj = d3Selection
     .append('foreignObject')
-    .attr('width', treeConfig.nodeWidth)
-    .attr('height', treeConfig.nodeHeight)
+    .attr('width', leafNodeWidth)
+    .attr('height', leafNodeHeight)
     .attr('class', 'leaf-node-wrapper')
     .attr('transform', d => {
-      return `translate(-${d.x < 0 ? treeConfig.nodeWidth : 0},-${treeConfig.nodeHeight / 2})`;
+      return `translate(-${d.x < 0 ? leafNodeWidth : 0},-${leafNodeHeight / 2})`;
     })
     .on('click', (e, d) => {
       this.dispatchEvent('leafClick', d.data, d);

@@ -18,7 +18,7 @@ export function addShowMoreNode(tree: HierarchyNode<TreeData>, options?: { size?
       moreData.forEach(it => addShowMoreNode(it, options)); // 隐藏起来的节点也要遍历子节点
 
       const showMoreNode = D3.hierarchy<TreeData>({
-        id: Date.now() + '' + Math.random(),
+        id: tree.data.id + '_more',
         name: `查看更多(${treeLen - size})`,
         nodeType: 'more',
       });
