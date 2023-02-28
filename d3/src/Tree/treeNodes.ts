@@ -5,11 +5,11 @@ import { TreeData } from './types';
 
 const rootNodeWidth = 100;
 const rootNodeHeight = 100;
-const parentNodeWidth = 70;
+const parentNodeWidth = 100;
 const parentNodeHeight = 22;
 const leafNodeWidth = 300;
 const leafNodeHeight = 20;
-const lineTextOffset = [15, -4]; // 偏移量
+const lineTextOffset = [10, -4]; // 偏移量
 
 type NodeSelection = Selection<SVGGElement, HierarchyPointNode<TreeData>, SVGGElement, unknown>;
 /**
@@ -44,8 +44,10 @@ export function addParentNode(this: Tree, d3Selection: NodeSelection) {
     .append('foreignObject')
     .attr('width', parentNodeWidth)
     .attr('height', parentNodeHeight)
-    .attr('class', 'parent-node-wrapper')
-    .attr('transform', `translate(-${parentNodeWidth / 2},-${parentNodeHeight / 2})`)
+    .attr('class', d => {
+      return d.x < 0 ? 'parent-node-wrapper left' : 'parent-node-wrapper';
+    })
+    .attr('transform', d => `translate(${d.x < 0 ? -parentNodeWidth : 0},-${parentNodeHeight / 2})`)
     .on('click', (e, d) => {
       this.toggleNode(d);
       this.updateTreeNodePosition();
@@ -135,7 +137,7 @@ export function addLineText(this: Tree, d3Selection: NodeSelection) {
       let offsetX = lineTextOffset[0];
       if (!d.data.nodeType || d.data.nodeType === 'leaf') offsetX *= 3;
       if (d.x < 0) offsetX = -offsetX;
-      const textStartX = ((d.parent?.x || 0) - d.x) * (1 - treeConfig.linkTuringPointRatio) + offsetX;
+      const textStartX = ((d.parent?.x || 0) - d.x) * (1 - treeConfig.linkTuringPointRatio(d)) + offsetX;
       return `translate(${textStartX},${lineTextOffset[1]})`;
     })
     .attr('text-anchor', d => {
@@ -163,7 +165,7 @@ export function addLink(this: Tree, d3Selection: Selection<EnterElement, Hierarc
         result = `M${origin} L${origin} L${origin} L${origin}`;
       } else if (lineStartPosition?.length === 4) {
         const [sourceX, sourceY, targetX, targetY] = lineStartPosition;
-        const half = (d.target.x - d.source.x) * treeConfig.linkTuringPointRatio;
+        const half = (d.target.x - d.source.x) * treeConfig.linkTuringPointRatio(d.target);
         result = `M${sourceX},${sourceY} L${sourceX + half},${sourceY} L${sourceX + half},${targetY} L${targetX},${targetY}`;
       } else {
         const origin = `${d.source.x},${d.source.y}`;

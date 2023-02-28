@@ -73,11 +73,13 @@ export class Tree {
     this.#$nodeGroup = this.#$wrapGroup.append('g').attr('class', treeConfig.className.nodesGroup);
     this.setTreeToCenter();
   }
-
+  clear() {
+    this.#$nodeGroup.selectAll('.' + treeConfig.className.nodeGroup).remove(); // 把节点去除再重新添加(重新绑定节点事件)
+    this.#$nodeGroup.selectAll('.' + treeConfig.className.linkGroup).remove(); // 防止触发移除动画
+  }
   setTreeData(data: TreeData) {
     if (!data) throw new TypeError('Invalid param data');
     this.#dataCopy = window.structuredClone(data);
-    this.#$nodeGroup.selectAll('.' + treeConfig.className.nodeGroup).remove(); // 把节点去除再重新添加(重新绑定节点事件)
     this.#initHierarchyData();
     this.renderTree(true);
   }
@@ -92,6 +94,9 @@ export class Tree {
     this.#nodes = this.#treeLayout(this.#hierarchyData); // this.#nodes === this.#hierarchyData
     this.#nodes.each(a => {
       [a.x, a.y] = [a.y, a.x]; // 旋转90度
+      if (a.depth === 1) {
+        a.x *= 0.8; // 一级节点宽度收窄
+      }
     });
     separateTree(this.#nodes); // left tree | right tree
   }
@@ -205,7 +210,7 @@ export class Tree {
       .transition()
       .duration(init ? 0 : treeConfig.animationDuration)
       .attr('d', d => {
-        const half = (d.target.x - d.source.x) * treeConfig.linkTuringPointRatio;
+        const half = (d.target.x - d.source.x) * treeConfig.linkTuringPointRatio(d.target);
         return `M${d.source.x},${d.source.y} L${d.source.x + half},${d.source.y} L${d.source.x + half},${d.target.y} L${d.target.x},${d.target.y}`;
       });
     // #endregion
