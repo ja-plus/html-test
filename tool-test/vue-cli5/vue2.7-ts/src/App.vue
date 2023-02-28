@@ -2,12 +2,17 @@
   <div id="app">
     <img alt="Vue logo" src="./assets/logo.png">
     <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
+    <div id="vue3app"></div>
   </div>
 </template>
 
 <script lang="ts" setup>
+import { onMounted } from 'vue';
 import HelloWorld from './components/HelloWorld.vue';
-
+import { app } from './vue3/app';
+onMounted(() => {
+  app.mount('#vue3app');
+})
 </script>
 
 <style lang="less">
