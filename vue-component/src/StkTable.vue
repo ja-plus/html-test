@@ -43,7 +43,7 @@
             v-for="col in virtualX_on ? virtualX_columnPart : row"
             :key="col.dataIndex"
             :data-col-key="col.dataIndex"
-            :draggable="headerDrag? 'true':'false'"
+            :draggable="headerDrag ? 'true' : 'false'"
             :rowspan="col.rowSpan"
             :colspan="col.colSpan"
             :style="{
@@ -181,7 +181,7 @@
 
 <script>
 /**
- * @version 1.0.6
+ * @version 1.0.7
  * @author JA+
  * 不支持低版本浏览器非虚拟滚动表格的表头固定，列固定，因为会卡。
  * TODO:存在的问题：
@@ -203,6 +203,8 @@ const _highlightColor = {
 };
 /** 高亮持续时间 */
 const _highlightDuration = 2000;
+/** 高亮变更频率 */
+const _highlightColorChangeFreq = 100;
 
 function _howDeepTheColumn(arr, level = 1) {
   const levels = [level];
@@ -420,9 +422,9 @@ export default {
     },
     /**表头是否可拖动 */
     headerDrag: {
-      type:Boolean,
-      default: false
-    }
+      type: Boolean,
+      default: false,
+    },
   },
   emits: [
     'row-click',
@@ -903,34 +905,36 @@ export default {
       if (this.calcHighlightDimLoop) return;
       this.calcHighlightDimLoop = true;
       // js计算gradient
-      const that = this;
       // raf 太频繁。考虑setTimeout分段设置颜色，过渡靠css transition 补间
-      window.setTimeout(function recursion() {
-        const highlightRows = [...that.highlightDimRows];
-        const nowTs = Date.now();
-        for (let i = 0; i < highlightRows.length; i++) {
-          const row = highlightRows[i];
-          // const rowKeyValue = that.rowKeyGen(row);
-          // const rowEl = that.$el.querySelector(`[data-row-key="${rowKeyValue}"]`);
-          //  经过的时间 ÷ 2s 计算出 颜色过渡进度 (0-1)
-          const progress = (nowTs - row._bgc_progress) / _highlightDuration;
-          if (progress <= 1) {
-            row._bgc = that.highlightInter(progress);
-          } else {
-            row._bgc = ''; // 清空颜色
-            highlightRows.splice(i--, 1);
+      const recursion = () => {
+        window.setTimeout(() => {
+          const highlightRows = [...this.highlightDimRows];
+          const nowTs = Date.now();
+          for (let i = 0; i < highlightRows.length; i++) {
+            const row = highlightRows[i];
+            // const rowKeyValue = this.rowKeyGen(row);
+            // const rowEl = this.$el.querySelector(`[data-row-key="${rowKeyValue}"]`);
+            //  经过的时间 ÷ 2s 计算出 颜色过渡进度 (0-1)
+            const progress = (nowTs - row._bgc_progress) / _highlightDuration;
+            if (progress <= 1) {
+              row._bgc = this.highlightInter(progress);
+            } else {
+              row._bgc = ''; // 清空颜色
+              highlightRows.splice(i--, 1);
+            }
           }
-        }
-        that.highlightDimRows = new Set(highlightRows);
+          this.highlightDimRows = new Set(highlightRows);
 
-        if (that.highlightDimRows.size > 0) {
-          // 还有高亮的行,则下一次循环
-          window.setTimeout(recursion, 100);
-        } else {
-          // 没有则停止循环
-          that.calcHighlightDimLoop = false;
-        }
-      }, 100);
+          if (this.highlightDimRows.size > 0) {
+            // 还有高亮的行,则下一次循环
+            recursion();
+          } else {
+            // 没有则停止循环
+            this.calcHighlightDimLoop = false;
+          }
+        }, _highlightColorChangeFreq);
+      };
+      recursion();
     },
 
     // ---- ref function-----

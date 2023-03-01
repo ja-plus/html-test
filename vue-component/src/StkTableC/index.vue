@@ -69,6 +69,7 @@ export default {
         };
       });
     },
+    /** 过滤得到所有固定列 */
     fixedLeftColumns() {
       return this.columns
         .filter(it => it.fixed === 'left')
@@ -80,6 +81,12 @@ export default {
   watch: {
     dataSource(val) {
       if (val) this.dataSourceCopy = val;
+      if (this.fixedLeftColumns?.length) {
+        // 重新计算虚拟滚动高度，因为为了展示暂无数据兜底，左侧固定列的高度开始为0
+        this.$nextTick(() => {
+          this.$refs.stkTableFixedLeft.initVirtualScroll();
+        });
+      }
     },
   },
   mounted() {
