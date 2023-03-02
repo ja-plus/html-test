@@ -39,13 +39,23 @@ export class Tree {
     rootClick: [],
     zoom: [],
   };
-  #option: ConsOption = {
+  option: ConsOption = {
     key: 'id',
     width: '100%',
     height: '100%',
   };
+  /**当前zoom 位置 */
+  currentTransform = {
+    x: 0,
+    y: 0,
+    k: 1,
+  };
+  /**svg 容器大小 */
+  svgSize: Partial<DOMRect> & { width: number; height: number } = { width: 800, height: 400 };
+
+  // visibleHelper: VisibleHelper | null = null;
   get key() {
-    return this.#option.key;
+    return this.option.key;
   }
   /**
    *
@@ -55,12 +65,12 @@ export class Tree {
    */
   constructor(selector: string, option?: Partial<ConsOption>) {
     this.selector = selector;
-    Object.assign(this.#option, option || {});
-
+    Object.assign(this.option, option || {});
+    this.initVirtual();
     this.#$svg = D3.select(selector)
       .append('svg')
-      .attr('width', this.#option.width)
-      .attr('height', this.#option.height)
+      .attr('width', this.option.width)
+      .attr('height', this.option.height)
       .attr('class', treeConfig.className.svg);
     // .attr('viewBox', '-800 -300 1600 600');
     this.#$wrapGroup = this.#$svg.append('g').attr('class', treeConfig.className.rootGroup);
@@ -68,14 +78,30 @@ export class Tree {
       this.#$wrapGroup.attr('transform', ev.transform);
       this.dispatchEvent('zoom', ev);
     });
+    if (this.option.virtual) {
+      this.#$zoom.on('end', ev => {
+        this.currentTransform = ev.transform;
+        this.clear();
+        this.renderTree(true);
+      });
+    }
     this.#$svg.call(this.#$zoom as any);
     this.#$linkGroup = this.#$wrapGroup.append('g').attr('class', treeConfig.className.linksGroup);
     this.#$nodeGroup = this.#$wrapGroup.append('g').attr('class', treeConfig.className.nodesGroup);
     this.setTreeToCenter();
   }
+  /**初始化按需加载参数 */
+  initVirtual() {
+    const dom = document.querySelector(this.selector);
+    if (!dom) {
+      throw new Error('can not find element by selector:' + this.selector);
+    }
+    this.svgSize = dom.getBoundingClientRect();
+  }
+  // TODO: deal reset window initVirtual
   clear() {
     this.#$nodeGroup.selectAll('.' + treeConfig.className.nodeGroup).remove(); // 把节点去除再重新添加(重新绑定节点事件)
-    this.#$nodeGroup.selectAll('.' + treeConfig.className.linkGroup).remove(); // 防止触发移除动画
+    this.#$linkGroup.selectAll('.' + treeConfig.className.linkGroup).remove(); // 防止触发移除动画
   }
   setTreeData(data: TreeData) {
     if (!data) throw new TypeError('Invalid param data');

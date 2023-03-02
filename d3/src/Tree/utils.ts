@@ -1,6 +1,7 @@
 import * as D3 from 'd3';
 import { HierarchyNode, HierarchyPointNode } from 'd3';
-import { Key, TreeData } from './types';
+import { Tree } from './index';
+import { Key, LinkSelection, NodeSelection, TreeData } from './types';
 
 /**
  * 增加查看更多按钮
@@ -166,4 +167,42 @@ export class HighlightHelper {
     }
     return isHighlight;
   }
+}
+
+/**计算节点是否在可视区内 */
+// export class VisibleHelper {
+//   static ins: VisibleHelper | null = null;
+//   /**可见的节点 */
+//   visibleNodes = new Set();
+//   /**可见的线 */
+//   visibleLines = new Set();
+
+//   static new() {
+//     if (this.ins) return this.ins;
+//     this.ins = new VisibleHelper();
+//     return this.ins;
+//   }
+//   calc() {}
+// }
+
+/**过滤不在视口的节点 */
+export function filterNotVisibleNode(this: Tree, d3Selection: NodeSelection): NodeSelection {
+  if (!this.option.virtual) return d3Selection;
+  return d3Selection.filter(it => {
+    const x = it.x * this.currentTransform.k + this.currentTransform.x;
+    const y = it.y * this.currentTransform.k + this.currentTransform.y;
+    return x > 0 && y > 0 && x < this.svgSize.width && y < this.svgSize.height;
+  });
+}
+export function filterNotVisibleLink(this: Tree, d3Selection: LinkSelection): LinkSelection {
+  if (!this.option.virtual) return d3Selection;
+  // 所有子节点都在可视区域外才隐藏
+  const { x, y, k } = this.currentTransform;
+  return d3Selection.filter(it => {
+    let [minX, maxX] = [it.source.x * k + x, it.target.x * k + x];
+    let [minY, maxY] = [it.source.y * k + y, it.target.y * k + y];
+    if (minX > maxX) [minX, maxX] = [maxX, minX];
+    if (minY > maxY) [minY, maxY] = [maxY, minY];
+    return maxX > 0 && minX < this.svgSize.width && maxY > 0 && minY < this.svgSize.height;
+  });
 }

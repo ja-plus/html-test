@@ -1,7 +1,8 @@
-import { BaseType, EnterElement, HierarchyPointLink, HierarchyPointNode, Selection } from 'd3';
+import { BaseType, HierarchyPointLink, HierarchyPointNode, Selection } from 'd3';
 import { treeConfig } from './config';
 import { Tree } from './index';
-import { TreeData } from './types';
+import { LinkSelection, NodeSelection, TreeData } from './types';
+import { filterNotVisibleNode, filterNotVisibleLink } from './utils';
 
 const rootNodeWidth = 100;
 const rootNodeHeight = 100;
@@ -11,7 +12,6 @@ const leafNodeWidth = 300;
 const leafNodeHeight = 20;
 const lineTextOffset = [10, -4]; // 偏移量
 
-type NodeSelection = Selection<SVGGElement, HierarchyPointNode<TreeData>, SVGGElement, unknown>;
 /**
  * 添加根节点
  */
@@ -40,7 +40,8 @@ export function addRootNode(this: Tree, d3Selection: NodeSelection) {
  * 添加父节点
  */
 export function addParentNode(this: Tree, d3Selection: NodeSelection) {
-  const fObj = d3Selection
+  const fObj = filterNotVisibleNode
+    .call(this, d3Selection)
     .append('foreignObject')
     .attr('width', parentNodeWidth)
     .attr('height', parentNodeHeight)
@@ -77,7 +78,8 @@ export function addParentNode(this: Tree, d3Selection: NodeSelection) {
  * 添加叶子节点
  */
 export function addLeafNode(this: Tree, d3Selection: NodeSelection) {
-  const fObj = d3Selection
+  const fObj = filterNotVisibleNode
+    .call(this, d3Selection)
     .append('foreignObject')
     .attr('width', leafNodeWidth)
     .attr('height', leafNodeHeight)
@@ -103,7 +105,8 @@ export function addLeafNode(this: Tree, d3Selection: NodeSelection) {
  * 添加查看更多节点
  */
 export function addMoreNode(this: Tree, d3Selection: NodeSelection) {
-  const fObj = d3Selection
+  const fObj = filterNotVisibleNode
+    .call(this, d3Selection)
     .append('foreignObject')
     .attr('width', treeConfig.nodeWidth)
     .attr('height', treeConfig.nodeHeight)
@@ -130,7 +133,8 @@ export function addMoreNode(this: Tree, d3Selection: NodeSelection) {
  * 添加线上的文字
  */
 export function addLineText(this: Tree, d3Selection: NodeSelection) {
-  return d3Selection
+  return filterNotVisibleNode
+    .call(this, d3Selection)
     .append('text')
     .attr('class', 'line-text')
     .attr('transform', d => {
@@ -153,8 +157,9 @@ export function addLineText(this: Tree, d3Selection: NodeSelection) {
 }
 
 /**enter 连接线 */
-export function addLink(this: Tree, d3Selection: Selection<EnterElement, HierarchyPointLink<TreeData>, SVGGElement, unknown>) {
-  return d3Selection
+export function addLink(this: Tree, d3Selection: LinkSelection) {
+  return filterNotVisibleLink
+    .call(this, d3Selection)
     .append('path')
     .attr('opacity', 1)
     .attr('d', (d: any) => {

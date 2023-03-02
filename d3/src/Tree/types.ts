@@ -1,3 +1,5 @@
+import { EnterElement, HierarchyPointLink, HierarchyPointNode, Selection } from 'd3';
+
 export type NodeType = 'root' | 'parent' | 'leaf' | 'more';
 export type TreeData = {
   id: string; //唯一值
@@ -15,6 +17,8 @@ export type ConsOption = {
   key: string;
   width: string | number;
   height: string | number;
+  /**是否虚拟展示 */
+  virtual?: boolean;
 };
 
 export type KeyFunc = (item: any) => string;
@@ -28,3 +32,6 @@ export type Key = string | KeyFunc;
  */
 export type EventType = 'leafClick' | 'lineTextClick' | 'rootClick' | 'zoom';
 export type EventCb = (...args: any[]) => void;
+
+export type NodeSelection = Selection<SVGGElement, HierarchyPointNode<TreeData>, SVGGElement, unknown>;
+export type LinkSelection = Selection<EnterElement, HierarchyPointLink<TreeData>, SVGGElement, unknown>;

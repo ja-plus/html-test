@@ -16,6 +16,9 @@ const data = {
         { name: '上海银行1', lineText: ' 16次' },
         { name: '上海银行2', lineText: ' 16次' },
         { name: '上海银行3', lineText: ' 16次' },
+        ...new Array(1000).fill(0).map((it, i) => {
+          return { name: '银行存款-' + i };
+        }),
       ],
     },
     {
@@ -27,6 +30,9 @@ const data = {
         { name: 'D', value: '叶子节点' },
         { name: 'D1', value: '叶子节点' },
         { name: 'D2', value: '叶子节点' },
+        ...new Array(1000).fill(0).map((it, i) => {
+          return { name: 'xintuorongzi-' + i };
+        }),
       ],
     },
     {
@@ -35,6 +41,9 @@ const data = {
       children: [
         { name: 'E', value: '叶子节点' },
         { name: 'F', value: '叶子节点' },
+        ...new Array(1000).fill(0).map((it, i) => {
+          return { name: 'xintuo-' + i };
+        }),
       ],
     },
     {
@@ -54,7 +63,7 @@ const data = {
     },
   ],
 };
-const tree = new Tree('.tree', { key: 'name' });
+const tree = new Tree('.tree', { key: 'name', virtual: true });
 tree.setTreeData(data);
 tree.addEventListener('leafClick', data => {
   console.log('leaf click', data);
