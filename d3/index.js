@@ -1,32 +1,32 @@
 import { Tree } from './src/Tree';
 const data = {
-  name: '建设银行及其关联方',
+  name: 'Root',
   nodeType: 'root',
   children: [
     {
-      name: '银行存款',
+      name: 'A',
       nodeType: 'parent',
-      lineText: '借款52次',
+      lineText: '文字',
       children: [
-        { name: '兴业银行', lineText: '13次' },
-        { name: '中国银行', lineText: '2次' },
-        { name: '建设银行', lineText: '10次' },
-        { name: '招商银行', lineText: '4次' },
-        { name: '上海银行', lineText: ' 16次' },
-        { name: '上海银行1', lineText: ' 16次' },
-        { name: '上海银行2', lineText: ' 16次' },
-        { name: '上海银行3', lineText: ' 16次' },
+        { name: 'A', lineText: '13次' },
+        { name: 'A1', lineText: '2次' },
+        { name: 'A2', lineText: '10次' },
+        { name: 'A3', lineText: '4次' },
+        { name: 'A4', lineText: ' 16次' },
+        { name: 'A5', lineText: ' 16次' },
+        { name: 'A6', lineText: ' 16次' },
+        { name: 'A7', lineText: ' 16次' },
         ...new Array(1000).fill(0).map((it, i) => {
           return { name: '银行存款-' + i };
         }),
       ],
     },
     {
-      name: '信拖融资',
+      name: 'B',
       nodeType: 'parent',
-      lineText: '融资19次',
+      lineText: '19次',
       children: [
-        { name: '中国对外经济贸易信托有限公司', value: '叶子节点' },
+        { name: 'B', value: '叶子节点' },
         { name: 'D', value: '叶子节点' },
         { name: 'D1', value: '叶子节点' },
         { name: 'D2', value: '叶子节点' },
@@ -47,17 +47,17 @@ const data = {
       ],
     },
     {
-      name: '并购信息',
+      name: 'A',
       nodeType: 'parent',
-      lineText: '卖方8次',
+      lineText: '8次',
       align: 'left',
-      children: [
-        { name: '配股', nodeType: 'parent', lineText: '2次', children: [{ name: '3-1' }, { name: '3-2' }] },
-        { name: 'PEVC', nodeType: 'parent', lineText: '12次', children: [{ name: '3-3' }, { name: '3-4' }] },
-      ],
+      // children: [
+      //   { name: '配股', nodeType: 'parent', lineText: '2次', children: [{ name: '3-1' }, { name: '3-2' }] },
+      //   { name: 'PEVC', nodeType: 'parent', lineText: '12次', children: [{ name: '3-3' }, { name: '3-4' }] },
+      // ],
     },
     {
-      name: '股权融资',
+      name: 'B',
       align: 'left',
       nodeType: 'parent',
     },
