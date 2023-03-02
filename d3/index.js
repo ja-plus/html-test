@@ -25,19 +25,14 @@ const data = {
       name: 'B',
       nodeType: 'parent',
       lineText: '19次',
-      children: [
-        { name: 'B', value: '叶子节点' },
-        { name: 'D', value: '叶子节点' },
-        { name: 'D1', value: '叶子节点' },
-        { name: 'D2', value: '叶子节点' },
-        ...new Array(1000).fill(0).map((it, i) => {
-          return { name: 'xintuorongzi-' + i };
-        }),
-      ],
+      children: new Array(1000).fill(0).map((it, i) => {
+        return { name: 'B-' + i };
+      }),
     },
     {
-      name: '信托融资',
+      name: 'BB',
       nodeType: 'parent',
+      align: 'left',
       children: [
         { name: 'E', value: '叶子节点' },
         { name: 'F', value: '叶子节点' },
@@ -47,7 +42,7 @@ const data = {
       ],
     },
     {
-      name: 'A',
+      name: 'C',
       nodeType: 'parent',
       lineText: '8次',
       align: 'left',
@@ -57,7 +52,7 @@ const data = {
       // ],
     },
     {
-      name: 'B',
+      name: 'D',
       align: 'left',
       nodeType: 'parent',
     },
