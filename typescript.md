@@ -31,6 +31,7 @@ const a = [1,2] as const; // a:[number,number]
 * Extract 与Exclude相反
 * Partial 字段全部转换为可选 k?:v
 * Record<K,V> 将联合类型或enum类型K，作为对象的key，V作为每个key的类型。
+* InstanceType
 ```ts
   type A = '1'|'2';
   type B = Record<A,string>; //{'1':string,'2':string}
