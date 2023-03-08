@@ -1,12 +1,14 @@
 // mod use_reqwest;
 // mod dimen2_arr_lookup;
 // mod order_arr;
-mod string;
-mod vector;
 mod hash_map;
-mod tempCodeRunnerFile;
 mod owner_ship;
 mod quick_sort;
+mod string;
+mod tempCodeRunnerFile;
+mod use_trait;
+mod vector;
+use use_trait::{Person, Show};
 // #[tokio::main]
 fn main() {
     // 接收命令行参数
@@ -26,6 +28,8 @@ fn main() {
     // dimen2_arr_lookup::main();
     // order_arr::main();
     let num = (2 as i64).pow(10);
-    println!("{},", num!= 1024);
-}
+    println!("{},", num != 1024);
 
+    let person = Person::new();
+    person.show();
+}
