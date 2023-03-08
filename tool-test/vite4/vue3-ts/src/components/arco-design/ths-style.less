@@ -1,0 +1,62 @@
+.arco-picker-header{
+    background-color:#F7F7FC;
+    padding: 6px 16px;
+}
+.arco-picker-date-value{
+    border-radius: 4px;
+}
+.arco-picker-cell-today{
+
+    &::after{
+        display:none;
+    }
+    .arco-picker-date-value{
+        font-weight: bold;
+        color: #1b63d9;
+        border: 1px solid;
+        border-radius: 4px;
+       
+    }
+}
+.arco-picker-cell .arco-picker-date{
+    padding: 0;
+}
+.arco-picker-row{
+    padding: 3px 0;
+}
+.arco-picker-header-icon{
+    background-color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width:unset;
+    .arco-icon{
+        width: 20px;
+        height: 20px;
+    } 
+    &:not(.arco-picker-header-icon-hidden):hover{
+     background-color: transparent;
+    }
+}
+.arco-panel-date{
+
+}
+.arco-panel-year,.arco-panel-month {
+    .arco-picker-cell:not(.arco-picker-cell-selected):not(.arco-picker-cell-range-start):not(.arco-picker-cell-range-end):not(.arco-picker-cell-disabled):not(.arco-picker-cell-week) .arco-picker-date-value:hover{
+        border-radius: 4px;
+    }
+    .arco-picker-row{
+        justify-content: space-around;
+        .arco-picker-cell{
+            .arco-picker-date{
+                .arco-picker-date-value{
+                    padding: 0 10px;
+                    width:max-content;
+                }
+            }
+        }
+    }
+}
+.arco-picker-cell-in-view.arco-picker-cell-today:not(.arco-picker-cell-selected):not(.arco-picker-cell-range-start):not(.arco-picker-cell-range-end):not(.arco-picker-cell-disabled):not(.arco-picker-cell-week) .arco-picker-date-value:hover{
+    color:#1b63d9;
+}
