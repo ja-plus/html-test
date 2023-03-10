@@ -1,9 +1,7 @@
-extern crate wasm_bindgen;
-
+mod deal_json; // 这里面的函数也可以被js调用
 use std::str;
 use wasm_bindgen::prelude::*;
 // use std::num; // 开平方根方法
-
 #[wasm_bindgen]
 extern "C" {
     #[wasm_bindgen(js_namespace = console)]
