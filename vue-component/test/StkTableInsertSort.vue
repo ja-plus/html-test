@@ -46,7 +46,7 @@ function handleSortChange(col, order, data) {
   tableSortStore.order = order;
 }
 function addRow() {
-  const random = Math.random() * 100;
+  const random = Math.random() * 10;
   // const random = 5.961156089701742;
   // const random = 2.1578705526783915;
   const item = {

@@ -236,34 +236,26 @@ export function insertToOrderedArray(sortState, newItem, targetArray) {
   let sIndex = 0;
   let eIndex = data.length - 1;
   const targetVal = newItem[dataIndex];
-  while (eIndex > sIndex) {
+  while (sIndex <= eIndex) {
     // console.log(sIndex, eIndex);
     const midIndex = Math.floor((sIndex + eIndex) / 2);
     const midVal = data[midIndex][dataIndex];
-    if (order === 'asc') {
-      if (strCompare(midVal, targetVal, sortType) === 1) {
-        eIndex = midIndex > 0 ? midIndex - 1 : 0;
-      } else {
-        sIndex = midIndex + 1;
-      }
-    } else if (order === 'desc') {
-      if (strCompare(midVal, targetVal, sortType) === 1) {
-        sIndex = midIndex + 1;
-      } else {
-        eIndex = midIndex > 0 ? midIndex - 1 : 0;
-      }
+    const compareRes = strCompare(midVal, targetVal, sortType);
+    if (compareRes === 0) {
+      //midVal == targetVal
+      sIndex = midIndex;
+      break;
+    } else if (compareRes === -1) {
+      // midVal < targetVal
+      if (order === 'asc') sIndex = midIndex + 1;
+      else eIndex = midIndex - 1;
+    } else {
+      //midVal > targetVal
+      if (order === 'asc') eIndex = midIndex - 1;
+      else sIndex = midIndex + 1;
     }
   }
-  // console.log('startIndex', sIndex);
-  // 与eIndex 的数据比较大小，选择插入在前方还是后方
-  const lastVal = data[eIndex][dataIndex];
-  if (order === 'asc') {
-    if (strCompare(targetVal, lastVal, sortType) === 1) data.splice(eIndex + 1, 0, newItem);
-    else data.splice(sIndex, 0, newItem);
-  } else if (order === 'desc') {
-    if (strCompare(targetVal, lastVal, sortType) === -1) data.splice(eIndex + 1, 0, newItem);
-    else data.splice(sIndex, 0, newItem);
-  }
+  data.splice(sIndex, 0, newItem);
   return data;
 }
 /**
@@ -712,7 +704,7 @@ export default {
     /** 固定列的style */
     fixedStyle(tagType, col) {
       const style = {};
-      if (chromeVersion < 56) {
+      if (this.isLegacyMode) {
         if (tagType === 'th') {
           style.position = 'relative';
           style.top = this.virtualScroll.scrollTop + 'px';
