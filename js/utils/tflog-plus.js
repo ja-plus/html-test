@@ -1,14 +1,29 @@
 /**
  descriptor: 注意！！！ 重写了console。将console的信息也输出到了TFLog，因此，在内部不建议再直接使用被重写过的console.log，而是使用console.__log
  **/
+console.__log = console.log;
+console.__warn = console.warn;
+console.__error = console.error;
+console.__info = console.info;
+/**
+ * @typedef LogRecord
+ * @property {number} time
+ * @property {string} namespace
+ * @property {'log'|'warn'|'error'|'info'} level
+ * @property {string} descriptor
+ * @property {any[]} data
+ */
+
 const TFLog = (function () {
-  var STATUS_MAP = {
+  const STATUS_MAP = {
     INITING: 1,
     INITED: 2,
     FAILED: 3,
   };
-  var varStorage = {
-    isSupportIndexedDB: getSupport(),
+  const varStorage = {
+    /**@type {IDBDatabase} */
+    db: null,
+    isSupportIndexedDB: isSupportIDB(),
     status: STATUS_MAP.INITING,
     database: 'TFLog',
     pool: [],
@@ -17,29 +32,19 @@ const TFLog = (function () {
   };
 
   // maxDeep,最多的层级限制 6。在低版本浏览器下 hasOwnProperty 无效，遍历dom出现问题
-  function filterFunction(obj, maxDeep) {
-    maxDeep = maxDeep == undefined ? 5 : maxDeep;
-    var newObj = {},
-      i;
-    if (maxDeep == 0) {
-      return '';
-    } else {
-      maxDeep--;
-    }
+  function filterFunction(obj, maxDeep = 5) {
+    let newObj = {};
+    if (maxDeep === 0) return '';
     try {
       // 函数则转为字符串
-      if (typeof obj === 'function') {
-        return obj.toString();
-      }
+      if (typeof obj === 'function') return obj.toString();
 
-      if (typeof obj !== 'object') {
-        return obj;
-      }
+      if (typeof obj !== 'object') return obj;
 
-      for (i in obj) {
-        if (obj.hasOwnProperty(i)) {
-          if (typeof obj[i] !== 'function' && !isDOM(obj[i])) {
-            newObj[i] = filterFunction(obj[i], maxDeep);
+      for (let key in obj) {
+        if (Object.hasOwnProperty.call(obj, key)) {
+          if (typeof obj[key] !== 'function' && !isDOM(obj[key])) {
+            newObj[key] = filterFunction(obj[key], maxDeep - 1);
           }
         }
       }
@@ -74,22 +79,17 @@ const TFLog = (function () {
     if (relative && !/^\d{13}$/.test(relative)) {
       throw new TypeError('relative time should be standard unix timestamp');
     }
-
     return (relative || Date.now()) - time.replace(/d$/, '') * 24 * 3600 * 1000;
   }
 
-  function consumePool(pool) {
-    pool = pool || [];
-    var handler = pool.shift();
-    try {
-      while (handler) {
-        handler();
-        handler = pool.shift(); // 遍历调用
-      }
-    } catch (e) {}
+  function consumePool(pool = []) {
+    let handler;
+    while ((handler = pool.shift())) {
+      handler();
+    }
   }
 
-  function getSupport() {
+  function isSupportIDB() {
     var support;
     try {
       // indexedb 不支持 iframe
@@ -124,13 +124,12 @@ const TFLog = (function () {
   }
 
   function initIndexedDB() {
-    var request;
     try {
       if (!varStorage.isSupportIndexedDB || varStorage.status !== STATUS_MAP.INITING) {
         return false;
       }
 
-      request = window.indexedDB.open(varStorage.database, 1);
+      let request = window.indexedDB.open(varStorage.database, 1);
       request.onerror = function (event) {
         throwError('protocol indexeddb is prevented.', event.target.error);
         if (event.target.error && event.target.error.name === 'QuotaExceededError') {
@@ -170,21 +169,12 @@ const TFLog = (function () {
             return throwError('onupgradeneeded_is_null');
           }
           if (!varStorage.db.objectStoreNames.contains('logs')) {
-            store = varStorage.db.createObjectStore('logs', {
-              autoIncrement: true,
-            });
-            store.createIndex('namespace', 'namespace', {
-              unique: false,
-            });
-            store.createIndex('level', 'level', {
-              unique: false,
-            });
-            store.createIndex('descriptor', 'descriptor', {
-              unique: false,
-            });
-            store.createIndex('data', 'data', {
-              unique: false,
-            });
+            store = varStorage.db.createObjectStore('logs', { autoIncrement: true });
+            store.createIndex('namespace', 'namespace', { unique: false });
+            store.createIndex('level', 'level', { unique: false });
+            store.createIndex('descriptor', 'descriptor', { unique: false });
+            store.createIndex('data', 'data', { unique: false });
+            store.createIndex('time', 'time', { unique: false });
           }
         } catch (e) {
           // throw Error:
@@ -200,37 +190,20 @@ const TFLog = (function () {
     }
   }
 
-  function TFLog(namespace) {
-    this.namespace = namespace;
-  }
-
-  TFLog.prototype = {
-    varStorage,
-    log(descriptor, data) {
-      showLog(this.namespace, 'log', descriptor, data);
-    },
-    warn(descriptor, data) {
-      showLog(this.namespace, 'warn', descriptor, data);
-    },
-    error(descriptor, data) {
-      showLog(this.namespace, 'error', descriptor, data);
-    },
-  };
   // 输出日志
-  function showLog(namespace, level, descriptor, data) {
-    record(namespace, level, descriptor, data);
-    if (namespace === 'console') {
-      return;
-    }
-    if (data && typeof data === 'object' && data.length !== 0) {
-      console['__' + level] && console['__' + level](namespace, descriptor, data);
-    } else {
-      console['__' + level] && console['__' + level](namespace, descriptor);
-    }
-  }
+  // function showLog(namespace, level, descriptor, data) {
+  //   record(namespace, level, descriptor, data);
+  //   if (namespace === 'console') {
+  //     return;
+  //   }
+  //   // if (data && typeof data === 'object' && data.length !== 0) {
+  //   //   console['__' + level] && console['__' + level](namespace, descriptor, data);
+  //   // } else {
+  //   //   console['__' + level] && console['__' + level](namespace, descriptor);
+  //   // }
+  // }
 
-  function record(namespace, level, descriptor, data) {
-    var transaction, store, request;
+  function storeLog(namespace, level, descriptor, data) {
     try {
       if (varStorage.status === STATUS_MAP.FAILED) {
         varStorage.pool = [];
@@ -238,33 +211,40 @@ const TFLog = (function () {
         return false;
       }
       if (varStorage.status === STATUS_MAP.INITING) {
-        return varStorage.pool.push(function () {
-          return record(namespace, level, descriptor, data);
+        varStorage.pool.push(function () {
+          storeLog(namespace, level, descriptor, data);
         });
+        return;
       }
       // 如果上一条record函数尚未onsuccess则压入record待执行队列。将record串行执行
       if (varStorage.recordLock) {
-        return varStorage.recordPool.push(function () {
-          return record(namespace, level, descriptor, data);
+        varStorage.recordPool.push(function () {
+          storeLog(namespace, level, descriptor, data);
         });
+        return;
       }
       varStorage.recordLock = true;
 
-      transaction = getTransaction();
+      const transaction = getTransaction();
       if (!transaction) {
         return throwError('getTransaction is null');
       }
-      store = transaction.objectStore('logs');
+      const store = transaction.objectStore('logs');
       // should not contains any function in data
       // otherwise 'DOMException: Failed to execute 'add' on 'IDBObjectStore': An object could not be cloned.' will be thrown
+      const curDate = new Date();
+      const timeStr = `${curDate.getMonth() + 1}-${curDate.getDate()} ${curDate.getHours()}:${curDate.getMinutes()}:${curDate.getSeconds()}`;
 
-      request = store.add({
-        time: Date.now(),
+      /**@type {LogRecord} */
+      const recordObj = {
+        timeMs: Date.now(),
+        time: timeStr,
         level,
         namespace,
         descriptor: filterFunction(descriptor),
         data: filterFunction(data),
-      });
+      };
+      const request = store.add(recordObj);
       // 这里的异常和transaction的异常会同时上报，不存在冒泡关系
       // request.onerror = function (event) {
       //     event.stopPropagation();
@@ -273,14 +253,11 @@ const TFLog = (function () {
 
       request.onsuccess = function () {
         // 标记为false
-        var handler;
         varStorage.recordLock = false;
         // 将record函数压入栈串行压入，即onsucces好后再执行下一条。如果失败则之后的直接拒绝
-        try {
-          varStorage.recordPool = varStorage.recordPool || [];
-          handler = varStorage.recordPool.shift();
-          handler && handler();
-        } catch (e) {}
+        varStorage.recordPool = varStorage.recordPool || [];
+        let handler = varStorage.recordPool.shift();
+        handler && handler();
       };
     } catch (e) {
       throwError('indexeddb_record', e);
@@ -337,13 +314,12 @@ const TFLog = (function () {
   }
 
   function clean() {
-    var request;
     try {
       // database can be removed only after all connections are closed
       varStorage.status = STATUS_MAP.FAILED;
       // 可能在打开的时候就失败 此时db尚未赋值
       varStorage.db && varStorage.db.close();
-      request = window.indexedDB.deleteDatabase(varStorage.database);
+      const request = window.indexedDB.deleteDatabase(varStorage.database);
       request.onerror = function (event) {
         // 1. Internal error opening backing store for indexedDB.deleteDatabase.
         // 2. Internal error deleting database.
@@ -356,82 +332,90 @@ const TFLog = (function () {
       throwError('indexeddb_clean', e);
     }
   }
+  /**
+   * 通过时间
+   * @param {[number,number]} param0 [几天前开始，几天前结束]
+   * @returns
+   */
+  function getByDate([from, to]) {
+    if (varStorage.status === STATUS_MAP.FAILED) {
+      varStorage.pool = [];
+      return false;
+    }
 
-  function get(from, to, readyFn) {
-    var transaction, store;
+    if (varStorage.status === STATUS_MAP.INITING) {
+      varStorage.pool.push(function () {
+        getByDate([from, to]);
+      });
+      return;
+    }
+
+    from = transTimeFormat(from);
+    to = transTimeFormat(to);
+
+    return get({
+      filter: record => from && to && record.timeMs > from && record.timeMs < to,
+    });
+  }
+
+  /**
+   * 获取日志
+   * @param {function} filter
+   */
+  function get(filter) {
+    if (!filter) {
+      throw new Error('TFLog.getData(option),option.filter need a function parameter');
+    }
     try {
-      if (varStorage.status === STATUS_MAP.FAILED) {
-        varStorage.pool = [];
-        return false;
-      }
+      const transaction = getTransaction();
+      if (!transaction) return throwError('getTransaction is null');
 
-      if (arguments.length === 1) {
-        readyFn = from;
-        from = undefined;
-      } else if (arguments.length === 2) {
-        readyFn = to;
-        to = undefined;
-      }
-      if (varStorage.status === STATUS_MAP.INITING) {
-        return varStorage.pool.push(function () {
-          return get(from, to, readyFn);
-        });
-      }
-      from = transTimeFormat(from);
-      to = transTimeFormat(to);
-
-      transaction = getTransaction();
-      if (!transaction) {
-        return throwError('getTransaction is null');
-      }
-      store = transaction.objectStore('logs');
-
-      // IDBObjectStore.getAll is a non-standard API
-      if (store.getAll) {
-        store.getAll().onsuccess = function (event) {
-          var result,
-            logs = [];
-          var i = 0;
-          result = event.target.result;
-          if (result) {
-            for (; i < result.length; i++) {
-              if (!result[i] || (from && result[i].time < from) || (to && result[i].time > to)) {
-                continue;
-              }
-              logs.push(result[i]);
-            }
-          }
-          readyFn(logs);
-        };
-      } else {
+      const store = transaction.objectStore('logs');
+      const logs = [];
+      return new Promise(resolve => {
         store.openCursor().onsuccess = function (event) {
-          var cursor = event.target.result,
-            logs = [];
+          const cursor = event.target.result;
           if (cursor) {
-            if (!cursor.value || (from && cursor.value.time < from) || (to && cursor.value.time > to)) {
+            if (!cursor.value || (filter && !filter(cursor.value))) {
               return cursor.continue();
             }
-
-            logs.push({
-              time: cursor.value.time,
-              level: cursor.value.level,
-              namespace: cursor.value.namespace,
-              descriptor: cursor.value.descriptor,
-              data: cursor.value.data,
-            });
+            logs.push(cursor.value);
             cursor.continue();
           } else {
-            readyFn(logs);
+            resolve(logs);
           }
         };
-      }
+      });
     } catch (e) {
       throwError('indexeddb_get', e);
     }
   }
 
+  /**
+   *
+   * @param {LogRecord[]} logs
+   */
+  function download(logs) {
+    let str = 'time,level,namespace,description,data\n';
+    for (let i = 0; i < logs.length; i++) {
+      const record = logs[i];
+      str += `${record.time},${record.level},${record.namespace},${JSON.stringify(record.descriptor)},${JSON.stringify(record.data)}\n`;
+    }
+    const file = new Blob([str], { type: 'text/plain' });
+    const url = URL.createObjectURL(file);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'log.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+    a.remove();
+  }
+  /**
+   *
+   * @param {number} daysToMaintain 保存近几天的日志
+   * @returns
+   */
   function keep(daysToMaintain) {
-    var transaction, store, request;
     try {
       if (varStorage.status === STATUS_MAP.FAILED) {
         varStorage.pool = [];
@@ -439,25 +423,25 @@ const TFLog = (function () {
       }
 
       if (varStorage.status === STATUS_MAP.INITING) {
-        return varStorage.pool.push(function () {
-          return keep(daysToMaintain);
+        varStorage.pool.push(function () {
+          keep(daysToMaintain);
         });
+        return;
       }
-      transaction = getTransaction();
-      if (!transaction) {
-        return throwError('getTransaction is null');
-      }
-      store = transaction.objectStore('logs');
+      const transaction = getTransaction();
+      if (!transaction) return throwError('getTransaction is null');
+
+      const store = transaction.objectStore('logs');
 
       if (!daysToMaintain) {
         store.clear().onerror = function (event) {
           return throwError('indexedb_keep_clear', event.target.error);
         };
       } else {
-        request = store.openCursor();
+        const request = store.openCursor();
         request.onsuccess = function (event) {
-          var range = Date.now() - daysToMaintain * 24 * 3600 * 1000;
-          var cursor = event.target.result;
+          const range = Date.now() - daysToMaintain * 24 * 3600 * 1000;
+          const cursor = event.target.result;
           if (cursor && cursor.value && cursor.value.time < range) {
             store.delete(cursor.primaryKey);
             cursor.continue();
@@ -473,10 +457,31 @@ const TFLog = (function () {
   }
   // 初始化
   initIndexedDB();
-  TFLog.keep = keep;
-  TFLog.clean = clean;
-  TFLog.get = get;
-  TFLog.record = record;
+
+  class TFLog {
+    constructor(namespace) {
+      this.namespace = namespace;
+    }
+    static keep = keep;
+    static clean = clean;
+    static get = get;
+    static getByDate = getByDate;
+    static record = storeLog;
+    static download = download;
+
+    log(descriptor, ...data) {
+      storeLog(this.namespace, 'log', descriptor, data);
+    }
+    warn(descriptor, ...data) {
+      storeLog(this.namespace, 'warn', descriptor, data);
+    }
+    error(descriptor, ...data) {
+      storeLog(this.namespace, 'error', descriptor, data);
+    }
+    info(descriptor, ...data) {
+      storeLog(this.namespace, 'info', descriptor, data);
+    }
+  }
 
   return TFLog;
 })();
@@ -484,10 +489,6 @@ const TFLog = (function () {
 
 /**重写console */
 function rewriteConsole() {
-  console.__log = console.log;
-  console.__warn = console.warn;
-  console.__error = console.error;
-  console.__info = console.info;
   const tfLog = new TFLog('console');
   console.log = function (...args) {
     console.__log.apply(console, args);
@@ -506,5 +507,11 @@ function rewriteConsole() {
     tfLog.log(...args);
   };
   console.__log('tflog已劫持console');
+  window.addEventListener('error', e => {
+    tfLog.error(e);
+  });
+  window.addEventListener('unhandledrejection', e => {
+    tfLog.error(e);
+  });
 }
 rewriteConsole();
