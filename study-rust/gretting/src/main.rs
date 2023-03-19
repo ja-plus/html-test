@@ -3,9 +3,7 @@
 // mod order_arr;
 mod hash_map;
 mod owner_ship;
-mod quick_sort;
 mod string;
-mod tempCodeRunnerFile;
 mod use_trait;
 mod vector;
 use use_trait::{Person, Show};

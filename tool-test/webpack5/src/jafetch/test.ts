@@ -1,8 +1,11 @@
 import jafetch from 'ja-fetch';
 /* test interceptor abortController*/
-import { commonCancelRequest } from 'ja-fetch/preset/interceptors';
+import { commonCancelRequest, commonThrottleRequest, commonParallelRequest } from 'ja-fetch/preset/interceptors';
 let ServiceAB = jafetch.create({});
-ServiceAB.interceptors.use(commonCancelRequest());
+ServiceAB.interceptors.use(commonCancelRequest((nowRequest,storedConfig) => {
+  return nowRequest.url === storedConfig.url
+}));
+ServiceAB.interceptors.use(commonParallelRequest({ limit: 3 }));
 
 const fetchBtn = document.createElement('button');
 fetchBtn.textContent = 'ja-fetch';
