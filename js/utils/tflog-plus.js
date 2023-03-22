@@ -1,5 +1,6 @@
 /**
- descriptor: 注意！！！ 重写了console。将console的信息也输出到了TFLog，因此，在内部不建议再直接使用被重写过的console.log，而是使用console.__log
+ * descriptor: 注意！！！ 重写了console。将console的信息也输出到了TFLog，因此，在内部不建议再直接使用被重写过的console.log，而是使用console.__log
+ * @version 1.1.0
  **/
 console.__log = console.log;
 console.__warn = console.warn;
@@ -326,7 +327,7 @@ const TFLog = (function () {
         return throwError('clean_error', event.target.error);
       };
       // request.onsuccess = function (event) {
-
+      console.__log('清理成功');
       // };
     } catch (e) {
       throwError('indexeddb_clean', e);
@@ -459,6 +460,8 @@ const TFLog = (function () {
   initIndexedDB();
 
   class TFLog {
+    /**超过这个值，清理一下控制台 */
+    static cleanSize = 5000;
     constructor(namespace) {
       this.namespace = namespace;
     }
@@ -490,21 +493,33 @@ const TFLog = (function () {
 /**重写console */
 function rewriteConsole() {
   const tfLog = new TFLog('console');
+  /**记录控制台日志数量 */
+  let consoleNum = 0;
+  /**
+   * @param {'log'|'warn'|'info'|'error'} key
+   * @param {any[]} args
+   */
+  const consoleReplacer = (key, args) => {
+    console['__' + key].apply(console, args);
+    consoleNum++;
+    tfLog[key](...args);
+    if (consoleNum > TFLog.cleanSize) {
+      console.clear();
+      consoleNum = 0;
+      console.__log(`日志数量达到${TFLog.cleanSize},自动清空控制台。您可通过修改TFLog.cleanSize的值变更。`);
+    }
+  };
   console.log = function (...args) {
-    console.__log.apply(console, args);
-    tfLog.log(...args);
+    consoleReplacer('log', args);
   };
   console.warn = function (...args) {
-    console.__warn.apply(console, args);
-    tfLog.warn(...args);
+    consoleReplacer('warn', args);
   };
   console.error = function (...args) {
-    console.__error.apply(console, args);
-    tfLog.error(...args);
+    consoleReplacer('error', args);
   };
   console.info = function (...args) {
-    console.__info.apply(console, args);
-    tfLog.log(...args);
+    consoleReplacer('info', args);
   };
   console.__log('tflog已劫持console');
   window.addEventListener('error', e => {
