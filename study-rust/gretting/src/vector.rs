@@ -52,5 +52,12 @@ fn main() {
     for (i, n) in vec.iter().enumerate(){
         println!("iter().enumerate():i:{},n:{}",i,n);
     }
+    // sort
+    let mut vec = vec![2,5,1,5,2];
+    vec.sort(); // vec.sort_by(|a,b| {a.cmp(b)})
+    println!("sort:{:?}",vec);
+
+    // with_capacity 预先设置最大容量
+    let mut vec:Vec<i32> = Vec::with_capacity(10);
     
 }

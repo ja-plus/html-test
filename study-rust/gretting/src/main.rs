@@ -7,6 +7,8 @@ mod string;
 mod use_trait;
 mod vector;
 use use_trait::{Person, Show};
+mod tempCodeRunnerFile;
+mod std_cmp;
 // #[tokio::main]
 fn main() {
     // 接收命令行参数
@@ -30,4 +32,6 @@ fn main() {
 
     let person = Person::new();
     person.show();
+
+    std_cmp::main();
 }

@@ -1,19 +1,12 @@
+use rand::Rng;
 use std::cmp::Ordering;
-
-/**
- * serde json 使用方式
- */
-use serde::{Deserialize, Serialize};
-use wasm_bindgen::prelude::wasm_bindgen;
-
-use crate::console_log;
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Debug)]
 struct Person {
-    id: f64,
+    id: i32,
     name: String,
     age: u8,
 }
-impl Eq for Person{}
+impl Eq for Person {}
 impl Ord for Person {
     fn cmp(&self, other: &Self) -> Ordering {
         if self.id < other.id {
@@ -25,12 +18,12 @@ impl Ord for Person {
         }
     }
 }
-impl PartialEq for Person{
+impl PartialEq for Person {
     fn eq(&self, other: &Self) -> bool {
         self.id == other.id
     }
 }
-impl PartialOrd for Person{
+impl PartialOrd for Person {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         match self.id.partial_cmp(&other.id) {
             Some(core::cmp::Ordering::Equal) => {}
@@ -44,18 +37,19 @@ impl PartialOrd for Person{
     }
 }
 
-#[wasm_bindgen]
-pub fn parse_json(json_str: String) -> String {
-    // console_log(&format!("接受到对象：{}",&json_str));
+pub fn main() {
+    let mut arr = Vec::with_capacity(10);
+    let mut rng = rand::thread_rng();
 
-    let mut person = serde_json::from_str::<Vec<Person>>(&json_str).unwrap_or_else(|err| {
-        console_log(&err.to_string());
-        panic!("{}", &err.to_string());
-    });
-    person.sort();
-    // person.name = String::from("New name");
-    // person.age = 10;
+    for _i in 0..10 {
+        let item = Person {
+            id: rng.gen_range::<i32>(0, 10),
+            name: "Jack".to_string(),
+            age: 12,
+        };
+        arr.push(item);
+    }
 
-    serde_json::to_string(&person).unwrap()
-    // json_str
+    arr.sort();
+    println!("{:?}", arr);
 }
