@@ -19,7 +19,7 @@ impl Solution {
         * @param num int整型一维数组 
         * @return int整型二维数组
     */
-    pub fn threeSum(&self, num: Vec<i32>) -> Vec<Vec<i32>> {
+    pub fn three_sum(&self, num: Vec<i32>) -> Vec<Vec<i32>> {
         // write code here
         let mut result:Vec<Vec<i32>> = Vec::new();
         let mut map:HashMap<i32,Vec<i32>> = HashMap::new();

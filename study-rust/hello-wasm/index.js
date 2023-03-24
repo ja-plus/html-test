@@ -6,9 +6,23 @@ init().then(() => {
     // 正确方式
     let res = greet('异步初始化wasm');
     console.log(res);
-    let person = { "name": "Jake", "age": 10 }
-    let result = parse_json(JSON.stringify(person));
-    console.log(result);
+    let person = new Array(10000).fill(0).map((it) => {
+        return { id: Math.random() * 10000, "name": "Jake", "age": 10 }
+    });
+    let person2 = structuredClone(person);
+    
+    console.time('stringify cost')
+    let personStr = JSON.stringify(person)
+    console.timeEnd('stringify cost')
+
+    console.time('rust alter');
+    let result = parse_json(personStr);
+    console.timeEnd('rust alter');
+
+    console.time('js sort');
+    person2.sort((a,b) => a.id - b.id)
+    console.timeEnd('js sort');
+    // console.log('person2', person2)
 
     /* 模拟订阅*/
     // sub_data();

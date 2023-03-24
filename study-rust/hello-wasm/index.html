@@ -17,41 +17,29 @@
    * @param {String} path wasm 文件路径
    * @param {Object} imports 传递到 wasm 代码中的变量
    */
-  function loadWebAssembly(path, imports = {}) {
-    return fetch(path) // 加载文件
-      .then(response => response.arrayBuffer()) // 转成 ArrayBuffer
-      .then(buffer => WebAssembly.compile(buffer))
-      .then(module => {
-        imports.env = imports.env || {};
+  // WebAssembly.instantiateStreaming(fetch("./pkg/hello_wasm_bg.wasm")).then((obj) => {
+  //   const greet = obj.instance.exports.greet;
+  //   const out = greet("hello");
+  //   console.log("rust output: ", out);
+  // })
+  // //or
+  // fetch("./pkg/hello_wasm_bg.wasm")
+  //   .then(res => res.arrayBuffer())
+  //   .then(bytes => WebAssembly.instantiate(bytes,{
+  //     // 这里是rs extern中定义的东西
+  //     alert,
+  //     console:console,
+  //     getData:() => {
+  //       console.log('data')
+  //     }
+  //   }))
+  //   .then(results => {
+  //     const greet = results.instance.exports.greet;
+  //     const out = greet('greet');
+  //     console.log("rust output: ", out);
+  //   })
 
-        // 开辟内存空间
-        imports.env.memoryBase = imports.env.memoryBase || 0;
-        if (!imports.env.memory) {
-          imports.env.memory = new WebAssembly.Memory({ initial: 256 });
-        }
 
-        // 创建变量映射表
-        imports.env.tableBase = imports.env.tableBase || 0;
-        if (!imports.env.table) {
-          // 在 MVP 版本中 element 只能是 "anyfunc"
-          imports.env.table = new WebAssembly.Table({ initial: 0, element: 'anyfunc' });
-        }
-
-        // 创建 WebAssembly 实例
-        return new WebAssembly.Instance(module, imports);
-      });
-  }
-// 加载wasm文件
-//  loadWebAssembly('hello_wasm_bg.wasm').then(instance => {
-//    // 调用c里面的方法
-//    const exports = instance.exports;
-//    console.log('exports', exports);
-//  });
-
-// import('./pkg/hello_wasm.js').then(async m => {
-//     await m.default();
-//     m.greet('异步加载js');
-//   });
 </script>
 <script type="module" src="./index.js"></script>
 
