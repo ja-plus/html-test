@@ -3,7 +3,7 @@ use std::str;
 use wasm_bindgen::prelude::*;
 // use std::num; // 开平方根方法
 #[wasm_bindgen]
-extern {
+extern "C" {
     #[wasm_bindgen(js_namespace = console)]
     pub fn log(s: &str);
     // 告诉rust 想要调用外部定义的函数。这些函数定义在window上。
