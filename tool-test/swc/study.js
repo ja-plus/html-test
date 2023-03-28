@@ -1,4 +1,4 @@
-import 'core-js/stable';
+// import 'core-js/stable';
 import Vue from 'vue/dist/vue.esm';
 import comm from './comm.js';
 console.log(comm.a);
@@ -28,3 +28,9 @@ async function asaw() {
 let obj = {};
 obj.fun?.();
 obj?.a;
+
+let s_num = 1_000;
+
+function* testGenerator() {
+  yield 1;
+}

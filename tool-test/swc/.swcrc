@@ -3,15 +3,29 @@
     "targets": {
       "chrome": "49"
     },
-    "mode": "entry",
-    "coreJs": "3.25"
+    /**
+     * 设置mode: "entry" 的话一定要在文件开头 import "core-js"
+     */
+    "mode": "usage",
+    "coreJs": "3.29",
+    // "loose": false, // ts 是否开启宽松模式
   },
-  "jsc":{
-    // "loose":true // babel/preset-env
-    "parser":{
-      "syntax": "ecmascript"// 'typescript'
+  "jsc": {
+    // "loose": true, // @babel/preset-env
+    "parser": {
+      "syntax": "ecmascript", // 'typescript'
+      "jsx": true
     },
-    "target": "es5"
+    "transform": {
+      "react": {
+        "runtime": "classic",//"automatic",
+      }
+    },
+    /**
+     * 作用类似 babel 的 regenerator-runtime 或 @babel/runtime
+     */
+    "externalHelpers": true,
+    // "target": "es2015" // env.targets 优先
     // "minify":{
     //   "compress": true,
     //   "mangle": true // terser
