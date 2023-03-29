@@ -1,0 +1,22 @@
+{
+  "name": "rspack-react-starter",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "rspack serve",
+    "build": "rspack build"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "vue": "^3.2.47"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.21.3",
+    "@rspack/cli": "latest",
+    "@types/react": "^18.0.25",
+    "@types/react-dom": "^18.0.8",
+    "@vue/babel-plugin-jsx": "^1.1.1",
+    "babel-loader": "^9.1.2"
+  }
+}

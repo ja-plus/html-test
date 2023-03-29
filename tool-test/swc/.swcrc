@@ -11,24 +11,36 @@
     // "loose": false, // ts 是否开启宽松模式
   },
   "jsc": {
-    // "loose": true, // @babel/preset-env
+    // "loose": true, // 宽松语法解析，如== 替换===。默认false
     "parser": {
       "syntax": "ecmascript", // 'typescript'
       "jsx": true
     },
-    "transform": {
-      "react": {
-        "runtime": "classic",//"automatic",
-      }
-    },
+    // "transform": {
+    //   "react": {
+    //     // "runtime": "automatic", // 默认"classic", 
+    //     "pragma": "h",
+    //     "pragmaFrag": "Fragment",
+    //   }
+    // },
+    /**引入的静态变量直接替换*/
+    // "constModules": true,
     /**
      * 作用类似 babel 的 regenerator-runtime 或 @babel/runtime
      */
     "externalHelpers": true,
     // "target": "es2015" // env.targets 优先
     // "minify":{
-    //   "compress": true,
+    //   "compress": true,// 与terser 配置一样
     //   "mangle": true // terser
     // }
-  }
+    // "experimental": {
+    //   "plugins": [
+    //     [
+    //       "swc-plugin-vue-jsx",
+    //       {}
+    //     ]
+    //   ]
+    // }
+  },
 }
