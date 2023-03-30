@@ -3,7 +3,7 @@
   async function transferImage2Text(imgData: File) {
     let worker = await createWorker({
       workerPath: 'js/worker.min.js',
-      // dataPath: './lang',
+      langPath: './lang-data',
       corePath: 'js/tesseract.js-core/tesseract-core.wasm.js',
       logger: m => {
         console.log(m);

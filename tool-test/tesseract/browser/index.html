@@ -12,18 +12,20 @@
       corePath: '../node_modules/tesseract.js-core/tesseract-core.wasm.js',
       logger: m => {
         console.log(m);
-      }
+      },
     });
 
-    async function transferImage2Text(data){
+    async function transferImage2Text(data) {
       await worker.load();
-      await worker.loadLanguage('chi');
-      await worker.initialize('chi');
-      const { data: { text } } = await worker.recognize(data);
+      await worker.loadLanguage('chi_sim');
+      await worker.initialize('chi_sim');
+      const {
+    data: { text },
+  } = await worker.recognize(data);
       console.log(text);
       await worker.terminate();
       return text;
-    };
+    }
   </script>
 </head>
 <body>
@@ -31,10 +33,10 @@
   <pre id="resultText"></pre>
 </body>
 <script>
-  const file = document.querySelector("#file");
+  const file = document.querySelector('#file');
   const resultText = document.querySelector('#resultText');
   file.addEventListener('change', async e => {
-    console.log('file',e.target.files);
+    console.log('file', e.target.files);
     let text = await transferImage2Text(e.target.files[0]);
     resultText.textContent = text;
   });
