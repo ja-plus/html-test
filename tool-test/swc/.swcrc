@@ -34,13 +34,13 @@
     //   "compress": true,// 与terser 配置一样
     //   "mangle": true // terser
     // }
-    // "experimental": {
-    //   "plugins": [
-    //     [
-    //       "swc-plugin-vue-jsx",
-    //       {}
-    //     ]
-    //   ]
-    // }
+    "experimental": {
+      "plugins": [
+        [
+          "swc-plugin-vue-jsx",
+          {}
+        ]
+      ]
+    }
   },
 }
