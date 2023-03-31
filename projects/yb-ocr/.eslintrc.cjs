@@ -19,7 +19,7 @@ module.exports = {
   },
   parser: '@typescript-eslint/parser',
   plugins: ['html', 'prettier'],
-  extends: ['eslint:recommended', 'plugin:svelte/recommended', 'plugin:prettier/recommended'],
+  extends: ['plugin:svelte/recommended', 'plugin:prettier/recommended'],
   overrides: [
     {
       files: ['*.svelte'],
@@ -32,6 +32,12 @@ module.exports = {
   ],
   rules: {
     'prettier/prettier': 1,
+    'svelte/valid-compile': [
+      'error',
+      {
+        ignoreWarnings: false,
+      },
+    ],
     eqeqeq: 1, // 使用 ===
     'dot-notation': 1, // 强制使用.不用[]
     // 'spaced-comment': 1, // 注释斜杠后空格
@@ -50,5 +56,6 @@ module.exports = {
     // 'key-spacing': 1, // 键值间空格 key:_val
     // 'no-new-object': 1, // 使用字面量创建对象 非new Object()
     // 'object-shorthand': 1, // 对象方法属性值缩写
+    // 'svelte/valid-compile': 0, // prevent less error
   },
 };

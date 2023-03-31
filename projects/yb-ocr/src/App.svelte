@@ -1,47 +1,35 @@
 <script lang="ts">
-  import { createWorker } from 'tesseract.js';
-  async function transferImage2Text(imgData: File) {
-    let worker = await createWorker({
-      workerPath: 'js/worker.min.js',
-      langPath: './lang-data',
-      corePath: 'js/tesseract.js-core/tesseract-core.wasm.js',
-      logger: m => {
-        console.log(m);
-      },
-    });
-    await worker.loadLanguage('chi_sim');
-    await worker.initialize('chi_sim');
-    const {
-      data: { text },
-    } = await worker.recognize(imgData);
-    // console.log(text);
-    // await worker.terminate();
-    return text;
-  }
-  let resultText = '';
-  async function handleFileChange(e) {
-    let file: File = e.target.files[0];
-    resultText = await transferImage2Text(file);
-  }
+  import FileInput from './lib/FileInput.svelte';
 </script>
 
 <main>
   <div class="input-file-content">
-    <input type="file" on:change={handleFileChange} />
+    <FileInput />
   </div>
-  <pre class="text-content">{resultText}</pre>
+  <pre class="text-content">TODO:</pre>
 </main>
 
-<style>
+<style lang="less">
   main {
     display: flex;
     height: 100%;
-  }
-  .input-file-content {
-    flex: 1;
-  }
-  .text-content {
-    flex: 1;
-    border: 1px dashed #aaa;
+    display: grid;
+    grid-template-rows: 100%;
+    grid-template-columns: 300px 1fr;
+    gap: var(--gap);
+    padding: var(--gap);
+
+    .input-file-content {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    .text-content {
+      flex: 1;
+      border: 2px solid #aaa;
+      border-radius: var(--border-radius);
+      margin: 0;
+    }
   }
 </style>
