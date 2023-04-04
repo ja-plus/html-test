@@ -15,62 +15,71 @@
     [FileStatus.pending]: 'pending',
     [FileStatus.success]: 'success',
   };
-  /**FileStatus*/
-  let status: FileStatus = FileStatus.init;
-  export let resultText = '';
-  let inputFileName = '';
+  // export let id = null;
+  export let isActive = false;
+  let fileEl = null;
+  let result = {
+    status: FileStatus.init,
+    text: '',
+    inputFileName: '',
+  };
   let transformProgress = 0;
 
-  const dispatch = createEventDispatcher();
+  const dispatch = createEventDispatcher<{
+    /**转换成功的回调*/
+    finished: typeof result;
+    click: typeof result;
+  }>();
+
   const transformProgressCallback = m => {
     // console.log('m', m);
     if (m.status === TesseractStatus.recognize) {
       transformProgress = Math.floor(m.progress * 100);
-      if (m.progress === 1) {
-        dispatch('finished');
-      }
     }
   };
   async function handleFileChange(e) {
     let file: File = e.target.files[0];
-    inputFileName = file.name;
+    result.inputFileName = file.name;
     try {
-      status = FileStatus.pending;
-      resultText = await transferImage2Text(file, transformProgressCallback);
+      result.status = FileStatus.pending;
+      result.text = await transferImage2Text(file, transformProgressCallback);
+      dispatch('finished', { ...result });
     } catch (err) {
-      status = FileStatus.fail;
+      result.status = FileStatus.fail;
       return;
     }
-    status = FileStatus.success;
+    result.status = FileStatus.success;
     transformProgress = 0;
-    console.log(`resultText(${inputFileName}):${resultText}`);
+    // console.log(`resultText(${result.inputFileName}):${result.text}`);
   }
-  /**
-   * input file click
-   */
-  function handleFileClick(e) {
-    if (status === FileStatus.success) {
-      e.preventDefault();
-      console.log('resultText', resultText);
-      return;
+  function handleFileClick() {
+    if (result.status !== FileStatus.success) {
+      fileEl.click();
     }
+    dispatch('click', { ...result });
   }
 </script>
 
-<label class={'file-input ' + statusClassMap[status]} style:--progress={transformProgress} for="file">
-  <input id="file" type="file" on:change={handleFileChange} on:click={handleFileClick} />
+<div
+  class={'file-input ' + statusClassMap[result.status]}
+  class:active={isActive}
+  style:--progress={transformProgress}
+  on:keypress
+  on:click={handleFileClick}
+>
+  <input bind:this={fileEl} type="file" on:change={handleFileChange} />
   <div class="icon-wrapper">
     <div class="status-icon">
-      <BeIcon name={statusIconMap[status]} style="font-size: 40px;" />
+      <BeIcon name={statusIconMap[result.status]} style="font-size: 40px;" />
     </div>
-    {#if status === FileStatus.pending}
+    {#if result.status === FileStatus.pending}
       <div class="progress-num">{transformProgress}</div>
     {/if}
   </div>
-  {#if inputFileName}
-    <span class="file-name">{inputFileName}</span>
+  {#if result.inputFileName}
+    <span class="file-name">{result.inputFileName}</span>
   {/if}
-</label>
+</div>
 
 <style lang="less">
   @property --progress {
@@ -85,7 +94,6 @@
     justify-content: center;
     height: 100px;
     cursor: pointer;
-    flex: 1;
     border: 2px dashed;
     border-radius: var(--border-radius);
     color: #888;
@@ -98,6 +106,9 @@
     transition: --progress 0.5s ease-out;
     > input[type='file'] {
       display: none;
+    }
+    &.active {
+      border-style: solid;
     }
 
     &.fail {
