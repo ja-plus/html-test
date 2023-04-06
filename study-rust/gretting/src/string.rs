@@ -37,4 +37,6 @@ fn main() {
     // compare
     println!("std:;cmp::max: {}", std::cmp::max(1, 2));
 
+    let s = ['a', 'b', 'c'].iter().collect::<String>();
+    println!("Vec<char> 转字符串:{}", s);
 }
