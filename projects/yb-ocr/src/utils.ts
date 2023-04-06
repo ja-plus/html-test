@@ -3,9 +3,9 @@ import { createWorker } from 'tesseract.js';
 export async function transferImage2Text(imgData: File, logger?: (m: any) => void) {
   if (!logger) logger = () => void 0;
   let worker = await createWorker({
-    workerPath: 'js/worker.min.js',
+    workerPath: './js/worker.min.js',
     langPath: './lang-data',
-    corePath: 'js/tesseract.js-core/tesseract-core.wasm.js',
+    corePath: './js/tesseract.js-core/tesseract-core.wasm.js',
     logger,
     errorHandler: err => {
       console.warn(err);
