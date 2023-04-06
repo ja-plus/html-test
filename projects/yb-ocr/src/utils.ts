@@ -19,5 +19,8 @@ export async function transferImage2Text(imgData: File, logger?: (m: any) => voi
   } = await worker.recognize(imgData);
   // console.log(text);
   await worker.terminate();
-  return text;
+  // 去掉中文间的空格
+  return text.replaceAll(/[\u4e00-\u9fa5](\s[\u4e00-\u9fa5])+/g, text => {
+    return text.replaceAll(' ', '');
+  });
 }

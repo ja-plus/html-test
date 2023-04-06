@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { BeIcon } from '@brewer/beerui';
+  import { BeIcon, BeCountTo } from '@brewer/beerui';
   import { createEventDispatcher } from 'svelte';
   import { FileStatus, TesseractStatus } from '../types/enums';
   import { transferImage2Text } from '../utils';
@@ -23,9 +23,12 @@
     text: '',
     inputFileName: '',
   };
+  let countTo;
+  let countToStart = 0;
   let transformProgress = 0;
 
   const dispatch = createEventDispatcher<{
+    fileChange: FileList;
     /**转换成功的回调*/
     finished: typeof result;
     click: typeof result;
@@ -34,11 +37,16 @@
   const transformProgressCallback = m => {
     // console.log('m', m);
     if (m.status === TesseractStatus.recognize) {
+      countToStart = transformProgress;
       transformProgress = Math.floor(m.progress * 100);
+      countTo.startHandler();
     }
   };
   async function handleFileChange(e) {
-    let file: File = e.target.files[0];
+    dispatch('fileChange', e.target.files);
+  }
+  /**导出该函数可被父组件调用*/
+  export async function transferFile(file: File) {
     result.inputFileName = file.name;
     try {
       result.status = FileStatus.pending;
@@ -46,11 +54,12 @@
       dispatch('finished', { ...result });
     } catch (err) {
       result.status = FileStatus.fail;
+      console.error(err);
       return;
     }
     result.status = FileStatus.success;
+    countToStart = 0;
     transformProgress = 0;
-    // console.log(`resultText(${result.inputFileName}):${result.text}`);
   }
   function handleFileClick() {
     if (result.status !== FileStatus.success) {
@@ -67,18 +76,18 @@
   on:keypress
   on:click={handleFileClick}
 >
-  <input bind:this={fileEl} type="file" on:change={handleFileChange} />
+  <input bind:this={fileEl} type="file" multiple on:change={handleFileChange} />
   <div class="icon-wrapper">
     <div class="status-icon">
-      <BeIcon name={statusIconMap[result.status]} style="font-size: 40px;" />
+      <BeIcon name={statusIconMap[result.status]} style="font-size: 46px;" />
     </div>
     {#if result.status === FileStatus.pending}
-      <div class="progress-num">{transformProgress}</div>
+      <div class="progress-num">
+        <BeCountTo start={countToStart} end={transformProgress} duration={1000} bind:this={countTo} />
+      </div>
     {/if}
   </div>
-  {#if result.inputFileName}
-    <span class="file-name">{result.inputFileName}</span>
-  {/if}
+  <span class="file-name"> {result.inputFileName || '点击添加文件'}</span>
 </div>
 
 <style lang="less">
@@ -87,22 +96,26 @@
     inherits: false;
     initial-value: 0;
   }
+  @keyframes loading {
+    from {
+      transform: rotate(0);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
+  }
   .file-input {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    height: 100px;
+    height: 80px;
+    flex-shrink: 0;
+    padding: var(--gap);
     cursor: pointer;
     border: 2px dashed;
     border-radius: var(--border-radius);
     color: #888;
-    background: linear-gradient(
-      90deg,
-      rgba(172, 224, 249, 0.2),
-      rgba(172, 224, 249, 1) calc(var(--progress) * 1%),
-      transparent calc(var(--progress) * 1%)
-    );
+    background: linear-gradient(90deg, rgba(30, 232, 117, 0.2), rgb(30, 232, 117) calc(var(--progress) * 1%), transparent calc(var(--progress) * 1%));
     transition: --progress 0.5s ease-out;
     > input[type='file'] {
       display: none;
@@ -118,7 +131,7 @@
       color: var(--color-pending);
       pointer-events: none;
       .status-icon {
-        animation: loading 2s ease infinite;
+        animation: loading 2s linear infinite;
       }
     }
     &.success {
@@ -129,9 +142,6 @@
       box-shadow: 0px 0px 5px;
     }
 
-    .file-name {
-      margin-top: var(--gap);
-    }
     .icon-wrapper {
       position: relative;
       .status-icon {
@@ -143,6 +153,10 @@
         top: 50%;
         transform: translate(-50%, -50%);
       }
+    }
+    .file-name {
+      word-break: break-all;
+      margin-left: var(--gap);
     }
   }
 </style>

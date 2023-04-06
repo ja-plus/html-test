@@ -3,11 +3,26 @@
     --color-blue: #1b63d9;
     --color-normal: #444;
     --color-success: #2fa78e;
-    --color-pending: #aaa;
+    --color-pending: #555;
     --color-error: #e63633;
     --gap: 10px;
+    --border: 2px solid #aaa;
 }
-
+* {
+    box-sizing: border-box;
+}
+*::-webkit-scrollbar {
+    width: 8px;
+    height:8px;
+}
+*::-webkit-scrollbar-thumb:hover{
+    box-shadow: 0 0 0 4px inset #ccc;
+}
+*::-webkit-scrollbar-thumb{
+    border-radius: 4px;
+    border: 1px solid transparent;
+    box-shadow: 0 0 0 4px inset #ddd;
+}
 body {
     margin: 0;
     height: 100vh;
@@ -15,14 +30,4 @@ body {
 
 #app {
     height: 100%;
-}
-
-@keyframes loading {
-    from {
-        transform: rotate(0);
-    }
-
-    to {
-        transform: rotate(360deg);
-    }
 }

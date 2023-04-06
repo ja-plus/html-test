@@ -1,8 +1,8 @@
 import ContextMenu from 'ja-contextmenu';
 const contextMenu = new ContextMenu();
-const menu = contextMenu.create({
-  items: [{ label: '菜单1' }, { label: '菜单2' }],
+const menu = contextMenu.create<number>({
+  items: [{ label: '菜单1',onclick:(e,pl) => console.log(pl) }, { label: '菜单2' }],
 });
 window.addEventListener('contextmenu', e => {
-  menu.show(e);
+  menu.show(e,1);
 });
