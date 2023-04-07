@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@arco-design/web-vue": "^2.43.2",
+    "ant-design-vue": "^3.2.16",
     "vue": "^3.2.45"
   },
   "devDependencies": {
