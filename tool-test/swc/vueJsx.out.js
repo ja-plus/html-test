@@ -1,4 +1,5 @@
-/* eslint-disable vue/one-component-per-file */ import { defineComponent, h } from "vue";
+/* eslint-disable vue/one-component-per-file */ import { createVNode as _createVNode } from "vue";
+import { defineComponent, h } from "vue";
 export default defineComponent({
     data () {
         return {
@@ -15,23 +16,27 @@ export default defineComponent({
             margin: "10px"
         };
         const className = "active";
-        return /*#__PURE__*/ React.createElement("div", {
-            id: "myDiv",
-            class: [
+        return _createVNode("div", {
+            "id": "myDiv",
+            "class": [
                 "my-div",
                 className
             ],
-            style: style,
-            onClick: this.handleClick
-        }, /*#__PURE__*/ React.createElement(Comp, {
-            name: this.message
-        }));
+            "style": style,
+            "onClick": this.handleClick
+        }, [
+            _createVNode(Comp, {
+                "name": this.message
+            }, null)
+        ]);
     }
 });
 const Comp = defineComponent({
     props: [
         "name"
     ],
-    render: ()=>/*#__PURE__*/ React.createElement("div", null, this.name)
+    render: ()=>_createVNode("div", null, [
+            this.name
+        ])
 });
 
