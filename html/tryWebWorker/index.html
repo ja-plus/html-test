@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Try web worker</title>
+</head>
+<body>
+    
+</body>
+<script>
+    let worker = new Worker('./worker.js');
+    worker.addEventListener('message', e => {
+      console.log('main thread receive data:', e.data);
+    });
+    console.time('worker postMessage cost');
+    worker.postMessage('hello');
+    console.timeEnd('worker postMessage cost');
+
+    // test sharedArrayBuffer
+    const sharedBuffer = new SharedArrayBuffer(1024);
+    worker.postMessage(sharedBuffer);
+    const sharedArray = new Uint32Array(sharedBuffer);
+    sharedArray[0] = 1;
+    worker.postMessage({ fun: 'sharedArray', sharedArray });
+    console.log(sharedArray);
+</script>
+</html>

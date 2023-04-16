@@ -181,7 +181,7 @@
 
 <script>
 /**
- * @version 1.0.7
+ * @version 1.0.8
  * @author JA+
  * 不支持低版本浏览器非虚拟滚动表格的表头固定，列固定，因为会卡。
  * TODO:存在的问题：
@@ -1046,10 +1046,10 @@ export default {
   --row-height: 28px;
   --border-color: #e8eaec;
   --border-width: 1px;
-  --td-bg-color: #fff;
-  --th-bg-color: #f8f8f9;
-  --tr-active-bg-color: rgb(230, 247, 255);
-  --tr-hover-bg-color: rgba(230, 247, 255, 0.7);
+  --td-bgc: #fff;
+  --th-bgc: #f8f8f9;
+  --tr-active-bgc: rgb(230, 247, 255);
+  --tr-hover-bgc: rgba(230, 247, 255, 0.7);
   --bg-border-top: linear-gradient(180deg, var(--border-color) var(--border-width), transparent var(--border-width));
   --bg-border-right: linear-gradient(270deg, var(--border-color) var(--border-width), transparent var(--border-width));
   --bg-border-bottom: linear-gradient(0deg, var(--border-color) var(--border-width), transparent var(--border-width));
@@ -1066,18 +1066,19 @@ export default {
   flex-direction: column;
   /**深色模式 */
   &.dark {
-    --th-bg-color: #181c21;
-    --td-bg-color: #181c21;
+    --th-bgc: #181c21;
+    --td-bgc: #181c21;
     --border-color: #26292e;
-    --tr-active-bg-color: #283f63;
-    --tr-hover-bg-color: #1a2b46;
+    --tr-active-bgc: #283f63;
+    --tr-hover-bgc: #1a2b46;
+    --table-bgc: #181c21;
     --highlight-color: #1e4c99; // 不能用rgba，因为固定列时，会变成半透明
     --sort-arrow-color: #5d6064;
     --sort-arrow-hover-color: #727782;
     --sort-arrow-active-color: #d0d1d2;
     --sort-arrow-active-sub-color: #5d6064;
 
-    background-color: var(--th-bg-color);
+    background-color: var(--table-bgc);
     color: #d0d1d2;
   }
 
@@ -1123,7 +1124,7 @@ export default {
         }
 
         th {
-          background-color: var(--th-bg-color);
+          background-color: var(--th-bgc);
 
           &.sortable {
             cursor: pointer;
@@ -1222,16 +1223,16 @@ export default {
         &.hover,
         &:hover {
           td {
-            background-color: var(--tr-hover-bg-color);
+            background-color: var(--tr-hover-bgc);
           }
         }
 
         &.active td {
-          background-color: var(--tr-active-bg-color);
+          background-color: var(--tr-active-bgc);
         }
 
         td {
-          background-color: var(--td-bg-color);
+          background-color: var(--td-bgc);
 
           &:first-child {
             // border-left: 1px solid var(--border-color);
