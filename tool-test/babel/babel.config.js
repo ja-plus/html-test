@@ -25,6 +25,7 @@ module.exports = {
         // shippedProposals: true
       },
     ],
+    ['@babel/preset-typescript'],
   ],
   plugins: [
     [
