@@ -85,3 +85,20 @@ export function numberSorter(a, b) {
   if (a !== '--' && b === '--') return -1;
   return Number(a) < Number(b) ? -1 : 1;
 }
+
+/**
+ * 异步防抖
+ * @param {number} delay 延时
+ */
+export function debounceSync(delay) {
+  let timer = 0;
+  let lastPromiseReject = () => null; // 暂存上一次promise的reject
+  return function () {
+    if (timer) clearTimeout(timer); // clear timeout后，之前的promise 状态不会变。
+    lastPromiseReject(); // 主动reject之前的promise
+    return new Promise((resolve, reject) => {
+      lastPromiseReject = reject; // 保存reject函数，供下一次调用。
+      timer = setTimeout(resolve, delay);
+    });
+  };
+}
