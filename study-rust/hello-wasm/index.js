@@ -1,4 +1,4 @@
-import init, { initSync, greet, sub_data, cpu_calc, fib as rust_fib, parse_json } from './pkg/hello_wasm.js';
+import init, { initSync, greet, sub_data, cpu_calc, fib as rust_fib, parse_json, add,add_range } from './pkg/hello_wasm.js';
 init().then(() => {
     /** 这样调用无法传参,接收返回 */
     // let res = module.greet('esmodule');
@@ -10,7 +10,7 @@ init().then(() => {
         return { id: Math.random() * 10000, "name": "Jake", "age": 10 }
     });
     let person2 = structuredClone(person);
-    
+
     console.time('stringify cost')
     let personStr = JSON.stringify(person)
     console.timeEnd('stringify cost')
@@ -20,7 +20,7 @@ init().then(() => {
     console.timeEnd('rust alter');
 
     console.time('js sort');
-    person2.sort((a,b) => a.id - b.id)
+    person2.sort((a, b) => a.id - b.id)
     console.timeEnd('js sort');
     // console.log('person2', person2)
 
@@ -60,6 +60,18 @@ init().then(() => {
     // console.timeEnd('js recursion fib cpu');
 
     // console.log('-----------');
+    console.time('rust add');
+    // console.log('rust add',add(0.1,0.2));
+    console.log('rust add',add_range(0,1_000_000_000));
+    console.timeEnd('rust add');
+    console.time('js add');
+    // console.log('js add',0.1 + 0.2);
+    let num = 0;
+    for(let i = 0;i<1_000_000_000;i++){
+        num += i;
+    }
+    console.log('js add', num);
+    console.timeEnd('js add');
 });
 /** 执行run后，该方法会被rust调用*/
 window.getData = function (str) {

@@ -86,6 +86,18 @@ pub fn fib(num: i32) -> i64 {
     }
     result
 }
+#[wasm_bindgen]
+pub fn add(a:f64,b:f64) -> f64 {
+    a + b
+}
+#[wasm_bindgen]
+pub fn add_range(a:i32,b:i32) -> i64 {
+    let mut sum =0;
+    for i in a..b {
+        sum += i as i64;
+    }
+    sum
+}
 
 // fn fib_rec(num: i16) -> i64 {
 //     if num < 2 {
