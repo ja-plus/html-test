@@ -36,7 +36,6 @@
             :style="{
               minWidth: virtualScrollX.offsetLeft + 'px',
               width: virtualScrollX.offsetLeft + 'px',
-              maxWidth: virtualScrollX.offsetLeft + 'px',
             }"
           ></th>
           <th
@@ -101,8 +100,7 @@
             style="padding: 0"
             :style="{
               minWidth: virtualX_offsetRight + 'px',
-              width: virtualScrollX.offsetLeft + 'px',
-              maxWidth: virtualScrollX.offsetLeft + 'px',
+              width: virtualX_offsetRight + 'px',
             }"
           ></th>
         </tr>
@@ -181,7 +179,7 @@
 
 <script>
 /**
- * @version 1.0.8
+ * @version 1.0.9
  * @author JA+
  * 不支持低版本浏览器非虚拟滚动表格的表头固定，列固定，因为会卡。
  * TODO:存在的问题：
