@@ -71,7 +71,10 @@
             @dragover="onThDragOver"
           >
             <div class="table-header-cell-wrapper">
-              <component :is="col.customHeaderCell(col)" v-if="col.customHeaderCell" />
+              <component
+                :is="typeof col.customHeaderCell === 'function' ? col.customHeaderCell(col) : col.customHeaderCell"
+                v-if="col.customHeaderCell"
+              />
               <template v-else>
                 <slot name="table-header" :column="col">
                   <span class="table-header-title">{{ col.title }}</span>
