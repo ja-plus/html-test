@@ -127,3 +127,7 @@ type StrArrOrNumArr = ToArray<string | number>; // =>  ToArray<string> | ToArray
 ```ts
 let a: 0 | 1 = +true// +boolean 结果为number，类型校验不通过
 ```
+
+### d.ts 声明文件顺序调整
+在 `tsconfig.json` 中指定files: []，在前面的先加载。<br>
+用于declare module '\*.vue' 与 declare module '\*/name.vue'; 的情况

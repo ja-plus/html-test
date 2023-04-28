@@ -21,6 +21,16 @@ export function onlyNumber(e) {
     e.preventDefault();
   }
 }
+/**
+ * input 字符串转数字
+ * @param {string} str
+ */
+export function validInputNumber(str) {
+  const numStr = str.replace(/[^d^\.^-]/);
+  const matchResult = numStr.match(/^[-\d]\d*(\.\d*)?/);
+  if (!matchResult) return '';
+  return matchResult[0];
+}
 
 /** 遍历树结构 */
 export function treeForEach(tree, callback) {
