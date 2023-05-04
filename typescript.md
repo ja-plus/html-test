@@ -19,9 +19,10 @@
   }
   ```
 * 将数组自动推断为元素tuple:
-```typescript 
-const a = [1,2] as const; // a:[number,number]
-```
+  ```typescript 
+  const a = [1,2] as const; // a:[number,number]
+  ```
+* tsconfig compilerOptions.checkJs = true 控制js进行 jsDoc 与ts类型检查
 ## 内置类型
 * Parameter 获取函数参数类型
 * ReturnType 获取函数的返回值类型
@@ -60,12 +61,12 @@ type B = A["name"]; // string
 ```
 ### 初始化对象为{}的方式
 ```typescript
-type A ={
+type A = {
   name: string,
   age: number
 }
 let a: Partial<A> = {};
-let b: A | Record<string, never> = {}
+let b: A & Record<string, never> = {}
 ```
 ### 指定方法的this类型
 ```ts
