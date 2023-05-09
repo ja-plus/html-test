@@ -99,16 +99,33 @@ export function numberSorter(a, b) {
 /**
  * 异步防抖
  * @param {number} delay 延时
+ * @return {Promise}
  */
 export function debounceSync(delay) {
   let timer = 0;
-  let lastPromiseReject = () => null; // 暂存上一次promise的reject
+  let lastPromiseReject = () => void 0; // 暂存上一次promise的reject
   return function () {
     if (timer) clearTimeout(timer); // clear timeout后，之前的promise 状态不会变。
     lastPromiseReject(); // 主动reject之前的promise
     return new Promise((resolve, reject) => {
       lastPromiseReject = reject; // 保存reject函数，供下一次调用。
-      timer = setTimeout(resolve, delay);
+      timer = window.setTimeout(resolve, delay);
     });
+  };
+}
+
+/**
+ * 异步节流
+ * @param {number} delay
+ * @returns {Promise}
+ */
+export function throttleSync(delay) {
+  let timer = 0;
+  return function () {
+    if (timer) return Promise.reject();
+    timer = window.setTimeout(() => {
+      timer = 0;
+    }, delay);
+    return Promise.resolve();
   };
 }

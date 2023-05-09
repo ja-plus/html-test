@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Symbol</title>
+</head>
+<body>
+    
+</body>
+<script>
+    let obj = {
+      name: 'jack',
+      [Symbol.toStringTag]() {
+        // 无效
+        return 'jack-1';
+      },
+      toString() {
+        return 'jack-2';
+      },
+      valueOf() {
+        return 1;
+      },
+      [Symbol.toPrimitive](hint) {
+        if (hint === 'number') {
+          // 覆盖valueOf
+          return 2;
+        } else if (hint === 'string') {
+          // 覆盖toString
+          return 'foo';
+        } else {
+          return 'default';
+        }
+      },
+      // 控制concat 行为不可展开
+      [Symbol.isConcatSpreadable]: false,
+      // Generator迭代器模式
+      *[Symbol.iterator]() {
+        for (let i = 0; i < 5; i++) {
+          yield i;
+        }
+      },
+      //修改match(obj) 行为
+      [Symbol.match](str) {
+        return str.indexOf('/') > -1;
+      },
+      //   [Symbol.replace]
+      // Symbol.search
+      // Symbol.split
+    };
+    let iteratorObj = {
+      id: 0,
+      // 返回迭代器对象模式
+      [Symbol.iterator]() {
+        let i = 0;
+        return {
+          next() {
+            i++;
+            return {
+              value: i,
+              done: i >= 10,
+            };
+          },
+        };
+      },
+    };
+    class Foo {
+      // Symbol.toStringTag 需要在class中才能使用
+      get [Symbol.toStringTag]() {
+        return 'Bar'; // [Object Bar]
+      }
+      // 控制instanceof 行为
+      static [Symbol.hasInstance](obj) {
+        return obj instanceof Array;
+      }
+    }
+    let foo = new Foo();
+    console.log('Symbol.toString', obj.toString(), foo.toString()); // [Object Bar]
+    console.log('Symbol.toPrimitive', String(obj), Number(obj), obj + '');
+    console.log('Symbol.iterator(Generator)', [...obj]);
+    console.log('Symbol.iterator(Return generator obj)', [...iteratorObj]);
+    console.log('Symbol.match', 'jack:', 'jack'.match(obj), ', /jack', '/jack'.match(obj));
+</script>
+</html>
