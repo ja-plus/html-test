@@ -27,6 +27,6 @@
     "prettier": "^2.8.7",
     "typescript": "^4.9.5",
     "vue-eslint-parser": "^9.1.0",
-    "whistle": "^2.9.1"
+    "whistle": "^2.9.48"
   }
 }

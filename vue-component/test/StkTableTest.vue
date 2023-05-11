@@ -29,15 +29,15 @@ div(style="margin-left:10px")
 div(:style="{width: tableWidth}" style="padding:10px;")
   StkTable(
     ref="stkTable"
-    rowKey="name"
+    row-key="name"
     theme="dark"
-    :noDataFull="true"
-    :virtual="true"
-    :virtualX="true"
+    no-data-full
+    virtual
+    virtual-x
     :style="{height:props.height}"
     v-bind="props"
     :columns="columns"
-    :dataSource="dataSource"
+    :data-source="dataSource"
     @current-change="onCurrentChange"
     @row-menu="onRowMenu"
     @header-row-menu="onHeaderRowMenu"
@@ -106,10 +106,8 @@ export default {
           dataIndex: 'name',
           fixed: 'left', // 会导致StkTable 滚动出空白？
           width: '200px',
-          maxWidth: '200px',
           headerClassName: 'my-th',
           className: 'my-td',
-          // minWidth: '200px', // 组件处理固定列的minWidth = width
           sorter: true,
           customHeaderCell: column => {
             // render(h) {
@@ -125,8 +123,7 @@ export default {
           title: 'Age',
           dataIndex: 'age',
           fixed: 'left',
-          width: '100px',
-          minWidth: '100px', // 为确保横向滚动准确，列宽一定要固定，minWidth,maxWidth要相等
+          width: '100px', // 为确保横向滚动准确，列宽一定要固定，minWidth,maxWidth要相等
           sorter(data, { order, column }) {
             // console.log(data, order, column);
             if (order === 'desc') return data.sort((a, b) => b.age - a.age);

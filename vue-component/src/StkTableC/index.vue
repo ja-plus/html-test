@@ -28,9 +28,11 @@
   </div>
 </template>
 <script>
+import { h } from 'vue';
 import StkTable from '../StkTable.vue';
 import store from './store';
 export default {
+  name: 'StkTableC',
   components: { StkTable },
   props: {
     columns: {
@@ -61,9 +63,7 @@ export default {
                 minWidth: col.width,
                 maxWidth: col.width,
                 fixed: null,
-                customCell() {
-                  return { render: h => '' };
-                },
+                customCell: h('span', ''),
               }
             : {}),
         };

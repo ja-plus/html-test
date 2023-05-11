@@ -74,6 +74,7 @@
               <component
                 :is="typeof col.customHeaderCell === 'function' ? col.customHeaderCell(col) : col.customHeaderCell"
                 v-if="col.customHeaderCell"
+                :col="col"
               />
               <template v-else>
                 <slot name="table-header" :column="col">
@@ -88,8 +89,7 @@
                     <polygon id="arrow-up" fill="#757699" points="8 2 4.8 6 11.2 6"></polygon>
                     <polygon
                       id="arrow-down"
-                      fill="#757699"
-                      transform="translate(8, 12) rotate(-180.000000) translate(-8, -12) "
+                      transform="translate(8, 12) rotate(-180) translate(-8, -12) "
                       points="8 10 4.8 14 11.2 14"
                     ></polygon>
                   </g>
@@ -182,7 +182,7 @@
 
 <script>
 /**
- * @version 1.0.9
+ * @version 1.0.10
  * @author JA+
  * 不支持低版本浏览器非虚拟滚动表格的表头固定，列固定，因为会卡。
  * TODO:存在的问题：
@@ -475,6 +475,8 @@ export default {
       thDrag: {
         dragStartKey: null,
       },
+      /**rowKey缓存 */
+      rowKeyGenStore: new WeakMap(),
     };
   },
   computed: {
@@ -779,9 +781,16 @@ export default {
       this.tableHeaders = tmpHeader;
       this.tableProps = tmpProps;
     },
-    /** 行唯一值生成 */
+    /**
+     * 行唯一值生成
+     */
     rowKeyGen(row) {
-      return typeof this.rowKey === 'function' ? this.rowKey(row) : row[this.rowKey];
+      let key = this.rowKeyGenStore.get(row);
+      if (!key) {
+        key = typeof this.rowKey === 'function' ? this.rowKey(row) : row[this.rowKey];
+        this.rowKeyGenStore.set(row, key);
+      }
+      return key;
     },
     // ------event handler-------------
     /**
