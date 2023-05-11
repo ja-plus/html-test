@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test svelte dialog</title>
+</head>
+<body>
+    <div id="dialog"></div>    
+</body>
+<script type="module">
+    import Dialog from '../tool-test/rollup/v3/lib/Dialog.js';
+    const dialogDiv = document.querySelector('#dialog');
+    console.log(Dialog);
+    const dialogComp = new Dialog({
+      target: dialogDiv,
+      props: {
+        title: '名称',
+      },
+    });
+</script>
+</html>

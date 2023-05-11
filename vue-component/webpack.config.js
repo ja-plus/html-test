@@ -1,18 +1,28 @@
 const path = require('path');
 const { VueLoaderPlugin } = require('vue-loader');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+/**
+ * @type {import('webpack').Configuration}
+ */
 module.exports = {
   mode: 'development',
   stats: 'minimal',
-  entry: './index.js',
+  entry: {
+    app: './index.js',
+    dialog: './src/svelte/Dialog/index.svelte',
+  },
   output: {
-    filename: 'main.js',
+    filename: '[name].js',
   },
   module: {
     rules: [
       {
         test: /\.vue$/,
         loader: 'vue-loader',
+      },
+      {
+        test: /\.svelte$/,
+        loader: 'svelte-loader',
       },
       {
         test: /\.jsx?$/,
@@ -34,6 +44,7 @@ module.exports = {
     ],
   },
   resolve: {
+    conditionNames: ['dialog', 'app'], // 配置入口构建顺序
     alias: {
       '@': path.resolve(__dirname, './src'),
     },

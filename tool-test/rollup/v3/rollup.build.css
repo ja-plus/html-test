@@ -1,0 +1,15 @@
+.modal.svelte-9pzi80 {
+  border-radius: 5px;
+  box-shadow: 0 0 10px #aaa;
+  border: 1px solid #aaa;
+}
+.modal.svelte-9pzi80 > header {
+  background-color: #aaa;
+  padding: 10px;
+}
+.modal.svelte-9pzi80 > article {
+  padding: 10px;
+}
+.modal.svelte-9pzi80 > footer {
+  padding: 10px;
+}
