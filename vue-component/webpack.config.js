@@ -9,7 +9,6 @@ module.exports = {
   stats: 'minimal',
   entry: {
     app: './index.js',
-    dialog: './src/svelte/Dialog/index.svelte',
   },
   output: {
     filename: '[name].js',
@@ -19,10 +18,6 @@ module.exports = {
       {
         test: /\.vue$/,
         loader: 'vue-loader',
-      },
-      {
-        test: /\.svelte$/,
-        loader: 'svelte-loader',
       },
       {
         test: /\.jsx?$/,
@@ -44,7 +39,6 @@ module.exports = {
     ],
   },
   resolve: {
-    conditionNames: ['dialog', 'app'], // 配置入口构建顺序
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
