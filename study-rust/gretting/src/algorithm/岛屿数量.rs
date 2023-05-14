@@ -53,10 +53,10 @@ impl Solution {
                 // 上面原本用HashSet判断是否访问，现在直接把原数组改变
                 *ch = '2';
                 // 四个方向查找
-                self.deep_search(grid, /* visited_set,  */ x - 1, y);
-                self.deep_search(grid, /* visited_set,  */ x + 1, y);
-                self.deep_search(grid, /* visited_set,  */ x, y - 1);
-                self.deep_search(grid, /* visited_set,  */ x, y + 1);
+                self.wide_search(grid, /* visited_set,  */ x - 1, y);
+                self.wide_search(grid, /* visited_set,  */ x + 1, y);
+                self.wide_search(grid, /* visited_set,  */ x, y - 1);
+                self.wide_search(grid, /* visited_set,  */ x, y + 1);
             }
         }
     }
