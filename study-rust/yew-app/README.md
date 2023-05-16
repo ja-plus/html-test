@@ -1,2 +1,2 @@
 生成dist
-* `trunk serve` 
+* `trunk serve --open `  // 启动开发环境
