@@ -18,7 +18,7 @@
     console.timeEnd('normalSort');
 
     // 开启两个线程排序
-    let worker = new Worker('../js/webWorker.js');
+    let worker = new Worker('./webWorker.js');
     
     console.time('workerSortTotal');
     // console.time('postMsgToWorker');
@@ -36,7 +36,7 @@
       gb();
     };
     
-    let worker2 = new Worker('../js/webWorker.js');
+    let worker2 = new Worker('./webWorker.js');
     let work2Arr = null;
     const halfArr2 = hugeArr2.slice(hugeArr.length / 2);
     worker2.postMessage(halfArr2);

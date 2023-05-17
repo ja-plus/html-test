@@ -155,12 +155,7 @@
               }"
               @click="e => onCellClick(e, row, col)"
             >
-              <component
-                :is="typeof col.customCell === 'function' ? col.customCell(col, row) : col.customCell"
-                v-if="col.customCell"
-                :col="col"
-                :row="row"
-              />
+              <component :is="col.customCell" v-if="col.customCell" :col="col" :row="row" />
               <div v-else class="table-cell-wrapper" :title="row[col.dataIndex]">
                 {{ row[col.dataIndex] ?? emptyCellText }}
               </div>
@@ -182,13 +177,14 @@
 
 <script>
 /**
- * @version 1.0.10
+ * @version 1.1.0
  * @author JA+
  * 不支持低版本浏览器非虚拟滚动表格的表头固定，列固定，因为会卡。
  * TODO:存在的问题：
  * [] column.dataIndex 作为唯一键，不能重复
  * [] 计算的高亮颜色，挂在数据源上对象上，若多个表格使用同一个数据源对象会有问题。需要深拷贝。(解决方案：获取组件uid)
- *
+ * @changelog
+ * -1.1.0 基于性能问题，不支持customCell传递函数，
  */
 import { interpolateRgb } from 'd3-interpolate';
 let chromeVersion = 0;

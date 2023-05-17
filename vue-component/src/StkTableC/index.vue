@@ -11,6 +11,7 @@
       :columns="fixedLeftColumns"
       :style="{ height: dataSourceCopy.length ? fixedTableHeight + 'px' : 'auto' }"
       @sort-change="(col, order) => handleSorterChange(col, order, 'l')"
+      @scroll="handleFixedLeftTableScroll"
       @th-drag-start="i => onThDragStart('l', i)"
       @th-drop="i => onThDrop('l', i)"
     ></StkTable>
@@ -104,11 +105,21 @@ export default {
       this.$refs.stkTableMain.currentHover = store.state.currentHover;
       this.$refs.stkTableMain.currentItem = store.state.currentItem;
     },
+    /**
+     * @param {Event} e
+     */
     handleMainTableScroll(e) {
       // console.log(e.target.scrollTop);
       if (this.fixedLeftColumns.length) {
         this.$refs.stkTableFixedLeft.$el.scrollTop = e.target.scrollTop;
       }
+    },
+    /**
+     * @param {Event} e
+     */
+    handleFixedLeftTableScroll(e) {
+      console.log(e, 'sdf');
+      this.$refs.stkTableMain.$el.scrollTop = e.target.scrollTop;
     },
     handleSorterChange(col, order, type) {
       if (type === 'l') {
@@ -166,11 +177,15 @@ export default {
 .stk-table-compatible {
   position: relative;
   .stk-table-fixed-left {
-    overflow: hidden;
     z-index: 3;
     position: absolute;
     left: 0;
     top: 0;
+    &::-webkit-scrollbar {
+      // 隐藏表格滚动条，使其可触发scroll事件
+      width: 0;
+      height: 0;
+    }
   }
   .stk-table-wrapper {
     height: 100%;

@@ -223,7 +223,8 @@ export default {
         { key: 'customHeaderCell', desc: '自定义表头渲染内容。同customCell' },
         {
           key: 'customCell',
-          desc: '自定义列td的渲染。接收一个方法，vue2需该方法return一个vue组件，也可返回jsx 如return {render(h){return jsx}}',
+          desc: '自定义列td的渲染。接收一个vue组件，也可返回jsx 如return {render(h){return jsx}}，组件接受props:["row","col"]',
+          value: 'VNode | Component',
         },
         { key: '------------', desc: '---------' },
         { key: 'TableEvents', desc: '', value: '' },
