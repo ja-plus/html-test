@@ -409,6 +409,7 @@ export default {
     },
   },
   emits: [
+    /**单击行 */
     'row-click',
     'sort-change',
     'current-change',
