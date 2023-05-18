@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/vue3';
-
 import StkTable from './StkTable.vue';
 
 // More on how to set up stories at: https://storybook.js.org/docs/vue/writing-stories/introduction
@@ -81,9 +80,7 @@ export const StkTableEmpty: Story = {
     ],
     dataSource: [],
   },
-  render: (args: any) => ({
-    setup() {
-      return () => <StkTable style="height:200px;box-shadow:0 0 10px #aaa" />;
-    },
+  render: () => ({
+    template: `<StkTable style="height:200px;box-shadow:0 0 10px #aaa" />`,
   }),
 };
