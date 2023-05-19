@@ -1,2 +1,2 @@
-export { default as StkTable } from './stories/StkTable.vue';
-export { default as Button } from './stories/Button.vue';
+export { default as StkTable } from '../packages/StkTable/StkTable.vue';
+export { default as Button } from '../packages/Button/Button.vue';
