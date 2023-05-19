@@ -5,9 +5,20 @@ import vueJsx from '@vitejs/plugin-vue-jsx';
 // https://vitejs.dev/config/
 export default defineConfig({
   build: {
+    minify: false,
     lib: {
       name: 'vite-vue-component',
       entry: './src/main.ts',
+      formats: ['es'],
+    },
+    rollupOptions: {
+      external: [/node_modules/], // 忽略所有三方包
+      // external: ['vue', 'd3-interpolate'],//忽略打包vue文件
+      // output: {
+      //   globals: {
+      //     vue: 'Vue', // umd需要
+      //   },
+      // },
     },
   },
   plugins: [vue(), vueJsx()],
