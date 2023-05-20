@@ -8,11 +8,11 @@ export default defineConfig({
     minify: false,
     lib: {
       name: 'vite-vue-component',
-      entry: [
-        './packages/StkTable/index.ts',
-        './packages/Button/index.ts',
-      ],
-      
+      entry: ['./packages/StkTable/index.ts', './packages/Button/index.ts'],
+      fileName: (format, entryName) => {
+        console.log(format, entryName);
+        return entryName + '.' + format + '.js';
+      },
       formats: ['es'],
     },
     rollupOptions: {
