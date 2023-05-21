@@ -1,13 +1,17 @@
 {
   "name": "vite-vue-components",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "main": "lib/index.js",
+  "module": "lib/index.js",
   "sideEffects": false,
-  "files": ["dist"],
+  "files": [
+    "lib"
+  ],
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc && vite build",
+    "build": "node build.js",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
