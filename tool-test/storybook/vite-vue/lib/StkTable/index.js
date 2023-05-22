@@ -1,5 +1,5 @@
-import { interpolateRgb } from "D:/code/html-test/tool-test/storybook/vite-vue/node_modules/d3-interpolate/src/index.js";
-import { openBlock, createElementBlock, normalizeClass, normalizeStyle, createElementVNode, Fragment, renderList, createCommentVNode, createBlock, resolveDynamicComponent, renderSlot, toDisplayString, createTextVNode, pushScopeId, popScopeId } from "D:/code/html-test/tool-test/storybook/vite-vue/node_modules/vue/dist/vue.runtime.esm-bundler.js";
+import { interpolateRgb } from "d3-interpolate";
+import { openBlock, createElementBlock, normalizeClass, normalizeStyle, createElementVNode, Fragment, renderList, createCommentVNode, createBlock, resolveDynamicComponent, renderSlot, toDisplayString, createTextVNode, pushScopeId, popScopeId } from "vue";
 const StkTable_vue_vue_type_style_index_0_scoped_03adf784_lang = "";
 const _export_sfc = (sfc, props) => {
   const target = sfc.__vccOpts || sfc;

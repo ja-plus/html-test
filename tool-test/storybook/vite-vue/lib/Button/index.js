@@ -1,4 +1,4 @@
-import { defineComponent, computed, openBlock, createElementBlock, normalizeClass, normalizeStyle, toDisplayString } from "D:/code/html-test/tool-test/storybook/vite-vue/node_modules/vue/dist/vue.runtime.esm-bundler.js";
+import { defineComponent, computed, openBlock, createElementBlock, normalizeClass, normalizeStyle, toDisplayString } from "vue";
 const button = "";
 const _sfc_main = /* @__PURE__ */ defineComponent({
   __name: "Button",

@@ -7,7 +7,7 @@ export default defineConfig({
   build: {
     minify: false,
     rollupOptions: {
-      external: [/node_modules/], // 忽略所有三方包
+      external: ['vue', 'd3-interpolate'], // 排除三方包
       // output: {
       //   globals: {
       //     vue: 'Vue', // umd需要
