@@ -7,7 +7,8 @@
   "module": "lib/index.js",
   "sideEffects": false,
   "files": [
-    "lib"
+    "lib",
+    "packages"
   ],
   "scripts": {
     "dev": "vite",
@@ -15,10 +16,6 @@
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
-  },
-  "dependencies": {
-    "d3-interpolate": "^3.0.1",
-    "vue": "^3.2.47"
   },
   "devDependencies": {
     "@storybook/addon-essentials": "^7.0.12",
@@ -32,6 +29,7 @@
     "@typescript-eslint/parser": "^5.57.1",
     "@vitejs/plugin-vue": "^4.1.0",
     "@vitejs/plugin-vue-jsx": "^3.0.1",
+    "d3-interpolate": "^3.0.1",
     "eslint": "^8.37.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-html": "^7.1.0",
@@ -44,6 +42,7 @@
     "storybook": "^7.0.12",
     "typescript": "^5.0.2",
     "vite": "^4.3.2",
+    "vue": "^3.2.47",
     "vue-eslint-parser": "^9.1.0",
     "vue-tsc": "^1.4.2"
   }

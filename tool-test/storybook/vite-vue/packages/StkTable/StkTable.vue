@@ -177,6 +177,7 @@
  * -1.1.0 基于性能问题，不支持customCell传递函数，
  */
 import { interpolateRgb } from 'd3-interpolate';
+import { defineComponent } from 'vue';
 let chromeVersion = 0;
 try {
   chromeVersion = +navigator.userAgent.match(/chrome\/\d+/i)[0].split('/')[1];
@@ -322,7 +323,7 @@ export function tableSort(sortOption, order, dataSource) {
   }
   return targetDataSource;
 }
-export default {
+export default defineComponent({
   name: 'StkTable',
   props: {
     minWidth: {
@@ -1027,7 +1028,7 @@ export default {
       return [...this.dataSourceCopy];
     },
   },
-};
+});
 </script>
 
 <style lang="less" scoped>

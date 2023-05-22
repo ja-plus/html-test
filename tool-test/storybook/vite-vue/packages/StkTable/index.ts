@@ -1,1 +1,1 @@
-export { default as StkTable } from './StkTable.vue';
+export { default as StkTable, tableSort, insertToOrderedArray } from './StkTable.vue';

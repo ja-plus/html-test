@@ -43,9 +43,9 @@ module.exports = {
       '@': path.resolve(__dirname, './src'),
     },
   },
-  cache: {
-    type: 'filesystem',
-  },
+  // cache: {
+  //   type: 'filesystem',
+  // },
   plugins: [
     new VueLoaderPlugin(),
     new HtmlWebpackPlugin({

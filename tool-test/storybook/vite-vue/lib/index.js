@@ -1,2 +1,3 @@
-export { default as Button } from './Button/index.ts';
-export { default as StkTable } from './StkTable/index.ts';
+import { Button } from './Button/index.js';
+import { StkTable } from './StkTable/index.js';
+export { Button,StkTable }
