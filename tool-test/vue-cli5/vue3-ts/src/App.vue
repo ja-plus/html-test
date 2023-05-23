@@ -1,16 +1,29 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
+  <div>
+    <img alt="Vue logo" src="./assets/logo.png">
+    <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
+    <!-- <StkTable class="dark" :columns="columns"></StkTable> -->
+  </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
 import HelloWorld from './components/HelloWorld.vue';
+//@ts-ignore
+// import {StkTable} from 'vite-vue';
 
 export default defineComponent({
   name: 'App',
   components: {
-    HelloWorld
+    HelloWorld,
+    // StkTable
+  },
+  data(){
+    return{
+      columns:[
+        {dataIndex: 'id', title:'id'}
+      ]
+    }
   }
 });
 </script>
