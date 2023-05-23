@@ -1,5 +1,6 @@
 import "./style.css";
 import { defineComponent, computed, openBlock, createElementBlock, normalizeClass, normalizeStyle, toDisplayString } from "vue";
+import { default as default2 } from "../assets/images/borderImage.png";
 const button = "";
 const _sfc_main = /* @__PURE__ */ defineComponent({
   __name: "Button",
@@ -35,5 +36,6 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
   }
 });
 export {
-  _sfc_main as Button
+  _sfc_main as Button,
+  default2 as Image
 };

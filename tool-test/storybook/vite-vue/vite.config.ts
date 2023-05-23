@@ -7,8 +7,9 @@ import dts from 'vite-plugin-dts';
 export default defineConfig({
   build: {
     minify: false,
+    assetsDir: '../assets',
     rollupOptions: {
-      external: ['vue', 'd3-interpolate'], // 排除三方包
+      external: ['vue', 'd3-interpolate', /assets\/images\/.+\.(png|jpe?g|svg|bmp)/], // 排除三方包,排除图片
       // output: {
       //   globals: {
       //     vue: 'Vue', // umd需要
@@ -32,8 +33,7 @@ export default defineConfig({
         generateBundle(options, bundle) {
           // console.log('options:', options);
           // console.log('bundle:', bundle);
-
-          bundle['index.js'].code = 'import "./style.css";\n' + bundle['index.js'].code;
+          (bundle['index.js'] as any).code = 'import "./style.css";\n' + (bundle['index.js'] as any).code;
         },
       };
     })(),

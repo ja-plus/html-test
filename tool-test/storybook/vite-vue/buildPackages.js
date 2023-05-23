@@ -1,4 +1,4 @@
-import { readdirSync, writeFileSync } from 'fs';
+import { cpSync, readdirSync, writeFileSync } from 'fs';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { build } from 'vite';
@@ -11,21 +11,25 @@ async function main() {
   let indexFileContent = '';
   const exportNames = [];
   const promise = [];
-  for (const compName of packages) {
+  for (const folderName of packages) {
     // const stats = lstatSync(path.join(packagesDir, compName));
     // if (stats.isDirectory()) {
     //   // 如果是目录，则构建
     // }
-    if (compName.indexOf('index.ts') === -1) {
-      promise.push(buildAComponent(compName));
-      indexFileContent += `import { ${compName} } from './${compName}/index.js';\n`;
-      exportNames.push(compName);
+    const firstLetter = folderName[0];
+    const isFirstLetterUpperCase = /[A-Z]/.test(firstLetter);
+    if (isFirstLetterUpperCase && folderName.indexOf('.ts') === -1) {
+      promise.push(buildAComponent(folderName));
+      indexFileContent += `import { ${folderName} } from './${folderName}/index.js';\n`;
+      exportNames.push(folderName);
     }
   }
   await Promise.all(promise);
   indexFileContent += `export { ${exportNames.join(', ')} };`;
   writeFileSync(path.join(outDir, 'index.js'), indexFileContent);
   console.log('index.js created');
+  // 复制静态资源目录
+  // cpSync(path.join(packagesDir, 'assets'), path.join(outDir, 'assets'));
 }
 main();
 

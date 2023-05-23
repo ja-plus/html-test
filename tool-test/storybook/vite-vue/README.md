@@ -1,3 +1,5 @@
+# 介绍
+* packages 目录中，大写开头文件夹会被打包。
 # 测试
 ## webpack5
 package.json 中sideEffect: false 会导致无法引入css。  
@@ -9,6 +11,9 @@ package.json 中sideEffect: false 会导致无法引入css。
 vite-plugin-dts
 
 # 使用方式
+
+# 引入css 插件
+vite-plugin-libcss
 
 # Vue 3 + TypeScript + Vite
 
