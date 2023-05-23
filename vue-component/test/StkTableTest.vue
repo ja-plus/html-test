@@ -82,10 +82,8 @@ div(style="width:max-content")
 
 <script>
 import { h } from 'vue';
-// import StkTable from '../src/StkTable.vue';
-import { StkTable } from 'vite-vue-components';
-import 'vite-vue-components/lib/StkTable/style.css';
-// import './style.css';
+import StkTable from '../src/StkTable.vue';
+// import { StkTable } from 'vite-vue-components';
 import StkTableC from '../src/StkTableC/index.vue'; // 兼容版本 fixedLeft
 import StkTableInsertSort from './StkTableInsertSort.vue'; // 插入排序
 export default {

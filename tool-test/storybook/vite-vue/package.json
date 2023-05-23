@@ -5,7 +5,6 @@
   "type": "module",
   "main": "lib/index.js",
   "module": "lib/index.js",
-  "sideEffects": false,
   "files": [
     "lib",
     "packages"
