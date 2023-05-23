@@ -23,7 +23,7 @@ async function main() {
     }
   }
   await Promise.all(promise);
-  indexFileContent += `export { ${exportNames.join(',')} }`;
+  indexFileContent += `export { ${exportNames.join(', ')} };`;
   writeFileSync(path.join(outDir, 'index.js'), indexFileContent);
   console.log('index.js created');
 }
@@ -41,14 +41,8 @@ async function buildAComponent(compName) {
       outDir: out,
       lib: {
         entry: [entry],
-        fileName: compName,
         formats: ['es'],
-      },
-      rollupOptions: {
-        external: ['vue', 'd3-interpolate'], // 排除三方包
       },
     },
   });
-  const indexFileContent = `import './style.css';\nimport { ${compName} } from './${compName}.js';\nexport { ${compName} };`;
-  writeFileSync(path.join(out, 'index.js'), indexFileContent);
 }

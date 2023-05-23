@@ -1,12 +1,14 @@
 # 测试
 ## webpack5
 package.json 中sideEffect: false 会导致无法引入css。  
-~~用vue-style-loader 不能引入样式？用style-loader 解决。~~ 又正常了。
 ## vue-cli5
 运行正常
 ## vite4
 运行正常
 ## ts支持
+vite-plugin-dts
+
+# 使用方式
 
 # Vue 3 + TypeScript + Vite
 
