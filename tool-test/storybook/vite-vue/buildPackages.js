@@ -2,7 +2,7 @@ import { readdirSync, writeFileSync } from 'fs';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { build } from 'vite';
-import { copySync } from 'fs-extra/esm';
+// import { copySync } from 'fs-extra/esm';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const packagesDir = path.join(__dirname, './packages');
@@ -30,8 +30,8 @@ async function main() {
   writeFileSync(path.join(outDir, 'index.js'), indexFileContent);
   console.log('created: lib/index.js');
   // 复制静态资源目录
-  copySync(path.join(packagesDir, 'assets'), path.join(outDir, 'assets'));
-  console.log('copied: packages/assets => lib/assets');
+  // copySync(path.join(packagesDir, 'assets'), path.join(outDir, 'assets'));
+  // console.log('copied: packages/assets => lib/assets');
 }
 main();
 

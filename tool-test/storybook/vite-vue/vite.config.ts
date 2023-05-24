@@ -7,9 +7,8 @@ import dts from 'vite-plugin-dts';
 export default defineConfig({
   build: {
     minify: false,
-    assetsDir: '../assets',
     rollupOptions: {
-      external: ['vue', 'd3-interpolate', /assets\/images\/.+\.(png|jpe?g|svg|bmp)/], // 排除三方包,排除图片
+      external: ['vue', 'd3-interpolate' /* /assets\/images\/.+\.(png|jpe?g|svg|bmp)/ */], // 排除三方包,排除图片
       // output: {
       //   globals: {
       //     vue: 'Vue', // umd需要
