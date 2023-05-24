@@ -185,6 +185,7 @@
  * TODO:存在的问题：
  * [] column.dataIndex 作为唯一键，不能重复
  * [] 计算的高亮颜色，挂在数据源上对象上，若多个表格使用同一个数据源对象会有问题。需要深拷贝。(解决方案：获取组件uid)
+ * [] highlight-row 颜色不能恢复到active的颜色
  * @changelog
  * -1.1.1 使td 背景为透明，fixed td背景继承tr背景
  * -1.1.0 基于性能问题，不支持customCell传递函数，
