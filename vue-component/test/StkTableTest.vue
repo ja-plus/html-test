@@ -252,24 +252,24 @@ export default {
     this.stkTable = this.$refs.stkTable;
     // this.$refs.stkTable.setCurrentRow('name0');
     // this.$refs.stkTable.setHighlightDimCell('add1', 'age');
-    // setInterval(() => {
-    //   this.$refs.stkTable.setHighlightDimCell('add1', 'age');
-    //   this.$refs.stkTableC.setHighlightDimCell('add1', 'age');
-    // }, 1500);
-    // setInterval(() => {
-    //   this.$refs.stkTable.setHighlightDimCell('add2', 'gender');
-    //   this.$refs.stkTableC.setHighlightDimCell('add2', 'gender');
-    // }, 2000);
     setInterval(() => {
-      this.$refs.stkTable.setHighlightDimRow(['add0']);
-      this.$refs.stkTableC.setHighlightDimRow(['add0']);
-    }, 1000);
+      this.$refs.stkTable?.setHighlightDimCell('add1', 'age');
+      // this.$refs.stkTableC?.setHighlightDimCell('add1', 'age');
+    }, 2500);
+    setInterval(() => {
+      this.$refs.stkTable?.setHighlightDimCell('add2', 'gender');
+      // this.$refs.stkTableC?.setHighlightDimCell('add2', 'gender');
+    }, 2000);
+    setInterval(() => {
+      this.$refs.stkTable?.setHighlightDimRow(['add0']);
+      this.$refs.stkTableC?.setHighlightDimRow(['add0']);
+    }, 3000);
   },
   methods: {
     handleHeightInput(e) {
       this.props.height = e.target.value + 'px';
       this.$nextTick(() => {
-        this.$refs.stkTable.initVirtualScroll();
+        this.$refs.stkTable?.initVirtualScroll();
       });
     },
     handleWidthInput(e) {
@@ -291,7 +291,7 @@ export default {
       console.log('row-dblclick:', e, row);
     },
     onCellClick(e, row, col) {
-      e.stopPropagation();
+      // e.stopPropagation();
       console.log('cell-click:', e, row, col);
     },
     onHeaderCellClick(e, row) {

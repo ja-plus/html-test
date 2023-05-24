@@ -87,7 +87,11 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="16px" height="16px" viewBox="0 0 16 16">
                   <g id="sort-btn">
                     <polygon id="arrow-up" fill="#757699" points="8 2 4.8 6 11.2 6"></polygon>
-                    <polygon id="arrow-down" transform="translate(8, 12) rotate(-180) translate(-8, -12) " points="8 10 4.8 14 11.2 14"></polygon>
+                    <polygon
+                      id="arrow-down"
+                      transform="translate(8, 12) rotate(-180) translate(-8, -12) "
+                      points="8 10 4.8 14 11.2 14"
+                    ></polygon>
                   </g>
                 </svg>
               </span>
@@ -124,8 +128,13 @@
             :key="rowKey ? rowKeyGen(row) : i"
             :data-row-key="rowKey ? rowKeyGen(row) : i"
             :class="{
-              active: rowKey ? rowKeyGen(row) === (currentItem.value && rowKeyGen(currentItem.value)) : row === currentItem.value,
+              active: rowKey
+                ? rowKeyGen(row) === (currentItem.value && rowKeyGen(currentItem.value))
+                : row === currentItem.value,
               hover: rowKey ? rowKeyGen(row) === currentHover.value : row === currentHover.value,
+            }"
+            :style="{
+              backgroundColor: row._bgc,
             }"
             @click="e => onRowClick(e, row)"
             @dblclick="e => onRowDblclick(e, row)"
@@ -144,7 +153,6 @@
                 width: col.width,
                 minWidth: col.minWidth || col.width,
                 maxWidth: col.maxWidth || col.width,
-                backgroundColor: row._bgc,
                 ...fixedStyle('td', col),
               }"
               @click="e => onCellClick(e, row, col)"
@@ -159,7 +167,11 @@
         </template>
       </tbody>
     </table>
-    <div v-if="(!dataSourceCopy || !dataSourceCopy.length) && showNoData" class="stk-table-no-data" :class="{ 'no-data-full': noDataFull }">
+    <div
+      v-if="(!dataSourceCopy || !dataSourceCopy.length) && showNoData"
+      class="stk-table-no-data"
+      :class="{ 'no-data-full': noDataFull }"
+    >
       <slot name="no-data">暂无数据</slot>
     </div>
   </div>
@@ -167,13 +179,14 @@
 
 <script>
 /**
- * @version 1.1.0
+ * @version 1.1.1
  * @author JA+
  * 不支持低版本浏览器非虚拟滚动表格的表头固定，列固定，因为会卡。
  * TODO:存在的问题：
  * [] column.dataIndex 作为唯一键，不能重复
  * [] 计算的高亮颜色，挂在数据源上对象上，若多个表格使用同一个数据源对象会有问题。需要深拷贝。(解决方案：获取组件uid)
  * @changelog
+ * -1.1.1 使td 背景为透明，fixed td背景继承tr背景
  * -1.1.0 基于性能问题，不支持customCell传递函数，
  */
 import { interpolateRgb } from 'd3-interpolate';
@@ -296,7 +309,12 @@ export function tableSort(sortOption, order, dataSource) {
 
       for (let i = 0; i < targetDataSource.length; i++) {
         const row = targetDataSource[i];
-        if (row[sortField] === null || row[sortField] === '' || typeof row[sortField] === 'boolean' || Number.isNaN(+row[sortField])) {
+        if (
+          row[sortField] === null ||
+          row[sortField] === '' ||
+          typeof row[sortField] === 'boolean' ||
+          Number.isNaN(+row[sortField])
+        ) {
           nanArr.push(row);
         } else {
           numArr.push(row);
@@ -487,17 +505,24 @@ export default {
     /** 虚拟滚动展示的行 */
     virtual_dataSourcePart() {
       if (!this.virtual_on) return this.dataSourceCopy;
-      return Object.freeze(this.dataSourceCopy.slice(this.virtualScroll.startIndex, this.virtualScroll.startIndex + this.virtual_pageSize));
+      return Object.freeze(
+        this.dataSourceCopy.slice(this.virtualScroll.startIndex, this.virtualScroll.startIndex + this.virtual_pageSize),
+      );
     },
     /** 虚拟表格定位下边距*/
     virtual_offsetBottom() {
       if (!this.virtual_on) return 0;
-      return (this.dataSourceCopy.length - this.virtualScroll.startIndex - this.virtual_dataSourcePart.length) * this.virtualScroll.rowHeight;
+      return (
+        (this.dataSourceCopy.length - this.virtualScroll.startIndex - this.virtual_dataSourcePart.length) *
+        this.virtualScroll.rowHeight
+      );
     },
     /* 是否开启横向虚拟滚动 */
     virtualX_on() {
       return (
-        this.virtualX && this.columns.reduce((sum, col) => (sum += parseInt(col.minWidth || col.width)), 0) > this.virtualScrollX.containerWidth * 1.5
+        this.virtualX &&
+        this.columns.reduce((sum, col) => (sum += parseInt(col.minWidth || col.width)), 0) >
+          this.virtualScrollX.containerWidth * 1.5
       );
     },
     /** 横向虚拟滚动展示的列 */
@@ -509,7 +534,9 @@ export default {
           const col = this.columns[i];
           if (col.fixed === 'left') fixedLeftColumns.push(col);
         }
-        return Object.freeze(fixedLeftColumns.concat(this.columns.slice(this.virtualScrollX.startIndex, this.virtualScrollX.endIndex)));
+        return Object.freeze(
+          fixedLeftColumns.concat(this.columns.slice(this.virtualScrollX.startIndex, this.virtualScrollX.endIndex)),
+        );
       }
       return this.columns;
       // return this.virtualX_on
@@ -618,7 +645,8 @@ export default {
     },
     initVirtualScrollY(height) {
       if (this.virtual_on) {
-        this.virtualScroll.containerHeight = typeof height === 'number' ? height : this.$refs.tableContainer?.offsetHeight;
+        this.virtualScroll.containerHeight =
+          typeof height === 'number' ? height : this.$refs.tableContainer?.offsetHeight;
         this.updateVirtualScrollY(this.$refs.tableContainer?.scrollTop);
         // const { offsetTop, containerHeight, rowHeight } = this.virtualScroll;
         // const tableAllHeight = this.dataSourceCopy.length * rowHeight;
@@ -894,14 +922,25 @@ export default {
           for (let i = 0; i < highlightRows.length; i++) {
             const row = highlightRows[i];
             // const rowKeyValue = this.rowKeyGen(row);
+            // /**@type {HTMLElement} */
             // const rowEl = this.$el.querySelector(`[data-row-key="${rowKeyValue}"]`);
+            // if (row._bgc_progress > 0 && rowEl) {
+            //   // 开始css transition 补间
+            //   if (rowEl.classList.contains('highlight-row-transition')) {
+            //     rowEl.classList.remove('highlight-row-transition');
+            //     void rowEl.offsetHeight; // reflow
+            //   }
+            //   rowEl.classList.add('highlight-row-transition');
+            // }
             //  经过的时间 ÷ 2s 计算出 颜色过渡进度 (0-1)
-            const progress = (nowTs - row._bgc_progress) / _highlightDuration;
+            const progress = (nowTs - row._bgc_progress_ms) / _highlightDuration;
+            // row._bgc_progress = progress;
             if (progress <= 1) {
               row._bgc = this.highlightInter(progress);
             } else {
               row._bgc = ''; // 清空颜色
               highlightRows.splice(i--, 1);
+              // rowEl.classList.remove('highlight-row-transition');
             }
           }
           this.highlightDimRows = new Set(highlightRows);
@@ -953,10 +992,10 @@ export default {
         const nowTs = Date.now(); // 重置渐变进度
         for (let i = 0; i < rowKeyValues.length; i++) {
           const rowKeyValue = rowKeyValues[i];
-
           const row = this.dataSource.find(it => this.rowKeyGen(it) === rowKeyValue);
           if (!row) continue;
-          row._bgc_progress = nowTs;
+          row._bgc_progress_ms = nowTs;
+          // row._bgc_progress = 0;
           this.highlightDimRows.add(row);
         }
         this.calcHighlightLoop();
@@ -1081,8 +1120,6 @@ export default {
   //   pointer-events: none;
   // }
   .stk-table-main {
-    // position: absolute;
-    // top: 0;
     border-spacing: 0;
     border-collapse: separate;
     table-layout: fixed; // 似乎不需要
@@ -1107,7 +1144,8 @@ export default {
           background-image: var(--bg-border-top), var(--bg-border-right), var(--bg-border-bottom);
 
           &:first-child {
-            background-image: var(--bg-border-top), var(--bg-border-right), var(--bg-border-bottom), var(--bg-border-left);
+            background-image: var(--bg-border-top), var(--bg-border-right), var(--bg-border-bottom),
+              var(--bg-border-left);
           }
         }
 
@@ -1204,33 +1242,30 @@ export default {
       }
 
       tr {
-        &.highlight-row td:not(.highlight-cell) {
+        background-color: var(--td-bgc); // td inherit tr bgc
+        &.highlight-row {
           animation: dim 2s linear;
         }
+        // &.highlight-row-transition {
+        //   transition: background-color 0.2s linear;
+        // }
 
         &.hover,
         &:hover {
-          td {
-            background-color: var(--tr-hover-bgc);
-          }
+          background-color: var(--tr-hover-bgc);
         }
-
-        &.active td {
+        &.active {
           background-color: var(--tr-active-bgc);
         }
 
         td {
-          background-color: var(--td-bgc);
-
-          &:first-child {
-            // border-left: 1px solid var(--border-color);
-            background-image: var(--bg-border-right), var(--bg-border-bottom), var(--bg-border-left);
-            // padding-left: 12px;
+          &.fixed-cell {
+            background-color: inherit; // 防止横向滚动后透明
           }
 
-          // &:last-child {
-          //   padding-right: 12px;
-          // }
+          &:first-child {
+            background-image: var(--bg-border-right), var(--bg-border-bottom), var(--bg-border-left);
+          }
 
           &.highlight-cell {
             animation: dim 2s linear;
@@ -1301,12 +1336,6 @@ export default {
 
   /**虚拟滚动模式 */
   &.virtual {
-    // .virtual-table-height {
-    //   width: 1px;
-    //   z-index: -2;
-    //   position: absolute;
-    // }
-
     .stk-table-main {
       thead {
         tr {
