@@ -1,4 +1,4 @@
-import { readdirSync, writeFileSync } from 'fs';
+import { readdirSync, writeFile, writeFileSync } from 'fs';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { build } from 'vite';
@@ -29,11 +29,16 @@ async function main() {
   indexFileContent += `export { ${exportNames.join(', ')} };`;
   writeFileSync(path.join(outDir, 'index.js'), indexFileContent);
   console.log('created: lib/index.js');
+  writeFileSync(path.join(packagesDir, 'index.ts'), '/** ⭐⭐此文件在打包时自动生成，请不要修改⭐⭐*/\n' + indexFileContent.replace(/\.js/g, ''));
+  console.log('updated: packages/index.ts');
   // 复制静态资源目录
   // copySync(path.join(packagesDir, 'assets'), path.join(outDir, 'assets'));
   // console.log('copied: packages/assets => lib/assets');
 }
-main();
+console.time('build cost');
+main().then(() => {
+  console.timeEnd('build cost');
+});
 
 /**
  * 构建一个组件
