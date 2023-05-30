@@ -132,3 +132,15 @@ let a: 0 | 1 = +true// +boolean 结果为number，类型校验不通过
 ### d.ts 声明文件顺序调整
 在 `tsconfig.json` 中指定files: []，在前面的先加载。<br>
 用于declare module '\*.vue' 与 declare module '\*/name.vue'; 的情况
+
+### 无法提示继承接口的属性
+```ts
+interface A extends B {}
+class Aa extends A {
+  // 无法提示B中的属性
+}
+```
+#### 解决
+```ts
+type A = B & {}
+```
