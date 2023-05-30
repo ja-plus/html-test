@@ -3,16 +3,31 @@ import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { build } from 'vite';
 import dts from 'vite-plugin-dts';
+import { diffMasterBranch } from './diffMasterBranch';
 // import { copySync } from 'fs-extra/esm';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const packagesDir = path.join(__dirname, './packages');
-const outDir = path.join(__dirname, './lib');
+const packagesDir = path.join(__dirname, '../packages');
+const outDir = path.join(__dirname, '../lib');
+/** 是否增量构建 */
+const isIncrement = process.argv.includes('--increment');
+
+console.time('build cost');
+main().then(() => {
+  console.timeEnd('build cost');
+});
+
 async function main() {
   const packages = readdirSync(packagesDir);
   let indexFileContent = '';
   const exportNames = [];
   const promise = [];
+  /**@type {Set<string> | null} */
+  let needPackedComponentNames = null;
+  if (isIncrement) {
+    needPackedComponentNames = diffMasterBranch();
+  }
+
   for (const folderName of packages) {
     // const stats = lstatSync(path.join(packagesDir, compName));
     // if (stats.isDirectory()) {
@@ -21,9 +36,12 @@ async function main() {
     const firstLetter = folderName[0];
     const isFirstLetterUpperCase = /[A-Z]/.test(firstLetter);
     if (isFirstLetterUpperCase && folderName.indexOf('.ts') === -1) {
-      promise.push(buildAComponent(folderName));
       indexFileContent += `import { ${folderName} } from './${folderName}/index.js';\n`;
       exportNames.push(folderName);
+
+      if (!needPackedComponentNames || needPackedComponentNames.has(folderName)) {
+        promise.push(buildAComponent(folderName));
+      }
     }
   }
   await Promise.all(promise);
@@ -36,10 +54,6 @@ async function main() {
   // copySync(path.join(packagesDir, 'assets'), path.join(outDir, 'assets'));
   // console.log('copied: packages/assets => lib/assets');
 }
-console.time('build cost');
-main().then(() => {
-  console.timeEnd('build cost');
-});
 
 /**
  * 构建一个组件

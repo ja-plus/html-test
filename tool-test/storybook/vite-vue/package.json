@@ -12,7 +12,7 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "node buildPackages.js",
+    "build": "node build/buildPackages.js",
     "build:fed":"vite build",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
