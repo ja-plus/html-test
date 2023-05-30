@@ -13,11 +13,13 @@
   "scripts": {
     "dev": "vite",
     "build": "node buildPackages.js",
+    "build:fed":"vite build",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
   "devDependencies": {
+    "@originjs/vite-plugin-federation": "^1.2.3",
     "@storybook/addon-essentials": "^7.0.12",
     "@storybook/addon-interactions": "^7.0.12",
     "@storybook/addon-links": "^7.0.12",
@@ -43,7 +45,7 @@
     "typescript": "^5.0.2",
     "vite": "^4.3.2",
     "vite-plugin-dts": "^2.3.0",
-    "vue": "^3.2.47",
+    "vue": "^3.3.4",
     "vue-eslint-parser": "^9.1.0",
     "vue-tsc": "^1.4.2"
   }

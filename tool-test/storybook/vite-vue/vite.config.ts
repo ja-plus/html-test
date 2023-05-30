@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
-import dts from 'vite-plugin-dts';
+// import federation from '@originjs/vite-plugin-federation';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -15,26 +15,20 @@ export default defineConfig({
       //   },
       // },
     },
+    target: ['esnext'],
   },
   plugins: [
     vue(),
     vueJsx(),
-    dts({
-      outputDir: './lib',
-      entryRoot: './packages',
-    }),
-    /**
-     * 在产物js上导入css
-     */
-    (function () {
-      return {
-        name: 'auto-import-style',
-        generateBundle(options, bundle) {
-          // console.log('options:', options);
-          // console.log('bundle:', bundle);
-          (bundle['index.js'] as any).code = 'import "./style.css";\n' + (bundle['index.js'] as any).code;
-        },
-      };
-    })(),
+    // -- federation 不支持slot vue，会报错 isCE
+    // federation({
+    //   name: 'storybook-vite-vue',
+    //   filename: 'remoteEntry.js',
+    //   // 需要暴露的模块
+    //   exposes: {
+    //     './Button': './packages/Button/index.ts',
+    //   },
+    //   shared: ['vue'],
+    // }),
   ],
 });

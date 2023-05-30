@@ -1,7 +1,8 @@
-import { readdirSync, writeFile, writeFileSync } from 'fs';
+import { readdirSync, writeFileSync } from 'fs';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { build } from 'vite';
+import dts from 'vite-plugin-dts';
 // import { copySync } from 'fs-extra/esm';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -55,5 +56,22 @@ async function buildAComponent(compName) {
         formats: ['es'],
       },
     },
+    plugins: [
+      dts({
+        outputDir: './lib',
+        entryRoot: './packages',
+      }),
+      /**
+       * 在产物js上导入css
+       */
+      (function () {
+        return {
+          name: 'auto-import-style',
+          generateBundle(options, bundle) {
+            bundle['index.js'].code = 'import "./style.css";\n' + bundle['index.js'].code;
+          },
+        };
+      })(),
+    ],
   });
 }

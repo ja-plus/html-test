@@ -26,7 +26,12 @@ type Story = StoryObj<typeof meta>;
 export const Primary: Story = {
   args: {
     primary: true,
-    label: 'Button',
+  },
+  render() {
+    return {
+      components: { Button },
+      template: `<Button primary>Button</Button>`,
+    };
   },
 };
 
