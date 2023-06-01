@@ -1,6 +1,6 @@
 import child_process from 'child_process';
 const dirName = 'packages';
-const cmd = 'git diff HEAD master --stat';
+const cmd = 'git diff origin/master --name-only'; // --state 路径过长会被省略
 
 export function diffMasterBranch() {
   // TODO: git fetch
@@ -18,6 +18,6 @@ export function diffMasterBranch() {
     })
     .filter(name => /[A-Z]/.test(name[0])); // 仅保留大写字母开头的文件夹
 
-  console.log('diff master breanch result:', updatedComps, '\n');
+  console.log('diff master branch result:', updatedComps, '\n');
   return new Set(updatedComps);
 }

@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "types": "packages/index.ts",
+  "types": "lib/index.d.ts",
   "main": "lib/index.js",
   "module": "lib/index.js",
   "files": [

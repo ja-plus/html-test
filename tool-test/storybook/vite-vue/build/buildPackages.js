@@ -47,9 +47,9 @@ async function main() {
   await Promise.all(promise);
   indexFileContent += `export { ${exportNames.join(', ')} };`;
   writeFileSync(path.join(outDir, 'index.js'), indexFileContent);
-  console.log('created: lib/index.js');
-  writeFileSync(path.join(packagesDir, 'index.ts'), '/** ⭐⭐此文件在打包时自动生成，请不要修改⭐⭐*/\n' + indexFileContent.replace(/\.js/g, ''));
-  console.log('updated: packages/index.ts');
+  console.log('create entry file: lib/index.js');
+  writeFileSync(path.join(packagesDir, 'index.d.ts'), '/** ⭐⭐此文件在打包时自动生成，请不要修改⭐⭐*/\n' + indexFileContent.replace(/\.js/g, ''));
+  console.log('create declaration file: packages/index.d.ts');
   // 复制静态资源目录
   // copySync(path.join(packagesDir, 'assets'), path.join(outDir, 'assets'));
   // console.log('copied: packages/assets => lib/assets');
