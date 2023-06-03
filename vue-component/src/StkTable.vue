@@ -2,7 +2,7 @@
   <div
     ref="tableContainer"
     class="stk-table"
-    :class="{ virtual: virtual, 'virtual-x': virtualX, dark: theme === 'dark' }"
+    :class="{ virtual: virtual, 'virtual-x': virtualX, dark: theme === 'dark',headless }"
     :style="virtual && { '--row-height': virtualScroll.rowHeight + 'px' }"
     @scroll="onTableScroll"
   >
@@ -27,7 +27,7 @@
       }"
     >
       <!-- transform: virtualX_on ? `translateX(${virtualScrollX.offsetLeft}px)` : null, 用transform控制虚拟滚动左边距，sticky会有问题 -->
-      <thead>
+      <thead v-if="!headless">
         <tr v-for="(row, index) in tableHeaders" :key="index" @contextmenu="e => onHeaderMenu(e)">
           <!-- 这个th用于横向虚拟滚动表格左边距,width、maxWidth 用于兼容低版本浏览器 -->
           <th
@@ -352,6 +352,11 @@ export default {
     maxWidth: {
       type: String,
       default: '',
+    },
+    /** 是否隐藏表头 */
+    headless: {
+      type: Boolean,
+      default: false
     },
     /**
      * 主题，亮、暗
@@ -1004,6 +1009,8 @@ export default {
         // -------- 普通滚动用css @keyframes动画，实现高亮
         /**是否需要重绘 */
         let needRepaint = false;
+        /** @type {HTMLElement[]} */
+        const rowElTemp = [];
         for (let i = 0; i < rowKeyValues.length; i++) {
           const rowKeyValue = rowKeyValues[i];
           /**@type {HTMLElement|null} */
@@ -1013,7 +1020,7 @@ export default {
             rowEl.classList.remove('highlight-row');
             needRepaint = true;
           }
-          rowEl.classList.add('highlight-row');
+          rowElTemp.push(rowEl);
           // 动画结束移除class
           window.clearTimeout(this.highlightDimRowsTimeout.get(rowKeyValue));
           this.highlightDimRowsTimeout.set(
@@ -1027,6 +1034,7 @@ export default {
         if (needRepaint) {
           void this.$el.offsetWidth; //强制浏览器重绘
         }
+        rowElTemp.forEach(el => el.classList.add('highlight-row'));// 统一添加动画
       }
     },
     /**
@@ -1120,6 +1128,9 @@ export default {
   //   z-index: 1;
   //   pointer-events: none;
   // }
+  &.headless {
+    border-top: 1px solid var(--border-color);
+  }
   .stk-table-main {
     border-spacing: 0;
     border-collapse: separate;
