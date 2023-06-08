@@ -7,12 +7,15 @@
     <title>Test Flip</title>
 </head>
 <style>
+    body{
+        margin:0;
+    }
     .cube {
-        position: absolute;
-        top:50%;
-        left: 50%;
+        /* position: absolute; */
+        /* top:50%; */
+        /* left: 50%;*/
         width: 100px;
-        height: 100px;
+        height: 100px; 
         background: url(../html/assets/img/searah.jpg) center / contain no-repeat;
         background-size: contain;
         border: 1px dashed #aaa;
@@ -32,17 +35,17 @@
 import Flip from '../js/Flip.js';
 
 const cube = document.querySelector('.cube');
-let flip = new Flip([cube], 1);
+let flip = new Flip([cube], 10);
 cube.addEventListener('click', e => {
   e.stopPropagation();
+  e.target.style.transition = 'none';
   e.target.classList.toggle('scale');
   flip.play();
 });
-window.addEventListener('click', e => {
-  console.log(e);
-  cube.style.left = e.x + 'px';
-  cube.style.top = e.y + 'px';
-  flip.play();
-});
+// window.addEventListener('click', e => {
+//   cube.style.left = e.x + 'px';
+//   cube.style.top = e.y + 'px';
+//   flip.play();
+// });
 </script>
 </html>

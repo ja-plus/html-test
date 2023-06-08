@@ -13,6 +13,7 @@ export default class Flip {
     this.duration = duration;
     Array.from(els).forEach(ele => {
       const { x, y, width, height } = ele.getBoundingClientRect();
+      // console.log(x, y, width, height);
       this.store.set(ele, { x, y, width, height }); // FIXME: 可能造成内存泄漏
     });
   }
@@ -21,17 +22,18 @@ export default class Flip {
    * TODO: 还原之前的style
    */
   play() {
-    this.store.forEach((oldRect, el) => {
+    this.store.forEach((oldState, el) => {
       const { x, y, width, height } = el.getBoundingClientRect();
-      const translateX = x - oldRect.x;
-      const translateY = y - oldRect.y;
-      const scaleX = oldRect.width / width;
-      const scaleY = oldRect.height / height;
+      console.log(x, y, width, height, oldState);
+      const translateX = x - oldState.x;
+      const translateY = y - oldState.y;
+      const scaleX = oldState.width / width;
+      const scaleY = oldState.height / height;
       // 更新当前位置
-      oldRect.x = x;
-      oldRect.y = y;
-      oldRect.width = width;
-      oldRect.height = height;
+      oldState.x = x;
+      oldState.y = y;
+      oldState.width = width;
+      oldState.height = height;
       // 移动到之前的位置
       el.style.transition = 'none';
       el.style.transformOrigin = '0 0';
@@ -41,6 +43,15 @@ export default class Flip {
       // 过渡到当前位置
       el.style.transition = `transform ${this.duration}s ease`;
       el.style.transform = `translate(0px,0px) scale(1,1)`;
+      // el.addEventListener(
+      //   'transitionend',
+      //   () => {
+      //     console.log('animationend');
+      //   },
+      //   {
+      //     once: true,
+      //   },
+      // );
     });
   }
 }
