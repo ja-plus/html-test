@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Flip</title>
+</head>
+<style>
+    .cube {
+        position: absolute;
+        top:50%;
+        left: 50%;
+        width: 100px;
+        height: 100px;
+        background: url(../html/assets/img/searah.jpg) center / contain no-repeat;
+        background-size: contain;
+        border: 1px dashed #aaa;
+    }
+    .cube.scale{
+        position: absolute;
+        width: 400px;
+        height: 200px;
+        left: 30%;
+        top: 30%;
+    }
+</style>
+<body>
+    <div class="cube"></div>
+</body>
+<script type="module">
+import Flip from '../js/Flip.js';
+
+const cube = document.querySelector('.cube');
+let flip = new Flip([cube], 1);
+cube.addEventListener('click', e => {
+  e.stopPropagation();
+  e.target.classList.toggle('scale');
+  flip.play();
+});
+window.addEventListener('click', e => {
+  console.log(e);
+  cube.style.left = e.x + 'px';
+  cube.style.top = e.y + 'px';
+  flip.play();
+});
+</script>
+</html>

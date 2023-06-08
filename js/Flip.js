@@ -4,34 +4,43 @@
 export default class Flip {
   /**
    * 开始位置
-   * @param {HTMLElement[]} eles
-   * @param {number} duration
+   * @param {HTMLElement[]} els
+   * @param {number} duration seconds
    */
-  constructor(eles, duration) {
+  constructor(els, duration) {
     /** @type {Map<HTMLElement,{x:number,y:number}>} */
     this.store = new Map();
     this.duration = duration;
-    Array.from(eles).forEach(ele => {
-      const { x, y } = ele.getBoundingClientRect();
-      this.store.set(ele, { x, y });
+    Array.from(els).forEach(ele => {
+      const { x, y, width, height } = ele.getBoundingClientRect();
+      this.store.set(ele, { x, y, width, height }); // FIXME: 可能造成内存泄漏
     });
   }
+  /**
+   * TODO: clone一个对象，不拉伸画面的情况淡出
+   * TODO: 还原之前的style
+   */
   play() {
-    this.store.forEach((old, k) => {
-      const { x, y } = k.getBoundingClientRect();
-      const translateX = x - old.x;
-      const translateY = y - old.y;
+    this.store.forEach((oldRect, el) => {
+      const { x, y, width, height } = el.getBoundingClientRect();
+      const translateX = x - oldRect.x;
+      const translateY = y - oldRect.y;
+      const scaleX = oldRect.width / width;
+      const scaleY = oldRect.height / height;
       // 更新当前位置
-      old.x = x;
-      old.y = y;
+      oldRect.x = x;
+      oldRect.y = y;
+      oldRect.width = width;
+      oldRect.height = height;
       // 移动到之前的位置
-      k.style.transition = 'none';
-      k.style.transform = `translate(${-translateX}px,${-translateY}px)`;
+      el.style.transition = 'none';
+      el.style.transformOrigin = '0 0';
+      el.style.transform = `translate(${-translateX}px,${-translateY}px) scale(${scaleX},${scaleY})`;
       // 通知浏览器重排
-      void k.offsetHeight;
+      void el.offsetHeight;
       // 过渡到当前位置
-      k.style.transition = `transform ${this.duration}s ease`;
-      k.style.transform = `translate(0px,0px)`;
+      el.style.transition = `transform ${this.duration}s ease`;
+      el.style.transform = `translate(0px,0px) scale(1,1)`;
     });
   }
 }
