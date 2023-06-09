@@ -11,14 +11,12 @@
         margin:0;
     }
     .cube {
-        /* position: absolute; */
-        /* top:50%; */
-        /* left: 50%;*/
+        cursor: pointer;
         width: 100px;
         height: 100px; 
-        background: url(../html/assets/img/searah.jpg) center / contain no-repeat;
+        background: url(../html/assets/img/sprite.jpeg) center / contain no-repeat;
         background-size: contain;
-        border: 1px dashed #aaa;
+        border: 2px dashed #aaa;
     }
     .cube.scale{
         position: absolute;
@@ -29,23 +27,17 @@
     }
 </style>
 <body>
-    <div class="cube"></div>
+    <div class="cube" ></div>
 </body>
 <script type="module">
 import Flip from '../js/Flip.js';
-
 const cube = document.querySelector('.cube');
-let flip = new Flip([cube], 10);
-cube.addEventListener('click', e => {
-  e.stopPropagation();
-  e.target.style.transition = 'none';
-  e.target.classList.toggle('scale');
+const flip = new Flip([cube], { duration: 1 });
+window.addEventListener('click', e => {
+  flip.record(cube);
+  cube.style.transition = 'none';
+  cube.classList.toggle('scale');
   flip.play();
 });
-// window.addEventListener('click', e => {
-//   cube.style.left = e.x + 'px';
-//   cube.style.top = e.y + 'px';
-//   flip.play();
-// });
 </script>
 </html>
