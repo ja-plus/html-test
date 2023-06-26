@@ -7,7 +7,7 @@
      * 设置mode: "entry" 的话一定要在文件开头 import "core-js"
      */
     "mode": "usage",
-    "coreJs": "3.29",
+    "coreJs": "3.31",
     // "loose": false, // ts 是否开启宽松模式
   },
   "jsc": {
