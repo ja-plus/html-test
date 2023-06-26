@@ -1,7 +1,7 @@
 避免使用export default, [export default 被认为是有害的](https://jkchao.github.io/typescript-book-chinese/tips/avoidExportDefault.html#commonjs-%E4%BA%92%E7%94%A8)
 
 ## 问题
-* d.ts中declare 的interface会被eslint标记为未定义，如何解决
+* d.ts中declare 的interface会被eslint标记为未定义，如何解决。取消eslint检查d.ts文件
 ## 笔记
 * `keyof` 将对象的Key作为联合类型
 * `typeof` 获得某一变量的类型
@@ -53,6 +53,16 @@ function controlFlowAnalysisWithNever(foo: Foo) {
     const check: never = foo;
   }
 }
+```
+### d.ts 中导入type并导出namespace到全局
+```typescript
+// typings.d.ts
+import { GlobalState } from 'otherType.ts'
+declare namespace GlobalType {
+  interface G_State extends GlobalState {}
+}
+export = GlobalType; // 必须
+export as namespace GlobalType;
 ```
 ### 从另一个类型中获取类型
 ```typescript
@@ -108,7 +118,7 @@ interface A {
 }
 type A = {
     [K in 'name' | 'id']:string; // 通过
-    [K: keyof Other]:string; // 通过
+    [K in keyof Other]:string; // 通过
 }
 ```
 ### interface 中不能使用 [K: string]?:
@@ -139,8 +149,6 @@ interface A extends B {}
 class Aa extends A {
   // 无法提示B中的属性
 }
-```
-#### 解决
-```ts
+// 解决
 type A = B & {}
 ```
