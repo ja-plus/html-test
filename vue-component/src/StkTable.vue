@@ -1,11 +1,7 @@
 <template>
-  <div
-    ref="tableContainer"
-    class="stk-table"
-    :class="{ virtual: virtual, 'virtual-x': virtualX, dark: theme === 'dark',headless }"
-    :style="virtual && { '--row-height': virtualScroll.rowHeight + 'px' }"
-    @scroll="onTableScroll"
-  >
+  <div ref="tableContainer" class="stk-table"
+    :class="{ virtual: virtual, 'virtual-x': virtualX, dark: theme === 'dark', headless }"
+    :style="virtual && { '--row-height': virtualScroll.rowHeight + 'px' }" @scroll="onTableScroll">
     <!-- 横向滚动时固定列的阴影，TODO: 覆盖一层在整个表上，使用linear-gradient 绘制阴影-->
     <!-- <div
       :class="showFixedLeftShadow && 'stk-table-fixed-left-col-box-shadow'"
@@ -19,63 +15,40 @@
       ></div>
     -->
     <!-- 表格主体 -->
-    <table
-      class="stk-table-main"
-      :style="{
-        minWidth: minWidth,
-        maxWidth: maxWidth,
-      }"
-    >
+    <table class="stk-table-main" :style="{
+      minWidth: minWidth,
+      maxWidth: maxWidth,
+    }">
       <!-- transform: virtualX_on ? `translateX(${virtualScrollX.offsetLeft}px)` : null, 用transform控制虚拟滚动左边距，sticky会有问题 -->
       <thead v-if="!headless">
         <tr v-for="(row, index) in tableHeaders" :key="index" @contextmenu="e => onHeaderMenu(e)">
           <!-- 这个th用于横向虚拟滚动表格左边距,width、maxWidth 用于兼容低版本浏览器 -->
-          <th
-            v-if="virtualX_on"
-            class="virtual-x-left"
-            :style="{
-              minWidth: virtualScrollX.offsetLeft + 'px',
-              width: virtualScrollX.offsetLeft + 'px',
-            }"
-          ></th>
-          <th
-            v-for="col in virtualX_on ? virtualX_columnPart : row"
-            :key="col.dataIndex"
-            :data-col-key="col.dataIndex"
-            :draggable="headerDrag ? 'true' : 'false'"
-            :rowspan="col.rowSpan"
-            :colspan="col.colSpan"
-            :style="{
+          <th v-if="virtualX_on" class="virtual-x-left" :style="{
+            minWidth: virtualScrollX.offsetLeft + 'px',
+            width: virtualScrollX.offsetLeft + 'px',
+          }"></th>
+          <th v-for="col in virtualX_on ? virtualX_columnPart : row" :key="col.dataIndex" :data-col-key="col.dataIndex"
+            :draggable="headerDrag ? 'true' : 'false'" :rowspan="col.rowSpan" :colspan="col.colSpan" :style="{
               textAlign: col.headerAlign,
               width: col.width,
               minWidth: col.minWidth || col.width,
               maxWidth: col.maxWidth || col.width,
               ...fixedStyle('th', col),
-            }"
-            :title="col.title"
-            :class="[
-              col.sorter ? 'sortable' : '',
-              col.dataIndex === sortCol && sortOrderIndex !== 0 && 'sorter-' + sortSwitchOrder[sortOrderIndex],
-              showHeaderOverflow ? 'text-overflow' : '',
-              col.headerClassName,
-              col.fixed ? 'fixed-cell' : '',
-            ]"
-            @click="
-              e => {
-                onColumnSort(col);
-                onHeaderCellClick(e, col);
-              }
-            "
-            @dragstart="onThDragStart"
-            @drop="onThDrop"
-            @dragover="onThDragOver"
-          >
+            }" :title="col.title" :class="[
+  col.sorter ? 'sortable' : '',
+  col.dataIndex === sortCol && sortOrderIndex !== 0 && 'sorter-' + sortSwitchOrder[sortOrderIndex],
+  showHeaderOverflow ? 'text-overflow' : '',
+  col.headerClassName,
+  col.fixed ? 'fixed-cell' : '',
+]" @click="e => {
+    onColumnSort(col);
+    onHeaderCellClick(e, col);
+  }
+  " @dragstart="onThDragStart" @drop="onThDrop" @dragover="onThDragOver">
             <div class="table-header-cell-wrapper">
               <component
                 :is="typeof col.customHeaderCell === 'function' ? col.customHeaderCell(col) : col.customHeaderCell"
-                v-if="col.customHeaderCell"
-                :col="col"
-              />
+                v-if="col.customHeaderCell" :col="col" />
               <template v-else>
                 <slot name="table-header" :column="col">
                   <span class="table-header-title">{{ col.title }}</span>
@@ -87,25 +60,18 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="16px" height="16px" viewBox="0 0 16 16">
                   <g id="sort-btn">
                     <polygon id="arrow-up" fill="#757699" points="8 2 4.8 6 11.2 6"></polygon>
-                    <polygon
-                      id="arrow-down"
-                      transform="translate(8, 12) rotate(-180) translate(-8, -12) "
-                      points="8 10 4.8 14 11.2 14"
-                    ></polygon>
+                    <polygon id="arrow-down" transform="translate(8, 12) rotate(-180) translate(-8, -12) "
+                      points="8 10 4.8 14 11.2 14"></polygon>
                   </g>
                 </svg>
               </span>
             </div>
           </th>
           <!-- 这个th用于横向虚拟滚动表格右边距 width、maxWidth 用于兼容低版本浏览器-->
-          <th
-            v-if="virtualX_on"
-            style="padding: 0"
-            :style="{
-              minWidth: virtualX_offsetRight + 'px',
-              width: virtualX_offsetRight + 'px',
-            }"
-          ></th>
+          <th v-if="virtualX_on" style="padding: 0" :style="{
+            minWidth: virtualX_offsetRight + 'px',
+            width: virtualX_offsetRight + 'px',
+          }"></th>
         </tr>
       </thead>
 
@@ -123,40 +89,28 @@
       <tbody>
         <tr v-if="virtual_on" :style="{ height: `${virtualScroll.offsetTop}px` }"></tr>
         <template v-if="dataSourceCopy && dataSourceCopy.length">
-          <tr
-            v-for="(row, i) in virtual_dataSourcePart"
-            :key="rowKey ? rowKeyGen(row) : i"
-            :data-row-key="rowKey ? rowKeyGen(row) : i"
-            :class="{
+          <tr v-for="(row, i) in virtual_dataSourcePart" :key="rowKey ? rowKeyGen(row) : i"
+            :data-row-key="rowKey ? rowKeyGen(row) : i" :class="{
               active: rowKey
                 ? rowKeyGen(row) === (currentItem.value && rowKeyGen(currentItem.value))
                 : row === currentItem.value,
               hover: rowKey ? rowKeyGen(row) === currentHover.value : row === currentHover.value,
-            }"
-            :style="{
-              backgroundColor: row._bgc,
-            }"
-            @click="e => onRowClick(e, row)"
-            @dblclick="e => onRowDblclick(e, row)"
-            @contextmenu="e => onRowMenu(e, row)"
-            @mouseover="e => onTrMouseOver(e, row)"
-          >
+              [rowClassName(row, i)]: true
+            }" :style="{
+  backgroundColor: row._bgc,
+}" @click="e => onRowClick(e, row)" @dblclick="e => onRowDblclick(e, row)"
+            @contextmenu="e => onRowMenu(e, row)" @mouseover="e => onTrMouseOver(e, row)">
             <!--这个td用于配合虚拟滚动的th对应，防止列错位-->
             <td v-if="virtualX_on" class="virtual-x-left" style="padding: 0"></td>
-            <td
-              v-for="col in virtualX_on ? virtualX_columnPart : tableProps"
-              :key="col.dataIndex"
+            <td v-for="col in virtualX_on ? virtualX_columnPart : tableProps" :key="col.dataIndex"
               :data-index="col.dataIndex"
-              :class="[col.className, showOverflow ? 'text-overflow' : '', col.fixed ? 'fixed-cell' : '']"
-              :style="{
+              :class="[col.className, showOverflow ? 'text-overflow' : '', col.fixed ? 'fixed-cell' : '']" :style="{
                 textAlign: col.align,
                 width: col.width,
                 minWidth: col.minWidth || col.width,
                 maxWidth: col.maxWidth || col.width,
                 ...fixedStyle('td', col),
-              }"
-              @click="e => onCellClick(e, row, col)"
-            >
+              }" @click="e => onCellClick(e, row, col)">
               <component :is="col.customCell" v-if="col.customCell" :col="col" :row="row" />
               <div v-else class="table-cell-wrapper" :title="row[col.dataIndex]">
                 {{ row[col.dataIndex] ?? emptyCellText }}
@@ -167,11 +121,8 @@
         </template>
       </tbody>
     </table>
-    <div
-      v-if="(!dataSourceCopy || !dataSourceCopy.length) && showNoData"
-      class="stk-table-no-data"
-      :class="{ 'no-data-full': noDataFull }"
-    >
+    <div v-if="(!dataSourceCopy || !dataSourceCopy.length) && showNoData" class="stk-table-no-data"
+      :class="{ 'no-data-full': noDataFull }">
       <slot name="no-data">暂无数据</slot>
     </div>
   </div>
@@ -179,7 +130,7 @@
 
 <script>
 /**
- * @version 1.1.1
+ * @version 1.2.1
  * @author JA+
  * 不支持低版本浏览器非虚拟滚动表格的表头固定，列固定，因为会卡。
  * TODO:存在的问题：
@@ -187,6 +138,8 @@
  * [] 计算的高亮颜色，挂在数据源上对象上，若多个表格使用同一个数据源对象会有问题。需要深拷贝。(解决方案：获取组件uid)
  * [] highlight-row 颜色不能恢复到active的颜色
  * @changelog
+ * -1.2.1 高亮单元格优化
+ * -1.2.0 props.rowClassName,td line-height
  * -1.1.1 使td 背景为透明，fixed td背景继承tr背景
  * -1.1.0 基于性能问题，不支持customCell传递函数，
  */
@@ -431,6 +384,15 @@ export default {
       type: Boolean,
       default: false,
     },
+    /** 
+     * 给行附加className 
+     * FIXME: 是否需要优化，因为不传此prop会使表格行一直执行空函数，是否有影响
+     * 
+    */
+    rowClassName: {
+      type: Function,
+      default: () => () => ''
+    }
   },
   emits: [
     'row-click',
@@ -468,6 +430,8 @@ export default {
       highlightDimRows: new Set(),
       /** 高亮后渐暗的行定时器 */
       highlightDimRowsTimeout: new Map(),
+      /** 高亮后渐暗的单元格定时器 */
+      highlightDimCellsTimeout: new Map(),
       /** 是否正在计算高亮行的循环*/
       calcHighlightDimLoop: false,
       virtualScroll: {
@@ -528,7 +492,7 @@ export default {
       return (
         this.virtualX &&
         this.columns.reduce((sum, col) => (sum += parseInt(col.minWidth || col.width)), 0) >
-          this.virtualScrollX.containerWidth * 1.5
+        this.virtualScrollX.containerWidth * 1.5
       );
     },
     /** 横向虚拟滚动展示的列 */
@@ -986,6 +950,14 @@ export default {
         void cellEl.offsetHeight; // 通知浏览器重绘
       }
       cellEl.classList.add('highlight-cell');
+      window.clearTimeout(this.highlightDimCellsTimeout.get(rowKeyValue));
+      this.highlightDimCellsTimeout.set(
+        rowKeyValue,
+        window.setTimeout(() => {
+          cellEl.classList.remove('highlight-cell');
+          this.highlightDimCellsTimeout.delete(rowKeyValue);
+        }, _highlightDuration)
+      );
     },
     /**
      * 高亮一行
@@ -1101,6 +1073,7 @@ export default {
   overflow: auto;
   display: flex;
   flex-direction: column;
+
   /**深色模式 */
   &.dark {
     --th-bgc: #181c21;
@@ -1131,6 +1104,7 @@ export default {
   &.headless {
     border-top: 1px solid var(--border-color);
   }
+
   .stk-table-main {
     border-spacing: 0;
     border-collapse: separate;
@@ -1246,6 +1220,7 @@ export default {
     }
 
     tbody {
+
       /**高亮渐暗 */
       @keyframes dim {
         from {
@@ -1255,9 +1230,11 @@ export default {
 
       tr {
         background-color: var(--td-bgc); // td inherit tr bgc
+
         &.highlight-row {
           animation: dim 2s linear;
         }
+
         // &.highlight-row-transition {
         //   transition: background-color 0.2s linear;
         // }
@@ -1266,6 +1243,7 @@ export default {
         &:hover {
           background-color: var(--tr-hover-bgc);
         }
+
         &.active {
           background-color: var(--tr-active-bgc);
         }
@@ -1341,6 +1319,7 @@ export default {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+
     &.no-data-full {
       flex: 1;
     }
@@ -1352,6 +1331,7 @@ export default {
       thead {
         tr {
           th {
+
             // 为不影响布局，表头行高要定死
             .table-header-cell-wrapper {
               overflow: hidden;
@@ -1363,12 +1343,14 @@ export default {
 
       tbody {
         position: relative;
+
         tr {
           td {
             height: var(--row-height);
-            line-height: var(--row-height);
+            line-height: 1;
+
             .table-cell-wrapper {
-              height: inherit;
+              max-height: var(--row-height);
               overflow: hidden;
             }
           }
@@ -1376,16 +1358,19 @@ export default {
       }
     }
   }
+
   &.virtual-x {
     .stk-table-main {
       .virtual-x-left {
         padding: 0;
       }
-      thead tr:first-child .virtual-x-left + th {
+
+      thead tr:first-child .virtual-x-left+th {
         // 横向虚拟滚动时，左侧第一个单元格加上border-left
         background-image: var(--bg-border-top), var(--bg-border-right), var(--bg-border-bottom), var(--bg-border-left);
       }
-      tr .virtual-x-left + th {
+
+      tr .virtual-x-left+th {
         background-image: var(--bg-border-right), var(--bg-border-bottom), var(--bg-border-left);
       }
     }

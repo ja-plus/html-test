@@ -1,11 +1,10 @@
-import { Component } from 'vue';
-import { VNode } from 'vue/types/umd';
+import { Component, VNode } from 'vue';
 export type StkTableColumn<T> = {
   dataIndex: keyof T;
   title?: string;
   align?: 'right' | 'left' | 'center';
   headerAlign?: 'right' | 'left' | 'center';
-  sorter?: boolean | function;
+  sorter?: boolean | Function;
   width?: string;
   minWidth?: string;
   maxWidth?: string;
@@ -13,6 +12,6 @@ export type StkTableColumn<T> = {
   sortField?: keyof T;
   sortType?: 'number' | 'string';
   fixed?: 'left' | null;
-  customCell?: ((col: StkTableColumn<T>, item: T) => Component | VNode) | (Component | VNode);
-  customHeaderCell?: ((col: StkTableColumn<T>) => Component | VNode) | (Component | VNode);
+  customCell?: Component | VNode;
+  customHeaderCell?: Component | VNode;
 };

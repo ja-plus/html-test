@@ -29,7 +29,7 @@
       color: #fff;
       text-align: center;
       border-radius: 10px/20px;
-      ;
+      cursor: grab;
     }
 
     .list li.move {
@@ -61,7 +61,7 @@
         e.target.classList.add('move');
       });
       movingEle = e.target;
-      flip = new Flip(ul.children, 0.5);
+      flip = new Flip(ul.children, { duration: 0.5, cloneNode: false });
     });
     ul.addEventListener('dragover', e => {
       e.preventDefault();
@@ -76,6 +76,7 @@
       const ulChildren = Array.from(ul.children);
       const sourceIndex = ulChildren.indexOf(movingEle);
       const targetIndex = ulChildren.indexOf(targetLi);
+      flip.record();
       if (sourceIndex < targetIndex) {
         console.log('下移,插入到下一个元素之前。', targetLi.nextElementSibling);
         ul.insertBefore(movingEle, targetLi.nextElementSibling);
