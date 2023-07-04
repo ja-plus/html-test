@@ -7,90 +7,111 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>draggable Flip Animation</title>
   <style>
+    html {
+      height: 100%;
+    }
+
     body {
-      margin:0;
-      height: 100vh;
-      display:flex;
+      margin: 0;
+      height: 100%;
+      display: flex;
       flex-direction: column;
       align-items: center;
     }
+
     .list {
-      list-style-type: none;
+      display: grid;
+      width: 100%;
+      gap: 10px;
+      grid-template-columns: repeat(auto-fill, 100px);
     }
 
-    .list li {
+    .list .item {
+      --main-color: #1b63d9;
+      color: var(--main-color);
       box-sizing: border-box;
-      height: 40px;
-      line-height: 40px;
-      width: 300px;
-      background-color: #1b63d9;
-      margin: 10px 0;
+      background-color: var(--main-color);
       font-size: 16px;
-      color: #fff;
+      aspect-ratio: 2;
       text-align: center;
-      border-radius: 10px/20px;
+      /* border-radius: 10px/20px; */
+      border-radius: 10px;
       cursor: grab;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      content-visibility: auto;
     }
 
-    .list li.move {
+    .list .move {
       background-color: transparent;
-      border: 2px dashed #1b64d9;
+      border: 2px dashed;
     }
   </style>
 </head>
 
 <body>
   <h1>Flip Animation</h1>
-  <ul class="list">
-    <li draggable="true">1</li>
-    <li draggable="true">2</li>
-    <li draggable="true">3</li>
-    <li draggable="true">4</li>
-    <li draggable="true">5</li>
-  </ul>
-  <script type="module">
-    import Flip from '../js/Flip.js';
-    const ul = document.querySelector('.list');
-    let movingEle = null;
-    let flip = null;
-    ul.addEventListener('dragstart', e => {
-      if (e.target === ul) return;
-      e.dataTransfer.effectAllowed = 'move'; // 鼠标样式，标志为移动
-      // drag出去的样式是当前的样式，因此要异步设置当前元素样式。
-      setTimeout(() => {
-        e.target.classList.add('move');
-      });
-      movingEle = e.target;
-      flip = new Flip(ul.children, { duration: 0.5, cloneNode: false });
-    });
-    ul.addEventListener('dragover', e => {
-      e.preventDefault();
-    });
-    ul.addEventListener('dragenter', e => {
-      e.preventDefault();
-      if (e.target === movingEle || e.target === ul) return;
-      // li
-      // console.log('e :>> ', e.target);
-      /** @type {HTMLElement}*/
-      const targetLi = e.target;
-      const ulChildren = Array.from(ul.children);
-      const sourceIndex = ulChildren.indexOf(movingEle);
-      const targetIndex = ulChildren.indexOf(targetLi);
-      flip.record();
-      if (sourceIndex < targetIndex) {
-        console.log('下移,插入到下一个元素之前。', targetLi.nextElementSibling);
-        ul.insertBefore(movingEle, targetLi.nextElementSibling);
-      } else {
-        console.log('上移，插入目标元素之前', targetLi);
-        ul.insertBefore(movingEle, targetLi);
-      }
-      flip.play();
-    });
-    ul.addEventListener('dragend', e => {
-      e.target.classList.remove('move');
-      movingEle = null;
-    });
-  </script>
+  <div class="list">
+  </div>
 </body>
+<script>
+  const list = document.querySelector('.list');
+  const fgmt = document.createDocumentFragment();
+  for (let i = 0; i < 1000; i++) {
+    const item = document.createElement('div');
+    item.style.setProperty(
+      '--main-color',
+      `rgb(${parseInt(Math.random() * 155) + 100},${parseInt(Math.random() * 155) + 100},${parseInt(Math.random() * 155) + 100})`,
+    );
+    item.className = 'item';
+    item.draggable = true;
+    const span = document.createElement('span');
+    span.style.color = '#333';
+    span.textContent = i;
+    item.appendChild(span);
+    fgmt.appendChild(item);
+  }
+  list.appendChild(fgmt);
+</script>
+<script type="module">
+  import Flip from '../js/Flip.js';
+  const ul = document.querySelector('.list');
+  let movingEle = null;
+  let flip = null;
+  ul.addEventListener('dragstart', e => {
+    if (e.target === ul) return;
+    e.dataTransfer.effectAllowed = 'move'; // 鼠标样式，标志为移动
+    // drag出去的样式是当前的样式，因此要异步设置当前元素样式。
+    setTimeout(() => {
+      e.target.classList.add('move');
+    });
+    movingEle = e.target;
+    flip = new Flip(ul.children, { duration: 0.5, cloneNode: false });
+  });
+  ul.addEventListener('dragover', e => {
+    e.preventDefault();
+  });
+  ul.addEventListener('dragenter', e => {
+    e.preventDefault();
+    if (e.target === movingEle || e.target === ul || !e.target.classList.contains('item')) return;
+    /** @type {HTMLElement}*/
+    const targetLi = e.target;
+    const ulChildren = Array.from(ul.children);
+    const sourceIndex = ulChildren.indexOf(movingEle);
+    const targetIndex = ulChildren.indexOf(targetLi);
+    flip.record();
+    if (sourceIndex < targetIndex) {
+      ul.insertBefore(movingEle, targetLi.nextElementSibling);
+    } else {
+      ul.insertBefore(movingEle, targetLi);
+    }
+    flip.play();
+  });
+  ul.addEventListener('dragend', e => {
+    e.target.classList.remove('move');
+    movingEle = null;
+  });
+</script>
 
 </html>
