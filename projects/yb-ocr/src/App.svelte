@@ -1,5 +1,6 @@
 <script lang="ts">
   import Ocr from './views/Ocr/index.svelte';
+  import BackgroundRemoval from './views/BackgroundRemoval/index.svelte';
   let current = 1;
 </script>
 
@@ -10,6 +11,8 @@
   </nav>
   {#if current === 1}
     <Ocr />
+  {:else}
+    <BackgroundRemoval />
   {/if}
 </main>
 
