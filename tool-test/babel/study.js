@@ -10,6 +10,8 @@ comm?.a;
 const study = () => {};
 const a = 1 ** 2;
 const arr = [11, ...[1, 2, 3]];
+const obj1 = { a: 1 };
+const obj2 = { ...obj1 };
 const b = [1, 2, 3].at(-1);
 Object.entries({});
 // 新增API

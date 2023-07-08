@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animation API</title>
+</head>
+<style>
+    html{
+        height: 100%;
+    }
+    body{
+        margin:0;
+        padding:0;
+        height:100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+    }
+    .stage{
+        width: 500px;
+        height:300px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px dashed #aaa;
+        border-radius: 10px;
+    }
+    .content{
+        width: 100px;
+        height: 100px;
+        background-color: #1b63d9;
+        color: #fff;
+    }
+    .content2 {
+        width: 100px;
+        height: 100px;
+        background-color: #1bb3d9;
+    }
+</style>
+<body>
+    <div class="stage">
+        <div class="content">chrome >= 75</div>
+    </div>
+    <div class="controller">
+        <button id="playButton">play</button>
+        <button id="pauseButton">pause</button>
+        <button id="reverseButton">reverse</button>
+        <button id="finishButton">finish</button>
+        <button id="cancelButton">cancel</button>
+        <button id="speedupButton">speedup</button>
+        <button id="slowdownButton">slowdown</button>
+        <button id="replayButton">replay(cancel+play)</button>
+    </div>
+    <div class="stage">
+        <div class="content2"></div>
+    </div>
+</body>
+<script>
+    const content = document.querySelector('.content');
+    const content2 = document.querySelector('.content2');
+    const playButton = document.querySelector('#playButton');
+    const pauseButton = document.querySelector('#pauseButton');
+    const reverseButton = document.querySelector('#reverseButton');
+    const finishButton = document.querySelector('#finishButton');
+    const cancelButton = document.querySelector('#cancelButton');
+    const speedupButton = document.querySelector('#speedupButton');
+    const slowdownButton = document.querySelector('#slowdownButton');
+    const replayButton = document.querySelector('#replayButton');
+
+    const contentAnimation = content.animate([{ backgroundColor: 'cyan', width: '100%' }], {
+      duration: 3000,
+      easing: 'ease',
+      iterations: Infinity,
+    });
+    const content2Animation = content2.animate(
+      [
+        { offset: 0.2, width: '50px', height: '50px' },
+        { offset: 1, width: '200px', height: '200px' },
+      ],
+      // 用动画一的属性
+      contentAnimation.effect.getTiming(),
+    );
+    playButton.addEventListener('click', () => {
+      contentAnimation.play();
+    });
+    pauseButton.addEventListener('click', () => {
+      contentAnimation.pause();
+    });
+    reverseButton.addEventListener('click', () => {
+      // 反向播放动画
+      contentAnimation.reverse();
+    });
+    finishButton.addEventListener('click', () => {
+      // 反向播放动画
+      contentAnimation.finish();
+    });
+    cancelButton.addEventListener('click', () => {
+      // 反向播放动画
+      contentAnimation.cancel();
+    });
+
+    speedupButton.addEventListener('click', () => {
+      contentAnimation.playbackRate *= 1.2;
+    });
+    slowdownButton.addEventListener('click', () => {
+      contentAnimation.playbackRate *= 0.8;
+    });
+    replayButton.addEventListener('click', () => {
+      contentAnimation.cancel();
+      contentAnimation.play();
+    });
+    </script>
+</html>

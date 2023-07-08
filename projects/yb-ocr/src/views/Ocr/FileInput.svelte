@@ -1,8 +1,8 @@
 <script lang="ts">
   import { BeIcon, BeCountTo } from '@brewer/beerui';
   import { createEventDispatcher } from 'svelte';
-  import { FileStatus, TesseractStatus } from '../types/enums';
-  import { transferImage2Text } from '../utils';
+  import { FileStatus, TesseractStatus } from '../../types/enums';
+  import { transferImage2Text } from '../../utils';
   const statusIconMap = {
     [FileStatus.init]: 'add',
     [FileStatus.fail]: 'error-circle',
