@@ -1,19 +1,14 @@
 <script lang="ts">
-  import Ocr from './views/Ocr/index.svelte';
-  import BackgroundRemoval from './views/BackgroundRemoval/index.svelte';
-  let current = 1;
+  import Router, { link } from 'svelte-spa-router';
+  import AsideNav from './Components/AsideNav.svelte';
+  import { routes, routeInfo } from './routes';
 </script>
 
 <main>
-  <nav>
-    <button on:click={() => (current = 1)}>1</button>
-    <button on:click={() => (current = 2)}>2</button>
-  </nav>
-  {#if current === 1}
-    <Ocr />
-  {:else}
-    <BackgroundRemoval />
-  {/if}
+  <AsideNav let:item options={routeInfo.map(it => ({ label: it.name, value: it.path }))}>
+    <a style="display:block;padding:5px 10px;" href={'#' + item.value} use:link>{item.label}</a>
+  </AsideNav>
+  <Router {routes} />
 </main>
 
 <style lang="less">

@@ -1,20 +1,17 @@
 <script lang="ts">
-  //@ts-ignore
   import imglyRemoveBackground from '@imgly/background-removal';
   function handleFileChange(e: Event) {
-    debugger;
     let file: File = (e.target as any).files[0];
     removal(file);
-    // let fr = new FileReader();
-    // fr.onload=(e)=>{
-    //     let ab = fr.result
-    //     removal(ab)
-    // }
-    // fr.readAsArrayBuffer(file);
   }
 
   async function removal(image_src) {
-    imglyRemoveBackground(image_src).then((blob: Blob) => {
+    imglyRemoveBackground(image_src, {
+      publicPath: '/background-removal/',
+      progress: (key, current, total) => {
+        console.log(`Downloading ${key}: (${current} of ${total}`);
+      },
+    }).then((blob: Blob) => {
       // The result is a blob encoded as PNG. It can be converted to an URL to be used as HTMLImage.src
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');

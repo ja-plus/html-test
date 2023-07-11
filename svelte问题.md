@@ -15,3 +15,13 @@
 
 # 特性
 * 支持多个同名slot
+## slot props
+slot加参数
+```jsx
+<Comp let:item>
+    <div></div>
+</Comp>
+...
+<slot {item}></slot>
+...
+```

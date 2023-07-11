@@ -30,7 +30,8 @@
     "vite": "^4.2.0"
   },
   "dependencies": {
-    "@imgly/background-removal": "^1.0.3",
+    "@imgly/background-removal": "^1.0.4",
+    "normalize.css": "^8.0.1",
     "svelte-spa-router": "^3.3.0",
     "tesseract.js": "^4.0.2",
     "tesseract.js-core": "^4.0.2"
