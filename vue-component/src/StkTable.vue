@@ -607,12 +607,17 @@ export default {
   methods: {
     /**
      * 初始化虚拟滚动参数
-     * @param {number} height 虚拟滚动的高度
+     * @param {number} [height] 虚拟滚动的高度
      */
     initVirtualScroll(height) {
       this.initVirtualScrollY(height);
       this.initVirtualScrollX();
     },
+    /**
+     * 初始化Y虚拟滚动参数
+     * @param {number} [height] 虚拟滚动的高度
+     */
+
     initVirtualScrollY(height) {
       if (this.virtual_on) {
         this.virtualScroll.containerHeight =
