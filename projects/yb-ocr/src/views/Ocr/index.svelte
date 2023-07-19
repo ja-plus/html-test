@@ -1,7 +1,7 @@
 <script lang="ts">
   import FileInput from './FileInput.svelte';
-  import { BeEmpty } from '@brewer/beerui';
   import { tick } from 'svelte';
+  import '@brewer/beerui/assets/beer.css';
   type FileInputItem = {
     id: number;
     comp: any;
@@ -64,7 +64,7 @@
   <div class="text-content">
     {#if !resultText}
       <div class="empty">
-        <BeEmpty />
+        <span>空</span>
       </div>
     {:else}
       <pre contenteditable="true">{resultText}</pre>
@@ -104,6 +104,7 @@
         height: 100%;
         display: flex;
         justify-content: center;
+        align-items: center;
       }
     }
   }

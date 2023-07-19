@@ -24,15 +24,33 @@
 <style lang="less">
   nav {
     .nav-item {
+      position: relative;
       cursor: pointer;
-      &:not(:last-child) {
-        border-bottom: var(--border);
+      padding: 6px 10px;
+      color: #242424;
+      display: flex;
+      align-items: center;
+
+      &::before {
+        content: '';
+        width: 3px;
+        height: 16px;
+        left: 0;
+        position: absolute;
+        visibility: hidden;
       }
       &:hover {
-        background-color: #eee;
+        &::before {
+          visibility: visible;
+          background-color: #c7c7c7;
+        }
       }
       &.current {
-        background-color: #ddd;
+        font-weight: bold;
+        &::before {
+          visibility: visible;
+          background-color: #0f6cbd;
+        }
       }
       .nav-item-text {
         padding: 6px 10px;

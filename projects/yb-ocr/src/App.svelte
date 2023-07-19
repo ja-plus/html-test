@@ -6,7 +6,7 @@
 
 <main>
   <AsideNav let:item options={routeInfo.map(it => ({ label: it.name, value: it.path }))}>
-    <a style="display:block;padding:5px 10px;" href={'#' + item.value} use:link>{item.label}</a>
+    <a style="display:block;color:#242424" href={'#' + item.value} use:link>{item.label}</a>
   </AsideNav>
   <Router {routes} />
 </main>
