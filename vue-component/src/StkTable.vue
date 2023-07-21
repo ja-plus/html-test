@@ -50,7 +50,7 @@
                 :is="typeof col.customHeaderCell === 'function' ? col.customHeaderCell(col) : col.customHeaderCell"
                 v-if="col.customHeaderCell" :col="col" />
               <template v-else>
-                <slot name="table-header" :column="col">
+                <slot name="tableHeader" :column="col">
                   <span class="table-header-title">{{ col.title }}</span>
                 </slot>
               </template>
@@ -123,7 +123,7 @@
     </table>
     <div v-if="(!dataSourceCopy || !dataSourceCopy.length) && showNoData" class="stk-table-no-data"
       :class="{ 'no-data-full': noDataFull }">
-      <slot name="no-data">暂无数据</slot>
+      <slot name="empty">暂无数据</slot>
     </div>
   </div>
 </template>
