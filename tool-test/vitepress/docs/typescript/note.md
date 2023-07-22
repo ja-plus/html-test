@@ -1,6 +1,5 @@
 # TypeScript Note
 避免使用export default, [export default 被认为是有害的](https://jkchao.github.io/typescript-book-chinese/tips/avoidExportDefault.html#commonjs-%E4%BA%92%E7%94%A8)
-
 ## 问题
 * d.ts中declare 的interface会被eslint标记为未定义，如何解决。取消eslint检查d.ts文件
 ## 笔记
