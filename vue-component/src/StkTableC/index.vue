@@ -118,7 +118,6 @@ export default {
      * @param {Event} e
      */
     handleFixedLeftTableScroll(e) {
-      console.log(e, 'sdf');
       this.$refs.stkTableMain.$el.scrollTop = e.target.scrollTop;
     },
     handleSorterChange(col, order, type) {
@@ -182,7 +181,7 @@ export default {
     left: 0;
     top: 0;
     &::-webkit-scrollbar {
-      // 隐藏表格滚动条，使其可触发scroll事件
+      // 隐藏表格滚动条，使其鼠标悬浮在上方时可触发scroll事件 (仅chrome支持)
       width: 0;
       height: 0;
     }

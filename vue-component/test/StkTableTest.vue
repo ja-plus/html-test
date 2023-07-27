@@ -298,15 +298,15 @@ export default {
       console.log('header-cell-click:', e, row);
     },
     onTableScroll(e) {
-      console.log(
-        'scroll:',
-        e.target.scrollHeight,
-        e.target.clientHeight,
-        'top:',
-        e.target.scrollTop,
-        'left:',
-        e.target.scrollLeft,
-      );
+      // console.log(
+      //   'scroll:',
+      //   e.target.scrollHeight,
+      //   e.target.clientHeight,
+      //   'top:',
+      //   e.target.scrollTop,
+      //   'left:',
+      //   e.target.scrollLeft,
+      // );
     },
     handleClearSorter() {
       this.$refs.stkTable.resetSorter();
