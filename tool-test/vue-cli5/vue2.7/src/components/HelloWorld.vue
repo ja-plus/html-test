@@ -1,6 +1,7 @@
 <template>
   <div class="hello">
     <h1>{{ msg }}</h1>
+    <h2>{{ name }}</h2>
     <p>
       For a guide and recipes on how to configure / customize this project,<br>
       check out the
@@ -31,10 +32,17 @@
 </template>
 
 <script>
+import { state } from '@/observableState';
+
 export default {
   name: 'HelloWorld',
   props: {
     msg: String
+  },
+  computed:{
+    name(){
+      return state.name;
+    }
   }
 }
 </script>

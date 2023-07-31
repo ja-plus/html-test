@@ -19,6 +19,7 @@ div(style="display:flex;")
     button(@click="props.showOverflow=!props.showOverflow") showOverflow:{{props.showOverflow}}
     button(@click="props.showHeaderOverflow=!props.showHeaderOverflow") showHeaderOverflow:{{props.showHeaderOverflow}}
     button(@click="props.sortRemote=!props.sortRemote") sortRemote:{{props.sortRemote}}
+    button(@click="props.theme==='light'?props.theme='dark':props.theme='light'") theme:{{props.theme}}
 div(style="margin-left:10px")
   div virtualScroll: {{$refs.stkTable&& $refs.stkTable.virtualScroll}}
   div virtual_pageSize: {{$refs.stkTable&& $refs.stkTable.virtual_pageSize}}
@@ -30,7 +31,6 @@ div(:style="{width: tableWidth}" style="padding:10px;")
   StkTable(
     ref="stkTable"
     row-key="name"
-    theme="dark"
     no-data-full
     virtual
     virtual-x
@@ -95,6 +95,7 @@ export default {
       stkTable: {},
       tableWidth: '500px',
       props: {
+        theme: 'dark',
         height: '200px',
         showOverflow: false,
         showHeaderOverflow: false,

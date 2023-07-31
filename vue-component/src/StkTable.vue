@@ -2,7 +2,7 @@
   <div
     ref="tableContainer"
     class="stk-table"
-    :class="{ virtual: virtual, 'virtual-x': virtualX, dark: theme === 'dark', headless }"
+    :class="{ virtual, 'virtual-x': virtualX, dark: theme === 'dark', headless }"
     :style="virtual && { '--row-height': virtualScroll.rowHeight + 'px' }"
     @scroll="onTableScroll"
   >
@@ -435,7 +435,7 @@ export default {
      */
     rowClassName: {
       type: Function,
-      default: () => () => '',
+      default: () => '',
     },
   },
   emits: [
@@ -1176,7 +1176,7 @@ export default {
     --sort-arrow-active-color: #d0d1d2;
     --sort-arrow-active-sub-color: #5d6064;
 
-    background-color: var(--table-bgc);
+    // background-color: var(--table-bgc); // ⭐这里加background-color会导致表格出滚动白屏
     color: #d0d1d2;
   }
 
@@ -1394,6 +1394,7 @@ export default {
   }
 
   .stk-table-no-data {
+    background-color: var(--table-bgc);
     line-height: var(--row-height);
     text-align: center;
     font-size: 14px;
