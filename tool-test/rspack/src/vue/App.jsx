@@ -1,4 +1,6 @@
 import { defineComponent, ref } from 'vue';
+import VueSFC from './VueSFC.vue';
+import VueSFC_TS from './VueSFC.ts.vue';
 
 export const App = defineComponent({
   name: 'App',
@@ -10,6 +12,8 @@ export const App = defineComponent({
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           <button onClick={() => count.value++}>count:{count.value}</button>
         </div>
+        <VueSFC></VueSFC>
+        <VueSFC_TS></VueSFC_TS>
       </div>
     );
   },
