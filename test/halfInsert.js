@@ -4,6 +4,7 @@
  * @property {null|'asc'|'desc'} order 排序顺序
  * @property {'number'|'string'} [sortType] 排序方式
  * ---
+ * @template T 无法定义callback 泛型
  * @callback CompareRule
  * @param {any} targetItem
  * @param {any} newItem
@@ -12,8 +13,9 @@
 
 /**
  * 对有序数组二分插入新数据
- * @param {any[]} targetArray 表格数据
- * @param {any} newItem 要插入的数据
+ * @template {Record<string,never>} T
+ * @param {T[]} targetArray 表格数据
+ * @param {T} newItem 要插入的数据
  * @param {CompareRule} compareRule 二分比较规则
  */
 exports.insertToOrderedArray = function insertToOrderedArray(targetArray, newItem, compareRule) {

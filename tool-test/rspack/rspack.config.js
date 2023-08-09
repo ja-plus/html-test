@@ -47,14 +47,22 @@ module.exports = {
       {
         test: /\.less$/,
         use: [
+          'style-loader',
+          'css-loader',
           {
             loader: 'less-loader',
             options: {
+              lessOptions: {
+                javascriptEnabled: true,
+              },
               // ...
             },
           },
         ],
-        type: 'css',
+        resolve: {
+          preferRelative: true,
+        },
+        // type: 'css',
       },
       // {
       //   resourceQuery: /lang=ts/, // 如果需要在 Vue SFC 里使用 Typescript, 请添加该规则
