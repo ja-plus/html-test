@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>蜡烛图</title>
+</head>
+<!-- <script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.1.2/echarts.common.js"></script> -->
+<!-- <script src="https://cdn.bootcdn.net/ajax/libs/echarts/4.9.0-rc.1/echarts-en.common.min.js"></script> -->
+
+<body>
+  <div id="echarts" style="height: 300px;width:800px"></div>
+</body>
+<script type="module">
+  import * as echarts from 'https://cdn.bootcdn.net/ajax/libs/echarts/5.4.2/echarts.esm.js';
+  let myChart = echarts.init(document.getElementById('echarts'));
+  const upColor = '#4aaeb8';
+  const downColor = '#ec0000';
+  let option = {
+    tooltip: { trigger: 'axis' },
+    xAxis: {
+      data: ['2017-10-24', '2017-10-25', '2017-10-26', '2017-10-27', ...new Array(50).fill('2017-10-27')],
+    },
+    yAxis: [{ type: 'value' }],
+    series: [
+      {
+        type: 'candlestick',
+        data: [[20, 34, 10, 38], [40, 35, 30, 50], [31, 38, 33, 44], [38, 15, 5, 42], ...new Array(50).fill([38, 15, 5, 42])],
+        barMaxWidth: '4px',
+        itemStyle: {
+          color: upColor,
+          color0: undefined,
+          borderColor: undefined,
+          borderColor0: downColor,
+        },
+      },
+    ],
+  };
+  myChart.setOption(option);
+</script>
+
+</html>

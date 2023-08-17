@@ -27,7 +27,6 @@ impl Solution {
         self.recursion(matrix, &mut count, 0);
         count
     }
-
     fn recursion(&self, mut matrix: Vec<Vec<Cell>>, count: &mut i32, row_index: usize) {
         let n: usize = matrix.len();
         if row_index >= n {
@@ -46,6 +45,8 @@ impl Solution {
 
                     self.mark_forbidden(&mut clone_matrix, i, j);
                     self.recursion(clone_matrix, count, row_index + 1);
+                    /** 这里用回溯性能更好 */
+
                 }
             }
             if empty_count < (n - row_index){
