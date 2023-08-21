@@ -28,35 +28,20 @@ impl Solution {
         count
     }
 
-    fn recursion(&self,  matrix: &mut Vec<Vec<Cell>>, count: &mut i32, row_index: usize) {
+    fn recursion(&self, matrix: &mut Vec<Vec<Cell>>, count: &mut i32, row_index: usize) {
         let n: usize = matrix.len();
         if row_index >= n {
             *count += 1;
             return;
         }
-        for i in row_index..n {
-            let mut empty_count = 0;
-            for j in 0..n {
-                let cell = &matrix[i][j];
-                // 判断该位置是否合法
-                if self.check_valid(&matrix, i, j) {
-                    matrix[i][j] = Cell::Q;
-                    self.recursion(matrix, count, row_index + 1);
-                    matrix[i][j] = Cell::Empty; // 回溯
-                }
 
-                // if *cell == Cell::Empty {
-                //     empty_count += 1;
-
-                //     let mut clone_matrix = matrix.clone();
-                //     clone_matrix[i][j] = Cell::Q;
-
-                //     self.mark_forbidden(&mut clone_matrix, i, j);
-                //     self.recursion(clone_matrix, count, row_index + 1);
-                // }
-            }
-            if empty_count < (n - row_index) {
-                break;
+        for j in 0..n {
+            let cell = &matrix[row_index][j];
+            // 判断该位置是否合法
+            if self.check_valid(&matrix, row_index, j) {
+                matrix[row_index][j] = Cell::Q;
+                self.recursion(matrix, count, row_index + 1);
+                matrix[row_index][j] = Cell::Empty; // 回溯
             }
         }
     }
@@ -85,7 +70,7 @@ impl Solution {
             jj += 1;
         }
         // 检擦斜边/
-        let min = std::cmp::min(i, n-j -1);
+        let min = std::cmp::min(i, n - j - 1);
         // 移动到右上角
         let mut ii = i - min;
         let mut jj = j + min;
