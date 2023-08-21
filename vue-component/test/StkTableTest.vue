@@ -106,7 +106,7 @@ export default {
         {
           title: 'Name',
           dataIndex: 'name',
-          fixed: 'left', // 会导致StkTable 滚动出空白？
+          fixed: 'left',
           width: '200px',
           headerClassName: 'my-th',
           className: 'my-td',

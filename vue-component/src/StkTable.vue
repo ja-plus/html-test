@@ -68,7 +68,7 @@
               <component
                 :is="typeof col.customHeaderCell === 'function' ? col.customHeaderCell(col) : col.customHeaderCell"
                 v-if="col.customHeaderCell"
-                :col="col"
+                :col.prop="col"
               />
               <template v-else>
                 <slot name="tableHeader" :column="col">
@@ -146,7 +146,7 @@
               :style="getCellStyle(2, col)"
               @click="e => onCellClick(e, row, col)"
             >
-              <component :is="col.customCell" v-if="col.customCell" :col="col" :row="row" />
+              <component :is="col.customCell" v-if="col.customCell" :col.prop="col" :row.prop="row" />
               <div v-else class="table-cell-wrapper" :title="row[col.dataIndex]">
                 {{ row[col.dataIndex] ?? emptyCellText }}
               </div>
@@ -168,7 +168,7 @@
 
 <script>
 /**
- * @version 1.2.1
+ * @version 1.2.3
  * @author JA+
  * 不支持低版本浏览器非虚拟滚动表格的表头固定，列固定，因为会卡。
  * TODO:存在的问题：
@@ -176,6 +176,7 @@
  * [] 计算的高亮颜色，挂在数据源上对象上，若多个表格使用同一个数据源对象会有问题。需要深拷贝。(解决方案：获取组件uid)
  * [] highlight-row 颜色不能恢复到active的颜色
  * @changelog
+ * -1.2.3 v-bind.prop 优化, col.prop row.prop
  * -1.2.2 td th style 优化
  * -1.2.1 高亮单元格优化
  * -1.2.0 props.rowClassName,td line-height
