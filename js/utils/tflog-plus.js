@@ -1,6 +1,6 @@
 /**
  * descriptor: 注意！！！ 重写了console。将console的信息也输出到了TFLog，因此，在内部不建议再直接使用被重写过的console.log，而是使用console.__log
- * @version 1.1.0
+ * @version 1.1.1
  **/
 console.__log = console.log;
 console.__warn = console.warn;
@@ -34,18 +34,18 @@ const TFLog = (function () {
 
   // maxDeep,最多的层级限制 6。在低版本浏览器下 hasOwnProperty 无效，遍历dom出现问题
   function filterFunction(obj, maxDeep = 5) {
-    let newObj = {};
     if (maxDeep === 0) return '';
     try {
       // 函数则转为字符串
       if (typeof obj === 'function') return obj.toString();
-
+      if (typeof obj === null) return null;
       if (typeof obj !== 'object') return obj;
-
+      let newObj = {};
       for (let key in obj) {
         if (Object.hasOwnProperty.call(obj, key)) {
-          if (typeof obj[key] !== 'function' && !isDOM(obj[key])) {
-            newObj[key] = filterFunction(obj[key], maxDeep - 1);
+          const item = obj[key];
+          if (typeof item !== 'function' && !isDOM(item)) {
+            newObj[key] = filterFunction(item, maxDeep - 1);
           }
         }
       }
