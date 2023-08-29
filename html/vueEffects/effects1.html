@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <input id="name"></div>
+    <label id="count"></label>
+    <button id="countAdd">count ++</button>
+</body>
+<script>
+    const nameEl = document.querySelector('#name');
+    const countEl = document.querySelector('#count');
+    const countAddEl = document.querySelector('#countAdd');
+
+    let activeEffect;
+    let obj = {
+      name: '111',
+      count: 1,
+    };
+    
+    /**
+     * @type {WeakMap<object, Map<string, Set<function>>>}
+     */
+    let bucket = new WeakMap();
+    obj = new Proxy(obj, {
+      get(target, key, receiver) {
+        (function track() {
+          if (!activeEffect) return;
+          let depsMap = bucket.get(target);
+          if (!depsMap) bucket.set(target, (depsMap = new Map()));
+          let deps = depsMap.get(key);
+          if (!deps) depsMap.set(key, (deps = new Set()));
+          deps.add(activeEffect);
+        })();
+    
+        return Reflect.get(target, key, receiver);
+      },
+      set(target, key, receiver) {
+        Reflect.set(target, key, receiver); // 先变更
+        // bucket.forEach((v, k) => v.forEach(fn => fn())); // 再触发
+        (function trigger() {
+          const depsMap = bucket.get(target);
+          if (!depsMap) return;
+          depsMap.get(key)?.forEach(fn => fn());
+        })();
+        return true; //表示属性设置成功
+      },
+    });
+    function effects(fn) {
+      activeEffect = fn;
+      fn();
+    }
+
+    effects(() => {
+      nameEl.value = obj.name;
+    });
+    effects(() => {
+      countEl.textContent = obj.count;
+    });
+    setTimeout(() => {
+      obj.name = '222';
+    }, 2000);
+    countAddEl.addEventListener('click', () => {
+      obj.count++;
+    });
+</script>
+
+</html>

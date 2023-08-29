@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <input id="name"></div>
+    <label id="count"></label>
+    <button id="countAdd">count ++</button>
+</body>
+<script>
+    const nameEl = document.querySelector('#name');
+    const countEl = document.querySelector('#count');
+    const countAddEl = document.querySelector('#countAdd');
+
+    let obj = {
+      name: '111',
+      count: 1,
+    };
+
+    //-----------------------
+    let activeEffect;
+    /**
+     * @type {WeakMap<object, Map<string, Set<function>>>}
+     */
+    let bucket = new WeakMap();
+    obj = new Proxy(obj, {
+      get(target, key, receiver) {
+        track(target, key);
+        return Reflect.get(target, key, receiver);
+      },
+      set(target, key, receiver) {
+        Reflect.set(target, key, receiver); // 先变更
+        // bucket.forEach((v, k) => v.forEach(fn => fn())); // 再触发
+        trigger(target, key);
+        return true; //表示属性设置成功
+      },
+    });
+
+    /** 收集依赖 */
+    function track(target, key) {
+      if (!activeEffect) return;
+      let depsMap = bucket.get(target);
+      if (!depsMap) bucket.set(target, (depsMap = new Map()));
+      let deps = depsMap.get(key);
+      if (!deps) depsMap.set(key, (deps = new Set()));
+      deps.add(activeEffect);
+      // >>>>>>
+      activeEffect.deps.push(deps);
+      // <<<<<<
+    }
+    /** 触发响应式*/
+    function trigger(target, key) {
+      const depsMap = bucket.get(target);
+      if (!depsMap) return;
+      const effects = depsMap.get(key);
+      // >>> 为避免死循环
+      const effectsToRun = new Set(effects);
+      effectsToRun.forEach(fn => fn());
+      // <<<
+    }
+
+    /**
+     * 核心就是每次执行effect方法后先删除之前的依赖，再重新收集依赖。
+     */
+    function effects(fn) {
+      //>>>>>
+      const effectFn = () => {
+        // 副作用函数执行前，清除依赖
+        cleanup(effectFn);
+        activeEffect = effectFn; // effectFn将被加入 key => Set()
+        fn();
+      };
+      /** @type {Set<function>[]} 用来保存哪些key收集了这个依赖*/
+      effectFn.deps = [];
+      effectFn();
+      //<<<<<
+    
+      // 我可能会写成下面的样子
+      // activeEffect = {
+      //   fn,
+      //   deps: [],
+      // };
+      // fn();
+    }
+    /**清除每个key收集的依赖*/
+    function cleanup(effectFn) {
+      for (let i = 0; i < effectFn.deps.length; i++) {
+        const deps = effectFn.deps[i];
+        deps.delete(effectFn);
+      }
+      effectFn.deps.length = 0;
+    }
+    //-----------------------
+
+    effects(() => {
+      nameEl.value = obj.count % 2 ? obj.name : 'haha'; // 分支切换
+    });
+
+    countAddEl.addEventListener('click', () => {
+      obj.count++;
+    });
+</script>
+
+</html>
