@@ -1197,7 +1197,6 @@ export default {
   .stk-table-main {
     border-spacing: 0;
     border-collapse: separate;
-    table-layout: fixed; // 似乎不需要
 
     th,
     td {
