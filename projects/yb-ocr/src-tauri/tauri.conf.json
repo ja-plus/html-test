@@ -4,11 +4,11 @@
     "beforeBuildCommand": "npm -v",
     "beforeDevCommand": "npm run dev",
     "devPath": "http://localhost:5173",
-    "distDir": "../public"
+    "distDir": "../dist"
   },
   "package": {
-    "productName": "yb-ocr",
-    "version": "0.1.0"
+    "productName": "yb-tools",
+    "version": "0.2.0"
   },
   "tauri": {
     "allowlist": {
