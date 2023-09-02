@@ -1,12 +1,14 @@
 /** @module refDoc */
 /**
  * @typedef {object} Person
- * @param {string} name
- * @param {number} age
- * @param {string} address
- *
+ * @prop {string} name
+ * @prop {number} age
+ * @prop {string} address
+ */
+/**
+ * @template T
  * @callback Run
- * @param {number|string} id
+ * @param {number|T} id
  */
 
 export const a = '';

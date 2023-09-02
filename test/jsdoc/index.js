@@ -1,6 +1,6 @@
 /**
  * @typedef {import('./refDoc').Person} Person
- * @typedef {import('./refDoc').Run} Run
+ * @typedef {import('./refDoc').Run<number>} Run
  * @typedef {import('./refDoc').A} A
  * @typedef {import('./test').TsType} TsType
  */
@@ -46,6 +46,7 @@ let obj = {
  * f(1,'haha'); // true
  * f('1','hh'); // false
  * ```
+ * @author a <sss.qq.com>
  */
 function f(id, name) {
   return;
