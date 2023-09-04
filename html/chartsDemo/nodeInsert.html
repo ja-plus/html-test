@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>折线图补点</title>
+</head>
+<!-- <script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.1.2/echarts.common.js"></script> -->
+<!-- <script src="https://cdn.bootcdn.net/ajax/libs/echarts/4.9.0-rc.1/echarts-en.common.min.js"></script> -->
+
+<body>
+  <div id="echarts" style="height: 300px;width:800px"></div>
+</body>
+<script type="module">
+  import * as echarts from 'https://cdn.bootcdn.net/ajax/libs/echarts/5.4.2/echarts.esm.js';
+  let myChart = echarts.init(document.getElementById('echarts'));
+
+  let data = [
+    [0, 1.65],
+    [0.08, 1.8],
+    [0.1, 1.8127],
+    [0.17, 1.8304],
+  ];
+  /** @type {number[]}*/
+  const slopeArr = [];
+  for (let i = 0; i < data.length; i++) {
+    slopeArr.push(slope(data, i));
+  }
+  console.log(slopeArr);
+
+  let fillData = [];
+  for (let i = 0; i < data.length; i++) {
+    fillData.push(data[i]);
+    if (i === data.length - 1) break;
+    let x = data[i][0];
+    const nextX = data[i + 1][0];
+    while ((x = x + 0.0001) < nextX) {
+      let y = createCurveAlgorithm(data, i, x, slopeArr);
+      fillData.push([x, y]);
+    }
+  }
+  data = fillData;
+
+  console.log(data);
+  
+  let option = {
+    tooltip: { trigger: 'axis' },
+    xAxis: {
+      type: 'value',
+    },
+    yAxis: [{ type: 'value', scale: true }],
+    series: [
+      {
+        type: 'line',
+        symbol: 'none',
+        data,
+      },
+      // {
+      //   type: 'custom',
+      //   data,
+      //   renderItem(params, api) {
+      //     const dataIndexInside = params.dataIndexInside;
+      //     const [x1, y1] = api.coord([api.value(0), api.value(1)]);
+      //     const [x2, y2] = api.coord([api.value(0, dataIndexInside + 1), api.value(1, dataIndexInside + 1)]);
+      //     if (!x2) return;
+      //     const len = x2 - x1;
+      //     const arr = data.map(api.coord);
+      //     /** @type {number[]}*/
+      //     const slopeArr = [];
+      //     for (let i = 0; i < arr.length; i++) {
+      //       slopeArr.push(slope(arr, i));
+      //     }
+
+      //     const points = [
+      //       [x1, y1],
+      //       [x2, y2],
+      //     ];
+      //     const newX = Math.floor((x1 + x2) / 2);
+      //     const y = createCurveAlgorithm(points, 0, newX, slopeArr);
+      //     points.splice(1, 0, [newX, y]);
+      //     // for (let i = 1; i < len - 1; i++) {
+      //     //   const y = createCurveAlgorithm(arr, i, x1 + i);
+      //     //   points.push([x1 + i, y]);
+      //     // }
+  
+      //     // console.log('points', points);
+
+      //     return {
+      //       type: 'polyline',
+      //       shape: {
+      //         points,
+      //       },
+      //     };
+      //   },
+      // },
+    ],
+  };
+  console.time('chart render');
+  myChart.setOption(option);
+  console.timeEnd('chart render');
+
+  /**
+   * 斜率
+   * @param {[number,number][]} arr [x,y]
+   * @param {number} i
+   */
+  function slope(arr, i) {
+    if (arr.len < 2) return 1;
+    let [x1, y1] = arr[i];
+    let [x2, y2] = arr[i];
+  
+    if (i === 0) {
+      [x2, y2] = arr[i + 1];
+    } else if (i === arr.length - 1) {
+      [x1, y1] = arr[i - 1];
+      [x2, y2] = arr[i];
+    } else {
+      [x1, y1] = arr[i - 1];
+      [x2, y2] = arr[i + 1];
+    }
+    return (y2 - y1) / (x2 - x1);
+  }
+
+  /**
+   * @param {[number,number][]} arr [x,y]值数组
+   * @param {number} i 下下标，用于访问斜率数组
+   * @param {number} x 目标x值
+   * @param {number[]} slopeArr 斜率数组
+   */
+  function createCurveAlgorithm(arr, i, x, slopeArr) {
+    const [x1, y1] = arr[i];
+    if (i === arr.length - 1) return y1;
+    const [x2, y2] = arr[i + 1];
+  
+    const H1 = 3 * ((x2 - x) / (x2 - x1)) ** 2 - 2 * ((x2 - x) / (x2 - x1)) ** 3;
+    const H2 = 3 * ((x - x1) / (x2 - x1)) ** 2 - 2 * ((x - x1) / (x2 - x1)) ** 3;
+    const H3 = (x2 - x) ** 2 / (x2 - x1) - (x2 - x) ** 3 / (x2 - x1) ** 2;
+    const H4 = (x - x1) ** 3 / (x2 - x1) ** 2 - (x - x1) ** 3 / (x2 - x1);
+  
+    const d1 = slopeArr[i];
+    const d2 = slopeArr[i + 1];
+
+    return y1 * H1 + y2 * H2 + d1 * H3 + d2 * H4;
+  }
+
+  let testY = createCurveAlgorithm(
+    [
+      [160, 179],
+      [320, 162],
+    ],
+    0,
+    240,
+    [-0.10625, -0.159375],
+  );
+  // testY = createCurveAlgorithm(
+  //   [
+  //     [1, 1],
+  //     [2, 2],
+  //   ],
+  //   0,
+  //   1.5,
+  //   [1, 1],
+  // );
+  console.log(testY);
+
+  console.log(
+    'slope',
+    slope(
+      [
+        [160, 179],
+        [320, 162],
+      ],
+      0,
+    ),
+  );
+</script>
+
+</html>
