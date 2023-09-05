@@ -1,12 +1,14 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
 
-  export let options: { label: string; value: string | number }[] = [];
+  export let options: { label: string; value: string }[] = [];
   export let value = options[0]?.value;
+
   const dispatch = createEventDispatcher<{
-    change: string | number;
+    change: string;
   }>();
-  function handleItemClick(v: string | number) {
+
+  function handleItemClick(v: string) {
     if (value === v) return;
     value = v;
     dispatch('change', v);
@@ -23,6 +25,7 @@
 
 <style lang="less">
   nav {
+    width: 70px;
     .nav-item {
       position: relative;
       cursor: pointer;

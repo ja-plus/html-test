@@ -1,6 +1,7 @@
 # 运行前复制静态资源
 * cp node_modules/@imgly/background-removal/dist/*.wasm ./public/background-removal
 * cp node_modules/@imgly/background-removal/dist/*.onnx ./public/background-removal
+.onnx 文件删掉小的
 
 ## 下载问题
     Error failed to bundle project: `https://github.com/tauri-apps/binary-releases/releases/download/nsis-3/nsis-3.zip: Network Error: timed out reading response`

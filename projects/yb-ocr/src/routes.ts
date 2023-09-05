@@ -13,7 +13,7 @@ export const routeInfo = [
   },
 ];
 
-let routes = {
+const routes = {
   /** '/': Ocr */
 };
 routeInfo.forEach(item => {

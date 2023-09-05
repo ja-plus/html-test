@@ -3,7 +3,7 @@
   let sourceFile: File = new File([], 'empty.jpg');
 
   let sourceImage = '';
-  let targetImage: string = '';
+  let targetImage = '';
 
   let loadingInterval = 0;
   let loadingTime = 0;

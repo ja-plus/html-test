@@ -19,7 +19,7 @@ module.exports = {
   },
   parser: '@typescript-eslint/parser',
   plugins: ['html', 'prettier'],
-  extends: ['plugin:svelte/recommended', 'plugin:prettier/recommended'],
+  extends: ['plugin:@typescript-eslint/recommended', 'plugin:svelte/recommended', 'plugin:prettier/recommended'],
   overrides: [
     {
       files: ['*.svelte'],
