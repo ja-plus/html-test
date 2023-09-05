@@ -69,7 +69,7 @@ impl Solution {
 
         str_vec.reverse();
         // println!("{:?}",str_vec);
-        
+
         str_vec.iter().collect::<String>()
     }
 }
@@ -89,5 +89,7 @@ fn main() {
      * [0, 1, 2, 2, 2, 3, 3, 4, 4, 5, 6]
      * [0, 1, 2, 2, 2, 3, 3, 4, 4, 5, 6]
      */
-    s.LCS("1A2C3D4B56".to_string(), "B1D23A456A".to_string());
+    let result = s.LCS("1A2C3D4B56".to_string(), "B1D23A456A".to_string());
+    assert_eq!(result, "123456");
+    println!("{}", result);
 }
