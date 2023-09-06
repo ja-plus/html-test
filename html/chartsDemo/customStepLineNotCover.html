@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>阶梯图不重叠</title>
+</head>
+<!-- <script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.1.2/echarts.common.js"></script> -->
+<!-- <script src="https://cdn.bootcdn.net/ajax/libs/echarts/4.9.0-rc.1/echarts-en.common.min.js"></script> -->
+
+<body>
+  <div id="echarts" style="height: 300px;width:100%;border:1px solid"></div>
+</body>
+<script type="module">
+  import * as echarts from 'https://cdn.bootcdn.net/ajax/libs/echarts/5.4.2/echarts.esm.js';
+  let myChart = echarts.init(document.getElementById('echarts'));
+  const gridTop = 50;
+  const gridBottom = 20;
+  const chartHeight = 300 - gridTop - gridBottom;
+  
+  const yData = [/* 'C-', 'C', 'C+', 'B-', 'B', 'B+', 'A-', */ 'A', 'A+', 'AA-', 'AA', 'AA+', 'AAA-', 'AAA'];
+  let data = [
+    ['2020-01-31', 'AA'],
+    ['2020-02-01', 'AA'],
+    ['2020-02-02', 'AAA-'],
+    ['2020-02-03', 'AAA-'],
+    ['2020-02-04', 'A'],
+    ['2020-02-05', 'A'],
+    ['2020-02-06', 'A'],
+    ['2020-02-07', 'AA'],
+    ['2020-02-08', 'AA'],
+  ];
+  const yIntervalHeight = chartHeight / yData.length;
+  const seriesNum = 2;
+  /** 系列偏移量*/
+  const baseOffset = yIntervalHeight / (seriesNum + 1);
+
+  function renderItem(params, api, index) {
+    const dataIndexInside = params.dataIndexInside;
+    const [x1, y1] = api.coord([api.value(0), api.value(1)]);
+    const [x2, y2] = api.coord([api.value(0, dataIndexInside + 1), api.value(1, dataIndexInside + 1)]);
+  
+    const symbolSize = 5;
+    const offset = baseOffset * (index % 2 ? 1 : -1) * (index - 1 + (seriesNum % 2 ? 0.5 : 0)) * (index / 2);
+    return {
+      type: 'group',
+      children: [
+        {
+          type: 'polyline',
+          shape: {
+            points: [
+              [x1, y1 - offset],
+              [x1, y2 - offset],
+              [x2, y2 - offset],
+            ],
+          },
+  
+          style: {
+            fill: 'transparent',
+            stroke: 'orange',
+            lineWidth: 2,
+          },
+        },
+        {
+          // diamond
+          type: 'polygon',
+          shape: {
+            points: [
+              [x1 - symbolSize, y1 - offset],
+              [x1, y1 - offset + symbolSize],
+              [x1 + symbolSize, y1 - offset],
+              [x1, y1 - offset - symbolSize],
+              [x1 - symbolSize, y1 - offset],
+            ],
+          },
+          style: {
+            fill: 'orange',
+            stroke: 'orange',
+            // stroke: '#fff',
+            lineWidth: 2,
+          },
+          emphasis: {
+            style: {
+              lineWidth: 4,
+            },
+          },
+        },
+      ],
+    };
+  }
+
+  let option = {
+    tooltip: { trigger: 'axis' },
+    grid: {
+      top: gridTop,
+      bottom: gridBottom,
+    },
+    legend: {
+      show: true,
+      // icon: 'diamond',
+      // lineStyle: {
+      //   color: 'orange',
+      //   type: 'solid',
+      //   width: 2,
+      // },
+      itemStyle: {
+        // op acity: 0,
+      },
+    },
+    xAxis: {
+      type: 'category',
+    },
+    yAxis: {
+      type: 'category',
+      splitLine: { show: true, interval: 0, lineStyle: { type: 'dashed' } },
+      axisLabel: {
+        interval: 0,
+      },
+      data: yData,
+    },
+    series: [
+      // {
+      //   name: 'line',
+      //   type: 'line',
+      //   step: 'start',
+      //   data,
+      // },
+      {
+        name: '1',
+        type: 'custom',
+        data,
+        color: 'orange',
+        renderItem: (p, a) => renderItem(p, a, 0),
+      },
+      {
+        name: '2',
+        type: 'custom',
+        data,
+        color: '#1b63d9',
+        renderItem: (p, a) => renderItem(p, a, 1),
+      },
+    ],
+  };
+  console.time('chart render');
+  myChart.setOption(option);
+  console.timeEnd('chart render');
+</script>
+
+</html>
