@@ -57,10 +57,8 @@ impl Solution {
             str_vec = c.to_string() + &str_vec;
         }
 
-        // str_vec.reverse();
-        println!("{}",str_vec);
+        // println!("{}",str_vec);
 
-        // str_vec.iter().collect::<String>()
         str_vec
     }
 }
