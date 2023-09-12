@@ -1,5 +1,4 @@
 struct Solution {}
-
 impl Solution {
     fn new() -> Self {
         Solution {}

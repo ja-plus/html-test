@@ -13,54 +13,39 @@ impl Solution {
      * @param s2 string字符串 the string
      * @return string字符串
      */
-    pub fn LCS(&self, s1: String, s2: String) -> String {
-        if s1 == "" || s2 == "" {
-            return "-1".to_string();
-        }
-        // write code here
-        let s1_arr: Vec<char> = s1.chars().collect();
-        let s2_arr: Vec<char> = s2.chars().collect();
-        // println!("s1_arr:{:?}", s1_arr);
+    pub fn LCS(&self, str1: String, str2: String) -> String {
+        if str1 == "" || str2 == "" {
+          return "-1".to_string();
+      }
+      // write code here
+      let s1_arr: Vec<char> = str1.chars().collect();
+      let s2_arr: Vec<char> = str2.chars().collect();
+      // println!("s1_arr:{:?}", s1_arr);
 
-        let mut temp_matrix: Vec<Vec<usize>> = vec![vec![0; s1_arr.len() + 1]; s2_arr.len() + 1];
-        let mut max_len = 0;
-        let mut max_i = 0;
-        let mut max_j = 0;
+      let mut temp_matrix: Vec<Vec<usize>> = vec![vec![0; s1_arr.len() + 1]; s2_arr.len() + 1];
+      let mut max_len = 0;
+      // let mut max_i = 0;
+      let mut max_j = 0;
 
-        for i in 0..s2_arr.len() {
-            let s2_char = s2_arr[i];
-            for j in 0..s1_arr.len() {
-                let s1_char = s1_arr[j];
-                if s2_char == s1_char {
-                    let length = temp_matrix[i][j] + 1;
-                    temp_matrix[i + 1][j + 1] = length;
-                    // 获取最大长度对应的位置
-                    if length > max_len {
-                        max_i = i;
-                        max_j = j;
-                        max_len = length;
-                    }
-                } else {
-                    temp_matrix[i + 1][j + 1] = 0;
-                }
-            }
-        }
+      for i in 0..s2_arr.len() {
+          let s2_char = s2_arr[i];
+          for j in 0..s1_arr.len() {
+              let s1_char = s1_arr[j];
+              if s2_char == s1_char {
+                  let length = temp_matrix[i][j] + 1;
+                  temp_matrix[i + 1][j + 1] = length;
+                  // 获取最大长度对应的位置
+                  if length > max_len {
+                      // max_i = i;
+                      max_j = j;
+                      max_len = length;
+                  }
+              }
+          }
+      }
 
-        // for item in temp_matrix.iter() {
-        //     println!("{:?}", item);
-        // }
-
-        let mut str_vec = "".to_string();
-        for i in 0..max_len {
-            // println!("i:{}",i);
-            let c = s1_arr[max_j - i];
-            str_vec = c.to_string() + &str_vec;
-        }
-
-        // println!("{}",str_vec);
-
-        str_vec
-    }
+      s1_arr[max_j - max_len + 1..=max_j].iter().collect::<String>()
+  }
 }
 
 fn main() {

@@ -1,13 +1,14 @@
 [package]
 name = "gretting"
 version = "0.1.0"
-authors = ["JA+ <601286825@qq.com>"]
+authors = ["JA+"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 rand = "0.5.5"
+regex = "1.9.5"
 reqwest = { version = "0.11", features = ["json"] }
 # tokio = { version = "1", features = ["full"] }
 # chrono = "0.4"
