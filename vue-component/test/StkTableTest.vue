@@ -36,7 +36,7 @@ div(:style="{width: tableWidth}" style="padding:10px;")
     virtual-x
     :style="{height:props.height}"
     v-bind="props"
-    :columns="columns"
+    v-model:columns="columns"
     :data-source="dataSource"
     @current-change="onCurrentChange"
     @row-menu="onRowMenu"
@@ -101,6 +101,7 @@ export default {
         showHeaderOverflow: false,
         sortRemote: false,
         // minWidth: 'auto',
+        colResizable: true,
       },
       columns: [
         {
@@ -146,13 +147,12 @@ export default {
         {
           title: 'Email(sortBy:name)',
           dataIndex: 'email',
-          minWidth: '150px',
-          maxWidth: '150px',
+          width: '150px',
           sorter: true,
           sortBy: 'name',
         },
         /** overflow 必须设置maxWidth */
-        { title: 'Address', dataIndex: 'address', minWidth: '100px', maxWidth: '100px' },
+        { title: 'Address', dataIndex: 'address', width: '100px' },
         // { title: 'Long Title Long Title LongTitle', dataIndex: 'address2', minWidth: '200px', maxWidth: '200px' },
         // { title: 'col2', dataIndex: 'address3' /* , fixed: 'right' */, minWidth: '150px', maxWidth: '150px' },
         // { title: 'col3', dataIndex: 'address' },
@@ -180,7 +180,8 @@ export default {
         { key: 'tableProps', desc: '', value: '' },
         { key: 'rowKey', desc: '一行的唯一键', value: 'string | (row) => string' },
         { key: 'height', desc: '高度' },
-        { key: 'minWidth', desc: '最小宽度', value: 'string', defaultValue: '100%' },
+        { key: 'maxWidth', desc: '最大宽度', value: 'string', defaultValue: 'max-content' },
+        { key: 'minWidth', desc: '最小宽度', value: 'string' },
         { key: 'showOverflow', desc: 'td文本溢出展示...', value: 'boolean', defaultValue: 'false' },
         { key: 'showHeaderOverflow', desc: 'th文本溢出展示...', value: 'boolean', defaultValue: 'false' },
         {
@@ -198,6 +199,8 @@ export default {
         { key: 'virtualX', desc: '是否开启横向虚拟滚动。一定要设置列宽。', defaultValue: 'false' },
         { key: 'columns', desc: '列配置', value: 'columnOption[]' },
         { key: 'dataSource', desc: '数据源', value: 'object[]' },
+        { key: 'colResizable', desc: '列拖动', value: 'boolean', defaultValue: 'false' },
+        { key: 'colMinWidth', desc: '列拖动的最小宽度', value: 'number', defaultValue: '10' },
         { key: '------------', desc: '---------' },
         { key: 'columnOption', desc: '', value: '' },
         { key: 'title', desc: '名称' },

@@ -18,14 +18,9 @@
         :style="{ height: dataSourceCopy.length * virtualScroll.rowHeight + 'px' }"
       ></div>
     -->
+    <div v-show="colResizable" ref="colResizeIndicator" class="column-resize-indicator"></div>
     <!-- 表格主体 -->
-    <table
-      class="stk-table-main"
-      :style="{
-        minWidth: minWidth,
-        maxWidth: maxWidth,
-      }"
-    >
+    <table class="stk-table-main" :style="{ minWidth: minWidth, maxWidth: maxWidth }">
       <!-- transform: virtualX_on ? `translateX(${virtualScrollX.offsetLeft}px)` : null, 用transform控制虚拟滚动左边距，sticky会有问题 -->
       <thead v-if="!headless">
         <tr v-for="(row, index) in tableHeaders" :key="index" @contextmenu="e => onHeaderMenu(e)">
@@ -39,7 +34,7 @@
             }"
           ></th>
           <th
-            v-for="col in virtualX_on ? virtualX_columnPart : row"
+            v-for="(col, colIndex) in virtualX_on ? virtualX_columnPart : row"
             :key="col.dataIndex"
             :data-col-key="col.dataIndex"
             :draggable="headerDrag ? 'true' : 'false'"
@@ -89,11 +84,17 @@
                   </g>
                 </svg>
               </span>
+              <!-- <div v-if="colIndex > 0" class="table-header-resizer left"></div> -->
+              <div
+                v-if="colResizable && colIndex !== (virtualX_on ? virtualX_columnPart : row).length - 1"
+                class="table-header-resizer right"
+                @mousedown="e => onThResizeMouseDown(e, col)"
+                @mousemove="e => onThResizeMouseMove(e)"
+              ></div>
             </div>
           </th>
           <!-- 这个th用于横向虚拟滚动表格右边距 width、maxWidth 用于兼容低版本浏览器-->
           <th
-            v-if="virtualX_on"
             style="padding: 0"
             :style="{
               minWidth: virtualX_offsetRight + 'px',
@@ -176,6 +177,7 @@
  * [] 计算的高亮颜色，挂在数据源上对象上，若多个表格使用同一个数据源对象会有问题。需要深拷贝。(解决方案：获取组件uid)
  * [] highlight-row 颜色不能恢复到active的颜色
  * @changelog
+ * -1.3.0 列宽拖动，列默认不铺满容器
  * -1.2.3 v-bind.prop 优化, col.prop row.prop
  * -1.2.2 td th style 优化
  * -1.2.1 高亮单元格优化
@@ -186,7 +188,7 @@
 import { interpolateRgb } from 'd3-interpolate';
 
 /**
- * @typedef {import('./StkTable').StkTableColumn} StkTableColumn
+ * @typedef {import('./StkTable').StkTableColumn<any>} StkTableColumn
  */
 
 let chromeVersion = 0;
@@ -339,26 +341,26 @@ export function tableSort(sortOption, order, dataSource) {
   }
   return targetDataSource;
 }
+
+/** @type {import('vue').Component} */
 export default {
   name: 'StkTable',
   props: {
     minWidth: {
       type: String,
-      default: 'min-content',
+      default: '',
     },
     /** 表格最大宽度，设置max-content 使表格按设置的width来 */
     maxWidth: {
       type: String,
-      default: '',
+      default: 'max-content',
     },
     /** 是否隐藏表头 */
     headless: {
       type: Boolean,
       default: false,
     },
-    /**
-     * 主题，亮、暗
-     */
+    /** 主题，亮、暗 */
     theme: {
       type: String,
       default: 'light',
@@ -374,7 +376,7 @@ export default {
       type: Boolean,
       default: false,
     },
-    /** 表格列配置 */
+    /** 表格列配置*/
     columns: {
       type: Array,
       default: () => [],
@@ -438,6 +440,16 @@ export default {
       type: Function,
       default: () => '',
     },
+    /** 列宽是否可拖动 */
+    colResizable: {
+      type: Boolean,
+      default: false,
+    },
+    /** 可拖动至最小的列宽 */
+    colMinWidth: {
+      type: Number,
+      default: 10,
+    },
   },
   emits: [
     'row-click',
@@ -452,6 +464,7 @@ export default {
     'th-drop',
     'th-drag-start',
     'scroll',
+    'update:columns',
   ],
   data() {
     return {
@@ -498,12 +511,20 @@ export default {
       },
       /** rowKey缓存 */
       rowKeyGenStore: new WeakMap(),
-      /** style缓存 */
-      styleStore: {
-        /** th */
-        1: new WeakMap(),
-        /** td */
-        2: new WeakMap(),
+
+      /** 列宽调整状态 */
+      colResizeState: {
+        isResizing: false,
+        /** 当前被拖动的列 */
+        currentCol: null,
+        /** 当前被拖动列的下标 */
+        currentColIndex: 0,
+        /** 鼠标按下开始位置 */
+        startX: 0,
+      },
+      tableContainerPosition: {
+        x: 0,
+        y: 0,
       },
     };
   },
@@ -611,8 +632,8 @@ export default {
   },
   watch: {
     columns: {
-      handler(val) {
-        this.dealColumns(val);
+      handler() {
+        this.dealColumns();
         this.initVirtualScrollX();
       },
       // deep: true, // 不能加，因为this.dealColumns 中操作了this.columns
@@ -655,6 +676,12 @@ export default {
     //   },
     //   { passive: false },
     // );
+    /** TODO: RESIZE 更新 */
+    this.tableContainerPosition = this.$refs.tableContainer.getBoundingClientRect();
+    this.initColResizeEvent();
+  },
+  beforeUnmount() {
+    this.clearColResizeEvent();
   },
   methods: {
     /**
@@ -836,14 +863,13 @@ export default {
      * @param {StkTableColumn} col
      */
     getCellStyle(tagType, col) {
-      let style = this.styleStore[tagType].get(col);
-      if (style) return style;
-      style = {
+      const fixedStyle = this.fixedStyle(tagType, col);
+      const style = {
         textAlign: col.headerAlign,
         width: col.width,
         minWidth: col.minWidth || col.width,
         maxWidth: col.maxWidth || col.width,
-        ...this.fixedStyle(tagType, col),
+        ...fixedStyle,
       };
       if (tagType === 1) {
         // TH
@@ -852,7 +878,7 @@ export default {
         //TD
         style.textAlign = col.align;
       }
-      this.styleStore[tagType].set(col, style);
+
       return style;
     },
 
@@ -963,6 +989,75 @@ export default {
     onThDragOver(e) {
       e.preventDefault();
     },
+    /** 初始化列宽拖动事件 */
+    initColResizeEvent() {
+      window.addEventListener('mousemove', this.onThResizeMouseMove);
+      window.addEventListener('mouseup', this.onThResizeMouseUp);
+    },
+    /** 清除列宽拖动事件 */
+    clearColResizeEvent() {
+      window.removeEventListener('mousemove', this.onThResizeMouseMove);
+      window.removeEventListener('mouseup', this.onThResizeMouseUp);
+    },
+    /**
+     * 拖动开始
+     * @param {MouseEvent} e
+     * @param {StkTableColumn} col
+     */
+    onThResizeMouseDown(e, col) {
+      const { pageX } = e;
+      e.stopPropagation();
+      // 记录拖动状态
+      Object.assign(this.colResizeState, {
+        isResizing: true,
+        currentCol: col,
+        currentColIndex: this.columns.indexOf(col),
+        startX: pageX,
+      });
+      const offsetTableX = pageX - this.tableContainerPosition.x;
+      // 展示指示线，更新其位置
+      this.$refs.colResizeIndicator.style.display = 'block';
+      this.$refs.colResizeIndicator.style.left = offsetTableX + 'px';
+    },
+    /**
+     * @param {MouseEvent} e
+     */
+    onThResizeMouseMove(e) {
+      const { isResizing } = this.colResizeState;
+      if (!isResizing) return;
+      const { pageX } = e;
+      e.stopPropagation();
+      e.preventDefault();
+      const offsetTableX = pageX - this.tableContainerPosition.x;
+      this.$refs.colResizeIndicator.style.left = offsetTableX + 'px';
+    },
+    /**
+     * @param {MouseEvent} e
+     */
+    onThResizeMouseUp(e) {
+      const { isResizing, startX, currentCol } = this.colResizeState;
+      if (!isResizing) return;
+
+      const { pageX } = e;
+      const moveX = pageX - startX;
+      let width = parseInt(currentCol.width) + moveX;
+      if (width < this.colMinWidth) width = this.colMinWidth;
+
+      const curCol = this.columns.find(it => it.dataIndex === currentCol.dataIndex);
+      curCol.width = width + 'px';
+
+      this.$emit('update:columns', [...this.columns]);
+
+      // 隐藏指示线
+      this.$refs.colResizeIndicator.style.display = 'none';
+      // 清除拖动状态
+      this.colResizeState = {
+        isResizing: false,
+        currentCol: null,
+        currentColIndex: 0,
+      };
+    },
+
     // ---tool func
     /**
      * 计算高亮渐暗颜色的循环
@@ -1142,6 +1237,8 @@ export default {
 .stk-table {
   // contain: strict;
   --row-height: 28px;
+  --cell-padding-x: 8px;
+  --resize-handle-width: 4px;
   --border-color: #e8eaec;
   --border-width: 1px;
   --td-bgc: #fff;
@@ -1193,6 +1290,15 @@ export default {
   &.headless {
     border-top: 1px solid var(--border-color);
   }
+  /** 列宽调整指示器 */
+  .column-resize-indicator {
+    width: 1px;
+    height: 100%;
+    position: absolute;
+    background: red;
+    z-index: 10;
+    display: none;
+  }
 
   .stk-table-main {
     border-spacing: 0;
@@ -1204,8 +1310,7 @@ export default {
       height: var(--row-height);
       font-size: 14px;
       box-sizing: border-box;
-      padding: 2px 5px;
-      padding: 0 8px;
+      padding: 0 var(--cell-padding-x);
       background-image: var(--bg-border-right), var(--bg-border-bottom);
     }
 
@@ -1300,6 +1405,20 @@ export default {
               #arrow-up,
               #arrow-down {
                 fill: var(--sort-arrow-color);
+              }
+            }
+            .table-header-resizer {
+              position: absolute;
+              top: 0;
+              cursor: col-resize;
+              width: var(--resize-handle-width);
+              height: var(--row-height);
+              background-color: rgba(255, 0, 0, 0.5);
+              &.left {
+                left: 0;
+              }
+              &.right {
+                right: 0;
               }
             }
           }
