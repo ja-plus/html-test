@@ -31,9 +31,6 @@ div(:style="{width: tableWidth}" style="padding:10px;")
   StkTable(
     ref="stkTable"
     row-key="name"
-    no-data-full
-    virtual
-    virtual-x
     :style="{height:props.height}"
     v-bind="props"
     v-model:columns="columns"
@@ -95,6 +92,7 @@ export default {
       stkTable: {},
       tableWidth: '500px',
       props: {
+        rowKey: 'name',
         theme: 'dark',
         height: '200px',
         showOverflow: false,
@@ -102,6 +100,10 @@ export default {
         sortRemote: false,
         // minWidth: 'auto',
         colResizable: true,
+        headerDrag: true,
+        virtual: true,
+        virtualX: true,
+        noDataFull: true,
       },
       columns: [
         {
@@ -140,7 +142,7 @@ export default {
           dataIndex: 'gender',
           // fixed: 'right',
           width: '150px',
-          minWidth: '150px',
+          // minWidth: '150px',
           sorter: true,
           sortType: 'number', // 指定为数字排序
         },

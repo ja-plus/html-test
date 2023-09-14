@@ -2,7 +2,13 @@
   <div
     ref="tableContainer"
     class="stk-table"
-    :class="{ virtual, 'virtual-x': virtualX, dark: theme === 'dark', headless }"
+    :class="{
+      virtual,
+      'virtual-x': virtualX,
+      dark: theme === 'dark',
+      headless,
+      'is-col-resizing': colResizeState.isResizing,
+    }"
     :style="virtual && { '--row-height': virtualScroll.rowHeight + 'px' }"
     @scroll="onTableScroll"
   >
@@ -23,7 +29,7 @@
     <table class="stk-table-main" :style="{ minWidth: minWidth, maxWidth: maxWidth }">
       <!-- transform: virtualX_on ? `translateX(${virtualScrollX.offsetLeft}px)` : null, 用transform控制虚拟滚动左边距，sticky会有问题 -->
       <thead v-if="!headless">
-        <tr v-for="(row, index) in tableHeaders" :key="index" @contextmenu="e => onHeaderMenu(e)">
+        <tr v-for="(row, rowIndex) in tableHeaders" :key="rowIndex" @contextmenu="e => onHeaderMenu(e)">
           <!-- 这个th用于横向虚拟滚动表格左边距,width、maxWidth 用于兼容低版本浏览器 -->
           <th
             v-if="virtualX_on"
@@ -33,8 +39,9 @@
               width: virtualScrollX.offsetLeft + 'px',
             }"
           ></th>
+          <!-- v for中最后一行才用 切割。TODO:不支持多级表头虚拟横向滚动 -->
           <th
-            v-for="(col, colIndex) in virtualX_on ? virtualX_columnPart : row"
+            v-for="(col, colIndex) in virtualX_on && rowIndex === tableHeaders.length - 1 ? virtualX_columnPart : row"
             :key="col.dataIndex"
             :data-col-key="col.dataIndex"
             :draggable="headerDrag ? 'true' : 'false'"
@@ -84,12 +91,16 @@
                   </g>
                 </svg>
               </span>
-              <!-- <div v-if="colIndex > 0" class="table-header-resizer left"></div> -->
+              <!-- 列宽拖动handler -->
               <div
-                v-if="colResizable && colIndex !== (virtualX_on ? virtualX_columnPart : row).length - 1"
+                v-if="colResizable && colIndex > 0"
+                class="table-header-resizer left"
+                @mousedown="e => onThResizeMouseDown(e, colIndex - 1)"
+              ></div>
+              <div
+                v-if="colResizable"
                 class="table-header-resizer right"
-                @mousedown="e => onThResizeMouseDown(e, col)"
-                @mousemove="e => onThResizeMouseMove(e)"
+                @mousedown="e => onThResizeMouseDown(e, colIndex)"
               ></div>
             </div>
           </th>
@@ -110,7 +121,7 @@
         <tr></tr>
       </tbody> -->
       <!-- <td
-          v-for="col in virtualX_on ? virtualX_columnPart : tableProps"
+          v-for="col in virtualX_on ? virtualX_columnPart : tableHeaderLast"
           :key="col.dataIndex"
           class="perch-td top"
         ></td> -->
@@ -140,7 +151,7 @@
             <!--这个td用于配合虚拟滚动的th对应，防止列错位-->
             <td v-if="virtualX_on" class="virtual-x-left" style="padding: 0"></td>
             <td
-              v-for="col in virtualX_on ? virtualX_columnPart : tableProps"
+              v-for="col in virtualX_on ? virtualX_columnPart : tableHeaderLast"
               :key="col.dataIndex"
               :data-index="col.dataIndex"
               :class="[col.className, showOverflow ? 'text-overflow' : '', col.fixed ? 'fixed-cell' : '']"
@@ -440,7 +451,11 @@ export default {
       type: Function,
       default: () => '',
     },
-    /** 列宽是否可拖动 */
+    /**
+     * 列宽是否可拖动
+     * 不要设置列minWidth，必须设置width
+     * TODO:列宽拖动时，每一列都必须要有width，且minWidth不生效
+     */
     colResizable: {
       type: Boolean,
       default: false,
@@ -480,9 +495,10 @@ export default {
       sortOrderIndex: 0,
       /** 排序切换顺序 */
       sortSwitchOrder: [null, 'desc', 'asc'],
+      /** 表头.内容是 props.columns 的引用集合 */
       tableHeaders: [],
-      /** 若有多级表头时，的tableHeaders */
-      tableProps: [],
+      /** 若有多级表头时，的tableHeaders.内容是 props.columns 的引用集合  */
+      tableHeaderLast: [],
       dataSourceCopy: Object.freeze([]),
       /** 存放高亮行的对象*/
       highlightDimRows: new Set(),
@@ -521,6 +537,8 @@ export default {
         currentColIndex: 0,
         /** 鼠标按下开始位置 */
         startX: 0,
+        /** 鼠标按下时滚动条的位置 */
+        scrollLeft: 0,
       },
       tableContainerPosition: {
         x: 0,
@@ -564,41 +582,40 @@ export default {
     virtualX_on() {
       return (
         this.virtualX &&
-        this.columns.reduce((sum, col) => (sum += parseInt(col.minWidth || col.width)), 0) >
+        this.tableHeaderLast.reduce((sum, col) => (sum += parseInt(col.minWidth || col.width)), 0) >
           this.virtualScrollX.containerWidth * 1.5
       );
     },
-    /** 横向虚拟滚动展示的列 */
+    /** 横向虚拟滚动展示的列,内容是 props.columns 的引用集合  */
     virtualX_columnPart() {
       if (this.virtualX_on) {
         const fixedLeftColumns = [];
         // 左侧固定列要一直在
         for (let i = 0; i < this.virtualScrollX.startIndex; i++) {
-          const col = this.columns[i];
+          const col = this.tableHeaderLast[i];
           if (col.fixed === 'left') fixedLeftColumns.push(col);
         }
         return Object.freeze(
-          fixedLeftColumns.concat(this.columns.slice(this.virtualScrollX.startIndex, this.virtualScrollX.endIndex)),
+          fixedLeftColumns.concat(
+            this.tableHeaderLast.slice(this.virtualScrollX.startIndex, this.virtualScrollX.endIndex),
+          ),
         );
       }
-      return this.columns;
-      // return this.virtualX_on
-      //   ? this.columns.slice(this.virtualScrollX.startIndex, this.virtualScrollX.endIndex)
-      //   : this.columns;
+      return this.tableHeaderLast;
     },
     /** 横向虚拟滚动，右边距 */
     virtualX_offsetRight() {
       if (!this.virtualX_on) return 0;
       let width = 0;
-      for (let i = this.virtualScrollX.endIndex; i < this.columns.length; i++) {
-        const col = this.columns[i];
+      for (let i = this.virtualScrollX.endIndex; i < this.tableHeaderLast.length; i++) {
+        const col = this.tableHeaderLast[i];
         width += parseInt(col.width || col.maxWidth || col.minWidth);
       }
       return width;
     },
 
     // fixedLeftColWidth() {
-    //   let fixedLeftColumns = this.tableProps.filter(it => it.fixed === 'left');
+    //   let fixedLeftColumns = this.tableHeaderLast.filter(it => it.fixed === 'left');
     //   let width = 0;
     //   for (let i = 0; i < fixedLeftColumns.length; i++) {
     //     const col = fixedLeftColumns[i];
@@ -609,7 +626,7 @@ export default {
     /** 计算每个fixed:left列前面列的总宽度，fixed:right右边列的总宽度，用于定位 */
     fixedColumnsPositionStore() {
       const store = {};
-      const cols = [...this.columns];
+      const cols = [...this.tableHeaderLast];
       let left = 0;
       for (let i = 0; i < cols.length; i++) {
         const item = cols[i];
@@ -647,7 +664,7 @@ export default {
         this.initVirtualScrollY();
         if (this.sortCol) {
           // 排序
-          const column = this.columns.find(it => it.dataIndex === this.sortCol);
+          const column = this.tableHeaderLast.find(it => it.dataIndex === this.sortCol);
           this.onColumnSort(column, false);
         }
       },
@@ -715,44 +732,46 @@ export default {
     },
     initVirtualScrollX() {
       if (this.virtualX) {
-        this.scrollTo(null, 0);
-        this.virtualScrollX.containerWidth = this.$refs.tableContainer?.offsetWidth;
-        this.updateVirtualScrollX(this.$refs.tableContainer?.scrollLeft);
+        const { offsetWidth, scrollLeft } = this.$refs.tableContainer || {};
+        // this.scrollTo(null, 0);
+        this.virtualScrollX.containerWidth = offsetWidth;
+        this.updateVirtualScrollX(scrollLeft);
       }
     },
     /** 通过滚动条位置，计算虚拟滚动的参数 */
     updateVirtualScrollY(sTop = 0) {
       const { rowHeight } = this.virtualScroll;
       const startIndex = Math.floor(sTop / rowHeight);
-      this.virtualScroll.startIndex = startIndex;
-      this.virtualScroll.offsetTop = startIndex * rowHeight; // startIndex之前的高度
+      Object.assign(this.virtualScroll, {
+        startIndex,
+        offsetTop: startIndex * rowHeight, // startIndex之前的高度
+      });
     },
     /** 通过横向滚动条位置，计算横向虚拟滚动的参数 */
     updateVirtualScrollX(sLeft = 0) {
-      if (!this.columns?.length) return;
+      if (!this.tableHeaderLast?.length) return;
       let startIndex = 0;
       let offsetLeft = 0;
 
       let colWidthSum = 0;
-      for (let colIndex = 0; colIndex < this.columns.length; colIndex++) {
+      for (let colIndex = 0; colIndex < this.tableHeaderLast.length; colIndex++) {
         startIndex++;
-        const col = this.columns[colIndex];
+        const col = this.tableHeaderLast[colIndex];
         if (col.fixed === 'left') continue; // fixed left 不进入计算列宽
         const colWidth = parseInt(col.width || col.maxWidth || col.minWidth);
         colWidthSum += colWidth;
         // 列宽（非固定列）加到超过scrollLeft的时候，表示startIndex从上一个开始下标
         if (colWidthSum >= sLeft) {
           offsetLeft = colWidthSum - colWidth;
-          // startIndex = colIndex;
           startIndex--;
           break;
         }
       }
       // -----
       colWidthSum = 0;
-      let endIndex = this.columns.length;
-      for (let colIndex = startIndex; colIndex < this.columns.length - 1; colIndex++) {
-        const col = this.columns[colIndex];
+      let endIndex = this.tableHeaderLast.length;
+      for (let colIndex = startIndex; colIndex < this.tableHeaderLast.length - 1; colIndex++) {
+        const col = this.tableHeaderLast[colIndex];
         colWidthSum += parseInt(col.width || col.maxWidth || col.minWidth);
         // 列宽大于容器宽度则停止
         if (colWidthSum >= this.virtualScrollX.containerWidth) {
@@ -760,9 +779,7 @@ export default {
           break;
         }
       }
-      this.virtualScrollX.startIndex = startIndex;
-      this.virtualScrollX.endIndex = endIndex;
-      this.virtualScrollX.offsetLeft = offsetLeft;
+      Object.assign(this.virtualScrollX, { startIndex, endIndex, offsetLeft });
     },
     /**
      * 固定列的style
@@ -813,15 +830,19 @@ export default {
 
       return style;
     },
-    /** 处理多级表头 */
+    /**
+     * 处理多级表头
+     * FIXME: 仅支持到两级表头。不支持多级。
+     */
     dealColumns() {
       // reset
       this.tableHeaders = [];
-      this.tableProps = [];
-      const copyColumn = this.columns;
+      this.tableHeaderLast = [];
+      const copyColumn = this.columns; // do not deep clone
       const deep = _howDeepTheColumn(copyColumn);
-      const tmpHeader = [];
-      const tmpProps = [];
+      const tmpHeaderRows = [];
+      const tmpHeaderLast = [];
+
       // 展开columns
       (function flat(arr, level = 0) {
         const colArr = [];
@@ -835,14 +856,15 @@ export default {
           if (col.children) {
             childrenArr.push(...col.children);
           } else {
-            tmpProps.push(col); // 没有children的列作为colgroup
+            tmpHeaderLast.push(col); // 没有children的列作为colgroup
           }
         });
-        tmpHeader.push(colArr);
+        tmpHeaderRows.push(colArr);
         if (childrenArr.length) flat(childrenArr, level + 1);
       })(copyColumn);
-      this.tableHeaders = tmpHeader;
-      this.tableProps = tmpProps;
+
+      this.tableHeaders = tmpHeaderRows;
+      this.tableHeaderLast = tmpHeaderLast;
     },
     /**
      * 行唯一值生成
@@ -1002,19 +1024,24 @@ export default {
     /**
      * 拖动开始
      * @param {MouseEvent} e
-     * @param {StkTableColumn} col
+     * @param {1|2} lr left or right handle. 1-left 2-right
+     * @param {number} colIndex
      */
-    onThResizeMouseDown(e, col) {
-      const { pageX } = e;
+    onThResizeMouseDown(e, colIndex) {
       e.stopPropagation();
+      e.preventDefault();
+      const { pageX } = e;
+      const { scrollLeft } = this.$refs.tableContainer;
+      const col = this.tableHeaderLast[colIndex];
       // 记录拖动状态
       Object.assign(this.colResizeState, {
         isResizing: true,
         currentCol: col,
-        currentColIndex: this.columns.indexOf(col),
+        currentColIndex: colIndex,
         startX: pageX,
+        scrollLeft,
       });
-      const offsetTableX = pageX - this.tableContainerPosition.x;
+      const offsetTableX = pageX - this.tableContainerPosition.x + scrollLeft;
       // 展示指示线，更新其位置
       this.$refs.colResizeIndicator.style.display = 'block';
       this.$refs.colResizeIndicator.style.left = offsetTableX + 'px';
@@ -1023,12 +1050,12 @@ export default {
      * @param {MouseEvent} e
      */
     onThResizeMouseMove(e) {
-      const { isResizing } = this.colResizeState;
+      const { isResizing, scrollLeft } = this.colResizeState;
       if (!isResizing) return;
       const { pageX } = e;
       e.stopPropagation();
       e.preventDefault();
-      const offsetTableX = pageX - this.tableContainerPosition.x;
+      const offsetTableX = pageX - this.tableContainerPosition.x + scrollLeft;
       this.$refs.colResizeIndicator.style.left = offsetTableX + 'px';
     },
     /**
@@ -1043,7 +1070,7 @@ export default {
       let width = parseInt(currentCol.width) + moveX;
       if (width < this.colMinWidth) width = this.colMinWidth;
 
-      const curCol = this.columns.find(it => it.dataIndex === currentCol.dataIndex);
+      const curCol = this.tableHeaderLast.find(it => it.dataIndex === currentCol.dataIndex);
       curCol.width = width + 'px';
 
       this.$emit('update:columns', [...this.columns]);
@@ -1055,6 +1082,7 @@ export default {
         isResizing: false,
         currentCol: null,
         currentColIndex: 0,
+        scrollLeft: 0,
       };
     },
 
@@ -1206,7 +1234,7 @@ export default {
       this.sortOrderIndex = this.sortSwitchOrder.findIndex(it => it === order);
       if (option.sort && this.dataSourceCopy?.length) {
         // 如果表格有数据，则进行排序
-        const column = option.sortOption || this.columns.find(it => it.dataIndex === this.sortCol);
+        const column = option.sortOption || this.tableHeaderLast.find(it => it.dataIndex === this.sortCol);
         if (column) this.onColumnSort(column, false, { force: true, emit: !option.silent });
         else console.warn('Can not find column by dataIndex:', this.sortCol);
       }
@@ -1255,6 +1283,9 @@ export default {
   --sort-arrow-hover-color: #8f90b5;
   --sort-arrow-active-color: #1b63d9;
   --sort-arrow-active-sub-color: #cbcbe1;
+  /** 列宽拖动指示器颜色 */
+  --col-resize-indicator-color: #cbcbe1;
+
   position: relative;
   overflow: auto;
   display: flex;
@@ -1269,10 +1300,13 @@ export default {
     --tr-hover-bgc: #1a2b46;
     --table-bgc: #181c21;
     --highlight-color: #1e4c99; // 不能用rgba，因为固定列时，会变成半透明
+
     --sort-arrow-color: #5d6064;
     --sort-arrow-hover-color: #727782;
     --sort-arrow-active-color: #d0d1d2;
     --sort-arrow-active-sub-color: #5d6064;
+
+    --col-resize-indicator-color: #5d6064;
 
     // background-color: var(--table-bgc); // ⭐这里加background-color会导致表格出滚动白屏
     color: #d0d1d2;
@@ -1290,14 +1324,21 @@ export default {
   &.headless {
     border-top: 1px solid var(--border-color);
   }
+
+  /** 调整列宽的时候不要触发th事件。否则会导致触发表头点击排序 */
+  &.is-col-resizing th {
+    pointer-events: none;
+  }
+
   /** 列宽调整指示器 */
   .column-resize-indicator {
-    width: 1px;
+    width: 0;
     height: 100%;
+    border-left: 1px dashed var(--col-resize-indicator-color);
     position: absolute;
-    background: red;
     z-index: 10;
     display: none;
+    pointer-events: none;
   }
 
   .stk-table-main {
@@ -1413,7 +1454,6 @@ export default {
               cursor: col-resize;
               width: var(--resize-handle-width);
               height: var(--row-height);
-              background-color: rgba(255, 0, 0, 0.5);
               &.left {
                 left: 0;
               }
