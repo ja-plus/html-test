@@ -11,6 +11,7 @@
     }"
     :style="virtual && { '--row-height': virtualScroll.rowHeight + 'px' }"
     @scroll="onTableScroll"
+    @wheel="onTableWheel"
   >
     <!-- 横向滚动时固定列的阴影，TODO: 覆盖一层在整个表上，使用linear-gradient 绘制阴影-->
     <!-- <div
@@ -26,7 +27,7 @@
     -->
     <div v-show="colResizable" ref="colResizeIndicator" class="column-resize-indicator"></div>
     <!-- 表格主体 -->
-    <table class="stk-table-main" :style="{ minWidth: minWidth, maxWidth: maxWidth }">
+    <table class="stk-table-main" :style="{ minWidth, maxWidth }">
       <!-- transform: virtualX_on ? `translateX(${virtualScrollX.offsetLeft}px)` : null, 用transform控制虚拟滚动左边距，sticky会有问题 -->
       <thead v-if="!headless">
         <tr v-for="(row, rowIndex) in tableHeaders" :key="rowIndex" @contextmenu="e => onHeaderMenu(e)">
@@ -95,12 +96,12 @@
               <div
                 v-if="colResizable && colIndex > 0"
                 class="table-header-resizer left"
-                @mousedown="e => onThResizeMouseDown(e, colIndex - 1)"
+                @mousedown="e => onThResizeMouseDown(e, col, true)"
               ></div>
               <div
                 v-if="colResizable"
                 class="table-header-resizer right"
-                @mousedown="e => onThResizeMouseDown(e, colIndex)"
+                @mousedown="e => onThResizeMouseDown(e, col)"
               ></div>
             </div>
           </th>
@@ -180,7 +181,7 @@
 
 <script>
 /**
- * @version 1.2.3
+ * @version 1.3.0
  * @author JA+
  * 不支持低版本浏览器非虚拟滚动表格的表头固定，列固定，因为会卡。
  * TODO:存在的问题：
@@ -357,6 +358,7 @@ export function tableSort(sortOption, order, dataSource) {
 export default {
   name: 'StkTable',
   props: {
+    /** 最小表格宽度 */
     minWidth: {
       type: String,
       default: '',
@@ -387,7 +389,7 @@ export default {
       type: Boolean,
       default: false,
     },
-    /** 表格列配置*/
+    /** 表格列配置 */
     columns: {
       type: Array,
       default: () => [],
@@ -401,6 +403,11 @@ export default {
     rowKey: {
       type: [String, Function],
       default: '',
+    },
+    /** 列唯一键 */
+    colKey: {
+      type: [String, Function],
+      default: 'dataIndex',
     },
     /** 空值展示文字 */
     emptyCellText: {
@@ -445,7 +452,6 @@ export default {
     /**
      * 给行附加className
      * FIXME: 是否需要优化，因为不传此prop会使表格行一直执行空函数，是否有影响
-     *
      */
     rowClassName: {
       type: Function,
@@ -454,7 +460,7 @@ export default {
     /**
      * 列宽是否可拖动
      * 不要设置列minWidth，必须设置width
-     * TODO:列宽拖动时，每一列都必须要有width，且minWidth不生效
+     * 列宽拖动时，每一列都必须要有width，且minWidth/maxWidth不生效
      */
     colResizable: {
       type: Boolean,
@@ -531,7 +537,7 @@ export default {
       /** 列宽调整状态 */
       colResizeState: {
         isResizing: false,
-        /** 当前被拖动的列 */
+        /** 当前被拖动的列 @type {StkTableColumn}*/
         currentCol: null,
         /** 当前被拖动列的下标 */
         currentColIndex: 0,
@@ -878,6 +884,13 @@ export default {
       return key;
     },
     /**
+     * 列唯一键
+     * @param {StkTableColumn} col
+     */
+    colKeyGen(col) {
+      return typeof this.colKey === 'function' ? this.colKey(col) : col[this.colKey];
+    },
+    /**
      * 性能优化，缓存style行内样式
      *
      * FIXME: col变化时仍从缓存拿style。watch col?
@@ -889,8 +902,8 @@ export default {
       const style = {
         textAlign: col.headerAlign,
         width: col.width,
-        minWidth: col.minWidth || col.width,
-        maxWidth: col.maxWidth || col.width,
+        minWidth: this.colResizable ? col.width : col.minWidth || col.width,
+        maxWidth: this.colResizable ? col.width : col.maxWidth || col.width,
         ...fixedStyle,
       };
       if (tagType === 1) {
@@ -963,9 +976,25 @@ export default {
     onHeaderCellClick(e, col) {
       this.$emit('header-cell-click', e, col);
     },
-    /** 滚动条监听 */
+    /**
+     * 鼠标滚轮事件监听
+     * @param {MouseEvent} e
+     */
+    onTableWheel(e) {
+      if (this.colResizeState.isResizing) {
+        // 正在调整列宽时，不允许用户滚动
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+    },
+    /**
+     * 滚动条监听
+     * @param {MouseEvent} e
+     */
     onTableScroll(e) {
       if (!e?.target) return;
+
       // 此处可优化，因为访问e.target.scrollXX消耗性能
       const { scrollTop, scrollLeft } = e.target;
       // 纵向滚动有变化
@@ -1025,14 +1054,22 @@ export default {
      * 拖动开始
      * @param {MouseEvent} e
      * @param {1|2} lr left or right handle. 1-left 2-right
-     * @param {number} colIndex
+     * @param {StkTableColumn} col 当前列配置
+     * @param {boolean} isPrev 是否要上一列
      */
-    onThResizeMouseDown(e, colIndex) {
+    onThResizeMouseDown(e, col, isPrev) {
       e.stopPropagation();
       e.preventDefault();
       const { pageX } = e;
       const { scrollLeft } = this.$refs.tableContainer;
-      const col = this.tableHeaderLast[colIndex];
+      /** 列下标 */
+      let colIndex = this.tableHeaderLast.findIndex(it => this.colKeyGen(it) === this.colKeyGen(col));
+      if (isPrev) {
+        // 上一列
+        colIndex -= 1;
+        col = this.tableHeaderLast[colIndex];
+      }
+
       // 记录拖动状态
       Object.assign(this.colResizeState, {
         isResizing: true,
@@ -1041,10 +1078,12 @@ export default {
         startX: pageX,
         scrollLeft,
       });
+
       const offsetTableX = pageX - this.tableContainerPosition.x + scrollLeft;
       // 展示指示线，更新其位置
       this.$refs.colResizeIndicator.style.display = 'block';
       this.$refs.colResizeIndicator.style.left = offsetTableX + 'px';
+      this.$refs.colResizeIndicator.style.top = this.$refs.tableContainer.scrollTop + 'px';
     },
     /**
      * @param {MouseEvent} e
@@ -1070,7 +1109,7 @@ export default {
       let width = parseInt(currentCol.width) + moveX;
       if (width < this.colMinWidth) width = this.colMinWidth;
 
-      const curCol = this.tableHeaderLast.find(it => it.dataIndex === currentCol.dataIndex);
+      const curCol = this.tableHeaderLast.find(it => this.colKeyGen(it) === this.colKeyGen(currentCol));
       curCol.width = width + 'px';
 
       this.$emit('update:columns', [...this.columns]);

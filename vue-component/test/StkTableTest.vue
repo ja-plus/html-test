@@ -181,6 +181,7 @@ export default {
       docTableData: [
         { key: 'tableProps', desc: '', value: '' },
         { key: 'rowKey', desc: '一行的唯一键', value: 'string | (row) => string' },
+        { key: 'colKey', desc: '一列的唯一键', value: 'string | (col) => string', defaultValue: 'dataIndex' },
         { key: 'height', desc: '高度' },
         { key: 'maxWidth', desc: '最大宽度', value: 'string', defaultValue: 'max-content' },
         { key: 'minWidth', desc: '最小宽度', value: 'string' },
@@ -201,7 +202,12 @@ export default {
         { key: 'virtualX', desc: '是否开启横向虚拟滚动。一定要设置列宽。', defaultValue: 'false' },
         { key: 'columns', desc: '列配置', value: 'columnOption[]' },
         { key: 'dataSource', desc: '数据源', value: 'object[]' },
-        { key: 'colResizable', desc: '列拖动', value: 'boolean', defaultValue: 'false' },
+        {
+          key: 'colResizable',
+          desc: '列拖动,列宽拖动时，每一列都必须要有width，且minWidth/maxWidth不生效',
+          value: 'boolean',
+          defaultValue: 'false',
+        },
         { key: 'colMinWidth', desc: '列拖动的最小宽度', value: 'number', defaultValue: '10' },
         { key: '------------', desc: '---------' },
         { key: 'columnOption', desc: '', value: '' },
