@@ -537,18 +537,16 @@ export default {
       /** 列宽调整状态 */
       colResizeState: {
         isResizing: false,
+        /** 初始宽度 
+        originColWidth: 0,*/
         /** 当前被拖动的列 @type {StkTableColumn}*/
         currentCol: null,
         /** 当前被拖动列的下标 */
         currentColIndex: 0,
         /** 鼠标按下开始位置 */
-        startX: 0,
-        /** 鼠标按下时滚动条的位置 */
-        scrollLeft: 0,
-      },
-      tableContainerPosition: {
-        x: 0,
-        y: 0,
+        startPageX: 0,
+        /** 鼠标按下时鼠标对于表格的偏移量 */
+        startOffsetTableX: 0,
       },
     };
   },
@@ -699,8 +697,6 @@ export default {
     //   },
     //   { passive: false },
     // );
-    /** TODO: RESIZE 更新 */
-    this.tableContainerPosition = this.$refs.tableContainer.getBoundingClientRect();
     this.initColResizeEvent();
   },
   beforeUnmount() {
@@ -800,13 +796,14 @@ export default {
           style.top = this.virtualScroll.scrollTop + 'px';
         }
       }
-      if (['left', 'right'].includes(col.fixed)) {
+      const { fixed, dataIndex } = col;
+      if (fixed === 'left' || fixed === 'right') {
         if (this.isLegacyMode) {
           /**
            * ----------浏览器兼容--------------
            */
           style.position = 'relative'; // 固定列方案替换为relative。原因:transform 在chrome84浏览器，列变动会导致横向滚动条计算出问题。
-          if (col.fixed === 'left') {
+          if (fixed === 'left') {
             if (this.virtualX_on) style.left = this.virtualScrollX.scrollLeft - this.virtualScrollX.offsetLeft + 'px';
             else style.left = this.virtualScrollX.scrollLeft + 'px';
           } else {
@@ -822,13 +819,13 @@ export default {
            * -------------高版本浏览器----------------
            */
           style.position = 'sticky'; // sticky 方案在低版本浏览器不兼容。具体表现为横向滚动超过一个父容器宽度（非table宽度）会导致sticky吸附失效。浏览器bug。
-          if (col.fixed === 'left') {
-            style.left = this.fixedColumnsPositionStore[col.dataIndex] + 'px';
+          if (fixed === 'left') {
+            style.left = this.fixedColumnsPositionStore[dataIndex] + 'px';
           } else {
-            style.right = this.fixedColumnsPositionStore[col.dataIndex] + 'px';
+            style.right = this.fixedColumnsPositionStore[dataIndex] + 'px';
           }
           if (tagType === 1) {
-            style.top = '0px';
+            style.top = '0';
             style.zIndex = 2; // 保证固定列高于其他单元格
           }
         }
@@ -900,7 +897,6 @@ export default {
     getCellStyle(tagType, col) {
       const fixedStyle = this.fixedStyle(tagType, col);
       const style = {
-        textAlign: col.headerAlign,
         width: col.width,
         minWidth: this.colResizable ? col.width : col.minWidth || col.width,
         maxWidth: this.colResizable ? col.width : col.maxWidth || col.width,
@@ -910,7 +906,7 @@ export default {
         // TH
         style.textAlign = col.headerAlign;
       } else if (tagType === 2) {
-        //TD
+        // TD
         style.textAlign = col.align;
       }
 
@@ -1061,7 +1057,7 @@ export default {
       e.stopPropagation();
       e.preventDefault();
       const { pageX } = e;
-      const { scrollLeft } = this.$refs.tableContainer;
+      const { scrollLeft, offsetLeft } = this.$refs.tableContainer;
       /** 列下标 */
       let colIndex = this.tableHeaderLast.findIndex(it => this.colKeyGen(it) === this.colKeyGen(col));
       if (isPrev) {
@@ -1069,17 +1065,17 @@ export default {
         colIndex -= 1;
         col = this.tableHeaderLast[colIndex];
       }
+      const offsetTableX = pageX - offsetLeft + scrollLeft;
 
       // 记录拖动状态
       Object.assign(this.colResizeState, {
         isResizing: true,
         currentCol: col,
         currentColIndex: colIndex,
-        startX: pageX,
-        scrollLeft,
+        startPageX: pageX,
+        startOffsetTableX: offsetTableX,
       });
 
-      const offsetTableX = pageX - this.tableContainerPosition.x + scrollLeft;
       // 展示指示线，更新其位置
       this.$refs.colResizeIndicator.style.display = 'block';
       this.$refs.colResizeIndicator.style.left = offsetTableX + 'px';
@@ -1089,23 +1085,28 @@ export default {
      * @param {MouseEvent} e
      */
     onThResizeMouseMove(e) {
-      const { isResizing, scrollLeft } = this.colResizeState;
+      const { isResizing, currentCol, startPageX, startOffsetTableX } = this.colResizeState;
       if (!isResizing) return;
       const { pageX } = e;
       e.stopPropagation();
       e.preventDefault();
-      const offsetTableX = pageX - this.tableContainerPosition.x + scrollLeft;
+      let moveX = pageX - startPageX;
+      // 移动量不小于最小列宽
+      if (parseInt(currentCol.width) + moveX < this.colMinWidth) moveX = -parseInt(currentCol.width);
+
+      const offsetTableX = startOffsetTableX + moveX;
       this.$refs.colResizeIndicator.style.left = offsetTableX + 'px';
     },
     /**
      * @param {MouseEvent} e
      */
     onThResizeMouseUp(e) {
-      const { isResizing, startX, currentCol } = this.colResizeState;
+      const { isResizing, startPageX, currentCol } = this.colResizeState;
       if (!isResizing) return;
-
       const { pageX } = e;
-      const moveX = pageX - startX;
+      const moveX = pageX - startPageX;
+
+      // 移动量不小于最小列宽
       let width = parseInt(currentCol.width) + moveX;
       if (width < this.colMinWidth) width = this.colMinWidth;
 
@@ -1121,6 +1122,7 @@ export default {
         isResizing: false,
         currentCol: null,
         currentColIndex: 0,
+        startPageX: 0,
         scrollLeft: 0,
       };
     },

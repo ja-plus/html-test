@@ -8,20 +8,12 @@ module.exports = {
   },
   parser: 'vue-eslint-parser',
   parserOptions: {
-    parser: {
-      js: '@babel/eslint-parser',
-      ts: '@typescript-eslint/parser',
-    },
+    parser: '@typescript-eslint/parser',
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
-  plugins: ['html', 'vue', 'prettier', '@typescript-eslint'],
-  extends: [
-    'eslint:recommended',
-    'plugin:vue/vue3-recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:prettier/recommended',
-  ],
+  plugins: ['html', 'vue', '@typescript-eslint', 'prettier'],
+  extends: ['plugin:@typescript-eslint/recommended', 'plugin:vue/vue3-recommended', 'plugin:prettier/recommended'],
   rules: {
     'prettier/prettier': 1,
     '@typescript-eslint/no-empty-function': 1, // 不能有空方法，改为1警告

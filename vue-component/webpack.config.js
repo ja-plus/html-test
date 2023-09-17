@@ -20,7 +20,7 @@ module.exports = {
         loader: 'vue-loader',
       },
       {
-        test: /\.jsx?$/,
+        test: /\.jsx$/,
         exclude: /node_modules/,
         loader: 'babel-loader',
       },

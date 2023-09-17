@@ -14,11 +14,10 @@
   "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.20.7",
-    "@babel/eslint-parser": "^7.19.1",
     "@typescript-eslint/eslint-plugin": "^5.32.0",
     "@typescript-eslint/parser": "^5.32.0",
     "@volar/vue-language-plugin-pug": "^1.0.20",
-    "@vue/babel-plugin-jsx": "^1.1.1",
+    "@vue/babel-plugin-jsx": "^1.1.5",
     "babel-loader": "^9.1.0",
     "css-loader": "^6.7.1",
     "eslint": "^8.31.0",
