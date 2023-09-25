@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=`">
+    <title>CustomEvent</title>
+</head>
+<body>
+    <button id="button">dispatchCustomEvent</button>
+    <p>Event.detail 可更改。CustomEvent 中的detail从初始化时传入，不可更改</p>
+</body>
+<script>
+    console.time();
+    const event = new Event('myEvent');
+
+    let customEvent = new CustomEvent('myCustomEvent', {
+      detail: 'aaa',
+    });
+    console.timeEnd();
+    button.addEventListener('myCustomEvent', e => {
+      console.log(e.detail, e);
+    });
+    button.addEventListener('myEvent', e => {
+      console.log(e, e.detail);
+    });
+    button.addEventListener('click', e => {
+      customEvent.aadd = 'bbb';
+      button.dispatchEvent(customEvent);
+      event.detail = Date.now();
+      button.dispatchEvent(event);
+    });
+</script>
+</html>
