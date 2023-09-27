@@ -13,7 +13,7 @@ const columns = [
     title: 'name',
     dataIndex: 'name',
     width: '200px',
-    customCell: () => ExpandCell,
+    customCell: ExpandCell,
   },
 ];
 const dataSource = [

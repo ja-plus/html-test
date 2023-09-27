@@ -71,7 +71,7 @@
               <component
                 :is="typeof col.customHeaderCell === 'function' ? col.customHeaderCell(col) : col.customHeaderCell"
                 v-if="col.customHeaderCell"
-                :col.prop="col"
+                :col="col"
               />
               <template v-else>
                 <slot name="tableHeader" :column="col">
@@ -129,44 +129,42 @@
       <!-- <tbody :style="{ transform: `translateY(${virtualScroll.offsetTop}px)` }"> -->
       <tbody>
         <tr v-if="virtual_on" :style="{ height: `${virtualScroll.offsetTop}px` }"></tr>
-        <template v-if="dataSourceCopy && dataSourceCopy.length">
-          <tr
-            v-for="(row, i) in virtual_dataSourcePart"
-            :key="rowKey ? rowKeyGen(row) : i"
-            :data-row-key="rowKey ? rowKeyGen(row) : i"
-            :class="{
-              active: rowKey
-                ? rowKeyGen(row) === (currentItem.value && rowKeyGen(currentItem.value))
-                : row === currentItem.value,
-              hover: rowKey ? rowKeyGen(row) === currentHover.value : row === currentHover.value,
-              [rowClassName(row, i)]: true,
-            }"
-            :style="{
-              backgroundColor: row._bgc,
-            }"
-            @click="e => onRowClick(e, row)"
-            @dblclick="e => onRowDblclick(e, row)"
-            @contextmenu="e => onRowMenu(e, row)"
-            @mouseover="e => onTrMouseOver(e, row)"
+        <tr
+          v-for="(row, i) in virtual_dataSourcePart"
+          :key="rowKey ? rowKeyGen(row) : i"
+          :data-row-key="rowKey ? rowKeyGen(row) : i"
+          :class="{
+            active: rowKey
+              ? rowKeyGen(row) === (currentItem.value && rowKeyGen(currentItem.value))
+              : row === currentItem.value,
+            hover: rowKey ? rowKeyGen(row) === currentHover.value : row === currentHover.value,
+            [rowClassName(row, i)]: true,
+          }"
+          :style="{
+            backgroundColor: row._bgc,
+          }"
+          @click="e => onRowClick(e, row)"
+          @dblclick="e => onRowDblclick(e, row)"
+          @contextmenu="e => onRowMenu(e, row)"
+          @mouseover="e => onTrMouseOver(e, row)"
+        >
+          <!--这个td用于配合虚拟滚动的th对应，防止列错位-->
+          <td v-if="virtualX_on" class="virtual-x-left" style="padding: 0"></td>
+          <td
+            v-for="col in virtualX_on ? virtualX_columnPart : tableHeaderLast"
+            :key="col.dataIndex"
+            :data-index="col.dataIndex"
+            :class="[col.className, showOverflow ? 'text-overflow' : '', col.fixed ? 'fixed-cell' : '']"
+            :style="getCellStyle(2, col)"
+            @click="e => onCellClick(e, row, col)"
           >
-            <!--这个td用于配合虚拟滚动的th对应，防止列错位-->
-            <td v-if="virtualX_on" class="virtual-x-left" style="padding: 0"></td>
-            <td
-              v-for="col in virtualX_on ? virtualX_columnPart : tableHeaderLast"
-              :key="col.dataIndex"
-              :data-index="col.dataIndex"
-              :class="[col.className, showOverflow ? 'text-overflow' : '', col.fixed ? 'fixed-cell' : '']"
-              :style="getCellStyle(2, col)"
-              @click="e => onCellClick(e, row, col)"
-            >
-              <component :is="col.customCell" v-if="col.customCell" :col.prop="col" :row.prop="row" />
-              <div v-else class="table-cell-wrapper" :title="row[col.dataIndex]">
-                {{ row[col.dataIndex] ?? emptyCellText }}
-              </div>
-            </td>
-          </tr>
-          <tr v-if="virtual_on" :style="{ height: `${virtual_offsetBottom}px` }"></tr>
-        </template>
+            <component :is="col.customCell" v-if="col.customCell" :col="col" :row="row" />
+            <div v-else class="table-cell-wrapper" :title="row[col.dataIndex]">
+              {{ row[col.dataIndex] ?? emptyCellText }}
+            </div>
+          </td>
+        </tr>
+        <tr v-if="virtual_on" :style="{ height: `${virtual_offsetBottom}px` }"></tr>
       </tbody>
     </table>
     <div
@@ -188,14 +186,6 @@
  * [] column.dataIndex 作为唯一键，不能重复
  * [] 计算的高亮颜色，挂在数据源上对象上，若多个表格使用同一个数据源对象会有问题。需要深拷贝。(解决方案：获取组件uid)
  * [] highlight-row 颜色不能恢复到active的颜色
- * @changelog
- * -1.3.0 列宽拖动，列默认不铺满容器
- * -1.2.3 v-bind.prop 优化, col.prop row.prop
- * -1.2.2 td th style 优化
- * -1.2.1 高亮单元格优化
- * -1.2.0 props.rowClassName,td line-height
- * -1.1.1 使td 背景为透明，fixed td背景继承tr背景
- * -1.1.0 基于性能问题，不支持customCell传递函数，
  */
 import { interpolateRgb } from 'd3-interpolate';
 

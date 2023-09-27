@@ -1,4 +1,4 @@
-import { defineComponent, h, ref, computed, onMounted, reactive } from 'vue';
+import { computed, defineComponent, onMounted, reactive, ref } from 'vue';
 
 export default defineComponent({
   props: ['col', 'row'],
