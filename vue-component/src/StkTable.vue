@@ -193,12 +193,15 @@ import { interpolateRgb } from 'd3-interpolate';
  * @typedef {import('./StkTable').StkTableColumn<any>} StkTableColumn
  */
 
-let chromeVersion = 0;
+let _chromeVersion = 0;
 try {
-  chromeVersion = +navigator.userAgent.match(/chrome\/\d+/i)[0].split('/')[1];
+  _chromeVersion = +navigator.userAgent.match(/chrome\/\d+/i)[0].split('/')[1];
 } catch (e) {
   console.error('获取浏览器版本出错！', e);
 }
+/** 是否兼容低版本模式 */
+const _isLegacyMode = _chromeVersion < 56;
+
 /** 高亮背景色 */
 const _highlightColor = {
   light: { from: '#71a2fd', to: '#fff' },
@@ -541,9 +544,6 @@ export default {
     };
   },
   computed: {
-    isLegacyMode() {
-      return chromeVersion < 56;
-    },
     /** 高亮颜色插值方法 */
     highlightInter() {
       return interpolateRgb(_highlightColor[this.theme].from, _highlightColor[this.theme].to);
@@ -555,13 +555,15 @@ export default {
     },
     /** 虚拟滚动展示的行数 */
     virtual_pageSize() {
-      return Math.ceil(this.virtualScroll.containerHeight / this.virtualScroll.rowHeight);
+      // 这里最终+1，因为headless=true无头时，需要上下各预渲染一行。
+      return Math.ceil(this.virtualScroll.containerHeight / this.virtualScroll.rowHeight) + 1;
     },
     /** 虚拟滚动展示的行 */
     virtual_dataSourcePart() {
       if (!this.virtual_on) return this.dataSourceCopy;
-      return Object.freeze(
-        this.dataSourceCopy.slice(this.virtualScroll.startIndex, this.virtualScroll.startIndex + this.virtual_pageSize),
+      return this.dataSourceCopy.slice(
+        this.virtualScroll.startIndex,
+        this.virtualScroll.startIndex + this.virtual_pageSize,
       );
     },
     /** 虚拟表格定位下边距*/
@@ -589,10 +591,8 @@ export default {
           const col = this.tableHeaderLast[i];
           if (col.fixed === 'left') fixedLeftColumns.push(col);
         }
-        return Object.freeze(
-          fixedLeftColumns.concat(
-            this.tableHeaderLast.slice(this.virtualScrollX.startIndex, this.virtualScrollX.endIndex),
-          ),
+        return fixedLeftColumns.concat(
+          this.tableHeaderLast.slice(this.virtualScrollX.startIndex, this.virtualScrollX.endIndex),
         );
       }
       return this.tableHeaderLast;
@@ -653,9 +653,14 @@ export default {
     dataSource: {
       handler(val) {
         // this.dealColumns(val);
+        let initVirtualScrollY = false;
+        if (this.dataSourceCopy.length !== val.length) {
+          initVirtualScrollY = true;
+        }
         this.dataSourceCopy = [...val];
-        // TODO: 数据长度没变则不计算虚拟滚动
-        this.initVirtualScrollY();
+        // 数据长度没变则不计算虚拟滚动
+        if (initVirtualScrollY) this.initVirtualScrollY();
+
         if (this.sortCol) {
           // 排序
           const column = this.tableHeaderLast.find(it => it.dataIndex === this.sortCol);
@@ -780,7 +785,7 @@ export default {
      */
     fixedStyle(tagType, col) {
       const style = {};
-      if (this.isLegacyMode) {
+      if (_isLegacyMode) {
         if (tagType === 1) {
           style.position = 'relative';
           style.top = this.virtualScroll.scrollTop + 'px';
@@ -788,7 +793,7 @@ export default {
       }
       const { fixed, dataIndex } = col;
       if (fixed === 'left' || fixed === 'right') {
-        if (this.isLegacyMode) {
+        if (_isLegacyMode) {
           /**
            * ----------浏览器兼容--------------
            */

@@ -1,10 +1,10 @@
 <template lang="pug">
 div
   div height:
-    input(type="range" min="100" max="1000" @input="handleHeightInput")
+    input(type="range" min="100" max="1000" :value="parseInt(props.height)" @input="handleHeightInput")
     | {{props.height}}
   div width:
-    input(type="range" min="100" max="2000"  @input="handleWidthInput")
+    input(type="range" min="100" max="2000" :value="parseInt(tableWidth)"  @input="handleWidthInput")
     | {{tableWidth}}
 
 div(style="display:flex;")
@@ -20,6 +20,7 @@ div(style="display:flex;")
     button(@click="props.showHeaderOverflow=!props.showHeaderOverflow") showHeaderOverflow:{{props.showHeaderOverflow}}
     button(@click="props.sortRemote=!props.sortRemote") sortRemote:{{props.sortRemote}}
     button(@click="props.theme==='light'?props.theme='dark':props.theme='light'") theme:{{props.theme}}
+    button(@click="props.headless = !props.headless") headless:{{props.headless}}
 div(style="margin-left:10px")
   div virtualScroll: {{$refs.stkTable&& $refs.stkTable.virtualScroll}}
   div virtual_pageSize: {{$refs.stkTable&& $refs.stkTable.virtual_pageSize}}
@@ -104,6 +105,7 @@ export default {
         virtual: true,
         virtualX: true,
         noDataFull: true,
+        headless: false,
       },
       columns: [
         {
@@ -209,6 +211,7 @@ export default {
           defaultValue: 'false',
         },
         { key: 'colMinWidth', desc: '列拖动的最小宽度', value: 'number', defaultValue: '10' },
+        { key: 'headless', desc: '是否展示表头', value: 'boolean', defaultValue: 'false' },
         { key: '------------', desc: '---------' },
         { key: 'columnOption', desc: '', value: '' },
         { key: 'title', desc: '名称' },
