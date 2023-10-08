@@ -2,3 +2,31 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components{
+    .my-hello {
+        @apply 
+            m-4 
+            w-40
+            h-40
+            bg-orange-300
+            ring
+            ring-orange-600
+            rounded-lg
+            text-white 
+            flex 
+            justify-center 
+            items-center
+            text-xl
+            shadow-lg
+            shadow-orange-300
+            font-bold
+            transition-all
+            hover:bg-orange-200
+            hover:shadow-xl
+            hover:shadow-orange-300
+            hover:text-3xl
+            cursor-pointer
+            ;
+    }
+}
