@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>try ESM</title>
+</head>
+
+<body>
+    <ul>
+        <li>import 语句有提升</li>
+        <li>在大多数情况下，导入的数据是实时的。也就是说，如果导出的值发生了变化，这种变化会反映在导入的变量上。
+
+            但默认导出并非如此：</li>
+        <li>
+            <div>export default foo; // 不是符号绑定。内外更改都没用。 等价export default 1;</div>
+            <div>export let bar = 1; // 是符号绑定。内外更改都会同步变。</div>
+            <div>export { bar as default }; // 这样也是符号绑定</div>
+
+        </li>
+        <li>引入顶级await 的模块时，会等待该模块执行完后，再执行引入文件剩下的代码。</li>
+    </ul>
+</body>
+<script type="module" src="./index.js"></script>
+
+</html>
