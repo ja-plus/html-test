@@ -9,27 +9,29 @@ console.log(t('message.hello'), 'hello');
 </script>
 
 <template>
-  <header class="page-header">
-    <div class="language">
-      <span>{{ $t('message.language') }}: </span>
-      <select v-model="locale">
-        <option v-for="locale in $i18n.availableLocales" :key="`locale-${locale}`" :value="locale">
-          {{ locale }}
-        </option>
-      </select>
-    </div>
-  </header>
   <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+    <header class="page-header">
+      <div class="language">
+        <span>{{ $t('message.language') }}: </span>
+        <select v-model="locale">
+          <option v-for="lc in $i18n.availableLocales" :key="`locale-${lc}`" :value="lc">
+            {{ lc }}
+          </option>
+        </select>
+      </div>
+    </header>
+    <div>
+      <a href="https://vitejs.dev" target="_blank">
+        <img src="/vite.svg" class="logo" alt="Vite logo" />
+      </a>
+      <a href="https://vuejs.org/" target="_blank">
+        <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
+      </a>
+    </div>
+    <!-- <HelloWorld msg="Vite + Vue" /> -->
+    <VueUse />
+    <VueI18n />
   </div>
-  <!-- <HelloWorld msg="Vite + Vue" /> -->
-  <VueUse />
-  <VueI18n />
 </template>
 
 <style scoped>
