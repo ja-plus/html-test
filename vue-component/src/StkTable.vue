@@ -482,7 +482,7 @@ export default {
   ],
   data() {
     return {
-      /** 是否展示横向滚动固定列的阴影 
+      /** 是否展示横向滚动固定列的阴影
       showFixedLeftShadow: false,*/
 
       /** 当前选中的一行*/
@@ -530,7 +530,7 @@ export default {
       /** 列宽调整状态 */
       colResizeState: {
         isResizing: false,
-        /** 初始宽度 
+        /** 初始宽度
         originColWidth: 0,*/
         /** 当前被拖动的列 @type {StkTableColumn}*/
         currentCol: null,
@@ -582,18 +582,32 @@ export default {
           this.virtualScrollX.containerWidth * 1.5
       );
     },
+    /**
+     * 左右固定列的集合。缓存。
+     * @return {{leftCols: StkTableColumn[], rightCols: StkTableColumn[]}}
+     */
+    virtualX_fixedColumnsPart() {
+      const leftCols = [];
+      const rightCols = [];
+      // 左侧固定列要一直在
+      for (let i = 0; i < this.virtualScrollX.startIndex; i++) {
+        const col = this.tableHeaderLast[i];
+        if (col.fixed === 'left') leftCols.push(col);
+        else if (col.fixed === 'right') rightCols.push(col);
+      }
+      return {
+        leftCols,
+        rightCols,
+      };
+    },
     /** 横向虚拟滚动展示的列,内容是 props.columns 的引用集合  */
     virtualX_columnPart() {
       if (this.virtualX_on) {
-        const fixedLeftColumns = [];
-        // 左侧固定列要一直在
-        for (let i = 0; i < this.virtualScrollX.startIndex; i++) {
-          const col = this.tableHeaderLast[i];
-          if (col.fixed === 'left') fixedLeftColumns.push(col);
-        }
-        return fixedLeftColumns.concat(
-          this.tableHeaderLast.slice(this.virtualScrollX.startIndex, this.virtualScrollX.endIndex),
-        );
+        // 虚拟横向滚动，固定列要一直保持存在
+        const { leftCols, rightCols } = this.virtualX_fixedColumnsPart;
+        //TODO: right
+        const mainColumns = this.tableHeaderLast.slice(this.virtualScrollX.startIndex, this.virtualScrollX.endIndex);
+        return leftCols.concat(mainColumns).concat(rightCols);
       }
       return this.tableHeaderLast;
     },
@@ -803,7 +817,7 @@ export default {
             else style.left = this.virtualScrollX.scrollLeft + 'px';
           } else {
             // TODO:计算右侧距离
-            style.transform = `translateX(${this.virtualX_offsetRight}px)`;
+            style.right = `${this.virtualX_offsetRight}px`;
           }
           if (tagType === 1) {
             style.top = this.virtualScroll.scrollTop + 'px';
@@ -935,7 +949,7 @@ export default {
         this.$emit('sort-change', col, order, [...this.dataSourceCopy]);
       }
     },
-    /** 插入一行 
+    /** 插入一行
     insertData(data) {
       if(!this.sortCol) return;
       const col = this.columns.find(it => it.dataIndex === this.sortCol);
