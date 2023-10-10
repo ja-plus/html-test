@@ -26,7 +26,7 @@ div(style="margin-left:10px")
   div virtual_pageSize: {{$refs.stkTable&& $refs.stkTable.virtual_pageSize}}
   div virtualScrollX: {{$refs.stkTable&& $refs.stkTable.virtualScrollX}}
   div virtualX_offsetRight: {{$refs.stkTable&& $refs.stkTable.virtualX_offsetRight}}
-  div virtualX_start/end:{{$refs.stkTable && $refs.stkTable.virtualX_startIndex}}/{{$refs.stkTable && $refs.stkTable.virtualX_endIndex}}
+  div virtualX_start/end:{{$refs.stkTable && $refs.stkTable.virtualScrollX.startIndex}}/{{$refs.stkTable && $refs.stkTable.virtualScrollX.endIndex}}
 
 div(:style="{width: tableWidth}" style="padding:10px;")
   StkTable(
@@ -78,7 +78,7 @@ div(style="width:max-content")
 
 </template>
 
-<script>
+<script lang='jsx'>
 import { h } from 'vue';
 import StkTable from '../src/StkTable.vue';
 // import { StkTable } from 'vite-vue-components';
@@ -91,7 +91,7 @@ export default {
   data() {
     return {
       stkTable: {},
-      tableWidth: '500px',
+      tableWidth: '700px',
       props: {
         rowKey: 'name',
         theme: 'dark',
@@ -157,6 +157,16 @@ export default {
         },
         /** overflow 必须设置maxWidth */
         { title: 'Address', dataIndex: 'address', width: '100px' },
+        { title: 'Address', dataIndex: 'address1', width: '100px' },
+        { title: 'Address', dataIndex: 'address2', width: '100px' },
+        { title: 'Address', dataIndex: 'address3', width: '100px' },
+        { title:'R', width:'50px', fixed: 'right' },
+        { 
+          title: 'Operate', dataIndex: 'Operate', width: '150px', fixed: 'right',
+          customCell(){
+            return <button><a href="#">+add</a></button>
+          }
+        },
         // { title: 'Long Title Long Title LongTitle', dataIndex: 'address2', minWidth: '200px', maxWidth: '200px' },
         // { title: 'col2', dataIndex: 'address3' /* , fixed: 'right' */, minWidth: '150px', maxWidth: '150px' },
         // { title: 'col3', dataIndex: 'address' },

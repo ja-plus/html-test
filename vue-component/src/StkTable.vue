@@ -151,7 +151,7 @@
           <!--这个td用于配合虚拟滚动的th对应，防止列错位-->
           <td v-if="virtualX_on" class="virtual-x-left" style="padding: 0"></td>
           <td
-            v-for="col in virtualX_on ? virtualX_columnPart : tableHeaderLast"
+            v-for="col in virtualX_columnPart"
             :key="col.dataIndex"
             :data-index="col.dataIndex"
             :class="[col.className, showOverflow ? 'text-overflow' : '', col.fixed ? 'fixed-cell' : '']"
@@ -482,7 +482,7 @@ export default {
   ],
   data() {
     return {
-      /** 是否展示横向滚动固定列的阴影 
+      /** 是否展示横向滚动固定列的阴影
       showFixedLeftShadow: false,*/
 
       /** 当前选中的一行*/
@@ -530,7 +530,7 @@ export default {
       /** 列宽调整状态 */
       colResizeState: {
         isResizing: false,
-        /** 初始宽度 
+        /** 初始宽度
         originColWidth: 0,*/
         /** 当前被拖动的列 @type {StkTableColumn}*/
         currentCol: null,
@@ -585,15 +585,23 @@ export default {
     /** 横向虚拟滚动展示的列,内容是 props.columns 的引用集合  */
     virtualX_columnPart() {
       if (this.virtualX_on) {
-        const fixedLeftColumns = [];
-        // 左侧固定列要一直在
+        // 虚拟横向滚动，固定列要一直保持存在
+        const leftCols = [];
+        const rightCols = [];
+        // 左侧固定列，如果在左边不可见区。则需要拿出来放在前面
         for (let i = 0; i < this.virtualScrollX.startIndex; i++) {
           const col = this.tableHeaderLast[i];
-          if (col.fixed === 'left') fixedLeftColumns.push(col);
+          if (col.fixed === 'left') leftCols.push(col);
         }
-        return fixedLeftColumns.concat(
-          this.tableHeaderLast.slice(this.virtualScrollX.startIndex, this.virtualScrollX.endIndex),
-        );
+        // 右侧固定列，如果在右边不可见区。则需要拿出来放在后面
+        for (let i = this.virtualScrollX.endIndex; i < this.tableHeaderLast.length; i++) {
+          const col = this.tableHeaderLast[i];
+          if (col.fixed === 'right') rightCols.push(col);
+        }
+
+        const mainColumns = this.tableHeaderLast.slice(this.virtualScrollX.startIndex, this.virtualScrollX.endIndex);
+
+        return leftCols.concat(mainColumns).concat(rightCols);
       }
       return this.tableHeaderLast;
     },
@@ -754,7 +762,8 @@ export default {
       for (let colIndex = 0; colIndex < this.tableHeaderLast.length; colIndex++) {
         startIndex++;
         const col = this.tableHeaderLast[colIndex];
-        if (col.fixed === 'left') continue; // fixed left 不进入计算列宽
+        // fixed left 不进入计算列宽
+        if (col.fixed === 'left') continue;
         const colWidth = parseInt(col.width || col.maxWidth || col.minWidth);
         colWidthSum += colWidth;
         // 列宽（非固定列）加到超过scrollLeft的时候，表示startIndex从上一个开始下标
@@ -793,35 +802,40 @@ export default {
       }
       const { fixed, dataIndex } = col;
       if (fixed === 'left' || fixed === 'right') {
+        const isFixedLeft = fixed === 'left';
         if (_isLegacyMode) {
           /**
            * ----------浏览器兼容--------------
            */
           style.position = 'relative'; // 固定列方案替换为relative。原因:transform 在chrome84浏览器，列变动会导致横向滚动条计算出问题。
-          if (fixed === 'left') {
+          if (isFixedLeft) {
             if (this.virtualX_on) style.left = this.virtualScrollX.scrollLeft - this.virtualScrollX.offsetLeft + 'px';
             else style.left = this.virtualScrollX.scrollLeft + 'px';
           } else {
             // TODO:计算右侧距离
-            style.transform = `translateX(${this.virtualX_offsetRight}px)`;
+            style.right = `${this.virtualX_offsetRight}px`;
           }
           if (tagType === 1) {
             style.top = this.virtualScroll.scrollTop + 'px';
-            style.zIndex = 2; // 保证固定列高于其他单元格
+            style.zIndex = isFixedLeft ? 4 : 3; // 保证固定列高于其他单元格
+          } else {
+            style.zIndex = isFixedLeft ? 3 : 2;
           }
         } else {
           /**
            * -------------高版本浏览器----------------
            */
           style.position = 'sticky'; // sticky 方案在低版本浏览器不兼容。具体表现为横向滚动超过一个父容器宽度（非table宽度）会导致sticky吸附失效。浏览器bug。
-          if (fixed === 'left') {
+          if (isFixedLeft) {
             style.left = this.fixedColumnsPositionStore[dataIndex] + 'px';
           } else {
             style.right = this.fixedColumnsPositionStore[dataIndex] + 'px';
           }
           if (tagType === 1) {
             style.top = '0';
-            style.zIndex = 2; // 保证固定列高于其他单元格
+            style.zIndex = isFixedLeft ? 4 : 3; // 保证固定列高于其他单元格
+          } else {
+            style.zIndex = isFixedLeft ? 3 : 2;
           }
         }
       }
@@ -935,7 +949,7 @@ export default {
         this.$emit('sort-change', col, order, [...this.dataSourceCopy]);
       }
     },
-    /** 插入一行 
+    /** 插入一行
     insertData(data) {
       if(!this.sortCol) return;
       const col = this.columns.find(it => it.dataIndex === this.sortCol);
