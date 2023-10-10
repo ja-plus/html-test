@@ -157,6 +157,9 @@ export default {
         },
         /** overflow 必须设置maxWidth */
         { title: 'Address', dataIndex: 'address', width: '100px' },
+        { title: 'Address', dataIndex: 'address1', width: '100px' },
+        { title: 'Address', dataIndex: 'address2', width: '100px' },
+        { title: 'Address', dataIndex: 'address3', width: '100px' },
         { title:'R', width:'50px', fixed: 'right' },
         { 
           title: 'Operate', dataIndex: 'Operate', width: '150px', fixed: 'right',
