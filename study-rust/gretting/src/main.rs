@@ -9,7 +9,9 @@
 // use use_trait::{Person, Show};
 mod std_cmp;
 mod temp;
+mod binary_tree;
 // #[tokio::main]
+use binary_tree::BinaryTree;
 fn main() {
     // 接收命令行参数
     // let args: Vec<String> = env::args().collect();
