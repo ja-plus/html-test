@@ -54,3 +54,11 @@ function f(id, name) {
 
 /** @type {typeof obj} */
 const tpof = {};
+
+// -----------------------this--------------
+/**
+ * @this {MyObj}
+ */
+function testThis() {
+  this.id;
+}
