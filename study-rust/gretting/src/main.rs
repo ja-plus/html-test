@@ -7,11 +7,11 @@
 // mod use_trait;
 // mod vector;
 // use use_trait::{Person, Show};
+mod binary_tree;
 mod std_cmp;
 mod temp;
-mod binary_tree;
 // #[tokio::main]
-use binary_tree::BinaryTree;
+use binary_tree::vector_binary_tree::VectorBinaryTree;
 fn main() {
     // 接收命令行参数
     // let args: Vec<String> = env::args().collect();
@@ -35,5 +35,7 @@ fn main() {
     // let person = Person::new();
     // person.show();
 
-    std_cmp::main();
+    // std_cmp::main();
+
+    let binary_tree = VectorBinaryTree::new_with_arr(vec![5, 1, 4, 3, 7, 2, 6]);
 }
