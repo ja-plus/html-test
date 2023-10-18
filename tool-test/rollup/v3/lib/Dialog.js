@@ -11,12 +11,6 @@ function __$styleInject(css) {
 }
 
 function noop() { }
-function assign(tar, src) {
-    // @ts-ignore
-    for (const k in src)
-        tar[k] = src[k];
-    return tar;
-}
 function run(fn) {
     return fn();
 }
@@ -34,52 +28,6 @@ function safe_not_equal(a, b) {
 }
 function is_empty(obj) {
     return Object.keys(obj).length === 0;
-}
-function create_slot(definition, ctx, $$scope, fn) {
-    if (definition) {
-        const slot_ctx = get_slot_context(definition, ctx, $$scope, fn);
-        return definition[0](slot_ctx);
-    }
-}
-function get_slot_context(definition, ctx, $$scope, fn) {
-    return definition[1] && fn
-        ? assign($$scope.ctx.slice(), definition[1](fn(ctx)))
-        : $$scope.ctx;
-}
-function get_slot_changes(definition, $$scope, dirty, fn) {
-    if (definition[2] && fn) {
-        const lets = definition[2](fn(dirty));
-        if ($$scope.dirty === undefined) {
-            return lets;
-        }
-        if (typeof lets === 'object') {
-            const merged = [];
-            const len = Math.max($$scope.dirty.length, lets.length);
-            for (let i = 0; i < len; i += 1) {
-                merged[i] = $$scope.dirty[i] | lets[i];
-            }
-            return merged;
-        }
-        return $$scope.dirty | lets;
-    }
-    return $$scope.dirty;
-}
-function update_slot_base(slot, slot_definition, ctx, $$scope, slot_changes, get_slot_context_fn) {
-    if (slot_changes) {
-        const slot_context = get_slot_context(slot_definition, ctx, $$scope, get_slot_context_fn);
-        slot.p(slot_context, slot_changes);
-    }
-}
-function get_all_dirty_from_scope($$scope) {
-    if ($$scope.ctx.length > 32) {
-        const dirty = [];
-        const length = $$scope.ctx.length / 32;
-        for (let i = 0; i < length; i++) {
-            dirty[i] = -1;
-        }
-        return dirty;
-    }
-    return -1;
 }
 
 new Set();
@@ -130,6 +78,18 @@ function set_data(text, data) {
         return;
     text.data = data;
 }
+function custom_event(type, detail, { bubbles = false, cancelable = false } = {}) {
+    const e = document.createEvent('CustomEvent');
+    e.initCustomEvent(type, bubbles, cancelable, detail);
+    return e;
+}
+function attribute_to_object(attributes) {
+    const result = {};
+    for (const attribute of attributes) {
+        result[attribute.name] = attribute.value;
+    }
+    return result;
+}
 
 // we need to store the information for multiple documents because a Svelte application could also contain iframes
 // https://github.com/sveltejs/svelte/issues/3624
@@ -138,6 +98,39 @@ new Map();
 let current_component;
 function set_current_component(component) {
     current_component = component;
+}
+function get_current_component() {
+    if (!current_component)
+        throw new Error('Function called outside component initialization');
+    return current_component;
+}
+/**
+ * Creates an event dispatcher that can be used to dispatch [component events](/docs#template-syntax-component-directives-on-eventname).
+ * Event dispatchers are functions that can take two arguments: `name` and `detail`.
+ *
+ * Component events created with `createEventDispatcher` create a
+ * [CustomEvent](https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent).
+ * These events do not [bubble](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Building_blocks/Events#Event_bubbling_and_capture).
+ * The `detail` argument corresponds to the [CustomEvent.detail](https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/detail)
+ * property and can contain any type of data.
+ *
+ * https://svelte.dev/docs#run-time-svelte-createeventdispatcher
+ */
+function createEventDispatcher() {
+    const component = get_current_component();
+    return (type, detail, { cancelable = false } = {}) => {
+        const callbacks = component.$$.callbacks[type];
+        if (callbacks) {
+            // TODO are there situations where events could be dispatched
+            // in a server (non-DOM) environment?
+            const event = custom_event(type, detail, { cancelable });
+            callbacks.slice().forEach(fn => {
+                fn.call(component, event);
+            });
+            return !event.defaultPrevented;
+        }
+        return true;
+    };
 }
 
 const dirty_components = [];
@@ -246,30 +239,10 @@ function flush_render_callbacks(fns) {
     render_callbacks = filtered;
 }
 const outroing = new Set();
-let outros;
 function transition_in(block, local) {
     if (block && block.i) {
         outroing.delete(block);
         block.i(local);
-    }
-}
-function transition_out(block, local, detach, callback) {
-    if (block && block.o) {
-        if (outroing.has(block))
-            return;
-        outroing.add(block);
-        outros.c.push(() => {
-            outroing.delete(block);
-            if (callback) {
-                if (detach)
-                    block.d(1);
-                callback();
-            }
-        });
-        block.o(local);
-    }
-    else if (callback) {
-        callback();
     }
 }
 
@@ -409,36 +382,54 @@ function init(component, options, instance, create_fragment, not_equal, props, a
     }
     set_current_component(parent_component);
 }
-/**
- * Base class for Svelte components. Used when dev=false.
- */
-class SvelteComponent {
-    $destroy() {
-        destroy_component(this, 1);
-        this.$destroy = noop;
-    }
-    $on(type, callback) {
-        if (!is_function(callback)) {
-            return noop;
+let SvelteElement;
+if (typeof HTMLElement === 'function') {
+    SvelteElement = class extends HTMLElement {
+        constructor() {
+            super();
+            this.attachShadow({ mode: 'open' });
         }
-        const callbacks = (this.$$.callbacks[type] || (this.$$.callbacks[type] = []));
-        callbacks.push(callback);
-        return () => {
-            const index = callbacks.indexOf(callback);
-            if (index !== -1)
-                callbacks.splice(index, 1);
-        };
-    }
-    $set($$props) {
-        if (this.$$set && !is_empty($$props)) {
-            this.$$.skip_bound = true;
-            this.$$set($$props);
-            this.$$.skip_bound = false;
+        connectedCallback() {
+            const { on_mount } = this.$$;
+            this.$$.on_disconnect = on_mount.map(run).filter(is_function);
+            // @ts-ignore todo: improve typings
+            for (const key in this.$$.slotted) {
+                // @ts-ignore todo: improve typings
+                this.appendChild(this.$$.slotted[key]);
+            }
         }
-    }
+        attributeChangedCallback(attr, _oldValue, newValue) {
+            this[attr] = newValue;
+        }
+        disconnectedCallback() {
+            run_all(this.$$.on_disconnect);
+        }
+        $destroy() {
+            destroy_component(this, 1);
+            this.$destroy = noop;
+        }
+        $on(type, callback) {
+            // TODO should this delegate to addEventListener?
+            if (!is_function(callback)) {
+                return noop;
+            }
+            const callbacks = (this.$$.callbacks[type] || (this.$$.callbacks[type] = []));
+            callbacks.push(callback);
+            return () => {
+                const index = callbacks.indexOf(callback);
+                if (index !== -1)
+                    callbacks.splice(index, 1);
+            };
+        }
+        $set($$props) {
+            if (this.$$set && !is_empty($$props)) {
+                this.$$.skip_bound = true;
+                this.$$set($$props);
+                this.$$.skip_bound = false;
+            }
+        }
+    };
 }
-
-__$styleInject(".modal.svelte-9pzi80 {\n  border-radius: 5px;\n  box-shadow: 0 0 10px #aaa;\n  border: 1px solid #aaa;\n}\n.modal.svelte-9pzi80 > header {\n  background-color: #aaa;\n  padding: 10px;\n}\n.modal.svelte-9pzi80 > article {\n  padding: 10px;\n}\n.modal.svelte-9pzi80 > footer {\n  padding: 10px;\n}\n");
 
 /* src\Dialog.svelte generated by Svelte v3.59.1 */
 
@@ -447,18 +438,19 @@ function create_fragment(ctx) {
 	let header;
 	let t0;
 	let t1;
-	let article;
+	let section;
 	let button0;
 	let t2;
 	let t3;
 	let t4;
+	let slot;
 	let t5;
 	let footer;
-	let current;
+	let button1;
+	let t7;
+	let button2;
 	let mounted;
 	let dispose;
-	const default_slot_template = /*#slots*/ ctx[4].default;
-	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[3], null);
 
 	return {
 		c() {
@@ -466,103 +458,138 @@ function create_fragment(ctx) {
 			header = element("header");
 			t0 = text(/*title*/ ctx[0]);
 			t1 = space();
-			article = element("article");
+			section = element("section");
 			button0 = element("button");
 			t2 = text("num:");
 			t3 = text(/*num*/ ctx[1]);
 			t4 = space();
-			if (default_slot) default_slot.c();
+			slot = element("slot");
 			t5 = space();
 			footer = element("footer");
-
-			footer.innerHTML = `<button>确认</button> 
-        <button>取消</button>`;
-
-			attr(div, "class", "modal svelte-9pzi80");
+			button1 = element("button");
+			button1.textContent = "确认";
+			t7 = space();
+			button2 = element("button");
+			button2.textContent = "取消";
+			this.c = noop;
+			attr(div, "class", "modal");
 		},
 		m(target, anchor) {
 			insert(target, div, anchor);
 			append(div, header);
 			append(header, t0);
 			append(div, t1);
-			append(div, article);
-			append(article, button0);
+			append(div, section);
+			append(section, button0);
 			append(button0, t2);
 			append(button0, t3);
-			append(article, t4);
-
-			if (default_slot) {
-				default_slot.m(article, null);
-			}
-
+			append(section, t4);
+			append(section, slot);
 			append(div, t5);
 			append(div, footer);
-			current = true;
+			append(footer, button1);
+			append(footer, t7);
+			append(footer, button2);
 
 			if (!mounted) {
-				dispose = listen(button0, "click", /*handleClick*/ ctx[2]);
+				dispose = [
+					listen(button0, "click", /*handleClick*/ ctx[2]),
+					listen(button1, "click", /*handleConfirm*/ ctx[3])
+				];
+
 				mounted = true;
 			}
 		},
 		p(ctx, [dirty]) {
-			if (!current || dirty & /*title*/ 1) set_data(t0, /*title*/ ctx[0]);
-			if (!current || dirty & /*num*/ 2) set_data(t3, /*num*/ ctx[1]);
-
-			if (default_slot) {
-				if (default_slot.p && (!current || dirty & /*$$scope*/ 8)) {
-					update_slot_base(
-						default_slot,
-						default_slot_template,
-						ctx,
-						/*$$scope*/ ctx[3],
-						!current
-						? get_all_dirty_from_scope(/*$$scope*/ ctx[3])
-						: get_slot_changes(default_slot_template, /*$$scope*/ ctx[3], dirty, null),
-						null
-					);
-				}
-			}
+			if (dirty & /*title*/ 1) set_data(t0, /*title*/ ctx[0]);
+			if (dirty & /*num*/ 2) set_data(t3, /*num*/ ctx[1]);
 		},
-		i(local) {
-			if (current) return;
-			transition_in(default_slot, local);
-			current = true;
-		},
-		o(local) {
-			transition_out(default_slot, local);
-			current = false;
-		},
+		i: noop,
+		o: noop,
 		d(detaching) {
 			if (detaching) detach(div);
-			if (default_slot) default_slot.d(detaching);
 			mounted = false;
-			dispose();
+			run_all(dispose);
 		}
 	};
 }
 
 function instance($$self, $$props, $$invalidate) {
-	let { $$slots: slots = {}, $$scope } = $$props;
 	let { title = 'Title' } = $$props;
 	let num = 0;
+	const dispatch = createEventDispatcher();
 
 	function handleClick() {
 		$$invalidate(1, num += 1);
 	}
 
+	function handleConfirm() {
+		dispatch('confirm');
+	}
+
 	$$self.$$set = $$props => {
 		if ('title' in $$props) $$invalidate(0, title = $$props.title);
-		if ('$$scope' in $$props) $$invalidate(3, $$scope = $$props.$$scope);
 	};
 
-	return [title, num, handleClick, $$scope, slots];
+	return [title, num, handleClick, handleConfirm];
 }
 
-class Dialog extends SvelteComponent {
+class Dialog extends SvelteElement {
 	constructor(options) {
 		super();
-		init(this, options, instance, create_fragment, safe_not_equal, { title: 0 });
+		const style = document.createElement('style');
+
+		style.textContent = `.modal{border-radius:5px;box-shadow:0 0 10px #aaa;border:1px solid #aaa;&>header{
+            background-color:#aaa;
+            padding:10px;
+        };&>article {
+            padding: 10px;
+        };&>footer{
+            padding:10px;
+        }}`;
+
+		this.shadowRoot.appendChild(style);
+
+		init(
+			this,
+			{
+				target: this.shadowRoot,
+				props: attribute_to_object(this.attributes),
+				customElement: true
+			},
+			instance,
+			create_fragment,
+			safe_not_equal,
+			{ title: 0 },
+			null
+		);
+
+		if (options) {
+			if (options.target) {
+				insert(options.target, this, options.anchor);
+			}
+
+			if (options.props) {
+				this.$set(options.props);
+				flush();
+			}
+		}
+	}
+
+	static get observedAttributes() {
+		return ["title"];
+	}
+
+	get title() {
+		return this.$$.ctx[0];
+	}
+
+	set title(title) {
+		this.$$set({ title });
+		flush();
 	}
 }
+
+customElements.define("my-dialog", Dialog);
 
 export { Dialog as default };

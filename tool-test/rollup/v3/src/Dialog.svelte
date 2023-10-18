@@ -1,3 +1,4 @@
+<svelte:options tag="my-dialog"/>
 <div class="modal">
     <header >{title}</header>
     <section>

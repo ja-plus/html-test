@@ -7,17 +7,18 @@
     <title>Test svelte dialog</title>
 </head>
 <body>
-    <div id="dialog"></div>    
+    <div id="dialog"></div>  
+    <my-dialog title="名称"></my-dialog>  
 </body>
-<script type="module">
+<script type="module" src="../tool-test/rollup/v3/lib/Dialog.js">
     import Dialog from '../tool-test/rollup/v3/lib/Dialog.js';
-    const dialogDiv = document.querySelector('#dialog');
-    console.log(Dialog);
-    const dialogComp = new Dialog({
-      target: dialogDiv,
-      props: {
-        title: '名称',
-      },
-    });
+    // const dialogDiv = document.querySelector('#dialog');
+    // console.log(Dialog);
+    // const dialogComp = new Dialog({
+    //   target: dialogDiv,
+    //   props: {
+    //     title: '名称',
+    //   },
+    // });
 </script>
 </html>

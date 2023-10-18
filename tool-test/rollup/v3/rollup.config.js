@@ -1,6 +1,7 @@
 import svelte from 'rollup-plugin-svelte';
 import resolve from '@rollup/plugin-node-resolve';
 import less from 'rollup-plugin-less';
+/** @type {import('rollup').RollupOptions} */
 export default {
   input: {
     Dialog: './src/Dialog.svelte',
@@ -8,10 +9,15 @@ export default {
   output: [
     {
       dir: 'lib',
+      // entryFileNames: '[name].webc.js',
     },
   ],
   plugins: [
-    svelte(),
+    svelte({
+      compilerOptions: {
+        customElement: true,
+      },
+    }),
     resolve({
       browser: true,
       exportConditions: ['svelte'], // 要打包的模块
