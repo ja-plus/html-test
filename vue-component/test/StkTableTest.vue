@@ -21,6 +21,7 @@ div(style="display:flex;")
     button(@click="props.sortRemote=!props.sortRemote") sortRemote:{{props.sortRemote}}
     button(@click="props.theme==='light'?props.theme='dark':props.theme='light'") theme:{{props.theme}}
     button(@click="props.headless = !props.headless") headless:{{props.headless}}
+    button(@click="props.colResizable = !props.colResizable") colResizable:{{props.colResizable}}
 div(style="margin-left:10px")
   div virtualScroll: {{$refs.stkTable&& $refs.stkTable.virtualScroll}}
   div virtual_pageSize: {{$refs.stkTable&& $refs.stkTable.virtual_pageSize}}

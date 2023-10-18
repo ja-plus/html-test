@@ -27,7 +27,7 @@
     -->
     <div v-show="colResizable" ref="colResizeIndicator" class="column-resize-indicator"></div>
     <!-- 表格主体 -->
-    <table class="stk-table-main" :style="{ minWidth, maxWidth }">
+    <table class="stk-table-main" :style="{ width: tableWidth, minWidth, maxWidth }">
       <!-- transform: virtualX_on ? `translateX(${virtualScrollX.offsetLeft}px)` : null, 用transform控制虚拟滚动左边距，sticky会有问题 -->
       <thead v-if="!headless">
         <tr v-for="(row, rowIndex) in tableHeaders" :key="rowIndex" @contextmenu="e => onHeaderMenu(e)">
@@ -351,15 +351,19 @@ export function tableSort(sortOption, order, dataSource) {
 export default {
   name: 'StkTable',
   props: {
-    /** 最小表格宽度 */
-    minWidth: {
+    width: {
       type: String,
       default: '',
     },
-    /** 表格最大宽度，设置max-content 使表格按设置的width来 */
+    /** 最小表格宽度 */
+    minWidth: {
+      type: String,
+      default: 'min-content',
+    },
+    /** 表格最大宽度*/
     maxWidth: {
       type: String,
-      default: 'max-content',
+      default: '',
     },
     /** 是否隐藏表头 */
     headless: {
@@ -443,7 +447,7 @@ export default {
       default: false,
     },
     /**
-     * 给行附加className
+     * 给行附加className<br>
      * FIXME: 是否需要优化，因为不传此prop会使表格行一直执行空函数，是否有影响
      */
     rowClassName: {
@@ -451,9 +455,9 @@ export default {
       default: () => '',
     },
     /**
-     * 列宽是否可拖动
-     * 不要设置列minWidth，必须设置width
-     * 列宽拖动时，每一列都必须要有width，且minWidth/maxWidth不生效
+     * 列宽是否可拖动<br>
+     * **不要设置**列minWidth，**必须**设置width<br>
+     * 列宽拖动时，每一列都必须要有width，且minWidth/maxWidth不生效。table width会变为"fit-content"。
      */
     colResizable: {
       type: Boolean,
@@ -544,6 +548,9 @@ export default {
     };
   },
   computed: {
+    tableWidth() {
+      return this.colResizable ? 'fit-content' : this.width;
+    },
     /** 高亮颜色插值方法 */
     highlightInter() {
       return interpolateRgb(_highlightColor[this.theme].from, _highlightColor[this.theme].to);
@@ -1458,6 +1465,7 @@ export default {
           }
 
           &.sorter-desc .table-header-cell-wrapper .table-header-sorter {
+            // display:initial;
             #arrow-up {
               fill: var(--sort-arrow-active-sub-color);
             }
@@ -1468,6 +1476,7 @@ export default {
           }
 
           &.sorter-asc .table-header-cell-wrapper .table-header-sorter {
+            // display:initial;
             #arrow-up {
               fill: var(--sort-arrow-active-color);
             }
@@ -1492,7 +1501,7 @@ export default {
               margin-left: 4px;
               width: 16px;
               height: 16px;
-
+              // display:none;
               #arrow-up,
               #arrow-down {
                 fill: var(--sort-arrow-color);
