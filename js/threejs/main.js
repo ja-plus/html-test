@@ -2,8 +2,9 @@ import * as THREE from 'three';
 
 // 引入轨道控制器扩展库OrbitControls.js
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
 
-const cameraPosition = [20, 40, 40];
+const cameraPosition = [0, 200, 200];
 
 const scene = new THREE.Scene(); // 创建一个场景
 // 创建透视投影相机相机
@@ -69,18 +70,36 @@ scene.add(spotLight);
 const ambient = new THREE.AmbientLight(0xffffff, 0.4);
 scene.add(ambient);
 
+const loader = new FBXLoader();
+loader.load('./1111.fbx', function (loadedModel) {
+  // console.log(loadedModel);
+  loadedModel.children.forEach(child => {
+    const mesh = child.clone();
+    mesh.material = new THREE.MeshPhongMaterial({
+      color: 0x00ffff,
+    });
+
+    scene.add(mesh);
+    render();
+  });
+});
+
 // 为了方便观察3D图像，添加三维坐标系对象
 const axes = new THREE.AxesHelper(10); // 坐标系轴长设置为
 //  把三维坐标系 添加到场景中
 scene.add(axes);
 
-renderer.render(scene, camera); // 结合场景和相机进行渲染，即用摄像机拍下此刻的场景（最后一步）
+function render() {
+  renderer.render(scene, camera); // 结合场景和相机进行渲染，即用摄像机拍下此刻的场景（最后一步）
+}
+
+render();
 
 // 设置相机控件轨道控制器OrbitControls
 const controls = new OrbitControls(camera, renderer.domElement);
 // 如果OrbitControls改变了相机参数，重新调用渲染器渲染三维场景
 controls.addEventListener('change', function () {
-  renderer.render(scene, camera); //执行渲染操作
+  render();
 }); //监听鼠标、键盘事件
 
 // window.addEventListener('wheel', e => {
