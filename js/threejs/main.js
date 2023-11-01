@@ -92,17 +92,11 @@ scene.add(ambient);
 const loader = new FBXLoader();
 const tgaLoader = new TGALoader();
 // tgaLoader.setPath('/Map');
-loader.load('./1111.fbx', function (loadedModel) {
+loader.load('/1111.fbx', function (loadedModel) {
   // console.log(loadedModel);
   loadedModel.children.forEach(child => {
     const mesh = child.clone();
-    console.log(mesh.name);
     mesh.material = new THREE.MeshBasicMaterial();
-    // mesh.material = new THREE.MeshToonMaterial({
-    //   color: 0xffffff,
-    //   // emissiveIntensity: 0.1,
-    //   // lightMapIntensity: 0.1,
-    // });
     tgaLoader.load(`/Map/${mesh.name}.tga`, texture => {
       mesh.material.map = texture;
       scene.add(mesh);
