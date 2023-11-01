@@ -3,6 +3,7 @@ import * as THREE from 'three';
 // 引入轨道控制器扩展库OrbitControls.js
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
+import { TGALoader } from 'three/examples/jsm/loaders/TGALoader';
 
 const cameraPosition = [100, 100, 100];
 
@@ -69,43 +70,52 @@ scene.add(cube, ball, cylinder);
 // // 将光源添加到场景中
 // scene.add(spotLight);
 
-const pointLight = new THREE.PointLight(0xffffff);
-pointLight.position.set(20, 20, 20);
-scene.add(pointLight);
+// const pointLight = new THREE.PointLight(0xffffff);
+// pointLight.position.set(20, 20, 20);
+// scene.add(pointLight);
+// 光源辅助观察
+// const pointLightHelper = new THREE.PointLightHelper(pointLight, 10);
+// scene.add(pointLightHelper);
 
 // 平行光
-const directionalLight = new THREE.DirectionalLight(0xffffff, 4);
-directionalLight.castShadow = true;
-scene.add(directionalLight);
+// const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+// directionalLight.castShadow = true;
+// scene.add(directionalLight);
+// // DirectionalLightHelper：可视化平行光
+// const dirLightHelper = new THREE.DirectionalLightHelper(directionalLight, 5, 0xff0000);
+// scene.add(dirLightHelper);
 
 //环境光:没有特定方向，整体改变场景的光照明暗
-const ambient = new THREE.AmbientLight(0xffffff, 0.1);
+const ambient = new THREE.AmbientLight(0xffffff, 1);
 scene.add(ambient);
 
 const loader = new FBXLoader();
+const tgaLoader = new TGALoader();
+// tgaLoader.setPath('/Map');
 loader.load('./1111.fbx', function (loadedModel) {
   // console.log(loadedModel);
   loadedModel.children.forEach(child => {
     const mesh = child.clone();
-    mesh.material = new THREE.MeshPhongMaterial({
-      color: 0x00ffff,
+    console.log(mesh.name);
+    mesh.material = new THREE.MeshBasicMaterial();
+    // mesh.material = new THREE.MeshToonMaterial({
+    //   color: 0xffffff,
+    //   // emissiveIntensity: 0.1,
+    //   // lightMapIntensity: 0.1,
+    // });
+    tgaLoader.load(`/Map/${mesh.name}.tga`, texture => {
+      mesh.material.map = texture;
+      scene.add(mesh);
     });
-
-    scene.add(mesh);
-    render();
   });
+  render();
 });
 
 // 为了方便观察3D图像，添加三维坐标系对象
 const axes = new THREE.AxesHelper(10); // 坐标系轴长设置为
 //  把三维坐标系 添加到场景中
 scene.add(axes);
-// 光源辅助观察
-const pointLightHelper = new THREE.PointLightHelper(pointLight, 10);
-scene.add(pointLightHelper);
-// DirectionalLightHelper：可视化平行光
-const dirLightHelper = new THREE.DirectionalLightHelper(directionalLight, 5, 0xff0000);
-scene.add(dirLightHelper);
+
 // const spotLightHelper = new THREE.SpotLightHelper(spotLight);
 // scene.add(spotLightHelper);
 
