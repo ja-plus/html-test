@@ -4,6 +4,10 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
 import { TGALoader } from 'three/examples/jsm/loaders/TGALoader';
+// import {GUI} from 'three/examples/jsm/libs/lil-gui.module.min'
+
+
+// const gui = new GUI();
 
 const cameraPosition = [100, 100, 100];
 
@@ -21,6 +25,8 @@ camera.position.set(...cameraPosition);
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight); // 通过调用 setSize() 方法设置渲染的长宽（设置渲染器为全屏）
 document.body.appendChild(renderer.domElement); // 将渲染结果展示到页面上
+// renderer.outputEncoding = THREE.sRGBEncoding;
+
 
 const geometry = new THREE.BoxGeometry(10, 10, 10); // 创建一个长宽高为10 的立方体
 const sphereGeometry = new THREE.SphereGeometry(10); // 球
@@ -60,6 +66,8 @@ camera.lookAt(cube.position);
 
 scene.add(cube, ball, cylinder);
 
+
+
 // 光源
 // 创建光源 聚光灯光源
 // const spotLight = new THREE.SpotLight(0xffffff);
@@ -73,7 +81,7 @@ scene.add(cube, ball, cylinder);
 // const pointLight = new THREE.PointLight(0xffffff);
 // pointLight.position.set(20, 20, 20);
 // scene.add(pointLight);
-// 光源辅助观察
+// // 光源辅助观察
 // const pointLightHelper = new THREE.PointLightHelper(pointLight, 10);
 // scene.add(pointLightHelper);
 
@@ -89,21 +97,31 @@ scene.add(cube, ball, cylinder);
 const ambient = new THREE.AmbientLight(0xffffff, 1);
 scene.add(ambient);
 
-const loader = new FBXLoader();
-const tgaLoader = new TGALoader();
-// tgaLoader.setPath('/Map');
-loader.load('/1111.fbx', function (loadedModel) {
-  // console.log(loadedModel);
-  loadedModel.children.forEach(child => {
-    const mesh = child.clone();
-    mesh.material = new THREE.MeshBasicMaterial();
-    tgaLoader.load(`/Map/${mesh.name}.tga`, texture => {
-      mesh.material.map = texture;
-      scene.add(mesh);
-    });
+function loadFbx() {
+  const loader = new FBXLoader();
+  const tgaLoader = new TGALoader();
+  // tgaLoader.setPath('/Map');
+  loader.load('/1111.fbx', function (loadedModel) {
+    // console.log(loadedModel);
+    Promise.all(loadedModel.children.map(child => {
+      return new Promise(resolve => {
+        const mesh = child.clone();
+        // console.log(mesh.name, mesh.material)
+        const texture = tgaLoader.load(`/Map/${mesh.name}.tga`, resolve)
+        // texture.flipY = false
+        texture.colorSpace = THREE.SRGBColorSpace;
+          mesh.material = new THREE.MeshToonMaterial({
+            map: texture
+          });
+        scene.add(mesh);
+      })
+    })).then(() => {
+      render();
+    })
   });
-  render();
-});
+}
+loadFbx();
+
 
 // 为了方便观察3D图像，添加三维坐标系对象
 const axes = new THREE.AxesHelper(10); // 坐标系轴长设置为
