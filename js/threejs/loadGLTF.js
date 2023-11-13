@@ -6,7 +6,8 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 export async function loadGLTF() {
   const loader = new GLTFLoader();
   //   loader.setDRACOLoader(dracoLoader);
-  const gltf = await loader.loadAsync('./1111.gltf');
+  // const gltf = await loader.loadAsync('./ff.glb');
+  const gltf = await loader.loadAsync('./1111.glb');
   //   const gltf = await loader.loadAsync('./CHR_ASK_002_cast.gltf');
   return gltf;
 }
