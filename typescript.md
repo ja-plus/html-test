@@ -56,6 +56,18 @@ function controlFlowAnalysisWithNever(foo: Foo) {
   }
 }
 ```
+```ts  
+// 判断enums 例子2
+enum E {
+  A,B
+}
+let a = E.A
+if(a === E.A){
+
+}else {
+  const a:E.B = a; // 如果 enum 中加了C， 则这里会提示报错
+}
+```
 ## 问题与解决方案
 ### valueof
 ```ts
