@@ -349,7 +349,6 @@ export function tableSort(sortOption, order, dataSource) {
   return targetDataSource;
 }
 
-/** @type {import('vue').Component} */
 export default defineComponent({
   name: 'StkTable',
   props: {
@@ -543,7 +542,7 @@ export default defineComponent({
         /** 当前被拖动列的下标 */
         currentColIndex: 0,
         /** 鼠标按下开始位置 */
-        startPageX: 0,
+        startX: 0,
         /** 鼠标按下时鼠标对于表格的偏移量 */
         startOffsetTableX: 0,
       },
@@ -1074,8 +1073,9 @@ export default defineComponent({
     onThResizeMouseDown(e, col, isPrev) {
       e.stopPropagation();
       e.preventDefault();
-      const { pageX } = e;
-      const { scrollLeft, offsetLeft } = this.$refs.tableContainer;
+      const { clientX } = e;
+      const { scrollLeft } = this.$refs.tableContainer;
+      const { left } = this.$refs.tableContainer.getBoundingClientRect();
       /** 列下标 */
       let colIndex = this.tableHeaderLast.findIndex(it => this.colKeyGen(it) === this.colKeyGen(col));
       if (isPrev) {
@@ -1083,14 +1083,14 @@ export default defineComponent({
         colIndex -= 1;
         col = this.tableHeaderLast[colIndex];
       }
-      const offsetTableX = pageX - offsetLeft + scrollLeft;
+      const offsetTableX = clientX - left + scrollLeft;
 
       // 记录拖动状态
       Object.assign(this.colResizeState, {
         isResizing: true,
         currentCol: col,
         currentColIndex: colIndex,
-        startPageX: pageX,
+        startPageX: clientX,
         startOffsetTableX: offsetTableX,
       });
 
@@ -1103,12 +1103,12 @@ export default defineComponent({
      * @param {MouseEvent} e
      */
     onThResizeMouseMove(e) {
-      const { isResizing, currentCol, startPageX, startOffsetTableX } = this.colResizeState;
+      const { isResizing, currentCol, startX, startOffsetTableX } = this.colResizeState;
       if (!isResizing) return;
-      const { pageX } = e;
+      const { clientX } = e;
       e.stopPropagation();
       e.preventDefault();
-      let moveX = pageX - startPageX;
+      let moveX = clientX - startX;
       // 移动量不小于最小列宽
       if (parseInt(currentCol.width) + moveX < this.colMinWidth) moveX = -parseInt(currentCol.width);
 
@@ -1119,10 +1119,10 @@ export default defineComponent({
      * @param {MouseEvent} e
      */
     onThResizeMouseUp(e) {
-      const { isResizing, startPageX, currentCol } = this.colResizeState;
+      const { isResizing, startX, currentCol } = this.colResizeState;
       if (!isResizing) return;
-      const { pageX } = e;
-      const moveX = pageX - startPageX;
+      const { clientX } = e;
+      const moveX = clientX - startX;
 
       // 移动量不小于最小列宽
       let width = parseInt(currentCol.width) + moveX;
@@ -1140,7 +1140,7 @@ export default defineComponent({
         isResizing: false,
         currentCol: null,
         currentColIndex: 0,
-        startPageX: 0,
+        startX: 0,
         scrollLeft: 0,
       };
     },
