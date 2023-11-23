@@ -84,6 +84,16 @@
       border-radius: calc(var(--icon-size) / 4);
       background-color: #000;
     }
+    .water-mark{
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
+      font-family: cursive;
+      opacity: 0.1;
+      color: #ddd;
+      pointer-events: none;
+      font-size: 30px;
+    }
   </style>
 </head>
 
@@ -93,10 +103,11 @@
     <button id="btnPause" class="operate-btn btn-pause" title="暂停录制"></button>
     <button id="btnEnd" class="operate-btn btn-end" title="结束录制"></button>
   </div>
+  <div class="water-mark">Author: japlus</div>
 </body>
 <script>
   /**
-   * @author JA+
+   * @author japlus
    */
   const btnStart = document.querySelector('#btnStart');
   const btnPause = document.querySelector('#btnPause');

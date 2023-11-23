@@ -19,6 +19,12 @@
     }
   }
   ```
+  eg:2
+  ```ts
+  function fn(type: '1'|'2'|'3'): type is '1'|'2' {
+    return (['1','2'] as (typeof type)[]).includes(type)
+  }
+  ```
   
 * 将数组自动推断为元素tuple:
   ```typescript 

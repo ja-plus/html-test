@@ -107,6 +107,7 @@
           </th>
           <!-- 这个th用于横向虚拟滚动表格右边距 width、maxWidth 用于兼容低版本浏览器-->
           <th
+            v-if="virtualX_on"
             style="padding: 0"
             :style="{
               minWidth: virtualX_offsetRight + 'px',
@@ -188,6 +189,7 @@
  * [] highlight-row 颜色不能恢复到active的颜色
  */
 import { interpolateRgb } from 'd3-interpolate';
+import { defineComponent } from 'vue';
 
 /**
  * @typedef {import('./StkTable').StkTableColumn<any>} StkTableColumn
@@ -348,7 +350,7 @@ export function tableSort(sortOption, order, dataSource) {
 }
 
 /** @type {import('vue').Component} */
-export default {
+export default defineComponent({
   name: 'StkTable',
   props: {
     width: {
@@ -1315,7 +1317,7 @@ export default {
     },
     //#endregion  ---ref function
   },
-};
+});
 </script>
 
 <style lang="less" scoped>
