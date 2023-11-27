@@ -14,6 +14,14 @@
         display:inline-block;
     }
     .calendar .header {
+      display:flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .calendar .day-content {
+      padding : 10px;
+    }
+    .calendar .header .week-bar{
         display: grid;
         padding: 10px;
         grid-template-columns: repeat(7, 40px);
@@ -43,7 +51,7 @@
 <body>
     <input name="year" type="number" onchange="yearChange(this)">
     <input name="month" type="number" max="12" min="1" onchange="monthChange(this)">
-    <div id="calendar" class="calendar"></div>
+    <div id="calendar"></div>
     
 </body>
 <script>
@@ -51,41 +59,54 @@
       weekI18n = {
         en: ['Sun', 'Mon', 'Tue', 'Wen', 'Thu', 'Fir', 'Sat'],
       };
+      year = 2023;
+      month = 10;
+      day = 1;
+      calendarHeaderEl = this.myh('div', { class: 'header' });
+      headerWeekBarEl = this.myh('div', { class: 'week-bar' });
+      headerDayEl = this.myh('div', { class: 'day-container' });
+      yearEl = this.myh('div', { class: 'calendar-year' });
+      monthEl = this.myh('div', { class: 'calendar-month' });
+      dayEl = this.myh('div', { class: 'calendar-day' });
+      calendarBodyEl = this.myh('div', { class: 'body' });
+    
       constructor() {
-        this.calendarHeader = this.myh('div', { class: 'header' });
-        this.calendarBody = this.myh('div', { class: 'body' });
-        this.month = 7;
-        this.year = 2021;
+        const headerWeekNames = this.weekI18n.en; // TODO: i18n
+        headerWeekNames.forEach(name => {
+          const item = this.myh('div', { class: 'week' }, name);
+          this.headerWeekBarEl.append(item);
+        });
+        this.calendarHeaderEl.appendChild(this.headerDayEl);
+        this.calendarHeaderEl.appendChild(this.headerWeekBarEl);
       }
       /* main*/
       init(htmlElement) {
         this.calendar = htmlElement;
-        // header
-        let headerWeekNames = this.weekI18n.en; // TODO: i18n
-        headerWeekNames.forEach((name) => {
-          let item = this.myh('div', { class: 'week' }, name);
-          this.calendarHeader.append(item);
-        });
-        this.calendar.append(this.calendarHeader, this.calendarBody);
-    
-        // body
-        let daysArr = this.showMonthDays();
-        this.drawCalendarBody(daysArr);
+        this.calendar.append(this.calendarHeaderEl, this.calendarBodyEl);
+
+        this.updateCalendar();
+      }
+      setDay(year, month, day) {
+        this.year = year;
+        this.month = month;
+        this.day = day;
+        this.yearEl.textContent = year + '-';
+        this.monthEl.textContent = month + '-';
+        this.dayEl.textContent = day;
       }
       /* 获取日期数组*/
       showMonthDays(year, month) {
         let daysArr = [];
         let date = new Date();
+        this.setDay(date.getFullYear(), date.getMonth(), date.getDate());
         if (year) {
           this.year = year;
-          date.setFullYear(this.year);
         }
         if (month) {
           this.month = month;
-          date.setMonth(this.month);
-        } else {
-          date.setMonth(this.month);
         }
+        date.setFullYear(this.year);
+        date.setMonth(this.month);
         // lastMonth
         date.setDate(1);
         let week = date.getDay(); // 获取当月第一天的星期
@@ -122,19 +143,19 @@
       /* 绘制日历元素*/
       drawCalendarBody(daysArr) {
         let fgmt = document.createDocumentFragment();
-        daysArr.forEach((item) => {
+        daysArr.forEach(item => {
           let div = this.myh('div', { class: 'cube' });
           if (item.class) div.classList.add(item.class);
           div.textContent = item.day;
           fgmt.append(div);
         });
-        this.calendarBody.append(fgmt);
+        this.calendarBodyEl.append(fgmt);
       }
     
       updateCalendar(year, month) {
         // remove body all child node
-        while (this.calendarBody.hasChildNodes()) {
-          this.calendarBody.removeChild(this.calendarBody.firstChild);
+        while (this.calendarBodyEl.hasChildNodes()) {
+          this.calendarBodyEl.removeChild(this.calendarBodyEl.firstChild);
         }
     
         let dayArr = this.showMonthDays(year, month);

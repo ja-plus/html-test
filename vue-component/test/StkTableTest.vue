@@ -23,11 +23,11 @@ div(style="display:flex;")
     button(@click="props.headless = !props.headless") headless:{{props.headless}}
     button(@click="props.colResizable = !props.colResizable") colResizable:{{props.colResizable}}
 div(style="margin-left:10px")
-  div virtualScroll: {{$refs.stkTable&& $refs.stkTable.virtualScroll}}
-  div virtual_pageSize: {{$refs.stkTable&& $refs.stkTable.virtual_pageSize}}
-  div virtualScrollX: {{$refs.stkTable&& $refs.stkTable.virtualScrollX}}
-  div virtualX_offsetRight: {{$refs.stkTable&& $refs.stkTable.virtualX_offsetRight}}
-  div virtualX_start/end:{{$refs.stkTable && $refs.stkTable.virtualScrollX.startIndex}}/{{$refs.stkTable && $refs.stkTable.virtualScrollX.endIndex}}
+  //- div virtualScroll: {{$refs.stkTable&& $refs.stkTable.virtualScroll}}
+  //- div virtual_pageSize: {{$refs.stkTable&& $refs.stkTable.virtual_pageSize}}
+  //- div virtualScrollX: {{$refs.stkTable&& $refs.stkTable.virtualScrollX}}
+  //- div virtualX_offsetRight: {{$refs.stkTable&& $refs.stkTable.virtualX_offsetRight}}
+  //- div virtualX_start/end:{{$refs.stkTable && $refs.stkTable.virtualScrollX.startIndex}}/{{$refs.stkTable && $refs.stkTable.virtualScrollX.endIndex}}
 
 div(:style="{width: tableWidth}" style="padding:10px;")
   StkTable(
@@ -81,7 +81,7 @@ div(style="width:max-content")
 
 <script lang='jsx'>
 import { h } from 'vue';
-import StkTable from '../src/StkTable.vue';
+import StkTable from '../src/StkTable/index.vue';
 // import { StkTable } from 'vite-vue-components';
 import StkTableC from '../src/StkTableC/index.vue'; // 兼容版本 fixedLeft
 import StkTableInsertSort from './StkTableInsertSort.vue'; // 插入排序
@@ -185,13 +185,13 @@ export default {
       addIndex: 0,
       dataSource: [],
       dataSource2: [],
-      docTableColumns: [
+      docTableColumns: Object.freeze([
         { title: '字段', dataIndex: 'key' },
         { title: '描述', dataIndex: 'desc' },
         { title: '取值', dataIndex: 'value' },
         { title: '默认', dataIndex: 'defaultValue' },
-      ],
-      docTableData: [
+      ]),
+      docTableData: Object.freeze([
         { key: 'tableProps', desc: '', value: '' },
         { key: 'rowKey', desc: '一行的唯一键', value: 'string | (row) => string' },
         { key: 'colKey', desc: '一列的唯一键', value: 'string | (col) => string', defaultValue: 'dataIndex' },
@@ -269,7 +269,7 @@ export default {
           desc: '表头拖动改变列顺序时',
           value: '(sourceDataIndex:string,targetDataIndex:string):void',
         },
-      ],
+      ]),
     };
   },
   computed: {},

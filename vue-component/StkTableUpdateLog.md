@@ -1,3 +1,6 @@
+## 1.5.0
+* 转换 CompositionApi
+* webpack -> vite
 ## 1.4.0
 * 实现 fixed: 'right'.存在fixed: 'left' 列，覆盖fixed: 'right'列的问题。
 ## 1.3.1
