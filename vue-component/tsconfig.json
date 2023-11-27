@@ -6,6 +6,7 @@
         "jsx": "preserve",
         "allowJs": true,
         "sourceMap": true,
+        "checkJs": true,
         "baseUrl": ".",
         "moduleResolution": "node",
         "lib": [
@@ -26,6 +27,7 @@
         ]
     },
     "include": [
+        "./src/**/*.js",
         "./src/**/*.ts"
     ],
     "exclude": [
