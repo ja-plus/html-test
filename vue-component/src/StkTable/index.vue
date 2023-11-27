@@ -187,7 +187,7 @@
  * [] highlight-row 颜色不能恢复到active的颜色
  */
 import { interpolateRgb } from 'd3-interpolate';
-import { defineComponent, ref, shallowRef } from 'vue';
+import { shallowRef } from 'vue';
 
 /**
  * @typedef {import('./StkTable').StkTableColumn<any>} StkTableColumn
@@ -348,7 +348,7 @@ export function tableSort(sortOption, order, dataSource) {
 }
 </script>
 <script setup>
-import { computed, getCurrentInstance, onBeforeUnmount, onMounted, reactive, ref, toRaw, watch } from 'vue';
+import { computed, getCurrentInstance, onBeforeUnmount, onMounted, ref, toRaw, watch } from 'vue';
 
 const { proxy: $vm } = getCurrentInstance();
 
@@ -684,22 +684,6 @@ dealColumns();
 
 onMounted(() => {
   initVirtualScroll();
-  // 通过wheel 模拟scroll事件，passive:false 使合成器线程等待主线程
-  // tableContainer.value.addEventListener(
-  //   'wheel',
-  //   e => {
-  //     e.preventDefault();
-  //     const event = {
-  //       target: {
-  //         scrollTop: tableContainer.value.scrollTop + (e.deltaY > 0 ? 60 : -60),
-  //         scrollLeft: 0,
-  //       },
-  //     };
-  //     onTableScroll(event);
-  //     tableContainer.value.scrollTop = event.target.scrollTop < 0 ? 0 : event.target.scrollTop;
-  //   },
-  //   { passive: false },
-  // );
   initColResizeEvent();
 });
 
@@ -714,6 +698,7 @@ function initVirtualScroll(height) {
   initVirtualScrollY(height);
   initVirtualScrollX();
 }
+
 /**
  * 初始化Y虚拟滚动参数
  * @param {number} [height] 虚拟滚动的高度
@@ -743,6 +728,7 @@ function initVirtualScrollX() {
     updateVirtualScrollX(scrollLeft);
   }
 }
+
 /** 通过滚动条位置，计算虚拟滚动的参数 */
 function updateVirtualScrollY(sTop = 0) {
   const { rowHeight } = virtualScroll.value;
@@ -752,6 +738,7 @@ function updateVirtualScrollY(sTop = 0) {
     offsetTop: startIndex * rowHeight, // startIndex之前的高度
   });
 }
+
 /** 通过横向滚动条位置，计算横向虚拟滚动的参数 */
 function updateVirtualScrollX(sLeft = 0) {
   if (!tableHeaderLast.value?.length) return;
@@ -787,6 +774,7 @@ function updateVirtualScrollX(sLeft = 0) {
   }
   Object.assign(virtualScrollX.value, { startIndex, endIndex, offsetLeft });
 }
+
 /**
  * 固定列的style
  * @param {1|2} tagType 1-th 2-td
@@ -842,6 +830,7 @@ function getFixedStyle(tagType, col) {
 
   return style;
 }
+
 /**
  * 处理多级表头
  * FIXME: 仅支持到两级表头。不支持多级。
@@ -878,6 +867,7 @@ function dealColumns() {
   tableHeaders.value = tmpHeaderRows;
   tableHeaderLast.value = tmpHeaderLast;
 }
+
 /**
  * 行唯一值生成
  */
@@ -889,6 +879,7 @@ function rowKeyGen(row) {
   }
   return key;
 }
+
 /**
  * 列唯一键
  * @param {StkTableColumn} col
@@ -896,6 +887,7 @@ function rowKeyGen(row) {
 function colKeyGen(col) {
   return typeof props.colKey === 'function' ? props.colKey(col) : col[props.colKey];
 }
+
 /**
  * 性能优化，缓存style行内样式
  *
@@ -921,6 +913,7 @@ function getCellStyle(tagType, col) {
 
   return style;
 }
+
 /**
  * 表头点击排序
  * @param {boolean} options.force sort-remote 开启后是否强制排序
@@ -959,22 +952,27 @@ function onRowClick(e, row) {
 function onRowDblclick(e, row) {
   emit('row-dblclick', e, row);
 }
+
 /** 表头行右键 */
 function onHeaderMenu(e) {
   emit('header-row-menu', e);
 }
+
 /** 表体行右键 */
 function onRowMenu(e, row) {
   emit('row-menu', e, row);
 }
+
 /** 单元格单击 */
 function onCellClick(e, row, col) {
   emit('cell-click', e, row, col);
 }
+
 /** 表头单元格单击 */
 function onHeaderCellClick(e, col) {
   emit('header-cell-click', e, col);
 }
+
 /**
  * 鼠标滚轮事件监听
  * @param {MouseEvent} e
@@ -987,6 +985,7 @@ function onTableWheel(e) {
     return;
   }
 }
+
 /**
  * 滚动条监听
  * @param {MouseEvent} e
@@ -1010,12 +1009,14 @@ function onTableScroll(e) {
   emit('scroll', e);
   // /* Warn: Unknown source: showFixedLeftShadow */ $vm.showFixedLeftShadow = e.target.scrollLeft > 0;
 }
+
 /** tr hover事件 */
 function onTrMouseOver(e, item) {
   if (props.showTrHoverClass) {
     currentHover.value = rowKeyGen(item);
   }
 }
+
 /** th拖动释放时 */
 function onThDrop(e) {
   let th = e.target;
@@ -1030,6 +1031,7 @@ function onThDrop(e) {
   }
   emit('th-drop', th.dataset.colKey);
 }
+
 /** 开始拖动记录th位置 */
 function onThDragStart(e) {
   // const i = Array.prototype.indexOf.call(e.target.parentNode.children, e.target); // 得到是第几个子元素
@@ -1040,11 +1042,13 @@ function onThDragStart(e) {
 function onThDragOver(e) {
   e.preventDefault();
 }
+
 /** 初始化列宽拖动事件 */
 function initColResizeEvent() {
   window.addEventListener('mousemove', onThResizeMouseMove);
   window.addEventListener('mouseup', onThResizeMouseUp);
 }
+
 /** 清除列宽拖动事件 */
 function clearColResizeEvent() {
   window.removeEventListener('mousemove', onThResizeMouseMove);
@@ -1078,7 +1082,7 @@ function onThResizeMouseDown(e, col, isPrev) {
   Object.assign(colResizeState, {
     currentCol: col,
     currentColIndex: colIndex,
-    startPageX: clientX,
+    startX: clientX,
     startOffsetTableX: offsetTableX,
   });
 
@@ -1093,10 +1097,10 @@ function onThResizeMouseDown(e, col, isPrev) {
  */
 function onThResizeMouseMove(e) {
   if (!isColResizing.value) return;
-  const { currentCol, startX, startOffsetTableX } = colResizeState;
-  const { clientX } = e;
   e.stopPropagation();
   e.preventDefault();
+  const { currentCol, startX, startOffsetTableX } = colResizeState;
+  const { clientX } = e;
   let moveX = clientX - startX;
   // 移动量不小于最小列宽
   if (parseInt(currentCol.width) + moveX < props.colMinWidth) moveX = -parseInt(currentCol.width);
@@ -1185,6 +1189,7 @@ function calcHighlightLoop() {
   };
   recursion();
 }
+
 /**
  * 选中一行，
  * @param {string} rowKey
@@ -1197,6 +1202,7 @@ function setCurrentRow(rowKey, option = { silent: false }) {
     emit('current-change', null, currentItem.value);
   }
 }
+
 /** 高亮一个单元格 */
 function setHighlightDimCell(rowKeyValue, dataIndex) {
   // TODO: 支持动态计算高亮颜色。不易实现。需记录每一个单元格的颜色情况。
@@ -1216,6 +1222,7 @@ function setHighlightDimCell(rowKeyValue, dataIndex) {
     }, _highlightDuration),
   );
 }
+
 /**
  * 高亮一行
  * @param {Array<string|number>} rowKeyValues
@@ -1266,6 +1273,7 @@ function setHighlightDimRow(rowKeyValues) {
     rowElTemp.forEach(el => el.classList.add('highlight-row')); // 统一添加动画
   }
 }
+
 /**
  * 设置表头排序状态
  * @param {string} dataIndex 列字段
@@ -1286,17 +1294,20 @@ function setSorter(dataIndex, order, option = {}) {
   }
   return dataSourceCopy.value;
 }
+
 /** 重置排序 */
 function resetSorter() {
   sortCol.value = null;
   sortOrderIndex.value = 0;
   dataSourceCopy.value = [...props.dataSource];
 }
+
 /** 滚动 */
 function scrollTo(top = 0, left = 0) {
   if (top !== null) tableContainer.value.scrollTop = top;
   if (left !== null) tableContainer.value.scrollLeft = left;
 }
+
 /** 获取当前状态的表格数据 */
 function getTableData() {
   return toRaw(dataSourceCopy.value);
@@ -1496,21 +1507,25 @@ defineExpose({
               margin-left: 4px;
               width: 16px;
               height: 16px;
+
               // display:none;
               #arrow-up,
               #arrow-down {
                 fill: var(--sort-arrow-color);
               }
             }
+
             .table-header-resizer {
               position: absolute;
               top: 0;
               cursor: col-resize;
               width: var(--resize-handle-width);
               height: var(--row-height);
+
               &.left {
                 left: 0;
               }
+
               &.right {
                 right: 0;
               }
