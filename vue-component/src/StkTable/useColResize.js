@@ -118,6 +118,7 @@ export function useColResize({ tableContainer, tableHeaderLast, colResizeIndicat
   }
 
   return {
+    isColResizing,
     onThResizeMouseDown,
     onThResizeMouseMove,
     onThResizeMouseUp,

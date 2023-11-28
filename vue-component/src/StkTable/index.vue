@@ -176,7 +176,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 /**
  * @version 1.3.0
  * @author JA+
@@ -195,7 +195,10 @@ import { shallowRef } from 'vue';
 
 let _chromeVersion = 0;
 try {
-  _chromeVersion = +navigator.userAgent.match(/chrome\/\d+/i)[0].split('/')[1];
+  const userAgent = navigator.userAgent.match(/chrome\/\d+/i);
+  if (userAgent) {
+    _chromeVersion = +userAgent[0].split('/')[1];
+  }
 } catch (e) {
   console.error('获取浏览器版本出错！', e);
 }
@@ -271,7 +274,7 @@ export function insertToOrderedArray(sortState, newItem, targetArray) {
  * @param {'number'|'string'} [type] 类型
  * @return {-1|0|1}
  */
-function strCompare(a, b, type) {
+function strCompare(a: string, b: string, type: 'number' | 'string') {
   // if (typeof a === 'number' && typeof b === 'number') type = 'number';
   if (type === 'number') {
     if (+a > +b) return 1;
@@ -347,9 +350,11 @@ export function tableSort(sortOption, order, dataSource) {
   return targetDataSource;
 }
 </script>
-<script setup>
+<script setup lang="ts">
 import { computed, getCurrentInstance, onMounted, ref, toRaw, watch } from 'vue';
 import { useColResize } from './useColResize';
+import { useThDrag } from './useThDrag';
+import { useVirtualScroll } from './useVirtualScroll';
 
 const { proxy: $vm } = getCurrentInstance();
 
@@ -519,25 +524,6 @@ let highlightDimCellsTimeout = new Map();
 /** 是否正在计算高亮行的循环*/
 let calcHighlightDimLoop = false;
 
-const virtualScroll = ref({
-  containerHeight: 0,
-  startIndex: 0, // 数组开始位置
-  rowHeight: 28,
-  offsetTop: 0, // 表格定位上边距
-  scrollTop: 0, // 纵向滚动条位置，用于判断是横向滚动还是纵向
-});
-
-const virtualScrollX = ref({
-  containerWidth: 0,
-  startIndex: 0,
-  endIndex: 0,
-  offsetLeft: 0,
-  scrollLeft: 0, // 横向滚动位置，用于判断是横向滚动还是纵向
-});
-
-const thDrag = {
-  dragStartKey: null,
-};
 /** rowKey缓存 */
 const rowKeyGenStore = new WeakMap();
 
@@ -547,72 +533,6 @@ const tableWidth = computed(() => {
 
 const highlightInter = computed(() => {
   return interpolateRgb(_highlightColor[props.theme].from, _highlightColor[props.theme].to);
-});
-
-const virtual_on = computed(() => {
-  return props.virtual && dataSourceCopy.value.length > virtual_pageSize.value * 2;
-});
-
-const virtual_pageSize = computed(() => {
-  // 这里最终+1，因为headless=true无头时，需要上下各预渲染一行。
-  return Math.ceil(virtualScroll.value.containerHeight / virtualScroll.value.rowHeight) + 1;
-});
-
-const virtual_dataSourcePart = computed(() => {
-  if (!virtual_on.value) return dataSourceCopy.value;
-  return dataSourceCopy.value.slice(
-    virtualScroll.value.startIndex,
-    virtualScroll.value.startIndex + virtual_pageSize.value,
-  );
-});
-
-const virtual_offsetBottom = computed(() => {
-  if (!virtual_on.value) return 0;
-  return (
-    (dataSourceCopy.value.length - virtualScroll.value.startIndex - virtual_dataSourcePart.value.length) *
-    virtualScroll.value.rowHeight
-  );
-});
-
-const virtualX_on = computed(() => {
-  return (
-    props.virtualX &&
-    tableHeaderLast.value.reduce((sum, col) => (sum += parseInt(col.minWidth || col.width)), 0) >
-      virtualScrollX.value.containerWidth * 1.5
-  );
-});
-
-const virtualX_columnPart = computed(() => {
-  if (virtualX_on.value) {
-    // 虚拟横向滚动，固定列要一直保持存在
-    const leftCols = [];
-    const rightCols = [];
-    // 左侧固定列，如果在左边不可见区。则需要拿出来放在前面
-    for (let i = 0; i < virtualScrollX.value.startIndex; i++) {
-      const col = tableHeaderLast.value[i];
-      if (col.fixed === 'left') leftCols.push(col);
-    }
-    // 右侧固定列，如果在右边不可见区。则需要拿出来放在后面
-    for (let i = virtualScrollX.value.endIndex; i < tableHeaderLast.value.length; i++) {
-      const col = tableHeaderLast.value[i];
-      if (col.fixed === 'right') rightCols.push(col);
-    }
-
-    const mainColumns = tableHeaderLast.value.slice(virtualScrollX.value.startIndex, virtualScrollX.value.endIndex);
-
-    return leftCols.concat(mainColumns).concat(rightCols);
-  }
-  return tableHeaderLast.value;
-});
-
-const virtualX_offsetRight = computed(() => {
-  if (!virtualX_on.value) return 0;
-  let width = 0;
-  for (let i = virtualScrollX.value.endIndex; i < tableHeaderLast.value.length; i++) {
-    const col = tableHeaderLast.value[i];
-    width += parseInt(col.width || col.maxWidth || col.minWidth);
-  }
-  return width;
 });
 
 const fixedColumnsPositionStore = computed(() => {
@@ -645,6 +565,35 @@ watch(
     initVirtualScrollX();
   },
 );
+
+dealColumns();
+
+const { onThResizeMouseDown } = useColResize({
+  colKeyGen,
+  colResizeIndicator,
+  emit,
+  props,
+  tableContainer,
+  tableHeaderLast,
+});
+
+const { isColResizing, onThDragStart, onThDragOver, onThDrop } = useThDrag({ emit });
+
+const {
+  virtualScroll,
+  virtualScrollX,
+  virtual_on,
+  virtual_dataSourcePart,
+  virtual_offsetBottom,
+  virtualX_on,
+  virtualX_columnPart,
+  virtualX_offsetRight,
+  initVirtualScrollY,
+  initVirtualScrollX,
+  updateVirtualScrollY,
+  updateVirtualScrollX,
+} = useVirtualScroll({ tableContainer, props, dataSourceCopy, tableHeaderLast });
+
 watch(
   () => props.dataSource,
   val => {
@@ -667,18 +616,6 @@ watch(
     deep: false,
   },
 );
-
-dealColumns();
-
-const { onThResizeMouseDown } = useColResize({
-  colKeyGen,
-  colResizeIndicator,
-  emit,
-  props,
-  tableContainer,
-  tableHeaderLast,
-});
-
 onMounted(() => {
   initVirtualScroll();
 });
@@ -687,85 +624,9 @@ onMounted(() => {
  * 初始化虚拟滚动参数
  * @param {number} [height] 虚拟滚动的高度
  */
-function initVirtualScroll(height) {
+function initVirtualScroll(height?: number) {
   initVirtualScrollY(height);
   initVirtualScrollX();
-}
-
-/**
- * 初始化Y虚拟滚动参数
- * @param {number} [height] 虚拟滚动的高度
- */
-function initVirtualScrollY(height) {
-  if (virtual_on.value) {
-    virtualScroll.value.containerHeight = typeof height === 'number' ? height : tableContainer.value?.offsetHeight;
-    updateVirtualScrollY(tableContainer.value?.scrollTop);
-    // const { offsetTop, containerHeight, rowHeight } = virtualScroll.value;
-    // const tableAllHeight = dataSourceCopy.value.length * rowHeight;
-    // const overflowHeight = tableAllHeight - containerHeight;
-    // if (overflowHeight < offsetTop && overflowHeight > 0) {
-    //   virtualScroll.value.offsetTop = overflowHeight;
-    //   virtualScroll.value.startIndex = Math.ceil(overflowHeight / rowHeight);
-    // } else if (overflowHeight <= 0) {
-    //   virtualScroll.value.offsetTop = 0;
-    //   virtualScroll.value.startIndex = 0;
-    // }
-  }
-}
-
-function initVirtualScrollX() {
-  if (props.virtualX) {
-    const { offsetWidth, scrollLeft } = tableContainer.value || {};
-    // scrollTo(null, 0);
-    virtualScrollX.value.containerWidth = offsetWidth;
-    updateVirtualScrollX(scrollLeft);
-  }
-}
-
-/** 通过滚动条位置，计算虚拟滚动的参数 */
-function updateVirtualScrollY(sTop = 0) {
-  const { rowHeight } = virtualScroll.value;
-  const startIndex = Math.floor(sTop / rowHeight);
-  Object.assign(virtualScroll.value, {
-    startIndex,
-    offsetTop: startIndex * rowHeight, // startIndex之前的高度
-  });
-}
-
-/** 通过横向滚动条位置，计算横向虚拟滚动的参数 */
-function updateVirtualScrollX(sLeft = 0) {
-  if (!tableHeaderLast.value?.length) return;
-  let startIndex = 0;
-  let offsetLeft = 0;
-
-  let colWidthSum = 0;
-  for (let colIndex = 0; colIndex < tableHeaderLast.value.length; colIndex++) {
-    startIndex++;
-    const col = tableHeaderLast.value[colIndex];
-    // fixed left 不进入计算列宽
-    if (col.fixed === 'left') continue;
-    const colWidth = parseInt(col.width || col.maxWidth || col.minWidth);
-    colWidthSum += colWidth;
-    // 列宽（非固定列）加到超过scrollLeft的时候，表示startIndex从上一个开始下标
-    if (colWidthSum >= sLeft) {
-      offsetLeft = colWidthSum - colWidth;
-      startIndex--;
-      break;
-    }
-  }
-  // -----
-  colWidthSum = 0;
-  let endIndex = tableHeaderLast.value.length;
-  for (let colIndex = startIndex; colIndex < tableHeaderLast.value.length - 1; colIndex++) {
-    const col = tableHeaderLast.value[colIndex];
-    colWidthSum += parseInt(col.width || col.maxWidth || col.minWidth);
-    // 列宽大于容器宽度则停止
-    if (colWidthSum >= virtualScrollX.value.containerWidth) {
-      endIndex = colIndex + 2; // TODO:预渲染的列数
-      break;
-    }
-  }
-  Object.assign(virtualScrollX.value, { startIndex, endIndex, offsetLeft });
 }
 
 /**
@@ -1008,32 +869,6 @@ function onTrMouseOver(e, item) {
   if (props.showTrHoverClass) {
     currentHover.value = rowKeyGen(item);
   }
-}
-
-/** th拖动释放时 */
-function onThDrop(e) {
-  let th = e.target;
-  // 找到th元素
-  while (th) {
-    if (th.tagName === 'TH') break;
-    th = th.parentNode;
-  }
-  // const i = Array.prototype.indexOf.call(th.parentNode.children, th); // 得到是第几个子元素
-  if (thDrag.dragStartKey !== th.dataset.colKey) {
-    emit('col-order-change', thDrag.dragStartKey, th.dataset.colKey);
-  }
-  emit('th-drop', th.dataset.colKey);
-}
-
-/** 开始拖动记录th位置 */
-function onThDragStart(e) {
-  // const i = Array.prototype.indexOf.call(e.target.parentNode.children, e.target); // 得到是第几个子元素
-  thDrag.dragStartKey = e.target.dataset.colKey;
-  emit('th-drag-start', thDrag.dragStartKey);
-}
-
-function onThDragOver(e) {
-  e.preventDefault();
 }
 
 /**
