@@ -214,268 +214,39 @@ const _highlightColor = {
 const _highlightDuration = 2000;
 /** 高亮变更频率 */
 const _highlightColorChangeFreq = 100;
-
-function _howDeepTheColumn(arr, level = 1) {
-  const levels = [level];
-  arr.forEach(item => {
-    if (item.children?.length) {
-      levels.push(_howDeepTheColumn(item.children, level + 1));
-    }
-  });
-  return Math.max(...levels);
-}
-/**
- * 对有序数组插入新数据
- * @param {object} sortState
- * @param {string} sortState.dataIndex 排序的列
- * @param {null|'asc'|'desc'} sortState.order 排序顺序
- * @param {'number'|'string'} [sortState.sortType] 排序方式
- * @param {object} newItem 要插入的数据
- * @param {Array} targetArray 表格数据
- */
-export function insertToOrderedArray(sortState, newItem, targetArray) {
-  let { dataIndex, order, sortType } = sortState;
-  if (!sortType) sortType = typeof newItem[dataIndex];
-  const data = [...targetArray];
-  if (!order) {
-    data.unshift(newItem);
-    return data;
-  }
-  // 二分插入
-  let sIndex = 0;
-  let eIndex = data.length - 1;
-  const targetVal = newItem[dataIndex];
-  while (sIndex <= eIndex) {
-    // console.log(sIndex, eIndex);
-    const midIndex = Math.floor((sIndex + eIndex) / 2);
-    const midVal = data[midIndex][dataIndex];
-    const compareRes = strCompare(midVal, targetVal, sortType);
-    if (compareRes === 0) {
-      //midVal == targetVal
-      sIndex = midIndex;
-      break;
-    } else if (compareRes === -1) {
-      // midVal < targetVal
-      if (order === 'asc') sIndex = midIndex + 1;
-      else eIndex = midIndex - 1;
-    } else {
-      //midVal > targetVal
-      if (order === 'asc') eIndex = midIndex - 1;
-      else sIndex = midIndex + 1;
-    }
-  }
-  data.splice(sIndex, 0, newItem);
-  return data;
-}
-/**
- * 字符串比较
- * @param {string} a
- * @param {string} b
- * @param {'number'|'string'} [type] 类型
- * @return {-1|0|1}
- */
-function strCompare(a: string, b: string, type: 'number' | 'string') {
-  // if (typeof a === 'number' && typeof b === 'number') type = 'number';
-  if (type === 'number') {
-    if (+a > +b) return 1;
-    if (+a === +b) return 0;
-    if (+a < +b) return -1;
-  } else {
-    return String(a).localeCompare(b);
-  }
-}
-
-/**
- * @typedef SortOption
- * @prop {function|boolean} sorter
- * @prop {string} dataIndex
- * @prop {string} sortField
- * @prop {'number'|'string'} sortType
- */
-/**
- * 表格排序抽离
- * 可以在组件外部自己实现表格排序，组件配置remote，使表格不排序。
- * 使用者在@sort-change事件中自行更改table props 'dataSource'完成排序。
- * TODO: key 唯一值，排序字段相同时，根据唯一值排序。
- * @param {SortOption} sortOption 列配置
- * @param {string|null} order 排序方式
- * @param {any} dataSource 排序的数组
- */
-export function tableSort(sortOption, order, dataSource) {
-  let targetDataSource = [...dataSource];
-  if (typeof sortOption.sorter === 'function') {
-    const customSorterData = sortOption.sorter(targetDataSource, { order, column: sortOption });
-    if (customSorterData) targetDataSource = customSorterData;
-  } else if (order) {
-    const sortField = sortOption.sortField || sortOption.dataIndex;
-    let { sortType } = sortOption;
-    if (!sortType) sortType = typeof dataSource[0][sortField];
-
-    if (sortType === 'number') {
-      // 按数字类型排序
-      const nanArr = []; // 非数字
-      const numArr = []; // 数字
-
-      for (let i = 0; i < targetDataSource.length; i++) {
-        const row = targetDataSource[i];
-        if (
-          row[sortField] === null ||
-          row[sortField] === '' ||
-          typeof row[sortField] === 'boolean' ||
-          Number.isNaN(+row[sortField])
-        ) {
-          nanArr.push(row);
-        } else {
-          numArr.push(row);
-        }
-      }
-      // 非数字当作最小值处理
-      if (order === 'asc') {
-        numArr.sort((a, b) => +a[sortField] - +b[sortField]);
-        targetDataSource = [...nanArr, ...numArr];
-      } else {
-        numArr.sort((a, b) => +b[sortField] - +a[sortField]);
-        targetDataSource = [...numArr, ...nanArr];
-      }
-      // targetDataSource = [...numArr, ...nanArr]; // 非数字不进入排序，一直排在最后
-    } else {
-      // 按string 排序
-      if (order === 'asc') {
-        targetDataSource.sort((a, b) => String(a[sortField]).localeCompare(b[sortField]));
-      } else {
-        targetDataSource.sort((a, b) => String(a[sortField]).localeCompare(b[sortField]) * -1);
-      }
-    }
-  }
-  return targetDataSource;
-}
 </script>
 <script setup lang="ts">
 import { computed, getCurrentInstance, onMounted, ref, toRaw, watch } from 'vue';
 import { useColResize } from './useColResize';
 import { useThDrag } from './useThDrag';
 import { useVirtualScroll } from './useVirtualScroll';
-
+import { howDeepTheColumn, insertToOrderedArray, tableSort } from './utils';
+import { StkProps } from './types/index';
 const { proxy: $vm } = getCurrentInstance();
 
-const props = defineProps({
-  width: {
-    type: String,
-    default: '',
-  },
-  /** 最小表格宽度 */
-  minWidth: {
-    type: String,
-    default: 'min-content',
-  },
-  /** 表格最大宽度*/
-  maxWidth: {
-    type: String,
-    default: '',
-  },
-  /** 是否隐藏表头 */
-  headless: {
-    type: Boolean,
-    default: false,
-  },
-  /** 主题，亮、暗 */
-  theme: {
-    type: String,
-    default: 'light',
-    validator: v => ['dark', 'light'].includes(v),
-  },
-  /** 虚拟滚动 */
-  virtual: {
-    type: Boolean,
-    default: false,
-  },
-  /** x轴虚拟滚动 */
-  virtualX: {
-    type: Boolean,
-    default: false,
-  },
-  /** 表格列配置 */
-  columns: {
-    type: Array,
-    default: () => [],
-  },
-  /** 表格数据源 */
-  dataSource: {
-    type: Array,
-    default: () => [],
-  },
-  /** 行唯一键 */
-  rowKey: {
-    type: [String, Function],
-    default: '',
-  },
-  /** 列唯一键 */
-  colKey: {
-    type: [String, Function],
-    default: 'dataIndex',
-  },
-  /** 空值展示文字 */
-  emptyCellText: {
-    type: String,
-    default: '--',
-  },
-  /** 暂无数据兜底高度是否撑满 */
-  noDataFull: {
-    type: Boolean,
-    default: false,
-  },
-  /** 是否展示暂无数据 */
-  showNoData: {
-    type: Boolean,
-    default: true,
-  },
-  /** 是否服务端排序，true则不排序数据 */
-  sortRemote: {
-    type: Boolean,
-    default: false,
-  },
-  /** 表头是否溢出展示... */
-  showHeaderOverflow: {
-    type: Boolean,
-    default: false,
-  },
-  /** 表体溢出是否展示... */
-  showOverflow: {
-    type: Boolean,
-    default: false,
-  },
-  /** 是否增加行hover class */
-  showTrHoverClass: {
-    type: Boolean,
-    default: false,
-  },
-  /** 表头是否可拖动 */
-  headerDrag: {
-    type: Boolean,
-    default: false,
-  },
-  /**
-   * 给行附加className<br>
-   * FIXME: 是否需要优化，因为不传此prop会使表格行一直执行空函数，是否有影响
-   */
-  rowClassName: {
-    type: Function,
-    default: () => '',
-  },
-  /**
-   * 列宽是否可拖动<br>
-   * **不要设置**列minWidth，**必须**设置width<br>
-   * 列宽拖动时，每一列都必须要有width，且minWidth/maxWidth不生效。table width会变为"fit-content"。
-   */
-  colResizable: {
-    type: Boolean,
-    default: false,
-  },
-  /** 可拖动至最小的列宽 */
-  colMinWidth: {
-    type: Number,
-    default: 10,
-  },
+const props = withDefaults(defineProps<StkProps>(), {
+  width: '',
+  minWidth: 'min-content',
+  maxWidth: '',
+  headless: false,
+  theme: 'light',
+  virtual: false,
+  virtualX: false,
+  columns: () => [],
+  dataSource: () => [],
+  rowKey: '',
+  colKey: 'dataIndex',
+  emptyCellText: '--',
+  noDataFull: false,
+  showNoData: true,
+  sortRemote: false,
+  showHeaderOverflow: false,
+  showOverflow: false,
+  showTrHoverClass: false,
+  headerDrag: false,
+  rowClassName: () => '',
+  colResizable: false,
+  colMinWidth: 10,
 });
 
 const emit = defineEmits([
@@ -694,7 +465,7 @@ function dealColumns() {
   tableHeaders.value = [];
   tableHeaderLast.value = [];
   const copyColumn = props.columns; // do not deep clone
-  const deep = _howDeepTheColumn(copyColumn);
+  const deep = howDeepTheColumn(copyColumn);
   const tmpHeaderRows = [];
   const tmpHeaderLast = [];
 
