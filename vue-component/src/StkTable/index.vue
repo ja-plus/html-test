@@ -189,10 +189,6 @@
 import { interpolateRgb } from 'd3-interpolate';
 import { shallowRef } from 'vue';
 
-/**
- * @typedef {import('./StkTable').StkTableColumn<any>} StkTableColumn
- */
-
 let _chromeVersion = 0;
 try {
   const userAgent = navigator.userAgent.match(/chrome\/\d+/i);
@@ -216,13 +212,13 @@ const _highlightDuration = 2000;
 const _highlightColorChangeFreq = 100;
 </script>
 <script setup lang="ts">
-import { computed, getCurrentInstance, onMounted, ref, toRaw, watch } from 'vue';
+import { computed, onMounted, ref, toRaw, watch } from 'vue';
+import { StkProps, StkTableColumn } from './types/index';
 import { useColResize } from './useColResize';
 import { useThDrag } from './useThDrag';
 import { useVirtualScroll } from './useVirtualScroll';
-import { howDeepTheColumn, insertToOrderedArray, tableSort } from './utils';
-import { StkProps } from './types/index';
-const { proxy: $vm } = getCurrentInstance();
+import { howDeepTheColumn, tableSort } from './utils';
+import { DEFAULT_COL_WIDTH } from './const';
 
 const props = withDefaults(defineProps<StkProps>(), {
   width: '',
@@ -265,8 +261,8 @@ const emit = defineEmits([
   'columns',
 ]);
 
-const tableContainer = ref(null);
-const colResizeIndicator = ref(null);
+const tableContainer = ref<HTMLDivElement>();
+const colResizeIndicator = ref<HTMLDivElement>();
 /** 当前选中的一行*/
 const currentItem = ref(null);
 /** 当前hover的行 */
@@ -280,9 +276,9 @@ let sortOrderIndex = ref(0);
 const sortSwitchOrder = [null, 'desc', 'asc'];
 
 /** 表头.内容是 props.columns 的引用集合 */
-const tableHeaders = ref([]);
+const tableHeaders = ref<StkTableColumn<any>[][]>([]);
 /** 若有多级表头时，的tableHeaders.内容是 props.columns 的引用集合  */
-const tableHeaderLast = ref([]);
+const tableHeaderLast = ref<StkTableColumn<any>[]>([]);
 
 const dataSourceCopy = shallowRef([...props.dataSource]);
 
@@ -314,7 +310,7 @@ const fixedColumnsPositionStore = computed(() => {
     const item = cols[i];
     if (item.fixed === 'left') {
       store[item.dataIndex] = left;
-      left += parseInt(item.width);
+      left += parseInt(item.width || DEFAULT_COL_WIDTH);
     }
   }
   let right = 0;
@@ -322,7 +318,7 @@ const fixedColumnsPositionStore = computed(() => {
     const item = cols[i];
     if (item.fixed === 'right') {
       store[item.dataIndex] = right;
-      right += parseInt(item.width);
+      right += parseInt(item.width || DEFAULT_COL_WIDTH);
     }
   }
 
@@ -406,7 +402,7 @@ function initVirtualScroll(height?: number) {
  * @param {StkTableColumn} col
  */
 function getFixedStyle(tagType, col) {
-  const style = {};
+  const style: Partial<CSSStyleDeclaration> = {};
   if (_isLegacyMode) {
     if (tagType === 1) {
       style.position = 'relative';
@@ -430,9 +426,9 @@ function getFixedStyle(tagType, col) {
       }
       if (tagType === 1) {
         style.top = virtualScroll.value.scrollTop + 'px';
-        style.zIndex = isFixedLeft ? 4 : 3; // 保证固定列高于其他单元格
+        style.zIndex = isFixedLeft ? '4' : '3'; // 保证固定列高于其他单元格
       } else {
-        style.zIndex = isFixedLeft ? 3 : 2;
+        style.zIndex = isFixedLeft ? '3' : '2';
       }
     } else {
       /**
@@ -446,9 +442,9 @@ function getFixedStyle(tagType, col) {
       }
       if (tagType === 1) {
         style.top = '0';
-        style.zIndex = isFixedLeft ? 4 : 3; // 保证固定列高于其他单元格
+        style.zIndex = isFixedLeft ? '4' : '3'; // 保证固定列高于其他单元格
       } else {
-        style.zIndex = isFixedLeft ? 3 : 2;
+        style.zIndex = isFixedLeft ? '3' : '2';
       }
     }
   }
@@ -466,15 +462,15 @@ function dealColumns() {
   tableHeaderLast.value = [];
   const copyColumn = props.columns; // do not deep clone
   const deep = howDeepTheColumn(copyColumn);
-  const tmpHeaderRows = [];
-  const tmpHeaderLast = [];
+  const tmpHeaderRows: StkTableColumn<any>[][] = [];
+  const tmpHeaderLast: StkTableColumn<any>[] = [];
 
   // 展开columns
   (function flat(arr, level = 0) {
-    const colArr = [];
-    const childrenArr = [];
+    const colArr: StkTableColumn<any>[] = [];
+    const childrenArr: StkTableColumn<any>[] = [];
     arr.forEach(col => {
-      col.rowSpan = col.children ? false : deep - level;
+      col.rowSpan = col.children ? 1 : deep - level;
       col.colSpan = col.children?.length;
       if (col.rowSpan === 1) delete col.rowSpan;
       if (col.colSpan === 1) delete col.colSpan;
@@ -522,7 +518,7 @@ function colKeyGen(col) {
  */
 function getCellStyle(tagType, col) {
   const fixedStyle = getFixedStyle(tagType, col);
-  const style = {
+  const style: Partial<CSSStyleDeclaration> = {
     width: col.width,
     minWidth: props.colResizable ? col.width : col.minWidth || col.width,
     maxWidth: props.colResizable ? col.width : col.maxWidth || col.width,
@@ -544,7 +540,7 @@ function getCellStyle(tagType, col) {
  * @param {boolean} options.force sort-remote 开启后是否强制排序
  * @param {boolean} options.emit 是否触发回调
  */
-function onColumnSort(col, click = true, options = {}) {
+function onColumnSort(col, click = true, options: { force?: boolean; emit?: boolean } = {}) {
   if (!col?.sorter) return;
   options = { force: false, emit: false, ...options };
   if (sortCol.value !== col.dataIndex) {
@@ -632,7 +628,6 @@ function onTableScroll(e) {
     updateVirtualScrollX(scrollLeft);
   }
   emit('scroll', e);
-  // /* Warn: Unknown source: showFixedLeftShadow */ $vm.showFixedLeftShadow = e.target.scrollLeft > 0;
 }
 
 /** tr hover事件 */
@@ -709,7 +704,7 @@ function setCurrentRow(rowKey, option = { silent: false }) {
 /** 高亮一个单元格 */
 function setHighlightDimCell(rowKeyValue, dataIndex) {
   // TODO: 支持动态计算高亮颜色。不易实现。需记录每一个单元格的颜色情况。
-  const cellEl = $vm.$el.querySelector(`[data-row-key="${rowKeyValue}"]>[data-index="${dataIndex}"]`);
+  const cellEl = tableContainer.value.querySelector(`[data-row-key="${rowKeyValue}"]>[data-index="${dataIndex}"]`);
   if (!cellEl) return;
   if (cellEl.classList.contains('highlight-cell')) {
     cellEl.classList.remove('highlight-cell');
@@ -753,7 +748,7 @@ function setHighlightDimRow(rowKeyValues) {
     for (let i = 0; i < rowKeyValues.length; i++) {
       const rowKeyValue = rowKeyValues[i];
       /**@type {HTMLElement|null} */
-      const rowEl = $vm.$el.querySelector(`[data-row-key="${rowKeyValue}"]`);
+      const rowEl = tableContainer.value?.querySelector(`[data-row-key="${rowKeyValue}"]`);
       if (!rowEl) continue;
       if (rowEl.classList.contains('highlight-row')) {
         rowEl.classList.remove('highlight-row');
@@ -771,7 +766,7 @@ function setHighlightDimRow(rowKeyValues) {
       );
     }
     if (needRepaint) {
-      void $vm.$el.offsetWidth; //强制浏览器重绘
+      void tableContainer.value?.offsetWidth; //强制浏览器重绘
     }
     rowElTemp.forEach(el => el.classList.add('highlight-row')); // 统一添加动画
   }

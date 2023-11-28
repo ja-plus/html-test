@@ -14,6 +14,9 @@ export type StkTableColumn<T> = {
   sortField?: keyof T;
   sortType?: 'number' | 'string';
   fixed?: 'left' | 'right' | null;
+
+  /** private */ rowSpan?: number;
+  /** private */ colSpan?: number;
   customCell?: Component | VNode;
   customHeaderCell?: Component | VNode;
   children?: StkTableColumn<T>[];

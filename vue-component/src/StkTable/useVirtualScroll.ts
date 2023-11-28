@@ -1,16 +1,13 @@
 import { Ref, ShallowRef, computed, ref } from 'vue';
 import { StkTableColumn } from './types';
+import { DEFAULT_COL_WIDTH, DEFAULT_TABLE_HEIGHT, DEFAULT_TABLE_WIDTH } from './const';
 
 type Option = {
-  tableContainer: Ref<HTMLElement | null>;
+  tableContainer: Ref<HTMLElement | undefined>;
   props: any;
   dataSourceCopy: ShallowRef<any[]>;
   tableHeaderLast: Ref<StkTableColumn<any>[]>;
 };
-const DEFAULT_COL_WIDTH = '100';
-
-const DEFAULT_TABLE_HEIGHT = 100;
-const DEFAULT_TABLE_WIDTH = 200;
 
 export function useVirtualScroll({ tableContainer, props, dataSourceCopy, tableHeaderLast }: Option) {
   const virtualScroll = ref({
