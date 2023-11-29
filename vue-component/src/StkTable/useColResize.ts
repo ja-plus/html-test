@@ -1,18 +1,26 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { StkTableColumn } from './types';
+
+type ColResizeState = {
+  /** 当前被拖动的列*/
+  currentCol: StkTableColumn<any> | null;
+  /** 当前被拖动列的下标 */
+  currentColIndex: number;
+  /** 鼠标按下开始位置 */
+  startX: number;
+  /** 鼠标按下时鼠标对于表格的偏移量 */
+  startOffsetTableX: 0;
+};
 
 /** 列宽拖动 */
 export function useColResize({ tableContainer, tableHeaderLast, colResizeIndicator, props, emit, colKeyGen }) {
   /** 列宽是否在拖动 */
   const isColResizing = ref(false);
   /** 列宽调整状态 */
-  let colResizeState = {
-    /** 当前被拖动的列 @type {import('@/StkTable').StkTableColumn<any> | null}*/
+  let colResizeState: ColResizeState = {
     currentCol: null,
-    /** 当前被拖动列的下标 */
     currentColIndex: 0,
-    /** 鼠标按下开始位置 */
     startX: 0,
-    /** 鼠标按下时鼠标对于表格的偏移量 */
     startOffsetTableX: 0,
   };
   onMounted(() => {
@@ -40,7 +48,7 @@ export function useColResize({ tableContainer, tableHeaderLast, colResizeIndicat
    * @param {import('@/StkTable').StkTableColumn<any>} col 当前列配置
    * @param {boolean} isPrev 是否要上一列
    */
-  function onThResizeMouseDown(e, col, isPrev) {
+  function onThResizeMouseDown(e: MouseEvent, col: StkTableColumn<any>, isPrev = false) {
     e.stopPropagation();
     e.preventDefault();
     const { clientX } = e;
@@ -73,7 +81,7 @@ export function useColResize({ tableContainer, tableHeaderLast, colResizeIndicat
   /**
    * @param {MouseEvent} e
    */
-  function onThResizeMouseMove(e) {
+  function onThResizeMouseMove(e: MouseEvent) {
     if (!isColResizing.value) return;
     e.stopPropagation();
     e.preventDefault();

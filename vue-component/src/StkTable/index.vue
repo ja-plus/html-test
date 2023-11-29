@@ -212,8 +212,8 @@ const _highlightDuration = 2000;
 const _highlightColorChangeFreq = 100;
 </script>
 <script setup lang="ts">
-import { computed, onMounted, ref, toRaw, watch } from 'vue';
-import { StkProps, StkTableColumn } from './types/index';
+import { CSSProperties, StyleValue, computed, onMounted, ref, toRaw, watch } from 'vue';
+import { SortOption, StkProps, StkTableColumn } from './types/index';
 import { useColResize } from './useColResize';
 import { useThDrag } from './useThDrag';
 import { useVirtualScroll } from './useVirtualScroll';
@@ -268,8 +268,8 @@ const currentItem = ref(null);
 /** 当前hover的行 */
 const currentHover = ref(null);
 
-/** 排序的列*/
-let sortCol = ref(null);
+/** 排序的列dataIndex*/
+let sortCol = ref<string | null>();
 let sortOrderIndex = ref(0);
 
 /** 排序切换顺序 */
@@ -283,7 +283,7 @@ const tableHeaderLast = ref<StkTableColumn<any>[]>([]);
 const dataSourceCopy = shallowRef([...props.dataSource]);
 
 /** 存放高亮行的对象*/
-let highlightDimRows = new Set();
+let highlightDimRows = new Set<any>();
 /** 高亮后渐暗的行定时器 */
 let highlightDimRowsTimeout = new Map();
 /** 高亮后渐暗的单元格定时器 */
@@ -401,8 +401,8 @@ function initVirtualScroll(height?: number) {
  * @param {1|2} tagType 1-th 2-td
  * @param {StkTableColumn} col
  */
-function getFixedStyle(tagType, col) {
-  const style: Partial<CSSStyleDeclaration> = {};
+function getFixedStyle(tagType, col): CSSProperties {
+  const style: CSSProperties = {};
   if (_isLegacyMode) {
     if (tagType === 1) {
       style.position = 'relative';
@@ -516,9 +516,9 @@ function colKeyGen(col) {
  * @param {1|2} tagType 1-th 2-td
  * @param {StkTableColumn} col
  */
-function getCellStyle(tagType, col) {
+function getCellStyle(tagType, col): CSSProperties {
   const fixedStyle = getFixedStyle(tagType, col);
-  const style: Partial<CSSStyleDeclaration> = {
+  const style: CSSProperties = {
     width: col.width,
     minWidth: props.colResizable ? col.width : col.minWidth || col.width,
     maxWidth: props.colResizable ? col.width : col.maxWidth || col.width,
@@ -704,7 +704,9 @@ function setCurrentRow(rowKey, option = { silent: false }) {
 /** 高亮一个单元格 */
 function setHighlightDimCell(rowKeyValue, dataIndex) {
   // TODO: 支持动态计算高亮颜色。不易实现。需记录每一个单元格的颜色情况。
-  const cellEl = tableContainer.value.querySelector(`[data-row-key="${rowKeyValue}"]>[data-index="${dataIndex}"]`);
+  const cellEl = tableContainer.value?.querySelector<HTMLElement>(
+    `[data-row-key="${rowKeyValue}"]>[data-index="${dataIndex}"]`,
+  );
   if (!cellEl) return;
   if (cellEl.classList.contains('highlight-cell')) {
     cellEl.classList.remove('highlight-cell');
@@ -743,12 +745,11 @@ function setHighlightDimRow(rowKeyValues) {
     // -------- 普通滚动用css @keyframes动画，实现高亮
     /**是否需要重绘 */
     let needRepaint = false;
-    /** @type {HTMLElement[]} */
-    const rowElTemp = [];
+
+    const rowElTemp: HTMLTableRowElement[] = [];
     for (let i = 0; i < rowKeyValues.length; i++) {
       const rowKeyValue = rowKeyValues[i];
-      /**@type {HTMLElement|null} */
-      const rowEl = tableContainer.value?.querySelector(`[data-row-key="${rowKeyValue}"]`);
+      const rowEl = tableContainer.value?.querySelector<HTMLTableRowElement>(`[data-row-key="${rowKeyValue}"]`);
       if (!rowEl) continue;
       if (rowEl.classList.contains('highlight-row')) {
         rowEl.classList.remove('highlight-row');
@@ -777,17 +778,22 @@ function setHighlightDimRow(rowKeyValues) {
  * @param {string} dataIndex 列字段
  * @param {'asc'|'desc'|null} order
  * @param {object} option.sortOption 指定排序参数
+ * @param {boolean} option.sort 是否触发排序
  * @param {boolean} option.silent 是否触发回调
- * @param {boolean} option.sort 是否排序
  */
-function setSorter(dataIndex, order, option = {}) {
-  option = { silent: true, sortOption: null, sort: true, ...option };
+function setSorter(
+  dataIndex: string,
+  order: null | 'asc' | 'desc',
+  option: { sortOption?: SortOption; silent?: boolean; sort?: boolean } = {},
+) {
+  const newOption = { silent: true, sortOption: null, sort: true, ...option };
   sortCol.value = dataIndex;
   sortOrderIndex.value = sortSwitchOrder.findIndex(it => it === order);
-  if (option.sort && dataSourceCopy.value?.length) {
+
+  if (newOption.sort && dataSourceCopy.value?.length) {
     // 如果表格有数据，则进行排序
-    const column = option.sortOption || tableHeaderLast.value.find(it => it.dataIndex === sortCol.value);
-    if (column) onColumnSort(column, false, { force: true, emit: !option.silent });
+    const column = newOption.sortOption || tableHeaderLast.value.find(it => it.dataIndex === sortCol.value);
+    if (column) onColumnSort(column, false, { force: true, emit: !newOption.silent });
     else console.warn('Can not find column by dataIndex:', sortCol.value);
   }
   return dataSourceCopy.value;
@@ -802,6 +808,7 @@ function resetSorter() {
 
 /** 滚动 */
 function scrollTo(top = 0, left = 0) {
+  if (!tableContainer.value) return;
   if (top !== null) tableContainer.value.scrollTop = top;
   if (left !== null) tableContainer.value.scrollLeft = left;
 }
