@@ -2,8 +2,8 @@ import { Component, VNode } from 'vue';
 
 type Sorter = boolean | Function;
 
-export type StkTableColumn<T> = {
-  dataIndex: keyof T;
+export type StkTableColumn<T extends Record<string, any>> = {
+  dataIndex: keyof T & string;
   title?: string;
   align?: 'right' | 'left' | 'center';
   headerAlign?: 'right' | 'left' | 'center';
@@ -24,12 +24,7 @@ export type StkTableColumn<T> = {
   children?: StkTableColumn<T>[];
 };
 
-export type SortOption = {
-  sorter: Sorter;
-  dataIndex: string;
-  sortField: string;
-  sortType: 'number' | 'string';
-};
+export type SortOption = Pick<StkTableColumn<any>, 'sorter' | 'dataIndex' | 'sortField' | 'sortType'>;
 
 export type SortState = {
   dataIndex: string;
@@ -52,7 +47,7 @@ export type StkProps = {
   headless: boolean;
 
   /** 主题，亮、暗 */
-  theme: string;
+  theme: 'light' | 'dark';
 
   /** 虚拟滚动 */
   virtual: boolean;

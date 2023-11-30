@@ -63,13 +63,6 @@ function strCompare(a: string, b: string, type: 'number' | 'string') {
 }
 
 /**
- * @typedef SortOption
- * @prop {function|boolean} sorter
- * @prop {string} dataIndex
- * @prop {string} sortField
- * @prop {'number'|'string'} sortType
- */
-/**
  * 表格排序抽离
  * 可以在组件外部自己实现表格排序，组件配置remote，使表格不排序。
  * 使用者在@sort-change事件中自行更改table props 'dataSource'完成排序。

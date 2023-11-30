@@ -177,3 +177,9 @@ class Aa extends A {
 // 解决
 type A = B & {}
 ```
+
+### Vue 
+Cannot find module './StkTableVue.vue' or its corresponding type declarations
+#### 解决
+* 安装 volar, volar ts 插件。
+* vscode f1 后 select typescript version, 选择use workspace version. 

@@ -190,7 +190,7 @@ import {
   Highlight_Duration,
   Is_Legacy_Mode,
 } from './const';
-import { SortOption, StkProps, StkTableColumn } from './types/index';
+import { SortOption, StkProps, StkTableColumn } from '@/StkTable/types/index';
 import { useColResize } from './useColResize';
 import { useThDrag } from './useThDrag';
 import { useVirtualScroll } from './useVirtualScroll';
@@ -279,7 +279,7 @@ const highlightInter = computed(() => {
 });
 
 const fixedColumnsPositionStore = computed(() => {
-  const store = {};
+  const store: Record<string, number> = {};
   const cols = [...tableHeaderLast.value];
   let left = 0;
   for (let i = 0; i < cols.length; i++) {
@@ -377,7 +377,7 @@ function initVirtualScroll(height?: number) {
  * @param {1|2} tagType 1-th 2-td
  * @param {StkTableColumn} col
  */
-function getFixedStyle(tagType, col): CSSProperties {
+function getFixedStyle(tagType: 1 | 2, col: StkTableColumn<any>): CSSProperties {
   const style: CSSProperties = {};
   if (Is_Legacy_Mode) {
     if (tagType === 1) {
@@ -482,7 +482,7 @@ function rowKeyGen(row: any) {
  * @param {StkTableColumn} col
  */
 function colKeyGen(col: StkTableColumn<any>) {
-  return typeof props.colKey === 'function' ? props.colKey(col) : col[props.colKey];
+  return typeof props.colKey === 'function' ? props.colKey(col) : (col as any)[props.colKey];
 }
 
 /**
@@ -492,7 +492,7 @@ function colKeyGen(col: StkTableColumn<any>) {
  * @param {1|2} tagType 1-th 2-td
  * @param {StkTableColumn} col
  */
-function getCellStyle(tagType, col): CSSProperties {
+function getCellStyle(tagType: 1 | 2, col: StkTableColumn<any>): CSSProperties {
   const fixedStyle = getFixedStyle(tagType, col);
   const style: CSSProperties = {
     width: col.width,
@@ -516,7 +516,7 @@ function getCellStyle(tagType, col): CSSProperties {
  * @param {boolean} options.force sort-remote 开启后是否强制排序
  * @param {boolean} options.emit 是否触发回调
  */
-function onColumnSort(col, click = true, options: { force?: boolean; emit?: boolean } = {}) {
+function onColumnSort(col?: StkTableColumn<any>, click = true, options: { force?: boolean; emit?: boolean } = {}) {
   if (!col?.sorter) return;
   options = { force: false, emit: false, ...options };
   if (sortCol.value !== col.dataIndex) {
@@ -538,7 +538,7 @@ function onColumnSort(col, click = true, options: { force?: boolean; emit?: bool
   }
 }
 
-function onRowClick(e, row) {
+function onRowClick(e: MouseEvent, row: any) {
   emit('row-click', e, row);
   // 选中同一行不触发current-change 事件
   if (currentItem.value === row) return;
@@ -546,27 +546,27 @@ function onRowClick(e, row) {
   emit('current-change', e, row);
 }
 
-function onRowDblclick(e, row) {
+function onRowDblclick(e: MouseEvent, row: any) {
   emit('row-dblclick', e, row);
 }
 
 /** 表头行右键 */
-function onHeaderMenu(e) {
+function onHeaderMenu(e: MouseEvent) {
   emit('header-row-menu', e);
 }
 
 /** 表体行右键 */
-function onRowMenu(e, row) {
+function onRowMenu(e: MouseEvent, row: any) {
   emit('row-menu', e, row);
 }
 
 /** 单元格单击 */
-function onCellClick(e, row, col) {
+function onCellClick(e: MouseEvent, row: any, col: StkTableColumn<any>) {
   emit('cell-click', e, row, col);
 }
 
 /** 表头单元格单击 */
-function onHeaderCellClick(e, col) {
+function onHeaderCellClick(e: MouseEvent, col: StkTableColumn<any>) {
   emit('header-cell-click', e, col);
 }
 
@@ -574,7 +574,7 @@ function onHeaderCellClick(e, col) {
  * 鼠标滚轮事件监听
  * @param {MouseEvent} e
  */
-function onTableWheel(e) {
+function onTableWheel(e: MouseEvent) {
   if (isColResizing.value) {
     // 正在调整列宽时，不允许用户滚动
     e.preventDefault();
@@ -585,13 +585,13 @@ function onTableWheel(e) {
 
 /**
  * 滚动条监听
- * @param {MouseEvent} e
+ * @param {Event} e scrollEvent
  */
-function onTableScroll(e) {
+function onTableScroll(e: Event) {
   if (!e?.target) return;
 
   // 此处可优化，因为访问e.target.scrollXX消耗性能
-  const { scrollTop, scrollLeft } = e.target;
+  const { scrollTop, scrollLeft } = e.target as HTMLElement;
   // 纵向滚动有变化
   if (scrollTop !== virtualScroll.value.scrollTop) virtualScroll.value.scrollTop = scrollTop;
   if (virtual_on.value) {
@@ -607,9 +607,9 @@ function onTableScroll(e) {
 }
 
 /** tr hover事件 */
-function onTrMouseOver(e, item) {
+function onTrMouseOver(e: MouseEvent, row: any) {
   if (props.showTrHoverClass) {
-    currentHover.value = rowKeyGen(item);
+    currentHover.value = rowKeyGen(row);
   }
 }
 
@@ -669,7 +669,7 @@ function calcHighlightLoop() {
  * @param {string} rowKey
  * @param {boolean} option.silent 是否触发回调
  */
-function setCurrentRow(rowKey, option = { silent: false }) {
+function setCurrentRow(rowKey: string, option = { silent: false }) {
   if (!dataSourceCopy.value.length) return;
   currentItem.value = dataSourceCopy.value.find(it => rowKeyGen(it) === rowKey);
   if (!option.silent) {
@@ -678,7 +678,7 @@ function setCurrentRow(rowKey, option = { silent: false }) {
 }
 
 /** 高亮一个单元格 */
-function setHighlightDimCell(rowKeyValue, dataIndex) {
+function setHighlightDimCell(rowKeyValue: string, dataIndex: string) {
   // TODO: 支持动态计算高亮颜色。不易实现。需记录每一个单元格的颜色情况。
   const cellEl = tableContainer.value?.querySelector<HTMLElement>(
     `[data-row-key="${rowKeyValue}"]>[data-index="${dataIndex}"]`,
@@ -701,9 +701,9 @@ function setHighlightDimCell(rowKeyValue, dataIndex) {
 
 /**
  * 高亮一行
- * @param {Array<string|number>} rowKeyValues
+ * @param rowKeyValues
  */
-function setHighlightDimRow(rowKeyValues) {
+function setHighlightDimRow(rowKeyValues: Array<string | number>) {
   if (!Array.isArray(rowKeyValues)) rowKeyValues = [rowKeyValues];
   if (props.virtual) {
     // --------虚拟滚动用js计算颜色渐变的高亮方案
