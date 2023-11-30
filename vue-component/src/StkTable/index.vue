@@ -172,9 +172,8 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 /**
- * @version 1.3.0
  * @author JA+
  * 不支持低版本浏览器非虚拟滚动表格的表头固定，列固定，因为会卡。
  * TODO:存在的问题：
@@ -183,33 +182,14 @@
  * [] highlight-row 颜色不能恢复到active的颜色
  */
 import { interpolateRgb } from 'd3-interpolate';
-import { shallowRef } from 'vue';
-
-let _chromeVersion = 0;
-try {
-  const userAgent = navigator.userAgent.match(/chrome\/\d+/i);
-  if (userAgent) {
-    _chromeVersion = +userAgent[0].split('/')[1];
-  }
-} catch (e) {
-  console.error('获取浏览器版本出错！', e);
-}
-/** 是否兼容低版本模式 */
-const _isLegacyMode = _chromeVersion < 56;
-
-/** 高亮背景色 */
-const _highlightColor = {
-  light: { from: '#71a2fd', to: '#fff' },
-  dark: { from: '#1e4c99', to: '#181c21' },
-};
-/** 高亮持续时间 */
-const _highlightDuration = 2000;
-/** 高亮变更频率 */
-const _highlightColorChangeFreq = 100;
-</script>
-<script setup lang="ts">
-import { CSSProperties, computed, onMounted, ref, toRaw, watch } from 'vue';
-import { DEFAULT_COL_WIDTH } from './const';
+import { CSSProperties, computed, onMounted, ref, toRaw, watch, shallowRef } from 'vue';
+import {
+  Default_Col_Width,
+  Highlight_Color,
+  Highlight_Color_Change_Freq,
+  Highlight_Duration,
+  Is_Legacy_Mode,
+} from './const';
 import { SortOption, StkProps, StkTableColumn } from './types/index';
 import { useColResize } from './useColResize';
 import { useThDrag } from './useThDrag';
@@ -295,7 +275,7 @@ const tableWidth = computed(() => {
 });
 
 const highlightInter = computed(() => {
-  return interpolateRgb(_highlightColor[props.theme].from, _highlightColor[props.theme].to);
+  return interpolateRgb(Highlight_Color[props.theme].from, Highlight_Color[props.theme].to);
 });
 
 const fixedColumnsPositionStore = computed(() => {
@@ -306,7 +286,7 @@ const fixedColumnsPositionStore = computed(() => {
     const item = cols[i];
     if (item.fixed === 'left') {
       store[item.dataIndex] = left;
-      left += parseInt(item.width || DEFAULT_COL_WIDTH);
+      left += parseInt(item.width || Default_Col_Width);
     }
   }
   let right = 0;
@@ -314,7 +294,7 @@ const fixedColumnsPositionStore = computed(() => {
     const item = cols[i];
     if (item.fixed === 'right') {
       store[item.dataIndex] = right;
-      right += parseInt(item.width || DEFAULT_COL_WIDTH);
+      right += parseInt(item.width || Default_Col_Width);
     }
   }
 
@@ -399,7 +379,7 @@ function initVirtualScroll(height?: number) {
  */
 function getFixedStyle(tagType, col): CSSProperties {
   const style: CSSProperties = {};
-  if (_isLegacyMode) {
+  if (Is_Legacy_Mode) {
     if (tagType === 1) {
       style.position = 'relative';
       style.top = virtualScroll.value.scrollTop + 'px';
@@ -408,7 +388,7 @@ function getFixedStyle(tagType, col): CSSProperties {
   const { fixed, dataIndex } = col;
   if (fixed === 'left' || fixed === 'right') {
     const isFixedLeft = fixed === 'left';
-    if (_isLegacyMode) {
+    if (Is_Legacy_Mode) {
       /**
        * ----------浏览器兼容--------------
        */
@@ -660,7 +640,7 @@ function calcHighlightLoop() {
         //   rowEl.classList.add('highlight-row-transition');
         // }
         //  经过的时间 ÷ 2s 计算出 颜色过渡进度 (0-1)
-        const progress = (nowTs - row._bgc_progress_ms) / _highlightDuration;
+        const progress = (nowTs - row._bgc_progress_ms) / Highlight_Duration;
         // row._bgc_progress = progress;
         if (progress <= 1) {
           row._bgc = highlightInter.value(progress);
@@ -679,7 +659,7 @@ function calcHighlightLoop() {
         // 没有则停止循环
         calcHighlightDimLoop = false;
       }
-    }, _highlightColorChangeFreq);
+    }, Highlight_Color_Change_Freq);
   };
   recursion();
 }
@@ -715,7 +695,7 @@ function setHighlightDimCell(rowKeyValue, dataIndex) {
     window.setTimeout(() => {
       cellEl.classList.remove('highlight-cell');
       highlightDimCellsTimeout.delete(rowKeyValue);
-    }, _highlightDuration),
+    }, Highlight_Duration),
   );
 }
 
@@ -759,7 +739,7 @@ function setHighlightDimRow(rowKeyValues) {
         window.setTimeout(() => {
           rowEl.classList.remove('highlight-row');
           highlightDimRowsTimeout.delete(rowKeyValue); // 回收内存
-        }, _highlightDuration),
+        }, Highlight_Duration),
       );
     }
     if (needRepaint) {

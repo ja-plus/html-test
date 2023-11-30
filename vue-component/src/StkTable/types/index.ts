@@ -1,6 +1,7 @@
 import { Component, VNode } from 'vue';
 
 type Sorter = boolean | Function;
+
 export type StkTableColumn<T> = {
   dataIndex: keyof T;
   title?: string;

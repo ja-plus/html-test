@@ -1,6 +1,6 @@
 import { Ref, ShallowRef, computed, ref } from 'vue';
 import { StkTableColumn } from './types';
-import { DEFAULT_COL_WIDTH, DEFAULT_TABLE_HEIGHT, DEFAULT_TABLE_WIDTH } from './const';
+import { Default_Col_Width, Default_Table_Height, Default_Table_Width } from './const';
 
 type Option = {
   tableContainer: Ref<HTMLElement | undefined>;
@@ -54,7 +54,7 @@ export function useVirtualScroll({ tableContainer, props, dataSourceCopy, tableH
   const virtualX_on = computed(() => {
     return (
       props.virtualX &&
-      tableHeaderLast.value.reduce((sum, col) => (sum += parseInt(col.minWidth || col.width || DEFAULT_COL_WIDTH)), 0) >
+      tableHeaderLast.value.reduce((sum, col) => (sum += parseInt(col.minWidth || col.width || Default_Col_Width)), 0) >
         virtualScrollX.value.containerWidth * 1.5
     );
   });
@@ -87,7 +87,7 @@ export function useVirtualScroll({ tableContainer, props, dataSourceCopy, tableH
     let width = 0;
     for (let i = virtualScrollX.value.endIndex; i < tableHeaderLast.value.length; i++) {
       const col = tableHeaderLast.value[i];
-      width += parseInt(col.width || col.maxWidth || col.minWidth || DEFAULT_COL_WIDTH);
+      width += parseInt(col.width || col.maxWidth || col.minWidth || Default_Col_Width);
     }
     return width;
   });
@@ -99,7 +99,7 @@ export function useVirtualScroll({ tableContainer, props, dataSourceCopy, tableH
   function initVirtualScrollY(height?: number) {
     if (virtual_on.value) {
       virtualScroll.value.containerHeight =
-        typeof height === 'number' ? height : tableContainer.value?.offsetHeight || DEFAULT_TABLE_HEIGHT;
+        typeof height === 'number' ? height : tableContainer.value?.offsetHeight || Default_Table_Height;
       updateVirtualScrollY(tableContainer.value?.scrollTop);
       // const { offsetTop, containerHeight, rowHeight } = virtualScroll.value;
       // const tableAllHeight = dataSourceCopy.value.length * rowHeight;
@@ -118,7 +118,7 @@ export function useVirtualScroll({ tableContainer, props, dataSourceCopy, tableH
     if (props.virtualX) {
       const { offsetWidth, scrollLeft } = tableContainer.value || {};
       // scrollTo(null, 0);
-      virtualScrollX.value.containerWidth = offsetWidth || DEFAULT_TABLE_WIDTH;
+      virtualScrollX.value.containerWidth = offsetWidth || Default_Table_Width;
       updateVirtualScrollX(scrollLeft);
     }
   }
@@ -145,7 +145,7 @@ export function useVirtualScroll({ tableContainer, props, dataSourceCopy, tableH
       const col = tableHeaderLast.value[colIndex];
       // fixed left 不进入计算列宽
       if (col.fixed === 'left') continue;
-      const colWidth = parseInt(col.width || col.maxWidth || col.minWidth || DEFAULT_COL_WIDTH);
+      const colWidth = parseInt(col.width || col.maxWidth || col.minWidth || Default_Col_Width);
       colWidthSum += colWidth;
       // 列宽（非固定列）加到超过scrollLeft的时候，表示startIndex从上一个开始下标
       if (colWidthSum >= sLeft) {
@@ -159,7 +159,7 @@ export function useVirtualScroll({ tableContainer, props, dataSourceCopy, tableH
     let endIndex = tableHeaderLast.value.length;
     for (let colIndex = startIndex; colIndex < tableHeaderLast.value.length - 1; colIndex++) {
       const col = tableHeaderLast.value[colIndex];
-      colWidthSum += parseInt(col.width || col.maxWidth || col.minWidth || DEFAULT_COL_WIDTH);
+      colWidthSum += parseInt(col.width || col.maxWidth || col.minWidth || Default_Col_Width);
       // 列宽大于容器宽度则停止
       if (colWidthSum >= virtualScrollX.value.containerWidth) {
         endIndex = colIndex + 2; // TODO:预渲染的列数
