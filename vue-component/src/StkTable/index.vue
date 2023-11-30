@@ -68,11 +68,7 @@
             @dragover="onThDragOver"
           >
             <div class="table-header-cell-wrapper">
-              <component
-                :is="typeof col.customHeaderCell === 'function' ? col.customHeaderCell(col) : col.customHeaderCell"
-                v-if="col.customHeaderCell"
-                :col="col"
-              />
+              <component :is="col.customHeaderCell" v-if="col.customHeaderCell" :col="col" />
               <template v-else>
                 <slot name="tableHeader" :column="col">
                   <span class="table-header-title">{{ col.title }}</span>
@@ -212,13 +208,13 @@ const _highlightDuration = 2000;
 const _highlightColorChangeFreq = 100;
 </script>
 <script setup lang="ts">
-import { CSSProperties, StyleValue, computed, onMounted, ref, toRaw, watch } from 'vue';
+import { CSSProperties, computed, onMounted, ref, toRaw, watch } from 'vue';
+import { DEFAULT_COL_WIDTH } from './const';
 import { SortOption, StkProps, StkTableColumn } from './types/index';
 import { useColResize } from './useColResize';
 import { useThDrag } from './useThDrag';
 import { useVirtualScroll } from './useVirtualScroll';
 import { howDeepTheColumn, tableSort } from './utils';
-import { DEFAULT_COL_WIDTH } from './const';
 
 const props = withDefaults(defineProps<StkProps>(), {
   width: '',
@@ -335,16 +331,16 @@ watch(
 
 dealColumns();
 
-const { onThResizeMouseDown } = useColResize({
+const { isColResizing, onThResizeMouseDown } = useColResize({
+  props,
+  emit,
   colKeyGen,
   colResizeIndicator,
-  emit,
-  props,
   tableContainer,
   tableHeaderLast,
 });
 
-const { isColResizing, onThDragStart, onThDragOver, onThDrop } = useThDrag({ emit });
+const { onThDragStart, onThDragOver, onThDrop } = useThDrag({ emit });
 
 const {
   virtualScroll,
@@ -492,7 +488,7 @@ function dealColumns() {
 /**
  * 行唯一值生成
  */
-function rowKeyGen(row) {
+function rowKeyGen(row: any) {
   let key = rowKeyGenStore.get(row);
   if (!key) {
     key = typeof props.rowKey === 'function' ? props.rowKey(row) : row[props.rowKey];
@@ -505,7 +501,7 @@ function rowKeyGen(row) {
  * 列唯一键
  * @param {StkTableColumn} col
  */
-function colKeyGen(col) {
+function colKeyGen(col: StkTableColumn<any>) {
   return typeof props.colKey === 'function' ? props.colKey(col) : col[props.colKey];
 }
 

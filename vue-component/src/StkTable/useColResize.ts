@@ -1,5 +1,6 @@
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { Ref, onBeforeUnmount, onMounted, ref } from 'vue';
 import { StkTableColumn } from './types';
+import { DEFAULT_COL_WIDTH } from './const';
 
 type ColResizeState = {
   /** 当前被拖动的列*/
@@ -12,10 +13,20 @@ type ColResizeState = {
   startOffsetTableX: 0;
 };
 
+type Params = {
+  props: any;
+  emit: any;
+  tableContainer: Ref<HTMLElement | undefined>;
+  tableHeaderLast: Ref<StkTableColumn<any>[]>;
+  colResizeIndicator: Ref<HTMLElement | undefined>;
+  colKeyGen: (p: any) => string;
+};
+
 /** 列宽拖动 */
-export function useColResize({ tableContainer, tableHeaderLast, colResizeIndicator, props, emit, colKeyGen }) {
+export function useColResize({ tableContainer, tableHeaderLast, colResizeIndicator, props, emit, colKeyGen }: Params) {
   /** 列宽是否在拖动 */
   const isColResizing = ref(false);
+
   /** 列宽调整状态 */
   let colResizeState: ColResizeState = {
     currentCol: null,
@@ -23,6 +34,7 @@ export function useColResize({ tableContainer, tableHeaderLast, colResizeIndicat
     startX: 0,
     startOffsetTableX: 0,
   };
+
   onMounted(() => {
     initColResizeEvent();
   });
@@ -44,11 +56,12 @@ export function useColResize({ tableContainer, tableHeaderLast, colResizeIndicat
 
   /**
    * 拖动开始
-   * @param {MouseEvent} e
-   * @param {import('@/StkTable').StkTableColumn<any>} col 当前列配置
-   * @param {boolean} isPrev 是否要上一列
+   * @param e
+   * @param col 当前列配置
+   * @param isPrev 是否要上一列
    */
   function onThResizeMouseDown(e: MouseEvent, col: StkTableColumn<any>, isPrev = false) {
+    if (!tableContainer.value) return;
     e.stopPropagation();
     e.preventDefault();
     const { clientX } = e;
@@ -73,9 +86,11 @@ export function useColResize({ tableContainer, tableHeaderLast, colResizeIndicat
     });
 
     // 展示指示线，更新其位置
-    colResizeIndicator.value.style.display = 'block';
-    colResizeIndicator.value.style.left = offsetTableX + 'px';
-    colResizeIndicator.value.style.top = tableContainer.value.scrollTop + 'px';
+    if (colResizeIndicator.value) {
+      colResizeIndicator.value.style.display = 'block';
+      colResizeIndicator.value.style.left = offsetTableX + 'px';
+      colResizeIndicator.value.style.top = tableContainer.value.scrollTop + 'px';
+    }
   }
 
   /**
@@ -88,33 +103,42 @@ export function useColResize({ tableContainer, tableHeaderLast, colResizeIndicat
     const { currentCol, startX, startOffsetTableX } = colResizeState;
     const { clientX } = e;
     let moveX = clientX - startX;
+    const currentColWidth = parseInt(currentCol?.width || DEFAULT_COL_WIDTH);
     // 移动量不小于最小列宽
-    if (parseInt(currentCol.width) + moveX < props.colMinWidth) moveX = -parseInt(currentCol.width);
+    if (currentColWidth + moveX < props.colMinWidth) {
+      moveX = -currentColWidth;
+    }
 
     const offsetTableX = startOffsetTableX + moveX;
+    if (!colResizeIndicator.value) return;
     colResizeIndicator.value.style.left = offsetTableX + 'px';
   }
 
   /**
    * @param {MouseEvent} e
    */
-  function onThResizeMouseUp(e) {
+  function onThResizeMouseUp(e: MouseEvent) {
     if (!isColResizing.value) return;
     const { startX, currentCol } = colResizeState;
     const { clientX } = e;
     const moveX = clientX - startX;
 
     // 移动量不小于最小列宽
-    let width = parseInt(currentCol.width) + moveX;
+    let width = parseInt(currentCol?.width || DEFAULT_COL_WIDTH) + moveX;
     if (width < props.colMinWidth) width = props.colMinWidth;
 
     const curCol = tableHeaderLast.value.find(it => colKeyGen(it) === colKeyGen(currentCol));
+    if (!curCol) return;
     curCol.width = width + 'px';
 
     emit('update:columns', [...props.columns]);
 
     // 隐藏指示线
-    colResizeIndicator.value.style.display = 'none';
+    if (colResizeIndicator.value) {
+      colResizeIndicator.value.style.display = 'none';
+      colResizeIndicator.value.style.left = '0';
+      colResizeIndicator.value.style.top = '0';
+    }
     // 清除拖动状态
     isColResizing.value = false;
     colResizeState = {

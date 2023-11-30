@@ -10,6 +10,7 @@ export type StkTableColumn<T> = {
   width?: string;
   minWidth?: string;
   maxWidth?: string;
+  headerClassName?: string;
   className?: string;
   sortField?: keyof T;
   sortType?: 'number' | 'string';
@@ -34,6 +35,8 @@ export type SortState = {
   order: null | 'asc' | 'desc';
   sortType?: 'number' | 'string';
 };
+
+export type UniqKey = string | ((param: any) => string);
 
 export type StkProps = {
   width: string;
@@ -63,10 +66,10 @@ export type StkProps = {
   dataSource: any[];
 
   /** 行唯一键 */
-  rowKey: string | Function;
+  rowKey: UniqKey;
 
   /** 列唯一键 */
-  colKey: string | Function;
+  colKey: UniqKey;
 
   /** 空值展示文字 */
   emptyCellText: string;
