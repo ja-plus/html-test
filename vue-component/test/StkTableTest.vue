@@ -81,8 +81,8 @@ div(style="width:max-content")
 
 <script lang='jsx'>
 import { h } from 'vue';
-import StkTable from '../src/StkTable/index.vue';
-// import { StkTable } from 'vite-vue-components';
+import { StkTable } from '../src/StkTable/index';
+// import { StkTable } from 'stk-table-vue';
 import StkTableC from '../src/StkTableC/index.vue'; // 兼容版本 fixedLeft
 import StkTableInsertSort from './StkTableInsertSort.vue'; // 插入排序
 export default {
@@ -161,10 +161,10 @@ export default {
         { title: 'Address', dataIndex: 'address1', width: '100px' },
         { title: 'Address', dataIndex: 'address2', width: '100px' },
         { title: 'Address', dataIndex: 'address3', width: '100px' },
-        { title:'R', width:'50px', fixed: 'right' },
-        { 
+        { title: 'R', width: '50px', fixed: 'right' },
+        {
           title: 'Operate', dataIndex: 'Operate', width: '150px', fixed: 'right',
-          customCell(){
+          customCell() {
             return <button><a href="#">+add</a></button>
           }
         },
@@ -273,7 +273,7 @@ export default {
     };
   },
   computed: {},
-  created() {},
+  created() { },
   mounted() {
     this.stkTable = this.$refs.stkTable;
     // this.$refs.stkTable.setCurrentRow('name0');

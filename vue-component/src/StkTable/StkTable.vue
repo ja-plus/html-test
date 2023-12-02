@@ -442,7 +442,7 @@ function dealColumns() {
   const tmpHeaderLast: StkTableColumn<any>[] = [];
 
   // 展开columns
-  (function flat(arr, level = 0) {
+  (function flat(arr: StkTableColumn<any>[], level = 0) {
     const colArr: StkTableColumn<any>[] = [];
     const childrenArr: StkTableColumn<any>[] = [];
     arr.forEach(col => {
@@ -710,7 +710,7 @@ function setHighlightDimRow(rowKeyValues: Array<string | number>) {
     const nowTs = Date.now(); // 重置渐变进度
     for (let i = 0; i < rowKeyValues.length; i++) {
       const rowKeyValue = rowKeyValues[i];
-      const row = props.dataSource.find(it => rowKeyGen(it) === rowKeyValue);
+      const row = props.dataSource.find((it: any) => rowKeyGen(it) === rowKeyValue);
       if (!row) continue;
       row._bgc_progress_ms = nowTs;
       // row._bgc_progress = 0;
