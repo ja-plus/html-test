@@ -34,7 +34,7 @@ export type SortState = {
 
 export type UniqKey = string | ((param: any) => string);
 
-export type StkProps = {
+export type StkProps = Partial<{
   width: string;
 
   /** 最小表格宽度 */
@@ -95,7 +95,7 @@ export type StkProps = {
    * 给行附加className<br>
    * FIXME: 是否需要优化，因为不传此prop会使表格行一直执行空函数，是否有影响
    */
-  rowClassName: Function;
+  rowClassName: (row: any, i: number) => string;
 
   /**
    * 列宽是否可拖动<br>
@@ -106,4 +106,4 @@ export type StkProps = {
 
   /** 可拖动至最小的列宽 */
   colMinWidth: number;
-};
+}>;
