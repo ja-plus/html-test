@@ -50,18 +50,18 @@ div(:style="{width: tableWidth}" style="padding:10px;")
   )
     //- template(#table-header="{ column }")
     //-   span {{column.title}} (slot)
-  StkTableC(
-    ref="stkTableC"
-    rowKey="name"
-    :noDataFull="true"
-    :virtual="true"
-    :style="{height:props.height}"
-    :columns="columns"
-    :dataSource="dataSource2"
-    @current-change="onCurrentChange"
-    @row-dblclick="onRowDblclick"
-    @col-order-change="onColOrderChange2"
-  )
+    //- StkTableC(
+    //-   ref="stkTableC"
+    //-   rowKey="name"
+    //-   :noDataFull="true"
+    //-   :virtual="true"
+    //-   :style="{height:props.height}"
+    //-   :columns="columns"
+    //-   :dataSource="dataSource2"
+    //-   @current-change="onCurrentChange"
+    //-   @row-dblclick="onRowDblclick"
+    //-   @col-order-change="onColOrderChange2"
+    //- )
 div columns:{{columns}}
 //- div dataSource:{{dataSource}}
 StkTableInsertSort
@@ -109,37 +109,43 @@ export default {
         headless: false,
       },
       columns: [
-        {
-          title: 'Name',
-          dataIndex: 'name',
-          fixed: 'left',
-          width: '200px',
-          headerClassName: 'my-th',
-          className: 'my-td',
-          sorter: true,
-          customHeaderCell: column => {
-            // render(h) {
-            return h(
-              'span',
-              { style: 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap' },
-              column.title + '(render) text-overflow,',
-            );
-            // },
-          },
-        },
-        {
-          title: 'Age',
-          dataIndex: 'age',
-          fixed: 'left',
-          width: '100px', // 为确保横向滚动准确，列宽一定要固定，minWidth,maxWidth要相等
-          sorter(data, { order, column }) {
-            // console.log(data, order, column);
-            if (order === 'desc') return data.sort((a, b) => b.age - a.age);
-            else if (order === 'asc') return data.sort((a, b) => a.age - b.age);
-          },
-          align: 'right',
-          headerAlign: 'right',
-        },
+        // {
+        //   title: 'BasicInfo',
+        //   children: [
+            {
+              title: 'Name',
+              dataIndex: 'name',
+              fixed: 'left',
+              width: '200px',
+              headerClassName: 'my-th',
+              className: 'my-td',
+              sorter: true,
+              customHeaderCell: props => {
+                // render(h) {
+                return h(
+                  'span',
+                  { style: 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap' },
+                  props.col.title + '(render) text-overflow,',
+                );
+                // },
+              },
+            },
+            {
+              title: 'Age',
+              dataIndex: 'age',
+              fixed: 'left',
+              width: '100px', // 为确保横向滚动准确，列宽一定要固定，minWidth,maxWidth要相等
+              sorter(data, { order, column }) {
+                // console.log(data, order, column);
+                if (order === 'desc') return data.sort((a, b) => b.age - a.age);
+                else if (order === 'asc') return data.sort((a, b) => a.age - b.age);
+              },
+              align: 'right',
+              headerAlign: 'right',
+            },
+        //   ]
+        // },
+
         {
           title: 'Gender',
           dataIndex: 'gender',

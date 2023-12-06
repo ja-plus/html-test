@@ -46,7 +46,7 @@
             :key="col.dataIndex"
             :data-col-key="col.dataIndex"
             :draggable="headerDrag ? 'true' : 'false'"
-            :rowspan="col.rowSpan"
+            :rowspan="virtualX_on ? 1 : col.rowSpan"
             :colspan="col.colSpan"
             :style="getCellStyle(1, col)"
             :title="col.title"
@@ -247,7 +247,7 @@ const sortSwitchOrder = [null, 'desc', 'asc'];
 
 /** 表头.内容是 props.columns 的引用集合 */
 const tableHeaders = ref<StkTableColumn<any>[][]>([]);
-/** 若有多级表头时，的tableHeaders.内容是 props.columns 的引用集合  */
+/** 若有多级表头时，最后一行的tableHeaders.内容是 props.columns 的引用集合  */
 const tableHeaderLast = ref<StkTableColumn<any>[]>([]);
 
 const dataSourceCopy = shallowRef([...props.dataSource]);
@@ -285,16 +285,6 @@ const fixedColumnsPositionStore = computed(() => {
   return store;
 });
 
-watch(
-  () => props.columns,
-  () => {
-    dealColumns();
-    initVirtualScrollX();
-  },
-);
-
-dealColumns();
-
 const { isColResizing, onThResizeMouseDown } = useColResize({
   props,
   emit,
@@ -325,6 +315,16 @@ const {
  * 高亮行，高亮单元格
  */
 const { setHighlightDimCell, setHighlightDimRow } = useHighlight({ props, tableContainer, rowKeyGen });
+
+watch(
+  () => props.columns,
+  () => {
+    dealColumns();
+    initVirtualScrollX();
+  },
+);
+
+dealColumns();
 
 watch(
   () => props.dataSource,
@@ -399,7 +399,7 @@ function getFixedStyle(tagType: 1 | 2, col: StkTableColumn<any>): CSSProperties 
       /**
        * -------------高版本浏览器----------------
        */
-      style.position = 'sticky'; // sticky 方案在低版本浏览器不兼容。具体表现为横向滚动超过一个父容器宽度（非table宽度）会导致sticky吸附失效。浏览器bug。
+      style.position = 'sticky';
       if (isFixedLeft) {
         style.left = fixedColumnsPositionStore.value[dataIndex] + 'px';
       } else {
@@ -427,30 +427,31 @@ function dealColumns() {
   tableHeaderLast.value = [];
   const copyColumn = props.columns; // do not deep clone
   const deep = howDeepTheColumn(copyColumn);
-  const tmpHeaderRows: StkTableColumn<any>[][] = [];
   const tmpHeaderLast: StkTableColumn<any>[] = [];
 
+  if (deep > 1 && props.virtualX) {
+    console.error('多级表头不支持横向虚拟滚动');
+  }
+
   // 展开columns
-  (function flat(arr: StkTableColumn<any>[], level = 0) {
-    const colArr: StkTableColumn<any>[] = [];
-    const childrenArr: StkTableColumn<any>[] = [];
+  (function flat(arr: StkTableColumn<any>[], depth = 0) {
+    if (!tableHeaders.value[depth]) {
+      tableHeaders.value[depth] = [];
+    }
     arr.forEach(col => {
-      col.rowSpan = col.children ? 1 : deep - level;
+      col.rowSpan = col.children ? 1 : deep - depth;
       col.colSpan = col.children?.length;
       if (col.rowSpan === 1) delete col.rowSpan;
       if (col.colSpan === 1) delete col.colSpan;
-      colArr.push(col);
-      if (col.children) {
-        childrenArr.push(...col.children);
+      tableHeaders.value[depth].push(col);
+      if (!props.virtualX && col.children) {
+        flat(col.children, depth + 1);
       } else {
         tmpHeaderLast.push(col); // 没有children的列作为colgroup
       }
     });
-    tmpHeaderRows.push(colArr);
-    if (childrenArr.length) flat(childrenArr, level + 1);
   })(copyColumn);
 
-  tableHeaders.value = tmpHeaderRows;
   tableHeaderLast.value = tmpHeaderLast;
 }
 
@@ -865,9 +866,9 @@ defineExpose({
             .table-header-resizer {
               position: absolute;
               top: 0;
+              bottom: 0;
               cursor: col-resize;
               width: var(--resize-handle-width);
-              height: var(--row-height);
 
               &.left {
                 left: 0;

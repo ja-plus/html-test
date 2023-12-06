@@ -7,6 +7,8 @@ type ColResizeState = {
   currentCol: StkTableColumn<any> | null;
   /** 当前被拖动列的下标 */
   currentColIndex: number;
+  /** 最后一个叶子列 */
+  lastCol: StkTableColumn<any> | null;
   /** 鼠标按下开始位置 */
   startX: number;
   /** 鼠标按下时鼠标对于表格的偏移量 */
@@ -31,6 +33,7 @@ export function useColResize({ tableContainer, tableHeaderLast, colResizeIndicat
   let colResizeState: ColResizeState = {
     currentCol: null,
     currentColIndex: 0,
+    lastCol: null,
     startX: 0,
     startOffsetTableX: 0,
   };
@@ -81,6 +84,7 @@ export function useColResize({ tableContainer, tableHeaderLast, colResizeIndicat
     Object.assign(colResizeState, {
       currentCol: col,
       currentColIndex: colIndex,
+      lastCol: findLastChildCol(col),
       startX: clientX,
       startOffsetTableX: offsetTableX,
     });
@@ -100,10 +104,10 @@ export function useColResize({ tableContainer, tableHeaderLast, colResizeIndicat
     if (!isColResizing.value) return;
     e.stopPropagation();
     e.preventDefault();
-    const { currentCol, startX, startOffsetTableX } = colResizeState;
+    const { lastCol, startX, startOffsetTableX } = colResizeState;
     const { clientX } = e;
     let moveX = clientX - startX;
-    const currentColWidth = parseInt(currentCol?.width || Default_Col_Width);
+    const currentColWidth = parseInt(lastCol?.width || Default_Col_Width);
     // 移动量不小于最小列宽
     if (currentColWidth + moveX < props.colMinWidth) {
       moveX = -currentColWidth;
@@ -119,15 +123,15 @@ export function useColResize({ tableContainer, tableHeaderLast, colResizeIndicat
    */
   function onThResizeMouseUp(e: MouseEvent) {
     if (!isColResizing.value) return;
-    const { startX, currentCol } = colResizeState;
+    const { startX, lastCol } = colResizeState;
     const { clientX } = e;
     const moveX = clientX - startX;
 
     // 移动量不小于最小列宽
-    let width = parseInt(currentCol?.width || Default_Col_Width) + moveX;
+    let width = parseInt(lastCol?.width || Default_Col_Width) + moveX;
     if (width < props.colMinWidth) width = props.colMinWidth;
 
-    const curCol = tableHeaderLast.value.find(it => colKeyGen(it) === colKeyGen(currentCol));
+    const curCol = tableHeaderLast.value.find(it => colKeyGen(it) === colKeyGen(lastCol));
     if (!curCol) return;
     curCol.width = width + 'px';
 
@@ -144,9 +148,19 @@ export function useColResize({ tableContainer, tableHeaderLast, colResizeIndicat
     colResizeState = {
       currentCol: null,
       currentColIndex: 0,
+      lastCol: null,
       startX: 0,
       startOffsetTableX: 0,
     };
+  }
+
+  /**获取最后一个叶子 */
+  function findLastChildCol(column: StkTableColumn<any> | null) {
+    if (column?.children?.length) {
+      const lastChild = column.children.at(-1) as StkTableColumn<any>;
+      return findLastChildCol(lastChild);
+    }
+    return column;
   }
 
   return {
