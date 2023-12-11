@@ -2,7 +2,9 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import path from 'path';
 import router from './routers/index.mjs';
+import spdy from 'spdy';
 import { fileURLToPath } from 'url';
+import { readFileSync } from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,7 +19,15 @@ app.set('view engine', 'ejs');
 
 app.use('/', router);
 
-let server = app.listen('8080', () => {
+const server = spdy.createServer(
+  {
+    key: readFileSync(path.join(__dirname, `../server.key`)),
+    cert: readFileSync(path.join(__dirname, `../server.crt`)),
+  },
+  app,
+);
+
+server.listen('3000', () => {
   const port = server.address().port;
-  console.log('服务已启动, http://localhost:' + port);
+  console.log('服务已启动, https://localhost:' + port);
 });
