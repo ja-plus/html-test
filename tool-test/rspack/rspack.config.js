@@ -1,29 +1,55 @@
-const { VueLoaderPlugin } = require('vue-loader');
+import { VueLoaderPlugin } from 'vue-loader';
+import RspackHtmlPlugin from '@rspack/plugin-html';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 /**
  * @type {import('@rspack/cli').Configuration}
  */
-module.exports = {
+export default {
   context: __dirname,
   entry: {
     main: './src/main.js',
   },
   builtins: {
-    html: [
-      {
-        template: './index.html',
-      },
-    ],
     // vue 要加的
     define: {
       __VUE_OPTIONS_API__: 'true',
       __VUE_PROD_DEVTOOLS__: 'false',
     },
   },
+  resolve: {
+    extensions: ['...', '.jsx', '.tsx', '.vue'],
+  },
   module: {
     rules: [
       {
         test: /\.svg$/,
         type: 'asset',
+      },
+      {
+        test: /\.jsx$/,
+        loader: 'builtin:swc-loader',
+        options: {
+          jsc: {
+            parser: {
+              syntax: 'ecmascript',
+              jsx: true,
+            },
+          },
+        },
+      },
+      {
+        test: /\.ts$/,
+        loader: 'builtin:swc-loader',
+        options: {
+          jsc: {
+            parser: {
+              syntax: 'typescript',
+              jsx: true,
+            },
+          },
+        },
       },
       {
         test: /vue[\\/].+\.jsx$/,
@@ -70,5 +96,10 @@ module.exports = {
       // },
     ],
   },
-  plugins: [new VueLoaderPlugin()],
+  plugins: [
+    new VueLoaderPlugin(),
+    new RspackHtmlPlugin.default({
+      template: './index.html',
+    }),
+  ],
 };

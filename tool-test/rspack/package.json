@@ -2,18 +2,21 @@
   "name": "rspack-react-starter",
   "private": true,
   "version": "0.0.0",
+  "type":"module",
   "scripts": {
-    "dev": "rspack serve",
+    "dev": "rspack dev",
     "build": "rspack build"
   },
   "dependencies": {
+    "@rspack/core": "^0.5.1",
+    "@rspack/cli": "^0.5.1",
+    "@rspack/plugin-html": "^0.5.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "vue": "^3.3.4"
   },
   "devDependencies": {
     "@babel/core": "^7.21.3",
-    "@rspack/cli": "latest",
     "@types/react": "^18.0.25",
     "@types/react-dom": "^18.0.8",
     "@vue/babel-plugin-jsx": "^1.1.1",
