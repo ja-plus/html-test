@@ -7,7 +7,7 @@ use vector_binary_tree::VectorBinaryTree;
  * 3-   7  8   9   10  11 12  13 14
  * 4- 15       
  */
-fn main() {
+pub fn main() {
     let mut binary_tree = VectorBinaryTree::new_with_arr((0..16).collect());
     binary_tree.set(4, 5, 20);
     let node = binary_tree.get(0, 0);

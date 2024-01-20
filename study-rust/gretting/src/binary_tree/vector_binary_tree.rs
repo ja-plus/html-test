@@ -4,7 +4,9 @@ pub struct Node {
     level: i32,
     index: i32,
 }
-/** 数组实现二叉树 */
+/** 
+ * # 数组实现二叉树 
+ */
 pub struct VectorBinaryTree {
     tree: Vec<Option<i32>>,
 }
@@ -81,13 +83,13 @@ impl VectorBinaryTree {
         }
         let value = self.tree.last().copied().unwrap_or(None);
         let mut level = -1;
-        let mut index = 0;
+        let mut index:i32 = 0;
         let mut i = 0;
         while i < len {
             level += 1;
-            i += 2_i32.pow(level as u32);
+            i += 2_usize.pow(level as u32);
         }
-        index = len - 2_i32.pow(level as u32 - 1) + 1;
+        index = (len - 2_usize.pow(level as u32 - 1) + 1) as i32;
         Node {
             value,
             level,

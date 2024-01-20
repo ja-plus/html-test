@@ -1,4 +1,4 @@
-// mod use_reqwest;
+mod use_reqwest;
 // mod dimen2_arr_lookup;
 // mod order_arr;
 // mod hash_map;
@@ -11,7 +11,7 @@ mod binary_tree;
 mod std_cmp;
 mod temp;
 // #[tokio::main]
-use binary_tree::vector_binary_tree::VectorBinaryTree;
+// use binary_tree::vector_binary_tree::{VectorBinaryTree};
 fn main() {
     // 接收命令行参数
     // let args: Vec<String> = env::args().collect();
@@ -36,6 +36,6 @@ fn main() {
     // person.show();
 
     // std_cmp::main();
-
-    let binary_tree = VectorBinaryTree::new_with_arr(vec![5, 1, 4, 3, 7, 2, 6]);
+        binary_tree::main();
+    // let binary_tree = VectorBinaryTree::new_with_arr(vec![5, 1, 4, 3, 7, 2, 6]);
 }
