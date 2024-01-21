@@ -1,4 +1,5 @@
 const path = require('path');
+const { VueLoaderPlugin } = require('vue-loader');
 const ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPlugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const SpeedMeasurePlugin = require('speed-measure-webpack-plugin');
@@ -47,6 +48,10 @@ module.exports = smp.wrap(
           test: /\.svelte$/,
           loader: 'svelte-loader',
         },
+        {
+          test: /\.vue$/,
+          loader: 'vue-loader',
+        },
         // {
         //   test: /\.m?js$/,
         //   loader: 'esbuild-loader',
@@ -62,6 +67,7 @@ module.exports = smp.wrap(
       ],
     },
     plugins: [
+      new VueLoaderPlugin(),
       new ModuleFederationPlugin({
         name: 'app',
         // library: { type: 'var', name: 'app' },

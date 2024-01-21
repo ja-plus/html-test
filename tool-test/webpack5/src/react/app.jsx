@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDom from 'react-dom';
-import AntdTest from './antd.jsx';
+// import AntdTest from './antd.jsx';
 import HelloMessage from './component.jsx';
 class App extends React.Component {
   render() {
@@ -10,7 +10,7 @@ class App extends React.Component {
           <h1>React</h1>
         </summary>
         <HelloMessage name="prop value" />
-        <AntdTest />
+        {/* <AntdTest /> */}
       </details>
     );
   }
