@@ -3,7 +3,7 @@ export function main() {
   let a = 'world';
   return (
     <div>
-      {Comp()}
+      <Comp></Comp>
       <span>{a}</span>
     </div>
   );

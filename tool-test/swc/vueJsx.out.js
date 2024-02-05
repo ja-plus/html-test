@@ -12,10 +12,10 @@ export default defineComponent({
         }
     },
     render () {
-        const style = {
+        var style = {
             margin: "10px"
         };
-        const className = "active";
+        var className = "active";
         return _createVNode("div", {
             "id": "myDiv",
             "class": [
@@ -31,7 +31,7 @@ export default defineComponent({
         ]);
     }
 });
-const Comp = defineComponent({
+var Comp = defineComponent({
     props: [
         "name"
     ],
