@@ -1,6 +1,6 @@
 module.exports = {
   presets: [
-    // ['solid'],
+    ['solid'],
     [
       '@babel/preset-env',
       {
@@ -12,7 +12,7 @@ module.exports = {
         },
       },
     ],
-    '@babel/preset-react',
+    // '@babel/preset-react',
   ],
   plugins: [
     // [

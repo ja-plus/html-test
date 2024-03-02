@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte';
-  import './stk-table.less';
+  import '../stk-table/stk-table.less';
+  
   export let style = '';
   export let virtual = true;
 
@@ -18,12 +19,7 @@
     { dataIndex: 'name', title: 'Name' },
   ];
 
-  export let dataSource = new Array(100).fill(0).map((it, i) => {
-    return {
-      id: i + 'id',
-      name: 'name' + i,
-    };
-  });
+  export let dataSource = [];
 
   $: dataSourceCopy = [...dataSource];
   /** 数据量大于2页才开始虚拟滚动*/
@@ -91,9 +87,8 @@
     <thead>
       <tr>
         {#each columns as col (col.dataIndex)}
-          <th data-col-key={col.dataIndex}>{col.title}</th>
+          <th data-col-key={col.dataIndex}>{col.title || '--'}</th>
         {/each}
-        <th></th>
       </tr>
     </thead>
     <tbody>
