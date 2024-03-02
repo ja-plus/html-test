@@ -64,6 +64,10 @@ module.exports = smp.wrap(
           test: /\.css$/,
           use: ['style-loader', 'css-loader', 'postcss-loader'],
         },
+        {
+          test: /\.less$/,
+          use: ['style-loader', 'css-loader', 'less-loader'],
+        },
       ],
     },
     plugins: [
