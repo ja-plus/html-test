@@ -14,6 +14,6 @@ function countPlus() {
   <div>
     <h2>Vue3 App</h2>
     <button @click="countPlus">count++ {{ count }}</button>
-    <StkTable style="height:300px" :columns="stkTableColumns" :data-source="stkTableData"></StkTable>
+    <StkTable style="height:600px" :columns="stkTableColumns" :data-source="stkTableData"></StkTable>
   </div>
 </template>

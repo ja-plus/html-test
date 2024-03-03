@@ -33,6 +33,6 @@
     <div>
     </div>
   </ChildComponent> -->
-  <StkTable style="height:300px" columns={stkTableColumns} dataSource={stkTableData}></StkTable>
+  <StkTable style="height:600px" columns={stkTableColumns} dataSource={stkTableData}></StkTable>
   <!-- <Button>carbon-components-svelte Button</Button> -->
 </div>
