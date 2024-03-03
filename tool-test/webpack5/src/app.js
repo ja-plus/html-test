@@ -6,4 +6,4 @@ import './svelte/app.js';
 import './solid/app.jsx';
 // import './jaContextMenu';
 // import './lit/index';
-// import './vue/app.js';
+import './vue/app.js';

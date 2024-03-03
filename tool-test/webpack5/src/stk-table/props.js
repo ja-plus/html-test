@@ -76,5 +76,6 @@ export const stkTableData = new Array(1000).fill(0).map((it, i) => {
     return {
         id: i + 'id',
         name: 'name' + i,
+        age:'age'+i,
     };
 })

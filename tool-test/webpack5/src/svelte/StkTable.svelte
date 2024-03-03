@@ -66,7 +66,6 @@
       startIndex,
       offsetTop: startIndex * rowHeight, // startIndex之前的高度
     });
-    virtualScroll = virtualScroll;
   }
 
   function onTableScroll(e) {
