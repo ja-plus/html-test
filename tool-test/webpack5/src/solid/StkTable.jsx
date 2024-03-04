@@ -13,18 +13,26 @@ export function StkTable(props) {
 
     const [dataSourceCopy, setDataSourceCopy] = createSignal([]);
 
-    const virtual_pageSize = () => Math.ceil(virtualScroll().containerHeight / virtualScroll().rowHeight) + 1; // 这里最终+1，因为headless=true无头时，需要上下各预渲染一行。
+    const virtual_pageSize = () => {
+        const vs = virtualScroll();
+        return Math.ceil(vs.containerHeight / vs.rowHeight) + 1
+    }; // 这里最终+1，因为headless=true无头时，需要上下各预渲染一行。
     const virtual_on = () => props.virtual && dataSourceCopy().length > virtual_pageSize() * 2;
     /** 虚拟滚动展示的行 */
-    const virtual_dataSourcePart = () => virtual_on()
-        ? dataSourceCopy().slice(virtualScroll().startIndex, virtualScroll().startIndex + virtual_pageSize())
-        : dataSourceCopy();
+    const virtual_dataSourcePart = () => {
+        const vs = virtualScroll();
+        const pageSize = virtual_pageSize();
+        console.log(vs, pageSize)
+        return virtual_on()
+            ? dataSourceCopy().slice(vs.startIndex, vs.startIndex + pageSize)
+            : dataSourceCopy()
+    };
     /** 虚拟表格定位下边距*/
     const virtual_offsetBottom = () => virtual_on() ? (dataSourceCopy().length - virtualScroll().startIndex - virtual_dataSourcePart().length) * virtualScroll().rowHeight : 0;
 
 
     onMount(() => {
-        setDataSourceCopy(props.dataSource);
+        setDataSourceCopy([...props.dataSource]);
         initVirtualScroll();
     });
 
@@ -43,28 +51,33 @@ export function StkTable(props) {
        */
     function initVirtualScrollY(height) {
         if (virtual_on()) {
-            virtualScroll().containerHeight = typeof height === 'number' ? height : tableContainer?.offsetHeight;
-            setVirtualScroll(virtualScroll());
+            const vs = virtualScroll()
+            vs.containerHeight = typeof height === 'number' ? height : tableContainer?.offsetHeight;
+            setVirtualScroll(vs);
             updateVirtualScrollY(tableContainer?.scrollTop);
         }
     }
     /** 通过滚动条位置，计算虚拟滚动的参数 */
     function updateVirtualScrollY(sTop = 0) {
-        const { rowHeight } = virtualScroll();
-        const startIndex = Math.floor(sTop / rowHeight);
-        const vs = Object.assign(virtualScroll(), {
+        let vs = virtualScroll();
+        const startIndex = Math.floor(sTop / vs.rowHeight);
+        Object.assign(vs, {
             startIndex,
-            offsetTop: startIndex * rowHeight, // startIndex之前的高度
+            offsetTop: startIndex * vs.rowHeight, // startIndex之前的高度
         });
-        setVirtualScroll(vs);
+        setVirtualScroll({...vs});// 必须扩展运算，否则不触发更新
     }
     function onTableScroll(e) {
         if (!e?.target) return;
 
         // 此处可优化，因为访问e.target.scrollXX消耗性能
         const { scrollTop, scrollLeft } = e.target;
+        const vs = virtualScroll()
         // 纵向滚动有变化
-        if (scrollTop !== virtualScroll().scrollTop) virtualScroll().scrollTop = scrollTop;
+        if (scrollTop !== vs.scrollTop) {
+            vs.scrollTop = scrollTop;
+            setVirtualScroll(vs);
+        }
         if (virtual_on()) {
             updateVirtualScrollY(scrollTop);
         }

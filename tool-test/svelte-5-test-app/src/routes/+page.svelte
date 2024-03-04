@@ -28,7 +28,7 @@
 	</h2>
 
 	<Counter />
-	<StkTable style="height:600px" columns={stkTableColumns} dataSource={stkTableData}></StkTable>
+	<StkTable style="height:600px" virtual columns={stkTableColumns} dataSource={stkTableData}></StkTable>
 </section>
 
 <style>

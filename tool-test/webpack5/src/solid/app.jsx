@@ -1,14 +1,18 @@
 // App.JSX
 import { render } from 'solid-js/web';
+import { stkTableColumns, stkTableData } from '../stk-table/props.js';
 import { StkTable } from './StkTable.jsx';
-import {stkTableColumns,stkTableData} from '../stk-table/props.js'
+// const [count,setCount] = createSignal(0);
 
+// setInterval(() => {
+//   setCount(count() + 1);
+// },1000)
 
 function App() {
-  return <div>
+  return <>
     <h1>Solid App</h1>
-    <StkTable style="height:600px" columns={stkTableColumns} dataSource={stkTableData}></StkTable>
-  </div>;
+    <StkTable style="height:600px" virtual columns={stkTableColumns} dataSource={stkTableData}></StkTable>
+  </>;
 }
 // 组件声明也可以直接用箭头函数
 /*
