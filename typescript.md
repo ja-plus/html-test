@@ -39,6 +39,7 @@
 * Exclude 去联合类型中的个别类型
 * Extract 与Exclude相反
 * Partial 字段全部转换为可选 k?:v
+* Required 字段全部转换为必须 k:v
 * Record&lt;K,V&gt; 将联合类型或enum类型K，作为对象的key，V作为每个key的类型。
 * InstanceType
   ```ts
