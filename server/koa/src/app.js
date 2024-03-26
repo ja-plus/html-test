@@ -6,7 +6,6 @@ const koaBody = require('koa-body');
 const cors = require('koa-cors');
 const staticMid = require('koa-static');
 const compress = require('koa-compress');
-const path = require('path');
 const chalk = require('chalk');
 const logger = require('./logger.js');
 
