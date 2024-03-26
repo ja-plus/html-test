@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        :root {
+            font-size: 1vw;
+        }
+        html{
+            height:100%;
+        }
+        body{
+            height:100%;
+            display: flex;
+            flex-direction: column;
+            font-size: 4rem;
+        }
+        .title{
+            background-color: orange;
+            font-size: 4rem;
+        }
+        .main {
+            height: 20rem;
+            background-color:chocolate;
+            display:flex;
+            padding: 5rem;
+        }
+        .main .left{
+            width: 50%;
+            background-color:orangered;
+        }
+        .main .right {
+            width: 50%;
+            background-color:aquamarine;
+        }
+        .main .left ,.main .right {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .main .left label ,.main .right label{
+            font-size: 10rem;
+        }
+
+        .table {
+            flex:1;
+            height:0;
+            margin-top: 2rem;
+            background-color:cadetblue;
+        }
+        .table button{
+            font-size: 2rem;
+            width: 10rem;
+            height: 4rem;
+        }
+        .table input{
+            font-size: 2rem;
+            width: 30rem;
+            height: 4rem;
+        }
+
+        
+        
+    </style>
+</head>
+
+<body>
+    <h1 class="title">hello</h1>
+    <article class="main">
+        <div class="left">
+            <label>123</label>
+        </div>
+        <div class="right">
+            <label>456</label>
+        </div>
+    </article>
+    <article class="table">
+        text
+        <button>Button</button>
+        <input value="123123文字">
+    </article>
+</body>
+</html>

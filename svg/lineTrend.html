@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SVG趋势图</title>
+</head>
+<style>
+  #svg {
+    border: 1px solid;
+  }
+</style>
+
+<body>
+  <div id="svg"></div>
+  <script>
+    class LineTrend {
+      svgNS = 'http://www.w3.org/2000/svg';
+      ringArr = [];
+      lineArr = [];
+      /** @type {number}*/
+      width;
+      height;
+      /** x轴比例尺 */
+      xScale;
+      /** y轴比例尺 */
+      yScale;
+      color = {
+        red: '#FF2B48',
+        green: '#2FC87B',
+      };
+      padding = 5;
+
+      /**
+       * @param {string} selector 挂载
+       * @param {number} arg2.w 宽度
+       * @param {number} arg2.h 高度
+       */
+      constructor(selector, { w, h, r }) {
+        this.height = h;
+        this.width = w;
+        this.r = r || 3;
+        this.svg = this.createSVGElement(w, h);
+        const mountEl = document.querySelector(selector);
+        if (!mountEl) return;
+        mountEl.appendChild(this.svg);
+      }
+
+      createSVGElement(w, h) {
+        const svg = document.createElementNS(this.svgNS, 'svg');
+        svg.setAttribute('width', w);
+        svg.setAttribute('height', h);
+        return svg;
+      }
+
+      createBasicRing(rx, ry, option) {
+        rx += this.padding;
+        ry -= this.padding;
+        const { color, r } = { color: this.color.red, r: this.r, ...option };
+        const path = document.createElementNS(this.svgNS, 'path');
+        path.setAttribute('d', `M${rx - r} ${ry} a${r} ${r} 0 1 0 ${2 * r} 0 a${r} ${r} 0 1 0 ${-2 * r} 0`);
+        path.setAttribute('stroke', color);
+        path.setAttribute('fill', 'transparent');
+        path.setAttribute('stroke-width', '2');
+        path.classList.add('ring');
+        this.ringArr.push(path);
+        return path;
+      }
+
+      createBasicLine(x1, y1, x2, y2, option) {
+        x1 += this.padding;
+        y1 -= this.padding;
+        x2 += this.padding;
+        y2 -= this.padding;
+        const { color } = { color: this.color.red, r: this.r, ...option };
+        const path = document.createElementNS(this.svgNS, 'path');
+        path.setAttribute('d', `M${x1} ${y1} L${x2} ${y2}`);
+        path.setAttribute('stroke', color);
+        path.setAttribute('fill', 'transparent');
+        path.setAttribute('stroke-width', '2');
+        this.lineArr.push(path);
+        return path;
+      }
+
+      /**
+       * @param {number} x1
+       * @param {number} y1
+       * @param {number} x2
+       * @param {number} y2
+       * @param {number} r
+       */
+      createLineWithEndRing(x1, y1, x2, y2, r = this.r) {
+        const x = x2 - x1;
+        const y = y2 - y1;
+        const z = Math.sqrt(x ** 2 + y ** 2);
+        const sin = z / y;
+        const cos = z / x;
+        const rx = r / cos;
+        const ry = r / sin;
+        const color = y > 0 ? this.color.green : this.color.red;
+        const linePath = this.createBasicLine(x1 + rx, y1 + ry, x2 - rx, y2 - ry, { color });
+        const ringPath = this.createBasicRing(x2, y2, { color, r });
+
+        return {
+          linePath,
+          ringPath,
+          lineTo: (x, y) => {
+            return this.createLineWithEndRing(x2, y2, x, y, r);
+          },
+        };
+      }
+
+      /**
+       * @param {number[]} data 数据
+       */
+      setOption(data) {
+        let yMax = -Infinity;
+        let yMin = Infinity;
+
+        data.forEach(y => {
+          if (yMax < y) yMax = y;
+          if (yMin > y) yMin = y;
+        });
+        if (yMax === yMin) {
+          //画中间
+        }
+        this.#calcLinearScale(yMin, yMax, data.length);
+        const transferredData = this.transferData(data);
+        let x1, y1;
+        transferredData.forEach(([x, y], index) => {
+          if (index === 0) {
+            this.createBasicRing(x, y, this.color.red);
+          } else {
+            this.createLineWithEndRing(x1, y1, x, y);
+          }
+          x1 = x;
+          y1 = y;
+        });
+        this.render();
+      }
+
+      /** 计算比例尺*/
+      #calcLinearScale(yMin, yMax, xCount) {
+        const maxValueRange = Math.abs(yMax - yMin);
+        const yScaleValue = (this.height - this.padding * 2) / maxValueRange; // this.r * 2 是半径防止圆环点溢出
+        const xScaleValue = (this.width - this.padding * 2) / (xCount - 1);
+        this.yScale = y => (y - yMin) * yScaleValue;
+        this.xScale = x => x * xScaleValue;
+      }
+
+      /**
+       * 将数据转换为坐标
+       * @param {number[]} data 数据
+       */
+      transferData(data) {
+        return data.map((y, x) => {
+          return [this.xScale(x), this.height - this.yScale(y)];
+        });
+      }
+
+      render() {
+        this.lineArr.forEach(linePath => {
+          this.svg.appendChild(linePath);
+        });
+        this.ringArr.forEach(ringPath => {
+          this.svg.appendChild(ringPath);
+        });
+      }
+    }
+
+    const lineTrend = new LineTrend('#svg', { w: 160, h: 60, r: 3 });
+    lineTrend.setOption([20, 50, 10, 40, 30]);
+      </script>
+</body>
+
+</html>

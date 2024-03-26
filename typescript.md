@@ -6,7 +6,7 @@
 ## 笔记
 * `keyof` 将对象的Key作为联合类型
 * `typeof` 获得某一变量的类型
-* `infer` 推导类型。必须跟在 `extends` 后,且一定在三元运算中。 eg: type getIntersection<&lt;T&gt; = T extends (a: infer P,b: infer P) =&gt; void ? P : never;
+* `infer` 推导类型。必须跟在 `extends` 后,且一定在三元运算中。 eg: type getIntersection&lt;T&gt; = T extends (a: infer P,b: infer P) =&gt; void ? P : never;
 * `is`
   ```ts
   function isString(s: unknown): s is string {
