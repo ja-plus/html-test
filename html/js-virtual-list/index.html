@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual List</title>
+    <style>
+        #virtualList {
+            --border-color: #e8eaec;
+            --border-width: 1px;
+            --td-bgc: #fff;
+            --th-bgc: #f8f8f9;
+            --bg-border-top: linear-gradient(180deg, var(--border-color) var(--border-width), transparent var(--border-width));
+            --bg-border-right: linear-gradient(270deg, var(--border-color) var(--border-width), transparent var(--border-width));
+            --bg-border-bottom: linear-gradient(0deg, var(--border-color) var(--border-width), transparent var(--border-width));
+            --bg-border-left: linear-gradient(90deg, var(--border-color) var(--border-width), transparent var(--border-width));
+
+            font-size: 14px;
+            height: 600px;
+            border: var(--border-width) solid var(--border-color);
+            overflow: auto;
+        }
+
+        #header {
+            position: sticky;
+            top: 0;
+        }
+
+        .tr {
+            height: 30px;
+            width: fit-content;
+            line-height: 30px;
+            box-sizing: border-box;
+            display: flex;
+        }
+
+        .tr .th {
+            padding: 0 5px;
+            box-sizing: border-box;
+            font-weight: bold;
+            text-align: center;
+            flex-shrink: 0;
+            background-color: var(--th-bgc);
+            background-image: var(--bg-border-right), var(--bg-border-bottom);
+
+        }
+
+        .tr .td {
+            padding: 0 5px;
+            box-sizing: border-box;
+            flex-shrink: 0;
+            background-image: var(--bg-border-right), var(--bg-border-bottom);
+
+        }
+
+        /* #content .item .td:nth-child(1){
+            width:40px
+        }
+        #content .item .td:nth-child(2){
+            width:80px
+        } */
+    </style>
+</head>
+
+<body>
+    <div id="virtualList">
+        <div id="header"></div>
+        <div id="content"></div>
+    </div>
+    <script src="./index.js"></script>
+</body>
+
+</html>
