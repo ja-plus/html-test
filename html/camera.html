@@ -7,8 +7,8 @@
   <title>Camera</title>
   <style>
     video {
-      width: 200px;
-      height:200px;
+      width: 400px;
+      height:400px;
     }
     .phtots img{
       border:1px dashed;
@@ -31,7 +31,7 @@
   /** @type {HTMLElement}*/
   const photos = document.getElementById('photos');
 
-  canvas.width = canvas.height = video.width = video.height = 200;
+  canvas.width = canvas.height = video.width = video.height = 400;
   const { width, height } = canvas;
   const ctx = canvas.getContext('2d');
   navigator.mediaDevices
@@ -42,7 +42,7 @@
       },
     })
     .then(stream => {
-      video.src = stream;
+      video.srcObject = stream;
       video.onloadedmetadata = () => {
         video.play();
       };
@@ -58,7 +58,7 @@
   });
   function addImage(src) {
     /** @type {HTMLImageElement}*/
-    let img = document.createElement('img');
+    let img = new Image();
     img.src = src;
     photos.appendChild(img);
   }
