@@ -35,7 +35,7 @@ const cols = [
 ];
 
 const virtualY = {
-  pageStart: 0,
+  pageStart: -1,
   pageEnd: 10,
   pageSize: 10,
 };
@@ -44,8 +44,8 @@ window.addEventListener('DOMContentLoaded', init);
 function init() {
   const pageSize = Math.ceil(listHeight / itemHeight);
   virtualY.pageSize = pageSize;
-  const headerHtml = `<div class="tr">` + cols.map(col => `<div class="th" style="width:${col.width || 100}px;">${col.title}</div>`).join('');
-  +'</div>';
+  const headerHtml =
+    `<div class="tr">` + cols.map(col => `<div class="th" style="width:${col.width || 100}px;">${col.title}</div>`).join('') + '</div>';
   listHeader.innerHTML = headerHtml;
   updateVirtualY();
 }
@@ -53,21 +53,16 @@ function init() {
 function render(items) {
   const topHeight = virtualY.pageStart * itemHeight;
   const bottomHeight = (listSize - virtualY.pageEnd) * itemHeight;
-  //   listTop.style.height = virtualY.pageStart * itemHeight + 'px';
-  //   listBottom.style.height = (listSize - virtualY.pageEnd) * itemHeight + 'px';
+  const cellsHtml = items
+    .map(item => {
+      const cells = cols.map(col => {
+        return `<div class="td" style="width:${col.width || 100}px;">${item[col.dataIndex] ?? '--'}</div>`;
+      });
+      return `<div class="tr">${cells.join('')}</div>`;
+    })
+    .join(' ');
 
-  const contentHtml =
-    `<div style="height:${topHeight}px"></div>` +
-    items
-      .map(item => {
-        const cells = [];
-        cols.forEach(col => {
-          cells.push(`<div class="td" style="width:${col.width || 100}px;">${item[col.dataIndex] ?? '--'}</div>`);
-        });
-        return ` <div class="tr">${cells.join('')}</div> `;
-      })
-      .join('') +
-    `<div style="height:${bottomHeight}px"></div>`;
+  const contentHtml = `<div style="height:${topHeight}px"></div>${cellsHtml}<div style="height:${bottomHeight}px"></div>`;
 
   listContent.innerHTML = contentHtml;
 }
@@ -76,14 +71,21 @@ virtualList.addEventListener('scroll', e => {
   updateVirtualY(e.target.scrollTop);
 });
 
+let rAF = 0;
 function updateVirtualY(sTop = 0) {
-  const scrollTop = sTop;
-  const pageStart = Math.floor(scrollTop / itemHeight);
-  const pageEnd = Math.min(pageStart + virtualY.pageSize + 1, listSize);
-  if (pageStart === 0 || virtualY.pageStart !== pageStart || virtualY.pageEnd !== pageEnd) {
-    virtualY.pageStart = pageStart;
-    virtualY.pageEnd = pageEnd;
-    const visibleItems = list.slice(virtualY.pageStart, virtualY.pageEnd + 1);
-    render(visibleItems);
+  if (rAF) {
+    window.cancelAnimationFrame(rAF);
   }
+  rAF = window.requestAnimationFrame(() => {
+    const scrollTop = sTop;
+    const pageStart = Math.floor(scrollTop / itemHeight);
+    const pageEnd = Math.min(pageStart + virtualY.pageSize + 1, listSize);
+    if (virtualY.pageStart !== pageStart || virtualY.pageEnd !== pageEnd) {
+      virtualY.pageStart = pageStart;
+      virtualY.pageEnd = pageEnd;
+      const visibleItems = list.slice(virtualY.pageStart, virtualY.pageEnd + 1);
+      render(visibleItems);
+    }
+    rAF = 0;
+  });
 }
