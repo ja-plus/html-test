@@ -18,7 +18,7 @@ impl Solution {
     }
 }
 
-fn main() { 
+pub fn main() { 
 
     let solution = Solution::new();
     // let result = solution.relative_sort_array(
