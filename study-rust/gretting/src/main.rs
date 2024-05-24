@@ -1,4 +1,4 @@
-mod use_reqwest;
+// mod use_reqwest;
 // mod dimen2_arr_lookup;
 // mod order_arr;
 // mod hash_map;
@@ -7,8 +7,10 @@ mod use_reqwest;
 // mod use_trait;
 // mod vector;
 // use use_trait::{Person, Show};
-mod binary_tree;
-mod std_cmp;
+// mod binary_tree;
+mod channel;
+mod rc;
+// mod std_cmp;
 mod temp;
 // #[tokio::main]
 // use binary_tree::vector_binary_tree::{VectorBinaryTree};
@@ -36,6 +38,9 @@ fn main() {
     // person.show();
 
     // std_cmp::main();
-        binary_tree::main();
+    // binary_tree::main();
     // let binary_tree = VectorBinaryTree::new_with_arr(vec![5, 1, 4, 3, 7, 2, 6]);
+
+    channel::main();
+    rc::main();
 }
