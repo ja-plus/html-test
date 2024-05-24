@@ -76,6 +76,11 @@ if(a === E.A){
 }
 ```
 ## 问题与解决方案
+### 获取数组元素的类型
+```ts
+type List = string[];
+type item = List[number]; // string
+```
 ### valueof
 ```ts
 type ValueOf<T> = T[keyof T];
