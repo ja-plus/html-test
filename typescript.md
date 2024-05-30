@@ -189,3 +189,16 @@ Cannot find module './StkTableVue.vue' or its corresponding type declarations
 #### 解决
 * 安装 volar, volar ts 插件。
 * vscode f1 后 select typescript version, 选择use workspace version. 
+
+#### Component类型
+`StkTableColumn.customCell` 类型直接定义 `Component<Props>` 如果 Props 属性为必选，则 通过`defineComponent` 创建的组件必须要定义所有的Prop，否则就不适配。但是在函数式组件中是正常使用的。customCell: (props) => {}。
+
+如果定义 Props 所有属性均为可选时。`defineComponent` 定义的组件仅需实现个别的 Prop 即可。但是函数式组件的入参props就需要额外判断是否存在。这增加了使用成本。
+
+解决
+```ts
+type CustomCell = ConcreteComponent<Props> | Exclude<Component<Partial<Props>, ConcreteComponent>>: 
+```
+由于 `Component` 由两个类型组成： `ConcreteComponent` | `ComponentPublicInstanceConstructor`。
+
+其中 `ConcreteComponent` 被export了，而另一个没有。因此要取得 `ComponentPublicInstanceConstructor` 类型，就可以使用 ts内置类型 `Exclude`达到 
