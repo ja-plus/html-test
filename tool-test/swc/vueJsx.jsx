@@ -1,10 +1,11 @@
 /* eslint-disable vue/one-component-per-file */
-import { defineComponent, h } from 'vue';
+import { defineComponent, h, ref } from 'vue';
 
 export default defineComponent({
   data() {
     return {
       message: 'hello',
+      model:'11'
     };
   },
   methods: {
@@ -16,10 +17,25 @@ export default defineComponent({
     const style = {
       margin: '10px',
     };
+    let a = {};
+    a.b = 1;
+    let b = a?.b;
     const className = 'active';
+    const Child = {
+     default: <span>slooot</span>
+    }
+
+    const t = () => 'ss'
+
     return (
       <div id="myDiv" class={['my-div', className]} style={style} onClick={this.handleClick}>
-        <Comp name={this.message}></Comp>
+        <input v-model={this.message} v-model:a={this.model}></input>
+        <Comp name={this.message}>
+          {Child}
+        </Comp>
+        <Comp>
+          {t()}
+        </Comp>
       </div>
     );
   },
@@ -27,5 +43,9 @@ export default defineComponent({
 
 const Comp = defineComponent({
   props: ['name'],
-  render: () => <div>{this.name}</div>,
+  setup: (props,ctx) => {
+    const a = ref(1);
+    const b = ref(2);
+    return () => <div v-model={a.value} v-model:b={b.value}>{props.name}{ctx.slots.default()}</div>
+  },
 });
